@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
- *   - Laura Schlimmer <laura@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -27,13 +27,14 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/runtime/tablerepository.h>
 #include <eventql/auth/internal_auth.h>
-#include <eventql/db/TSDBTableRef.h>
+#include <eventql/db/table_ref.h>
 #include <eventql/db/partition_map.h>
-#include <eventql/db/CompactionWorker.h>
-#include <eventql/db/TableConfig.pb.h>
-#include <eventql/db/TSDBTableInfo.h>
+#include <eventql/db/compaction_worker.h>
+#include <eventql/db/table_config.pb.h>
+#include <eventql/db/table_info.h>
 #include <eventql/db/table_service.h>
 #include "eventql/server/sql/table_scan.h"
+#include <eventql/db/metadata_client.h>
 
 namespace eventql {
 class TableService;
@@ -45,7 +46,6 @@ public:
       const String& tsdb_namespace,
       PartitionMap* partition_map,
       ConfigDirectory* cdir,
-      ReplicationScheme* replication_scheme,
       TableService* table_service,
       InternalAuth* auth);
 
@@ -55,17 +55,26 @@ public:
       RefPtr<csql::SequentialScanNode> seqscan) const override;
 
   static KeyRange findKeyRange(
+      KeyspaceType keyspace,
       const String& partition_key,
       const Vector<csql::ScanConstraint>& constraints);
 
   void listTables(
       Function<void (const csql::TableInfo& table)> fn) const override;
 
+  Status listPartitions(
+      const String& table_name,
+      Function<void (const TablePartitionInfo& partition)> fn) const override;
+
+  Status listServers(
+      Function<void (const ServerConfig& server)> fn) const override;
+
   Option<csql::TableInfo> describe(const String& table_name) const override;
 
   Status createTable(const csql::CreateTableNode& req) override;
   Status createDatabase(const String& database_name) override;
   Status alterTable(const csql::AlterTableNode& alter_table) override;
+  Status dropTable(const std::string& table_name) override;
 
   Status insertRecord(
       const String& table_name,
@@ -79,15 +88,21 @@ public:
 
 protected:
 
-  csql::TableInfo tableInfoForTable(const TSDBTableInfo& table) const;
+  csql::TableInfo tableInfoForTable(const TableDefinition& table) const;
+
+  RefPtr<csql::ValueExpressionNode> simplifyWhereExpression(
+      RefPtr<Table> table,
+      const String& keyrange_begin,
+      const String& keyrange_end,
+      RefPtr<csql::ValueExpressionNode> expr) const;
 
   String tsdb_namespace_;
   PartitionMap* partition_map_;
   ConfigDirectory* cdir_;
-  ReplicationScheme* replication_scheme_;
   TableService* table_service_;
   InternalAuth* auth_;
 };
 
+void evqlVersionExpr(sql_txn* ctx, int argc, csql::SValue* argv, csql::SValue* out);
 
 } // namespace csql

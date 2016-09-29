@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -27,7 +27,6 @@
 #include "eventql/util/stdtypes.h"
 
 enum class LogLevel {
-  kFatal = 10000,
   kEmergency = 9000,
   kAlert = 8000,
   kCritical = 7000,

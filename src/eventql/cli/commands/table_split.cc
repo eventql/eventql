@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
- *   - Laura Schlimmer <laura@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -47,26 +47,18 @@ Status TableSplit::execute(
     OutputStream* stdout_os,
     OutputStream* stderr_os) {
   ::cli::FlagParser flags;
+
   flags.defineFlag(
-      "cluster_name",
+      "database",
       ::cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
-      "node name",
+      "database",
       "<string>");
 
   flags.defineFlag(
-      "namespace",
-      ::cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "namespace",
-      "<string>");
-
-  flags.defineFlag(
-      "table_name",
+      "table",
       ::cli::FlagParser::T_STRING,
       true,
       NULL,
@@ -92,6 +84,15 @@ Status TableSplit::execute(
       "table name",
       "<string>");
 
+  flags.defineFlag(
+      "finalize",
+      ::cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "finalize immediately",
+      "<switch>");
+
   try {
     flags.parseArgv(argv);
 
@@ -112,13 +113,11 @@ Status TableSplit::execute(
     }
 
     auto table_cfg = cdir->getTableConfig(
-        flags.getString("namespace"),
-        flags.getString("table_name"));
+        flags.getString("database"),
+        flags.getString("table"));
 
     KeyspaceType keyspace;
     switch (table_cfg.config().partitioner()) {
-      case TBL_PARTITION_FIXED:
-        RAISE(kIllegalArgumentError);
       case TBL_PARTITION_UINT64:
       case TBL_PARTITION_TIMEWINDOW:
         keyspace = KEYSPACE_UINT64;
@@ -126,8 +125,12 @@ Status TableSplit::execute(
       case TBL_PARTITION_STRING:
         keyspace = KEYSPACE_STRING;
         break;
+      case TBL_PARTITION_FIXED:
+      default:
+        RAISE(kIllegalArgumentError);
     }
 
+    auto cconf = cdir->getClusterConfig();
     auto partition_id = SHA1Hash::fromHexString(flags.getString("partition_id"));
     auto split_partition_id_low = Random::singleton()->sha1();
     auto split_partition_id_high = Random::singleton()->sha1();
@@ -144,13 +147,20 @@ Status TableSplit::execute(
         split_partition_id_high.size());
     op.set_placement_id(Random::singleton()->random64());
 
-    ServerAllocator server_alloc(cdir.get());
+    if (flags.isSet("finalize")) {
+      op.set_finalize_immediately(true);
+    }
 
-    Set<String> split_servers_low;
+    ServerAllocator server_alloc(cdir.get(), nullptr);
+
+    std::vector<String> split_servers_low;
     {
-      auto rc = server_alloc.allocateServers(3, &split_servers_low);
+      auto rc = server_alloc.allocateServers(
+          ServerAllocator::MUST_ALLOCATE,
+          cconf.replication_factor(),
+          Set<String>{},
+          &split_servers_low);
       if (!rc.isSuccess()) {
-        stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
         return rc;
       }
     }
@@ -159,11 +169,14 @@ Status TableSplit::execute(
       op.add_split_servers_low(s);
     }
 
-    Set<String> split_servers_high;
+    std::vector<String> split_servers_high;
     {
-      auto rc = server_alloc.allocateServers(3, &split_servers_high);
+      auto rc = server_alloc.allocateServers(
+          ServerAllocator::MUST_ALLOCATE,
+          cconf.replication_factor(),
+          Set<String>{},
+          &split_servers_high);
       if (!rc.isSuccess()) {
-        stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
         return rc;
       }
     }
@@ -173,8 +186,8 @@ Status TableSplit::execute(
     }
 
     MetadataOperation envelope(
-        flags.getString("namespace"),
-        flags.getString("table_name"),
+        flags.getString("database"),
+        flags.getString("table"),
         METAOP_SPLIT_PARTITION,
         SHA1Hash(
             table_cfg.metadata_txnid().data(),
@@ -182,11 +195,11 @@ Status TableSplit::execute(
         Random::singleton()->sha1(),
         *msg::encode(op));
 
-    MetadataCoordinator coordinator(cdir.get());
+    MetadataCoordinator coordinator(cdir.get(), nullptr, nullptr, nullptr);
     {
       auto rc = coordinator.performAndCommitOperation(
-          flags.getString("namespace"),
-          flags.getString("table_name"),
+          flags.getString("database"),
+          flags.getString("table"),
           envelope);
 
       if (!rc.isSuccess()) {
@@ -225,16 +238,12 @@ void TableSplit::printHelp(OutputStream* stdout_os) const {
 
   stdout_os->write(
       "Usage: evqlctl table-split [OPTIONS]\n"
-      "  --namespace              The name of the namespace.\n"
-      "  --cluster_name           The name of the cluster.\n"
-      "  --table_name             The name of the table to split.\n"
+      "  --database               The name of the database.\n"
+      "  --table                  The name of the table to split.\n"
       "  --partition_id           The id of the partition to split.\n"
       "  --split_point            \n");
 }
 
 } // namespace cli
 } // namespace eventql
-
-
-
 

@@ -1,6 +1,8 @@
+*.dSYM
 test_evql_*
 evql
 evqld
 evqlctl
+evqlslap
 cstable_tool
-evql-mysql-import
+mysql2evql

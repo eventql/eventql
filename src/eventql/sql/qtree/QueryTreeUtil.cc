@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -84,7 +84,7 @@ bool QueryTreeUtil::isConstantExpression(
   auto call_expr = dynamic_cast<CallExpressionNode*>(expr.get());
   if (call_expr) {
     auto symbol = txn->getSymbolTable()->lookup(call_expr->symbol());
-    if (symbol.isAggregate()) {
+    if (symbol.isAggregate() || symbol.hasSideEffects()) {
       return false;
     }
   }
@@ -131,12 +131,30 @@ RefPtr<ValueExpressionNode> QueryTreeUtil::removeConstraintFromPredicate(
     const ScanConstraint& constraint) {
   auto call_expr = dynamic_cast<CallExpressionNode*>(expr.get());
   if (call_expr && call_expr->symbol() == "logical_and") {
-    return new CallExpressionNode(
-        "logical_and",
-        Vector<RefPtr<ValueExpressionNode>> {
-          removeConstraintFromPredicate(call_expr->arguments()[0], constraint),
-          removeConstraintFromPredicate(call_expr->arguments()[1], constraint),
-        });
+    auto arg_left = removeConstraintFromPredicate(call_expr->arguments()[0], constraint);
+    auto arg_right = removeConstraintFromPredicate(call_expr->arguments()[1], constraint);
+
+    auto arg_left_is_true =
+        dynamic_cast<LiteralExpressionNode*>(arg_left.get()) &&
+        dynamic_cast<LiteralExpressionNode*>(arg_left.get())->value().isBool() &&
+        dynamic_cast<LiteralExpressionNode*>(arg_left.get())->value().getBool();
+
+    auto arg_right_is_true =
+        dynamic_cast<LiteralExpressionNode*>(arg_right.get()) &&
+        dynamic_cast<LiteralExpressionNode*>(arg_right.get())->value().isBool() &&
+        dynamic_cast<LiteralExpressionNode*>(arg_right.get())->value().getBool();
+
+    if (arg_left_is_true && arg_right_is_true) {
+      return new LiteralExpressionNode(SValue(SValue::BoolType(true)));
+    } else if (arg_left_is_true) {
+      return arg_right;
+    } else if (arg_right_is_true) {
+      return arg_left;
+    } else {
+      return new CallExpressionNode(
+          "logical_and",
+          Vector<RefPtr<ValueExpressionNode>> { arg_left, arg_right });
+    }
   }
 
   auto e_constraint = findConstraint(expr);

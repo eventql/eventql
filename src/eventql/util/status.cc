@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -50,6 +50,11 @@ Status::Status(
     const std::string& message) :
     type_(type),
     message_(message) {}
+
+Status::Status(const ReturnCode& rc) :
+    Status(
+        rc.isSuccess() ? eSuccess : eRuntimeError,
+        rc.getMessage()) {}
 
 bool Status::isError() const {
   return type_ != eSuccess;
@@ -115,5 +120,15 @@ std::string StringUtil::toString<kStatusType>(kStatusType value) {
 void Status::raiseIfError() const {
   if (isError()) {
     RAISE(kRuntimeError, message_);
+  }
+}
+
+Status::operator ReturnCode() const {
+  if (type_ == eSuccess) {
+    return ReturnCode::success();
+  } else {
+    return ReturnCode::error(
+        StringUtil::toString(type_),
+        message_);
   }
 }

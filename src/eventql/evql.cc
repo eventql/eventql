@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -29,201 +29,15 @@
 #include "eventql/eventql.h"
 #include "eventql/util/application.h"
 #include "eventql/util/logging.h"
-#include "eventql/util/random.h"
-#include "eventql/util/thread/eventloop.h"
-#include "eventql/util/thread/threadpool.h"
-#include "eventql/util/thread/FixedSizeThreadPool.h"
 #include "eventql/util/io/TerminalOutputStream.h"
 #include "eventql/util/wallclock.h"
-#include "eventql/util/json/json.h"
-#include "eventql/util/json/jsonrpc.h"
-#include "eventql/util/http/httpclient.h"
-#include "eventql/util/http/HTTPSSEResponseHandler.h"
 #include "eventql/util/cli/CLI.h"
 #include "eventql/util/cli/flagparser.h"
 #include "eventql/util/cli/term.h"
-#include "eventql/server/sql/codec/binary_codec.h"
 #include "eventql/cli/console.h"
 #include "eventql/cli/cli_config.h"
 
 thread::EventLoop ev;
-
-//String loadAuth(const cli::FlagParser& global_flags) {
-//  auto auth_file_path = FileUtil::joinPaths(getenv("HOME"), ".z1auth");
-//
-//  if (FileUtil::exists(auth_file_path)) {
-//    return FileUtil::read(auth_file_path).toString();
-//  } else {
-//    if (global_flags.isSet("auth_token")) {
-//      return global_flags.getString("auth_token");
-//    } else {
-//      RAISE(
-//          kRuntimeError,
-//          "no auth token found - you must either call 'zli login' or pass the "
-//          "--auth_token flag");
-//    }
-//  }
-//}
-//
-//
-//void runSQL(
-//    const cli::FlagParser& global_flags,
-//    const String& file) {
-//
-//  auto stdout_os = OutputStream::getStdout();
-//  auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
-//
-//  csql::BinaryResultParser res_parser;
-//
-//  res_parser.onTableHeader([] (const Vector<String>& columns) {
-//    iputs("columns: $0", columns);
-//  });
-//
-//  res_parser.onRow([] (int argc, const csql::SValue* argv) {
-//    iputs("row: $0", Vector<csql::SValue>(argv, argv + argc));
-//  });
-//
-//  res_parser.onError([&stderr_os] (const String& error) {
-//    stderr_os->print(
-//        "ERROR:",
-//        { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
-//
-//    stderr_os->print(StringUtil::format(" $0\n", error));
-//    exit(1);
-//  });
-//
-//  try {
-//    auto program_source = FileUtil::read(file).toString();
-//    bool is_tty = stderr_os->isTTY();
-//
-//    auto url = StringUtil::format(
-//        "http://$0/api/v1/sql",
-//        global_flags.getString("api_host"));
-//
-//    auto postdata = StringUtil::format(
-//          "format=binary&query=$0",
-//          URI::urlEncode(program_source));
-//
-//    auto auth_token = loadAuth(global_flags);
-//
-//    http::HTTPMessage::HeaderList auth_headers;
-//    auth_headers.emplace_back(
-//        "Authorization",
-//        StringUtil::format("Token $0", auth_token));
-//
-//    http::HTTPClient http_client(nullptr);
-//    auto req = http::HTTPRequest::mkPost(url, postdata, auth_headers);
-//    auto res = http_client.executeRequest(
-//        req,
-//        http::StreamingResponseHandler::getFactory(
-//            std::bind(
-//                &csql::BinaryResultParser::parse,
-//                &res_parser,
-//                std::placeholders::_1,
-//                std::placeholders::_2)));
-//
-//    if (!res_parser.eof()) {
-//      stderr_os->print(
-//          "ERROR:",
-//          { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
-//
-//      stderr_os->print(" connection to server list");
-//      exit(1);
-//    }
-//  } catch (const StandardException& e) {
-//    stderr_os->print(
-//        "ERROR:",
-//        { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
-//
-//    stderr_os->print(StringUtil::format(" $0\n", e.what()));
-//    exit(1);
-//  }
-//}
-//
-//void cmd_run(
-//    const cli::FlagParser& global_flags,
-//    const cli::FlagParser& cmd_flags) {
-//  const auto& argv = cmd_flags.getArgv();
-//  if (argv.size() != 1) {
-//    RAISE(kUsageError, "usage: $ zli run <script.js>");
-//  }
-//
-//  if (StringUtil::endsWith(argv[0], "js")) {
-//    runJS(global_flags, argv[0]);
-//    return;
-//  }
-//
-//  if (StringUtil::endsWith(argv[0], "sql")) {
-//    runSQL(global_flags, argv[0]);
-//    return;
-//  }
-//
-//  RAISE(kUsageError, "unsupported file format");
-//}
-//
-//void cmd_login(
-//    const cli::FlagParser& global_flags,
-//    const cli::FlagParser& cmd_flags) {
-//  Term term;
-//
-//  term.print(">> Username: ");
-//  auto username = term.readLine();
-//  term.print(">> Password (will not be echoed): ");
-//  auto password = term.readPassword();
-//  term.print("\n");
-//
-//  try {
-//    auto url = StringUtil::format(
-//        "http://$0/api/v1/auth/login",
-//        global_flags.getString("api_host"));
-//
-//    auto authdata = StringUtil::format(
-//        "userid=$0&password=$1",
-//        URI::urlEncode(username),
-//        URI::urlEncode(password));
-//
-//    http::HTTPClient http_client(nullptr);
-//    auto req = http::HTTPRequest::mkPost(url, authdata);
-//    auto res = http_client.executeRequest(req);
-//
-//    switch (res.statusCode()) {
-//
-//      case 200: {
-//        auto json = json::parseJSON(res.body());
-//        auto auth_token = json::objectGetString(json, "auth_token");
-//
-//        if (!auth_token.isEmpty()) {
-//          {
-//            auto auth_file_path = FileUtil::joinPaths(getenv("HOME"), ".z1auth");
-//            auto file = File::openFile(
-//              auth_file_path,
-//              File::O_WRITE | File::O_CREATEOROPEN | File::O_TRUNCATE);
-//
-//            file.write(auth_token.get());
-//          }
-//
-//          term.printGreen("Login successful\n");
-//          exit(0);
-//        }
-//
-//        /* fallthrough */
-//      }
-//
-//      case 401: {
-//        term.printRed("Invalid credentials, please try again\n");
-//        exit(1);
-//      }
-//
-//      default:
-//        RAISEF(kRuntimeError, "HTTP Error: $0", res.body().toString());
-//
-//    }
-//  } catch (const StandardException& e) {
-//    term.print("ERROR:", { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
-//    term.print(StringUtil::format(" $0\n", e.what()));
-//    exit(1);
-//  }
-//}
 
 static bool hasSTDIN() {
   struct pollfd p = {
@@ -265,6 +79,24 @@ int main(int argc, const char** argv) {
       NULL,
       "print version",
       "<switch>");
+
+  flags.defineFlag(
+      "config",
+      ::cli::FlagParser::T_STRING,
+      false,
+      "c",
+      NULL,
+      "path to config file",
+      "<config_file>");
+
+  flags.defineFlag(
+      "config_set",
+      ::cli::FlagParser::T_STRING,
+      false,
+      "C",
+      NULL,
+      "set config option",
+      "<key>=<val>");
 
   flags.defineFlag(
       "file",
@@ -339,6 +171,24 @@ int main(int argc, const char** argv) {
       "<token>");
 
   flags.defineFlag(
+      "history_file",
+      cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "history path",
+      "<path>");
+
+  flags.defineFlag(
+      "history_maxlen",
+      cli::FlagParser::T_INTEGER,
+      false,
+      NULL,
+      NULL,
+      "history length",
+      "<number of history entries>");
+
+  flags.defineFlag(
       "loglevel",
       cli::FlagParser::T_STRING,
       false,
@@ -379,7 +229,7 @@ int main(int argc, const char** argv) {
     stdout_os->write(
         StringUtil::format(
             "EventQL $0 ($1)\n"
-            "Copyright (c) 2016, zScale Techology GmbH. All rights reserved.\n\n",
+            "Copyright (c) 2016, DeepCortex GmbH. All rights reserved.\n\n",
             eventql::kVersionString,
             eventql::kBuildID));
   }
@@ -402,6 +252,8 @@ int main(int argc, const char** argv) {
         "   -u, --user <user>         Set the auth username\n"
         "   --password <password>     Set the auth password (if required)\n"
         "   --auth_token <token>      Set the auth token (if required)\n"
+        "   -c, --config <file>       Load config from file\n"
+        "   -C name=value             Define a config value on the command line\n"
         "   -B, --batch               Run in batch mode (streaming result output)\n"
         "   -q, --quiet               Be quiet (disables query progress)\n"
         "   --verbose                 Print debug output to STDERR\n"
@@ -421,6 +273,29 @@ int main(int argc, const char** argv) {
 
   /* console options */
   eventql::ProcessConfigBuilder cfg_builder;
+  cfg_builder.setProperty("client.timeout", "5000000");
+
+  if (flags.isSet("config")) {
+    auto config_file_path = flags.getString("config");
+    auto rc = cfg_builder.loadFile(config_file_path);
+    if (!rc.isSuccess()) {
+      printError("error while loading config file: " + rc.message());
+      return 1;
+    }
+  }
+
+  for (const auto& opt : flags.getStrings("config_set")) {
+    auto opt_key_end = opt.find("=");
+    if (opt_key_end == String::npos) {
+      printError(StringUtil::format("invalid config option: $0", opt));;
+      return 1;
+    }
+
+    auto opt_key = opt.substr(0, opt_key_end);
+    auto opt_value = opt.substr(opt_key_end + 1);
+    cfg_builder.setProperty(opt_key, opt_value);
+  }
+
   {
     auto status = cfg_builder.loadDefaultConfigFile("evql");
     if (!status.isSuccess()) {
@@ -430,39 +305,37 @@ int main(int argc, const char** argv) {
   }
 
   if (flags.isSet("host")) {
-    cfg_builder.setProperty("evql", "host", flags.getString("host"));
-  }
-
-  if (flags.isSet("auth_token")) {
-    cfg_builder.setProperty("evql", "auth_token", flags.getString("auth_token"));
+    cfg_builder.setProperty("client.host", flags.getString("host"));
   }
 
   if (flags.isSet("port")) {
-    cfg_builder.setProperty("evql", "port", StringUtil::toString(flags.getInt("port")));
-  }
-
-  if (flags.isSet("user")) {
-    cfg_builder.setProperty("evql", "user", flags.getString("user"));
+    cfg_builder.setProperty(
+        "client.port",
+        StringUtil::toString(flags.getInt("port")));
   }
 
   if (flags.isSet("database")) {
-    cfg_builder.setProperty("evql", "database", flags.getString("database"));
+    cfg_builder.setProperty("client.database", flags.getString("database"));
   }
 
-  if (flags.isSet("file")) {
-    cfg_builder.setProperty("evql", "file", flags.getString("file"));
+  if (flags.isSet("user")) {
+    cfg_builder.setProperty("client.user", flags.getString("user"));
+  }
+
+  if (flags.isSet("password")) {
+    cfg_builder.setProperty("client.password", flags.getString("password"));
+  }
+
+  if (flags.isSet("auth_token")) {
+    cfg_builder.setProperty("client.auth_token", flags.getString("auth_token"));
   }
 
   if (flags.isSet("lang")) {
-    cfg_builder.setProperty("evql", "lang", flags.getString("lang"));
+    cfg_builder.setProperty("client.lang", flags.getString("lang"));
   }
 
   if (flags.isSet("batch")) {
-    cfg_builder.setProperty("evql", "batch", "true");
-  }
-
-  if (flags.isSet("quiet")) {
-    cfg_builder.setProperty("evql", "quiet", "true");
+    cfg_builder.setProperty("client.batch", "true");
   }
 
   /* cli config */
@@ -479,38 +352,55 @@ int main(int argc, const char** argv) {
   /* cli */
   eventql::cli::Console console(cli_cfg);
 
+  {
+    auto rc = console.connect();
+    if (!rc.isSuccess()) {
+      printError(StringUtil::format(
+          "error while connecting to server: $0", rc.getMessage()));
+      return 1;
+    }
+  }
+
+  int rc = 0;
+
   auto file = cli_cfg.getFile();
   auto language = cli_cfg.getLanguage();
   if (file.isEmpty() &&
       !language.isEmpty() &&
       language.get() == eventql::cli::CLIConfig::kLanguage::JAVASCRIPT) {
-    logFatal("evql", "missing --file flag. Set --file for javascript");
-    return 1;
+    printError("missing --file flag. Set --file for javascript");
+    rc = 1;
+    goto exit;
   }
 
   if (!file.isEmpty()) {
     if (language.isEmpty()) {
-      logFatal("evql", "invalid --lang flag. Must be one of 'sql', 'js' or 'javascript'");
-      return 1;
+      printError(
+          "invalid --lang flag. Must be one of 'sql', 'js' or 'javascript'");
+      rc = 1;
+      goto exit;
     }
 
     auto query = FileUtil::read(file.get());
     switch (language.get()) {
       case eventql::cli::CLIConfig::kLanguage::SQL: {
         Status ret = console.runQuery(query.toString());
-        return ret.isSuccess() ? 0 : 1;
+        rc = ret.isSuccess() ? 0 : 1;
+        goto exit;
       }
 
       case eventql::cli::CLIConfig::kLanguage::JAVASCRIPT: {
         Status ret = console.runJS(query.toString());
-        return ret.isSuccess() ? 0 : 1;
+        rc = ret.isSuccess() ? 0 : 1;
+        goto exit;
       }
     }
   }
 
   if (flags.isSet("exec")) {
     auto ret = console.runQuery(flags.getString("exec"));
-    return ret.isSuccess() ? 0 : 1;
+    rc = ret.isSuccess() ? 0 : 1;
+    goto exit;
   }
 
   if (hasSTDIN() || flags.isSet("batch") || !stdout_os->isTTY()) {
@@ -519,13 +409,16 @@ int main(int argc, const char** argv) {
       auto ret = console.runQuery(query);
       query = "";
       if (ret.isError()) {
-        return 1;
+        rc = 1;
+        goto exit;
       }
     }
   } else {
     console.startInteractiveShell();
   }
 
-  return 0;
+exit:
+  console.close();
+  return rc;
 }
 

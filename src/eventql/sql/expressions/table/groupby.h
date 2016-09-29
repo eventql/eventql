@@ -1,8 +1,8 @@
   /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
- *   - Laura Schlimmer <laura@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -26,6 +26,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/SHA1.h>
 #include <eventql/sql/runtime/defaultruntime.h>
+#include <eventql/transport/native/client_tcp.h>
 
 namespace csql {
 
@@ -69,6 +70,7 @@ public:
       Transaction* txn,
       Vector<ValueExpression> select_expressions,
       Vector<ValueExpression> group_expressions,
+      SHA1Hash expression_fingerprint,
       ScopedPtr<TableExpression> input);
 
   ~PartialGroupByExpression();
@@ -76,6 +78,8 @@ public:
   ScopedPtr<ResultCursor> execute() override;
 
   size_t getNumColumns() const override;
+
+  Option<SHA1Hash> getCacheKey() const override;
 
 protected:
 
@@ -86,6 +90,7 @@ protected:
   Transaction* txn_;
   Vector<ValueExpression> select_exprs_;
   Vector<ValueExpression> group_exprs_;
+  SHA1Hash expression_fingerprint_;
   ScopedPtr<TableExpression> input_;
   HashMap<String, Vector<VM::Instance>> groups_;
   HashMap<String, Vector<VM::Instance>>::const_iterator groups_iter_;
@@ -100,13 +105,18 @@ public:
       Transaction* txn,
       ExecutionContext* execution_context,
       Vector<ValueExpression> select_expressions,
-      ScopedPtr<TableExpression> input);
+      eventql::ProcessConfig* config,
+      eventql::ConfigDirectory* config_dir,
+      size_t max_concurrent_tasks,
+      size_t max_concurrent_tasks_per_host);
 
   ~GroupByMergeExpression();
 
   ScopedPtr<ResultCursor> execute() override;
 
   size_t getNumColumns() const override;
+
+  void addPart(GroupByNode* node, std::vector<std::string> hosts);
 
 protected:
 
@@ -116,13 +126,12 @@ protected:
   Transaction* txn_;
   ExecutionContext* execution_context_;
   Vector<ValueExpression> select_exprs_;
-  ScopedPtr<TableExpression> input_;
+  eventql::native_transport::TCPAsyncClient rpc_scheduler_;
   HashMap<String, Vector<VM::Instance>> groups_;
   HashMap<String, Vector<VM::Instance>>::const_iterator groups_iter_;
   ScratchMemory scratch_;
   bool freed_;
+  size_t num_parts_;
 };
-
-
 
 }

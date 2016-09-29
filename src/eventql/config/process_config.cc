@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
- *   - Laura Schlimmer <laura@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -42,10 +42,13 @@ ProcessConfig::ProcessConfig(
       HashMap<String, String> properties) :
       properties_(properties) {}
 
-Option<String> ProcessConfig::getString(
-    const String& section,
-    const String& key) const {
-  return getString(StringUtil::format("$0.$1", section, key));
+const char* ProcessConfig::getCString(const String& key) const {
+  auto p = properties_.find(key);
+  if (p != properties_.end()) {
+    return p->second.c_str();
+  }
+
+  return nullptr;
 }
 
 Option<String> ProcessConfig::getString(const String& key) const {
@@ -57,17 +60,11 @@ Option<String> ProcessConfig::getString(const String& key) const {
   return None<String>();
 }
 
-Option<int64_t> ProcessConfig::getInt(
-    const String& section,
-    const String& key) const {
-  return getInt(StringUtil::format("$0.$1", section, key));
-}
-
 Option<int64_t> ProcessConfig::getInt(const String& key) const {
   auto p = properties_.find(key);
   if (p != properties_.end() && StringUtil::isNumber(p->second)) {
     try {
-      auto value = std::stoi(p->second);
+      auto value = std::stoll(p->second);
       return Some<int64_t>(value);
 
     } catch (std::exception e) {
@@ -78,10 +75,30 @@ Option<int64_t> ProcessConfig::getInt(const String& key) const {
   return None<int64_t>();
 }
 
-bool ProcessConfig::getBool(
-    const String& section,
-    const String& key) const {
-  return getBool(StringUtil::format("$0.$1", section, key));
+int64_t ProcessConfig::getInt(const String& key, int64_t or_else) const {
+  auto p = properties_.find(key);
+  if (p != properties_.end() && StringUtil::isNumber(p->second)) {
+    try {
+      return std::stoll(p->second);
+    } catch (std::exception e) {
+      /* fallthrough */
+    }
+  }
+
+  return or_else;
+}
+
+double ProcessConfig::getDouble(const String& key, double or_else) const {
+  auto p = properties_.find(key);
+  if (p != properties_.end()) {
+    try {
+      return std::stod(p->second);
+    } catch (std::exception e) {
+      /* fallthrough */
+    }
+  }
+
+  return or_else;
 }
 
 bool ProcessConfig::getBool(const String& key) const {
@@ -118,30 +135,38 @@ Status ProcessConfigBuilder::loadFile(const String& file) {
 }
 
 Status ProcessConfigBuilder::loadDefaultConfigFile(const String& process) {
-  /* load /etc/{process}.conf */
-  {
-    String config_file_name = StringUtil::format("$0.conf", process);
-    String config_file_path = FileUtil::joinPaths("/etc", config_file_name);
+  if (process == "evqld") {
+    /* load /etc/evqld.conf */
+    auto config_file_path = "/etc/evqld.conf";
+    if (FileUtil::exists(config_file_path)) {
+      return loadFile(config_file_path);
+    } else {
+      return Status::success();
+    }
+
+  } else {
+    /* load /etc/evql.conf */
+    auto config_file_path = "/etc/evql.conf";
     if (FileUtil::exists(config_file_path)) {
       auto rc = loadFile(config_file_path);
       if (!rc.isSuccess()) {
         return rc;
       }
     }
-  }
 
-  char* homedir = getenv("HOME");
-  if (!homedir) {
-    return Status::success();
-  }
-
-  {
-    String confg_file_path = FileUtil::joinPaths(homedir, ".evqlrc");
-    if (!FileUtil::exists(confg_file_path)) {
+    char* homedir = getenv("HOME");
+    if (!homedir) {
       return Status::success();
     }
 
-    return loadFile(confg_file_path);
+    {
+      String confg_file_path = FileUtil::joinPaths(homedir, ".evql.conf");
+      if (!FileUtil::exists(confg_file_path)) {
+        return Status::success();
+      }
+
+      return loadFile(confg_file_path);
+    }
   }
 }
 

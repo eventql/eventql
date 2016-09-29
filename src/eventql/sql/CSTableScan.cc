@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -41,7 +41,7 @@ CSTableScan::CSTableScan(
     execution_context_(execution_context),
     stmt_(stmt->deepCopyAs<SequentialScanNode>()),
     cstable_filename_(cstable_filename),
-    colindex_(0),
+    colindex_(1),
     aggr_strategy_(stmt_->aggregationStrategy()),
     rows_scanned_(0),
     num_records_(0),
@@ -65,7 +65,7 @@ CSTableScan::CSTableScan(
     stmt_(stmt->deepCopyAs<SequentialScanNode>()),
     cstable_(cstable),
     cstable_filename_(cstable_filename),
-    colindex_(0),
+    colindex_(1),
     aggr_strategy_(stmt_->aggregationStrategy()),
     rows_scanned_(0),
     num_records_(0),
@@ -186,7 +186,13 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
   }
 
   while (cur_pos_ < num_records_) {
-    ++rows_scanned_;
+    if (++rows_scanned_ % 8192 == 0) {
+      auto rc = txn_->triggerHeartbeat();
+      if (!rc.isSuccess()) {
+        RAISE(kRuntimeError, rc.getMessage());
+      }
+    }
+
     uint64_t next_level = 0;
 
     if (cur_fetch_level_ == 0) {
@@ -515,6 +521,7 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
 }
 
 bool CSTableScan::fetchNextWithoutColumns(SValue* row, int row_len) {
+  csql::SValue sql_null;
   Vector<SValue> out_row(select_list_.size(), SValue{});
 
   while (cur_pos_ < num_records_) {
@@ -536,8 +543,8 @@ bool CSTableScan::fetchNextWithoutColumns(SValue* row, int row_len) {
       VM::evaluate(
           txn_,
           select_list_[i].compiled.program(),
-          0,
-          nullptr,
+          1,
+          &sql_null,
           &row[i]);
     }
 
@@ -567,7 +574,7 @@ void CSTableScan::resolveColumns(RefPtr<ValueExpressionNode> expr) const {
     auto colname = fieldref->fieldName();
     auto col = columns_.find(colname);
     if (col == columns_.end()) {
-      RAISEF(kNotFoundError, "column(s) not found: $0", colname);
+      fieldref->setColumnIndex(0);
     } else {
       fieldref->setColumnIndex(col->second.index);
     }

@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -115,15 +115,21 @@ const char* Token::getTypeName(kTokenType type) {
     case T_TABLE: return "T_TABLE";
     case T_TABLES: return "T_TABLES";
     case T_DATABASE: return "T_DATABASE";
+    case T_USE: return "T_USE";
     case T_ON: return "T_ON";
     case T_OFF: return "T_OFF";
     case T_ALTER: return "T_ALTER";
     case T_ADD: return "T_ADD";
     case T_DROP: return "T_DROP";
+    case T_PRIMARY: return "T_PRIMARY";
+    case T_KEY: return "T_KEY";
     case T_COLUMN: return "T_COLUMN";
     case T_SHOW: return "T_SHOW";
     case T_DESCRIBE: return "T_DESCRIBE";
     case T_EXPLAIN: return "T_EXPLAIN";
+    case T_PARTITIONS: return "T_PARTITIONS";
+    case T_CLUSTER: return "T_CLUSTER";
+    case T_SERVERS: return "T_SERVERS";
     case T_EOF: return "T_EOF";
     case T_DRAW: return "T_DRAW";
     case T_LINECHART: return "T_LINECHART";

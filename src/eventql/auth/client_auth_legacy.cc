@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -30,7 +30,7 @@ LegacyClientAuth::LegacyClientAuth(
     const String& secret) :
     cookie_coder_(secret) {}
 
-Status LegacyClientAuth::authenticateSession(
+Status LegacyClientAuth::authenticateNonInteractive(
     Session* session,
     HashMap<String, String> auth_data) {
   const auto& auth_token_str = auth_data["auth_token"];
@@ -53,7 +53,11 @@ Status LegacyClientAuth::authenticateSession(
 Status LegacyClientAuth::changeNamespace(
     Session* session,
     const String& ns) {
-  if (ns == session->getEffectiveNamespace()) {
+  if (session->isInternal()) {
+    session->setEffectiveNamespace(ns);
+    session->setDisplayNamespace(ns);
+    return Status::success();
+  } else if (ns == session->getEffectiveNamespace()) {
     return Status::success();
   } else {
     return Status(eRuntimeError, "access denied");

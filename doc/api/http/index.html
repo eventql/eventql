@@ -1,16 +1,26 @@
-<h1>HTTP API Reference</h1>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+<h1>7.1 HTTP API</h1>
+
+<p>
+The EventQL HTTP API gives you full access to EventQL via HTTP. All EventQL
+operations can be executed via this API. The EventQL CLI uses the HTTP API to
+access EventQL.
+</p>
+
+<h4>Version Prefix</h4>
+<p>All API routes are prefixed with <code>/api/v1/</code>. This documentation
+is only for the v1 version of the API</p>
+
+<p class="warning">
+<strong>Backwards compatibility:</strong> At the current version, EventQL does not yet
+promise backwards compatibility even with the v1 prefix. We'll remove this warning
+when this policy changes. We expect we'll reach API stability by EventQL 1.0.
+</p>
 
 <h3>Tables</h3>
-<table class="api_reference http" cellspacing=0 border=0>
+<table class="api_reference http">
   <tr>
     <td><span class="tag">POST</span></td>
-    <td>/api/v1/tables/upload_table</td>
-    <td>Upload a table</td>
-  </tr>
-  <tr>
-    <td><span class="tag">POST</span></td>
-    <td><a href="tables/create_table">/api/v1/tables/create_table</a></td>
+    <td><a href="tables/create">/api/v1/tables/create</a></td>
     <td>Create a new table (or overwrite an existing table).</td>
   </tr>
   <tr>
@@ -26,49 +36,30 @@
   <tr>
     <td><span class="tag">POST</span></td>
     <td><a href="tables/insert">/api/v1/tables/insert</a></td>
-    <td>Insert or update record(s)</td>
+    <td>Insert or update row(s).</td>
+  </tr>
+   <tr>
+    <td><span class="tag">POST</span></td>
+    <td><a href="tables/drop">/api/v1/tables/drop</a></td>
+    <td>Remove an existing table.</td>
   </tr>
   <tr>
-    <td><span class="tag">GET</span></td>
-    <td><a href="tables/">/api/v1/tables</a></td>
+    <td><span class="tag">POST</span></td>
+    <td><a href="tables/list">/api/v1/tables/list</a></td>
     <td>List existing tables.</td>
   </tr>
   <tr>
-    <td><span class="tag">GET</span></td>
-    <td><a href="tables/table">/api/v1/tables/[table]</a></td>
-    <td>Obtain information about the table and its columns</td>
+    <td><span class="tag">POST</span></td>
+    <td><a href="tables/describe">/api/v1/tables/describe</a></td>
+    <td>Obtain information about the table and its columns.</td>
   </tr>
 </table>
 
 <h3>SQL</h3>
-<table class="api_reference http" cellspacing=0 border=0>
+<table class="api_reference http">
   <tr>
-    <td><span class="tag">GET</span></td>
+    <td><span class="tag">POST/GET</span></td>
     <td><a href="sql">/api/v1/sql</a></td>
     <td>Execute SQL</td>
-  </tr>
-  <tr>
-    <td><span class="tag">POST</span></td>
-    <td>/api/v1/sql/aggregate_partition</td>
-    <td>Insert or update record(s)</td>
-  </tr>
-  <tr>
-    <td><span class="tag">GET</span></td>
-    <td><a href="sql/scan_partition">/api/v1/sql/scan_partition</a></td>
-    <td>Insert or update record(s)</td>
-  </tr>
-</table>
-
-<h3>Auth</h3>
-<table class="api_reference http" cellspacing=0 border=0>
-  <tr>
-    <td><span class="tag">POST</span></td>
-    <td><a href="auth/login">/api/v1/auth/login</a></td>
-    <td>Login</td>
-  </tr>
-  <tr>
-    <td><span class="tag">POST</span></td>
-    <td><a href="sql">/api/v1/auth/logout</a></td>
-    <td>Logout</td>
   </tr>
 </table>

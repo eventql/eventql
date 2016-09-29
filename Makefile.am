@@ -4,16 +4,10 @@ ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = foreign
 
 SUBDIRS = \
+    deps \
     . \
-    deps/3rdparty/spidermonkey \
-    deps/3rdparty/pcre \
-    deps/3rdparty/linenoise \
-    deps/3rdparty/libsimdcomp \
-    deps/3rdparty/protobuf \
-    deps/3rdparty/liblmdb \
-    deps/3rdparty/inih \
-    deps/3rdparty/zookeeper \
-    src
+    src \
+    test
 
 EXTRA_DIST =                             \
   doc                                    \
@@ -57,5 +51,6 @@ release: clean distdir
 	./build/scripts/build_linux_x86_64.sh $(PACKAGE) $(VERSION)
 	./build/scripts/build_darwin_x86_64.sh $(PACKAGE) $(VERSION)
 	./build/scripts/package_tarballs.sh $(PACKAGE) $(VERSION)
+	./build/scripts/package_osxpkg.sh $(PACKAGE) $(VERSION)
 
 .PHONY: package

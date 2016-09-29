@@ -1,0 +1,70 @@
+/**
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
+ * Authors:
+ *   - Paul Asmuth <paul@eventql.io>
+ *
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License ("the license") as
+ * published by the Free Software Foundation, either version 3 of the License,
+ * or any later version.
+ *
+ * In accordance with Section 7(e) of the license, the licensing of the Program
+ * under the license does not imply a trademark license. Therefore any rights,
+ * title and interest in our trademarks remain entirely with us.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the license for more details.
+ *
+ * You can be released from the requirements of the license by purchasing a
+ * commercial license. Buying such a license is mandatory as soon as you develop
+ * commercial activities involving this program without disclosing the source
+ * code of your own applications
+ */
+package eventql;
+
+message ReplicaState {
+
+  /**
+   * SHA1 sum (20 bytes) containing the unique identifier of this replica
+   */
+  required bytes replica_id = 1;
+
+  /**
+   * Up to which offset have we uploaded the partition to this replica (used
+   * for log partition replication)
+   */
+  optional uint64 replicated_offset = 2;
+
+  /**
+   * Which is the newest version have we uploaded the partition to this replica
+   * (used for static partition replication)
+   */
+  optional uint64 version = 6;
+
+};
+
+message ReplicationState {
+
+  /**
+   * SHA1 sum (20 bytes) containing the uuid of the partition for which this
+   * replication state was written. The uuid is used to prevent A/B/A scenarios
+   * when a partition is created, deleted and recreated.  
+   */
+  required bytes uuid = 1;
+
+  /**
+   * One entry for each replica to which we pushed some data. It is safe to
+   * delete entries from this list / truncate this list; if the replication
+   * offset for a specific host is lost all that will happen is that some
+   * data will be uploaded to the host that has already been sent there. However
+   * since the upload is idempotent this will not have any visible effects.
+   */
+  repeated ReplicaState replicas = 2;
+
+  /**
+   * If true, the cleanup/drop routine for this partition has completed
+   */
+  optional bool dropped = 3;
+
+};

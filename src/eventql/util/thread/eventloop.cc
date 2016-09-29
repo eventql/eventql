@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -69,9 +69,9 @@ void EventLoop::setupRunQWakeupPipe() {
   }
 }
 
-void EventLoop::runAsync(std::function<void()> task) {
-   appendToRunQ(task);
-}
+//void EventLoop::runAsync(std::function<void()> task) {
+//   appendToRunQ(task);
+//}
 
 void EventLoop::run(std::function<void()> task) {
   if (std::this_thread::get_id() == threadid_) {

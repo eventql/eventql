@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -27,7 +27,6 @@
 #include "eventql/auth/client_auth.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/http/httpservice.h>
-#include <eventql/AnalyticsSession.pb.h>
 #include <eventql/auth/internal_auth.h>
 
 namespace eventql {

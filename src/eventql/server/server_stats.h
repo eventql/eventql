@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -28,17 +28,19 @@
 
 namespace eventql {
 
-struct Z1Stats {
+struct evqld_stats {
   stats::Counter<uint64_t> num_partitions;
-  stats::Counter<uint64_t> num_partitions_loaded;
+  stats::Counter<uint64_t> num_partitions_opened;
+  stats::Counter<uint64_t> num_partitions_loading;
   stats::Counter<uint64_t> replication_queue_length;
   stats::Counter<uint64_t> compaction_queue_length;
   stats::Counter<uint64_t> mapreduce_reduce_memory;
   stats::Counter<uint64_t> mapreduce_num_map_tasks;
   stats::Counter<uint64_t> mapreduce_num_reduce_tasks;
+  stats::Counter<uint64_t> cache_size;
   http::HTTPClientStats http_client_stats;
 };
 
-Z1Stats* z1stats();
+struct evqld_stats* evqld_stats();
 
 }

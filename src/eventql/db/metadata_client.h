@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -26,30 +26,40 @@
 #include "eventql/util/status.h"
 #include "eventql/db/metadata_operation.h"
 #include "eventql/db/metadata_file.h"
-#include "eventql/db/Partition.h"
+#include "eventql/db/metadata_cache.h"
+#include "eventql/db/partition.h"
 #include "eventql/config/config_directory.h"
 
 namespace eventql {
 
+struct MetadataClientLocks {
+  std::mutex download_lock;
+  std::mutex create_lock;
+  std::mutex discover_lock;
+};
+
 class MetadataClient {
 public:
 
-  MetadataClient(ConfigDirectory* cdir);
+  MetadataClient(
+      ConfigDirectory* cdir,
+      ProcessConfig* config,
+      MetadataStore* store,
+      MetadataCache* cache,
+      native_transport::TCPConnectionPool* conn_pool,
+      net::DNSCache* dns_cache);
 
   Status fetchLatestMetadataFile(
       const String& ns,
       const String& table_id,
-      MetadataFile* file);
-
-  Status fetchMetadataFile(
-      const TableDefinition& table_config,
-      MetadataFile* file);
+      RefPtr<MetadataFile>* file,
+      bool allow_cache = true);
 
   Status fetchMetadataFile(
       const String& ns,
       const String& table_id,
       const SHA1Hash& txnid,
-      MetadataFile* file);
+      RefPtr<MetadataFile>* file);
 
   Status listPartitions(
       const String& ns,
@@ -61,10 +71,41 @@ public:
       const String& ns,
       const String& table_id,
       const String& key,
+      bool allow_create,
       PartitionFindResponse* res);
 
+  Status findPartition(
+      const PartitionFindRequest& request,
+      PartitionFindResponse* res);
+
+  Status discoverPartition(
+      PartitionDiscoveryRequest request,
+      PartitionDiscoveryResponse* response);
+
 protected:
+
+  MetadataClientLocks* getAdvisoryLocks(
+      const String& ns,
+      const String& table_id);
+
+  ReturnCode downloadMetadataFile(
+      const String& ns,
+      const String& table_id,
+      const SHA1Hash& txnid,
+      RefPtr<MetadataFile>* file);
+
+  Status createPartition(
+      const PartitionFindRequest& request,
+      PartitionFindResponse* res);
+
   ConfigDirectory* cdir_;
+  ProcessConfig* config_;
+  MetadataCache* cache_;
+  MetadataStore* store_;
+  native_transport::TCPConnectionPool* conn_pool_;
+  net::DNSCache* dns_cache_;
+  std::mutex lockmap_mutex_;
+  std::map<std::string, std::unique_ptr<MetadataClientLocks>> lockmap_;
 };
 
 } // namespace eventql

@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -333,6 +333,12 @@ void ASTNode::debugPrint(int indent /* = 0 */) const {
     case T_DESCRIBE_TABLE:
       printf("- T_DESCRIBE_TABLE");
       break;
+    case T_DESCRIBE_PARTITIONS:
+      printf("- T_DESCRIBE_PARTITIONS");
+      break;
+    case T_CLUSTER_SHOW_SERVERS:
+      printf("- T_CLUSTER_SHOW_SERVERS");
+      break;
     case T_EXPLAIN_QUERY:
       printf("- T_EXPLAIN_QUERY");
       break;
@@ -360,11 +366,29 @@ void ASTNode::debugPrint(int indent /* = 0 */) const {
     case T_COLUMN_TYPE:
       printf("- T_COLUMN_TYPE");
       break;
+    case T_TABLE_PROPERTY_LIST:
+      printf("- T_TABLE_PROPERTY_LIST");
+      break;
+    case T_TABLE_PROPERTY:
+      printf("- T_TABLE_PROPERTY");
+      break;
+    case T_TABLE_PROPERTY_KEY:
+      printf("- T_TABLE_PROPERTY_KEY");
+      break;
+    case T_TABLE_PROPERTY_VALUE:
+      printf("- T_TABLE_PROPERTY_VALUE");
+      break;
     case T_DATABASE_NAME:
       printf("- T_DATABASE_NAME");
       break;
     case T_CREATE_DATABASE:
       printf("- T_CREATE_DATABASE");
+      break;
+    case T_USE_DATABASE:
+      printf("- T_USE_DATABASE");
+      break;
+    case T_DROP_TABLE:
+      printf("- T_DROP_TABLE");
       break;
     case T_INSERT_INTO:
       printf("- T_INSERT_INTO");

@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -27,8 +27,9 @@
 #include <eventql/util/http/httpstats.h>
 #include <eventql/util/SHA1.h>
 #include <eventql/db/partition_map.h>
-#include <eventql/db/ReplicationWorker.h>
+#include <eventql/db/replication_worker.h>
 #include <eventql/config/config_directory.h>
+#include <eventql/db/database.h>
 
 #include "eventql/eventql.h"
 namespace eventql {
@@ -36,13 +37,7 @@ namespace eventql {
 class StatusServlet : public http::HTTPService {
 public:
 
-  StatusServlet(
-      ServerCfg* config,
-      PartitionMap* pmap,
-      ConfigDirectory* cdir,
-      http::HTTPServerStats* http_server_stats,
-      http::HTTPClientStats* http_client_stats,
-      ReplicationWorker* repl_worker);
+  StatusServlet(Database* db);
 
   void handleHTTPRequest(
       http::HTTPRequest* request,
@@ -76,12 +71,7 @@ protected:
       http::HTTPRequest* request,
       http::HTTPResponse* response);
 
-  ServerCfg* config_;
-  PartitionMap* pmap_;
-  ConfigDirectory* cdir_;
-  http::HTTPServerStats* http_server_stats_;
-  http::HTTPClientStats* http_client_stats_;
-  ReplicationWorker* repl_worker_;
+  Database* db_;
 };
 
 }

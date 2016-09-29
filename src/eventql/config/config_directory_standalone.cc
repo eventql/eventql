@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -37,7 +37,7 @@ StandaloneConfigDirectory::StandaloneConfigDirectory(
   db_ = mdb::MDB::open(datadir, opts);
 }
 
-Status StandaloneConfigDirectory::start() {
+Status StandaloneConfigDirectory::start(bool create /* = false */) {
   if (db_.get()) {
     auto txn = db_->startTransaction(false);
     auto cursor = txn->getCursor();
@@ -101,6 +101,14 @@ void StandaloneConfigDirectory::setClusterConfigChangeCallback(
 }
 
 String StandaloneConfigDirectory::getServerID() const {
+  return "localhost";
+}
+
+bool StandaloneConfigDirectory::electLeader() {
+  return true;
+}
+
+String StandaloneConfigDirectory::getLeader() const {
   return "localhost";
 }
 
@@ -183,7 +191,8 @@ void StandaloneConfigDirectory::updateNamespaceConfig(NamespaceConfig cfg) {
 
 TableDefinition StandaloneConfigDirectory::getTableConfig(
     const String& db_namespace,
-    const String& table_name) const {
+    const String& table_name,
+    bool allow_cache /* = true */) {
   std::unique_lock<std::mutex> lk(mutex_);
   auto iter = tables_.find(db_namespace + "~" + table_name);
   if (iter == tables_.end()) {
@@ -197,16 +206,32 @@ void StandaloneConfigDirectory::updateTableConfig(
     const TableDefinition& table,
     bool force /* = false */) {
   std::unique_lock<std::mutex> lk(mutex_);
-  tables_.emplace(table.customer() + "~" + table.table_name(), table);
-  auto callbacks = on_table_change_;
+  auto table_id = table.customer() + "~" + table.table_name();
+  auto old_table_version = 0;
+  auto old_table = tables_.find(table_id);
+  if (old_table != tables_.end()) {
+    old_table_version = old_table->second.version();
+  }
+
+  if (table.version() != old_table_version) {
+    RAISEF(
+        kIllegalArgumentError,
+        "conflicting update to table config: $0",
+        table.table_name());
+  }
+
+  auto new_table = table;
+  new_table.set_version(old_table_version + 1);
+
+  tables_[table_id] = new_table;
 
   if (db_.get()) {
     auto db_key = StringUtil::format(
         "tbl~$0~$1",
-        table.customer(),
-        table.table_name());
+        new_table.customer(),
+        new_table.table_name());
 
-    auto db_val = *msg::encode(table);
+    auto db_val = *msg::encode(new_table);
     auto txn = db_->startTransaction(false);
     txn->update(
         db_key.data(),
@@ -217,9 +242,10 @@ void StandaloneConfigDirectory::updateTableConfig(
     txn->commit();
   }
 
+  auto callbacks = on_table_change_;
   lk.unlock();
   for (const auto& cb : callbacks) {
-    cb(table);
+    cb(new_table);
   }
 }
 

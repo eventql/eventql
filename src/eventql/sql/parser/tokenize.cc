@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -482,6 +482,11 @@ next:
     goto next;
   }
 
+  if (token == "USE") {
+    token_list->emplace_back(Token::T_USE);
+    goto next;
+  }
+
   if (token == "AXIS") {
     token_list->emplace_back(Token::T_AXIS);
     goto next;
@@ -559,6 +564,21 @@ next:
 
   if (token == "EXPLAIN") {
     token_list->emplace_back(Token::T_EXPLAIN);
+    goto next;
+  }
+
+  if (token == "PARTITIONS") {
+    token_list->emplace_back(Token::T_PARTITIONS);
+    goto next;
+  }
+
+  if (token == "CLUSTER") {
+    token_list->emplace_back(Token::T_CLUSTER);
+    goto next;
+  }
+
+  if (token == "SERVERS") {
+    token_list->emplace_back(Token::T_SERVERS);
     goto next;
   }
 

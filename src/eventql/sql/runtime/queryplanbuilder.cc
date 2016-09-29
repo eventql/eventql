@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -43,10 +43,14 @@
 #include <eventql/sql/qtree/ValueExpressionNode.h>
 #include <eventql/sql/qtree/JoinNode.h>
 #include <eventql/sql/qtree/nodes/create_database.h>
+#include <eventql/sql/qtree/nodes/use_database.h>
 #include <eventql/sql/qtree/nodes/alter_table.h>
 #include <eventql/sql/qtree/nodes/create_table.h>
+#include <eventql/sql/qtree/nodes/drop_table.h>
 #include <eventql/sql/qtree/nodes/insert_into.h>
 #include <eventql/sql/qtree/nodes/insert_json.h>
+#include <eventql/sql/qtree/nodes/describe_partitions.h>
+#include "eventql/sql/qtree/nodes/cluster_show_servers.h"
 #include <eventql/sql/table_schema.h>
 
 namespace csql {
@@ -106,7 +110,19 @@ RefPtr<QueryTreeNode> QueryPlanBuilder::build(
     return node;
   }
 
+  if ((node = buildDescribePartitions(txn, ast)) != nullptr) {
+    return node;
+  }
+
+  if ((node = buildClusterShowServers(txn, ast)) != nullptr) {
+    return node;
+  }
+
   if ((node = buildCreateTable(txn, ast)) != nullptr) {
+    return node;
+  }
+
+  if ((node = buildDropTable(txn, ast)) != nullptr) {
     return node;
   }
 
@@ -115,6 +131,10 @@ RefPtr<QueryTreeNode> QueryPlanBuilder::build(
   }
 
   if ((node = buildCreateDatabase(txn, ast)) != nullptr) {
+    return node;
+  }
+
+  if ((node = buildUseDatabase(txn, ast)) != nullptr) {
     return node;
   }
 
@@ -139,8 +159,12 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
       case ASTNode::T_SELECT_DEEP:
       case ASTNode::T_SHOW_TABLES:
       case ASTNode::T_DESCRIBE_TABLE:
+      case ASTNode::T_DESCRIBE_PARTITIONS:
+      case ASTNode::T_CLUSTER_SHOW_SERVERS:
       case ASTNode::T_CREATE_TABLE:
       case ASTNode::T_CREATE_DATABASE:
+      case ASTNode::T_USE_DATABASE:
+      case ASTNode::T_DROP_TABLE:
       case ASTNode::T_INSERT_INTO:
       case ASTNode::T_ALTER_TABLE:
         nodes.emplace_back(build(txn, statements[i], tables));
@@ -1726,6 +1750,34 @@ QueryTreeNode* QueryPlanBuilder::buildDescribeTable(
   return new DescribeTableNode(table_name->getToken()->getString());
 }
 
+QueryTreeNode* QueryPlanBuilder::buildDescribePartitions(
+    Transaction* txn,
+    ASTNode* ast) {
+  if (!(*ast == ASTNode::T_DESCRIBE_PARTITIONS) ||
+        ast->getChildren().size() != 1) {
+    return nullptr;
+  }
+
+  auto table_name = ast->getChildren()[0];
+  if (table_name->getType() != ASTNode::T_TABLE_NAME ||
+      table_name->getToken() == nullptr) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  return new DescribePartitionsNode(table_name->getToken()->getString());
+}
+
+QueryTreeNode* QueryPlanBuilder::buildClusterShowServers(
+    Transaction* txn,
+    ASTNode* ast) {
+  if (!(*ast == ASTNode::T_CLUSTER_SHOW_SERVERS) ||
+        ast->getChildren().size() != 0) {
+    return nullptr;
+  }
+
+  return new ClusterShowServersNode();
+};
+
 static TableSchema buildCreateTableSchema(ASTNode* ast);
 
 static void buildCreateTableSchemaColumn(
@@ -1886,6 +1938,25 @@ QueryTreeNode* QueryPlanBuilder::buildCreateTable(
     node->setPrimaryKey(primary_key_columns);
   }
 
+  std::vector<std::pair<std::string, std::string>> properties;
+  if (ast->getChildren().size() >= 3) {
+    for (const auto& cld : ast->getChildren()[2]->getChildren()) {
+      if (cld->getType() != ASTNode::T_TABLE_PROPERTY) {
+        continue;
+      }
+
+      if (cld->getChildren().size() != 2 ||
+          cld->getChildren()[0]->getType() != ASTNode::T_TABLE_PROPERTY_KEY ||
+          cld->getChildren()[1]->getType() != ASTNode::T_TABLE_PROPERTY_VALUE) {
+        RAISE(kRuntimeError, "corrupt AST");
+      }
+
+      node->addProperty(
+          cld->getChildren()[0]->getToken()->getString(),
+          cld->getChildren()[1]->getToken()->getString());
+    }
+  }
+
   return node;
 }
 
@@ -1903,6 +1974,38 @@ QueryTreeNode* QueryPlanBuilder::buildCreateDatabase(
   }
 
   return new CreateDatabaseNode(db_name->getToken()->getString());
+}
+
+QueryTreeNode* QueryPlanBuilder::buildUseDatabase(
+    Transaction* txn,
+    ASTNode* ast) {
+  if (!(*ast == ASTNode::T_USE_DATABASE) || ast->getChildren().size() != 1) {
+    return nullptr;
+  }
+
+  auto db_name = ast->getChildren()[0];
+  if (db_name->getType() != ASTNode::T_DATABASE_NAME ||
+      db_name->getToken() == nullptr) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  return new UseDatabaseNode(db_name->getToken()->getString());
+}
+
+QueryTreeNode* QueryPlanBuilder::buildDropTable(
+    Transaction* txn,
+    ASTNode* ast) {
+  if (!(*ast == ASTNode::T_DROP_TABLE) || ast->getChildren().size() != 1) {
+    return nullptr;
+  }
+
+  auto db_name = ast->getChildren()[0];
+  if (db_name->getType() != ASTNode::T_TABLE_NAME ||
+      db_name->getToken() == nullptr) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  return new DropTableNode(db_name->getToken()->getString());
 }
 
 QueryTreeNode* QueryPlanBuilder::buildInsertInto(
@@ -1934,21 +2037,17 @@ QueryTreeNode* QueryPlanBuilder::buildInsertInto(
   auto columns = ast->getChildren()[1]->getChildren();
   auto values = ast->getChildren()[2]->getChildren();
 
-  if (columns.size() != values.size()) {
-    RAISE(kRuntimeError, "corrupt AST");
-  }
-
   Vector<InsertIntoNode::InsertValueSpec> values_spec;
-  for (size_t i = 0; i < columns.size(); ++i) {
-    if (columns[i]->getType() != ASTNode::T_COLUMN_NAME ||
-         columns[i]->getToken() == nullptr) {
-      RAISE(kRuntimeError, "corrupt AST");
-    }
-
+  for (size_t i = 0; i < values.size(); ++i) {
     InsertIntoNode::InsertValueSpec spec;
     spec.type = InsertIntoNode::InsertValueType::SCALAR;
-    spec.column = columns[i]->getToken()->getString();
     spec.expr = buildValueExpression(txn, values[i]);
+    if (columns.size() > i &&
+        columns[i]->getType() == ASTNode::T_COLUMN_NAME &&
+        columns[i]->getToken() != nullptr) {
+      spec.column = columns[i]->getToken()->getString();
+    }
+
     values_spec.emplace_back(spec);
   }
 

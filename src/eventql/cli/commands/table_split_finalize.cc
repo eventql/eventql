@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
- *   - Laura Schlimmer <laura@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -47,26 +47,18 @@ Status TableSplitFinalize::execute(
     OutputStream* stdout_os,
     OutputStream* stderr_os) {
   ::cli::FlagParser flags;
+
   flags.defineFlag(
-      "cluster_name",
+      "database",
       ::cli::FlagParser::T_STRING,
       true,
       NULL,
       NULL,
-      "node name",
+      "database",
       "<string>");
 
   flags.defineFlag(
-      "namespace",
-      ::cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "namespace",
-      "<string>");
-
-  flags.defineFlag(
-      "table_name",
+      "table",
       ::cli::FlagParser::T_STRING,
       true,
       NULL,
@@ -103,16 +95,16 @@ Status TableSplitFinalize::execute(
     }
 
     auto table_cfg = cdir->getTableConfig(
-        flags.getString("namespace"),
-        flags.getString("table_name"));
+        flags.getString("database"),
+        flags.getString("table"));
 
     auto partition_id = SHA1Hash::fromHexString(flags.getString("partition_id"));
     FinalizeSplitOperation op;
     op.set_partition_id(partition_id.data(), partition_id.size());
 
     MetadataOperation envelope(
-        flags.getString("namespace"),
-        flags.getString("table_name"),
+        flags.getString("database"),
+        flags.getString("table"),
         METAOP_FINALIZE_SPLIT,
         SHA1Hash(
             table_cfg.metadata_txnid().data(),
@@ -120,11 +112,11 @@ Status TableSplitFinalize::execute(
         Random::singleton()->sha1(),
         *msg::encode(op));
 
-    MetadataCoordinator coordinator(cdir.get());
+    MetadataCoordinator coordinator(cdir.get(), nullptr, nullptr, nullptr);
     {
       auto rc = coordinator.performAndCommitOperation(
-          flags.getString("namespace"),
-          flags.getString("table_name"),
+          flags.getString("database"),
+          flags.getString("table"),
           envelope);
 
       if (!rc.isSuccess()) {
@@ -161,17 +153,13 @@ void TableSplitFinalize::printHelp(OutputStream* stdout_os) const {
       "\nevqlctl-$0 - $1\n\n", kName_, kDescription_));
 
   stdout_os->write(
-      "Usage: evqlctl table-split [OPTIONS]\n"
-      "  --namespace              The name of the namespace.\n"
-      "  --cluster_name           The name of the cluster.\n"
-      "  --table_name             The name of the table to split.\n"
+      "Usage: evqlctl table-split-finalize [OPTIONS]\n"
+      "  --database               The name of the database.\n"
+      "  --table                  The name of the table to split.\n"
       "  --partition_id           The id of the partition to split.\n"
       "  --split_point            \n");
 }
 
 } // namespace cli
 } // namespace eventql
-
-
-
 

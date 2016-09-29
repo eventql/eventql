@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -24,15 +24,13 @@
 #pragma once
 #include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
-#include <eventql/db/TableConfig.pb.h>
-#include <eventql/db/Partition.h>
-#include <eventql/db/TSDBNodeConfig.pb.h>
-#include <eventql/db/TSDBTableInfo.h>
-#include <eventql/db/PartitionInfo.pb.h>
-#include <eventql/db/RecordEnvelope.pb.h>
+#include <eventql/db/table_config.pb.h>
+#include <eventql/db/partition.h>
+#include <eventql/db/table_info.h>
+#include <eventql/db/partition_info.pb.h>
+#include <eventql/db/record_envelope.pb.h>
 #include <eventql/db/table_service.h>
 #include <eventql/db/partition_map.h>
-#include <eventql/db/TimeWindowPartitioner.h>
 #include <eventql/sql/transaction.h>
 #include <eventql/auth/internal_auth.h>
 
@@ -47,9 +45,9 @@ public:
       csql::Runtime* sql,
       PartitionMap* pmap,
       ConfigDirectory* cdir,
-      ReplicationScheme* repl,
       InternalAuth* auth,
-      TableService* table_service);
+      TableService* table_service,
+      const String& cache_dir);
 
   ScopedPtr<csql::Transaction> startTransaction(Session* session);
 
@@ -57,9 +55,9 @@ protected:
   csql::Runtime* sql_;
   PartitionMap* pmap_;
   ConfigDirectory* cdir_;
-  ReplicationScheme* repl_;
   InternalAuth* auth_;
   TableService* table_service_;
+  String cache_dir_;
 };
 
 } // namespace eventql

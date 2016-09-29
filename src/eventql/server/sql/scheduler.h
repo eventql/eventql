@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
- *   - Laura Schlimmer <laura@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -30,19 +30,20 @@
 #include <eventql/sql/query_plan.h>
 #include <eventql/db/partition_map.h>
 #include <eventql/auth/internal_auth.h>
+#include <eventql/server/sql/table_scan.h>
 
 namespace eventql {
 
 class Scheduler : public csql::DefaultScheduler {
 public:
 
-  const size_t kMaxConcurrency = 24;
+  const size_t kMaxConcurrency = 48;
 
   Scheduler(
+      ProcessConfig* config,
       PartitionMap* pmap,
       ConfigDirectory* cdir,
-      InternalAuth* auth,
-      ReplicationScheme* repl_scheme);
+      InternalAuth* auth);
 
 protected:
 
@@ -82,10 +83,10 @@ protected:
   void rewriteTableTimeSuffix(
       RefPtr<csql::QueryTreeNode> node);
 
+  ProcessConfig* config_;
   PartitionMap* pmap_;
   ConfigDirectory* cdir_;
   InternalAuth* auth_;
-  ReplicationScheme* repl_scheme_;
   size_t running_cnt_;
 };
 

@@ -1,10 +1,159 @@
-v0.3.0
-======
-  - renamed to eventqlr
-  - deleted old webui code, non-core services
-  - rewritten sql query execution to internally use and return result cursors
-  - implemented unified DAG scheduler for sql+mapreduce
-  - implemented binary network protocol
+EventQL v0.5.0 beta;
+
+  * Changed the DESCRIBE TABLE statement to return a new "encoding" column that
+    contains information about the column's encoding settings
+
+  * Changed the server allocator to assign new partitions to servers using
+    a weighted random scheme, taking into a account the load facotr and the
+    number of available bytes on disk for each server
+
+  * Changed all metadata operations to use the native protocol
+
+  * Added the evqlslap benchmark and load testing tool
+
+  * Added caching for metadata lookups
+
+  * Added internal (server-to-server) connection pooling for native TCP
+    connections
+
+  * Added a new "user defined partitioning" mode that can be enabled by setting
+    user_defined_partitioning=true on a table and allows to explicitly specify
+    the partition key for each row
+
+  * Added a new monitor thread that publishes disk usage and other load
+    information to the coordination service
+
+  * Added new frames to native protocol: ACK, INSERT, REPL_INSERT,
+    META_GETFILE{_RESULT}, META_CREATEFILE, META_PERFORMOP{_RESULT},
+    META_DISCOVER{_RESULT}, META_LISTPARTITIONS{_RESULT},
+    META_FINDPARTITION{_RESULT}
+
+  * Added the DESCRIBE PARTITIONS table statement to obtain information about
+    the partitions of a table
+
+  * Added the USE statement to switch databases
+
+  * Added the following new configuration options: server.disk_capacity,
+    server.load_limit_{soft,hard}, server.partitions_loading_limit_{soft,hard},
+    server.loadinfo_publish_interval, server.noalloc,
+    server.s2s_pool_max_connections, server.s2s_pool_max_connections_per_host,
+    server.s2s_pool_linger_timeout, cluster.allow_create_database
+
+  * Added new sql functions: usleep, fnv32
+
+  * Added the CREATE DATABASE statement
+
+  * Added the CLUSTER SHOW SERVERS statement and the cluster-list command to
+    obtain information about the servers of the current cluster.
+
+
+EventQL v0.4.0 beta;
+
+  * Changed the parallel GROUP BY operation to use the new native protocol and
+    to schedule all remote partial group bys from a a single thread using
+    asynchronous I/O (currently via poll()).
+
+  * Changed the evql client to use the new native protocol
+
+  * Changed the connection acceptor code to read the first byte of an incoming
+    connection and switch protocols (currently HTTP and native) based on this
+    first byte
+
+  * Changed the http server code to execute incoming requests from within a
+    database thread (previously this was a generic thread pool)
+
+  * Changed the internal cluster auth to require all internal hosts to be
+    whitelisted using the cluster.allowed_hosts option. In standalone mode,
+    the whitelist is defaulted to 0.0.0.0/0
+
+  * Changed the HTTP transport to run fully within the database thread (i.e.
+    removed the dependency on an external event loop) and added http timeouts
+
+  * Changed the SQL engine to use the new native transport
+
+  * Changed the zookeeper backend to explicitly reconnect on session timeouts
+    and not rely on the built-in reconnect mechanism
+
+  * Removed the obsolete "sha1_tokens" field from the cluster/server config
+
+  * Removed the PCRE dependency
+
+  * Added a native transport layer (a framed TCP-based protocol). See
+    doc/internals/protocol.txt for the specification
+
+  * Added a c client driver library (libevqlclient)
+
+  * Added a new table config option that allows to set a finite partition size
+    (called a "partition size hint" in the user facing documentation). A table
+    with a finite partition size will initially have zero partitions but
+    instead add (finite) partitions as it receives inserts for the respective
+    chunks of the keyspace (without splitting the new partition from a larger
+    partition)
+
+  * Added the DROP TABLE statement
+
+  * Added a thread-local storage and retrieval mechanism for the current
+    session. This also adds a new requirement that all operations must be
+    executed from within a valid database thread.
+
+  * Added support for loading configuration files using the '-c' flag and for
+    setting/overring individual configuration parameters using the '-C' flags
+    in the EventQL client (evql) binary
+
+  * Added the following new configuration options: server.c2s_io_timeout,
+    server.c2s_idle_timeout, server.s2s_io_timeout, server.s2s_idle_timeout,
+    server.heartbeat_interval, cluster.allowed_hosts, server.http_io_timeout,
+    server.query_progress_rate_limit, cluster.allow_anonymous,
+    cluster.allow_drop_table, server.query_max_concurrent_shards,
+    server.query_max_concurrent_shards_per_host,
+    server.query_failed_shard_policy, client.timeout
+
+
+EventQL v0.3.2 (v0.3.2, gitb0ea6bc) beta; 2016-09-13 15:23:08 +0000
+
+  * Fixed a bug in the eventql client (evql) where missing HOME and USER
+    env variables would lead to an assertion on some libc++ implementations
+
+  * Added the client.history_file and client.history_maxlen options to the
+    eventql client (evql)
+
+
+EventQL v0.3.1 (v0.3.1, git2da7f66) beta; 2016-09-04 16:11:19 +0000
+
+  * Fixed a bug in the standalone backend where any ALTER TABLE statements
+    would fail with "table already exists"
+
+  * Changed the mapreduce reduce shard allocation so that (in most cases)
+    repeated executions of the same job will result in (unchanged) reduce
+    shards being scheduled on the same machines as before to improve cache
+    hit rates.
+
+  * Changed the default policy for handling failed mapreduce shards from ERROR
+    (return an error to the user) to IGNORE (ignore the missing shard and
+    continue without it)
+
+  * Changed kDefaultMaxConcurrentTasks (the default maximum number of threads
+    to be started for a single sql query) from 32 to 64
+
+  * Added a new execution step to the mapreduce scheduler where, before running
+    a given map task on any of the candidate servers, we try to retrieve it
+    from cache on each of the candidate servers (and bail early if we find it).
+
+  * Added verbose debug-logging to the MapReduce scheduler.
+
+  * Added many documentation improvements, dockerfiles, examples, etc
+
+
+EventQL v0.3.0 (v0.3.0-rc0, gita2fa235) beta; 2016-07-25 22:53:29 +0000
+
+  * Renamed the project to EventQL (the previous name was ZenDB Z1)
+
+  * Removed the old web interface and all non-core services such as the logfile
+    service
+
+  * Changed the sql query execution code to use and return result cursors (as
+    opposed to non-interruptable result streams)
+
 
 v0.2.4 (2016-02-24)
 ===================

@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
- *   - Laura Schlimmer <laura@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -24,23 +24,22 @@
  */
 #include <eventql/server/sql/scheduler.h>
 #include <eventql/server/sql/table_provider.h>
-#include <eventql/server/sql/pipelined_expression.h>
 #include <eventql/sql/qtree/QueryTreeUtil.h>
 #include <eventql/db/metadata_client.h>
-
 #include "eventql/eventql.h"
+#include <algorithm>
 
 namespace eventql {
 
 Scheduler::Scheduler(
+    ProcessConfig* config,
     PartitionMap* pmap,
     ConfigDirectory* cdir,
-    InternalAuth* auth,
-    ReplicationScheme* repl_scheme) :
+    InternalAuth* auth) :
+    config_(config),
     pmap_(pmap),
     cdir_(cdir),
     auth_(auth),
-    repl_scheme_(repl_scheme),
     running_cnt_(0) {}
 
 ScopedPtr<csql::TableExpression> Scheduler::buildTableExpression(
@@ -85,17 +84,24 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPartialGroupByExpression(
     RefPtr<csql::GroupByNode> node) {
   Vector<csql::ValueExpression> select_expressions;
   Vector<csql::ValueExpression> group_expressions;
+  SHA1Hash expression_fingerprint;
 
   for (const auto& slnode : node->selectList()) {
     select_expressions.emplace_back(
         txn->getCompiler()->buildValueExpression(
             txn,
             slnode->expression()));
+
+    expression_fingerprint = SHA1::compute(
+        expression_fingerprint.toString() + slnode->toString());
   }
 
   for (const auto& e : node->groupExpressions()) {
     group_expressions.emplace_back(
         txn->getCompiler()->buildValueExpression(txn, e));
+
+    expression_fingerprint = SHA1::compute(
+        expression_fingerprint.toString() + e->toString());
   }
 
   return mkScoped(
@@ -103,6 +109,7 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPartialGroupByExpression(
           txn,
           std::move(select_expressions),
           std::move(group_expressions),
+          expression_fingerprint,
           buildTableExpression(
               txn,
               execution_context,
@@ -113,13 +120,28 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
     csql::Transaction* txn,
     csql::ExecutionContext* execution_context,
     RefPtr<csql::GroupByNode> node) {
-  auto remote_aggregate = mkScoped(
-      new PipelinedExpression(
+  size_t max_concurrent_tasks =
+      config_->getInt("server.query_max_concurrent_shards").get();
+  size_t max_concurrent_tasks_per_host =
+      config_->getInt("server.query_max_concurrent_shards_per_host").get();
+
+  Vector<csql::ValueExpression> select_expressions;
+  for (const auto& slnode : node->selectList()) {
+    select_expressions.emplace_back(
+        txn->getCompiler()->buildValueExpression(
+            txn,
+            slnode->expression()));
+  }
+
+  auto expr = mkScoped(
+      new csql::GroupByMergeExpression(
           txn,
           execution_context,
-          static_cast<Session*>(txn->getUserData())->getEffectiveNamespace(),
-          auth_,
-          kMaxConcurrency));
+          std::move(select_expressions),
+          config_,
+          cdir_,
+          max_concurrent_tasks,
+          max_concurrent_tasks_per_host));
 
   auto shards = pipelineExpression(txn, node.get());
   for (size_t i = 0; i < shards.size(); ++i) {
@@ -130,29 +152,15 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
             shards[i].qtree));
 
     group_by_copy->setIsPartialAggreagtion(true);
-    if (shards[i].is_local) {
-      auto partial = 
-          buildPartialGroupByExpression(txn, execution_context, group_by_copy);
-      remote_aggregate->addLocalQuery(std::move(partial));
-    } else {
-      remote_aggregate->addRemoteQuery(group_by_copy.get(), shards[i].hosts);
+    std::vector<std::string> hosts;
+    for (const auto& h : shards[i].hosts) {
+      hosts.emplace_back(h.name);
     }
+
+    expr->addPart(group_by_copy.get(), hosts);
   }
 
-  Vector<csql::ValueExpression> select_expressions;
-  for (const auto& slnode : node->selectList()) {
-    select_expressions.emplace_back(
-        txn->getCompiler()->buildValueExpression(
-            txn,
-            slnode->expression()));
-  }
-
-  return mkScoped(
-      new csql::GroupByMergeExpression(
-          txn,
-          execution_context,
-          std::move(select_expressions),
-          std::move(remote_aggregate)));
+  return std::move(expr);
 }
 
 Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
@@ -181,65 +189,52 @@ Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
     RAISE(kIllegalStateError, "can't pipeline query tree");
   }
 
-  auto db_namespace =
-      static_cast<Session*>(txn->getUserData())->getEffectiveNamespace();
+  auto session = static_cast<Session*>(txn->getUserData());
+  auto db_namespace = session->getEffectiveNamespace();
 
   String local_server_id;
   if (cdir_->hasServerID()) {
     local_server_id = cdir_->getServerID();
   }
 
+  auto keyrange = TSDBTableProvider::findKeyRange(
+      table.get()->getKeyspaceType(),
+      table.get()->config().config().partition_key(),
+      seqscan->constraints());
+
+  PartitionListResponse partition_list;
+  auto rc = session->getDatabaseContext()->metadata_client->listPartitions(
+      db_namespace,
+      table_ref.table_key,
+      keyrange,
+      &partition_list);
+
+  if (!rc.isSuccess()) {
+    RAISEF(kRuntimeError, "metadata lookup failure: $0", rc.message());
+  }
+
   HashMap<SHA1Hash, Vector<ReplicaRef>> partitions;
   Set<SHA1Hash> local_partitions;
-  if (table.get()->partitionerType() == TBL_PARTITION_FIXED ||
-      table.get()->storage() != TBL_STORAGE_COLSM) {
-    auto partitioner = table.get()->partitioner();
-    for (const auto& p : partitioner->listPartitions(seqscan->constraints())) {
-      auto replicas = repl_scheme_->replicasFor(p);
-      if (repl_scheme_->hasLocalReplica(p)) {
-        local_partitions.emplace(p);
+  for (const auto& p : partition_list.partitions()) {
+    Vector<ReplicaRef> replicas;
+    SHA1Hash pid(p.partition_id().data(), p.partition_id().size());
+
+    for (const auto& s : p.servers()) {
+      if (s == local_server_id) {
+        local_partitions.emplace(pid);
       }
 
-      partitions.emplace(p, Vector<ReplicaRef>(replicas.begin(), replicas.end()));
-    }
-  } else {
-    auto keyrange = TSDBTableProvider::findKeyRange(
-        table.get()->config().config().partition_key(),
-        seqscan->constraints());
-
-    MetadataClient metadata_client(cdir_);
-    PartitionListResponse partition_list;
-    auto rc = metadata_client.listPartitions(
-        db_namespace,
-        table_ref.table_key,
-        keyrange,
-        &partition_list);
-
-    if (!rc.isSuccess()) {
-      RAISEF(kRuntimeError, "metadata lookup failure: $0", rc.message());
-    }
-
-    for (const auto& p : partition_list.partitions()) {
-      Vector<ReplicaRef> replicas;
-      SHA1Hash pid(p.partition_id().data(), p.partition_id().size());
-
-      for (const auto& s : p.servers()) {
-        if (s == local_server_id) {
-          local_partitions.emplace(pid);
-        }
-
-        auto server_cfg = cdir_->getServerConfig(s);
-        if (server_cfg.server_status() != SERVER_UP) {
-          continue;
-        }
-
-        ReplicaRef rref(SHA1::compute(s), server_cfg.server_addr());
-        rref.name = s;
-        replicas.emplace_back(rref);
+      auto server_cfg = cdir_->getServerConfig(s);
+      if (server_cfg.server_status() != SERVER_UP) {
+        continue;
       }
 
-      partitions.emplace(pid, replicas);
+      ReplicaRef rref(SHA1::compute(s), server_cfg.server_addr());
+      rref.name = s;
+      replicas.emplace_back(rref);
     }
+
+    partitions.emplace(pid, replicas);
   }
 
   Vector<PipelinedQueryTree> shards;
@@ -287,8 +282,8 @@ void Scheduler::rewriteTableTimeSuffix(RefPtr<csql::QueryTreeNode> node) {
   auto seqscan = dynamic_cast<csql::SequentialScanNode*>(node.get());
   if (seqscan) {
     auto table_ref = TSDBTableRef::parse(seqscan->tableName());
-    if (!table_ref.timerange_begin.isEmpty() &&
-        !table_ref.timerange_limit.isEmpty()) {
+    if (!table_ref.keyrange_begin.isEmpty() &&
+        !table_ref.keyrange_limit.isEmpty()) {
       seqscan->setTableName(table_ref.table_key);
 
       auto pred = mkRef(
@@ -301,7 +296,7 @@ void Scheduler::rewriteTableTimeSuffix(RefPtr<csql::QueryTreeNode> node) {
                       new csql::ColumnReferenceNode("time"),
                       new csql::LiteralExpressionNode(
                           csql::SValue(csql::SValue::IntegerType(
-                              table_ref.timerange_begin.get().unixMicros())))
+                              std::stoull(table_ref.keyrange_begin.get()))))
                     }),
                 new csql::CallExpressionNode(
                     "lte",
@@ -309,7 +304,7 @@ void Scheduler::rewriteTableTimeSuffix(RefPtr<csql::QueryTreeNode> node) {
                       new csql::ColumnReferenceNode("time"),
                       new csql::LiteralExpressionNode(
                           csql::SValue(csql::SValue::IntegerType(
-                              table_ref.timerange_limit.get().unixMicros())))
+                              std::stoull(table_ref.keyrange_limit.get()))))
                     })
               }));
 

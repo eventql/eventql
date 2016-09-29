@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
- *   - Laura Schlimmer <laura@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -40,7 +40,8 @@ OrderByExpression::OrderByExpression(
     sort_specs_(std::move(sort_specs)),
     input_(std::move(input)),
     num_rows_(0),
-    pos_(0) {
+    pos_(0),
+    cnt_(0) {
   if (sort_specs_.size() == 0) {
     RAISE(kIllegalArgumentError, "can't execute ORDER BY: no sort specs");
   }
@@ -63,6 +64,13 @@ ScopedPtr<ResultCursor> OrderByExpression::execute() {
       rows_.begin(),
       rows_.end(),
       [this] (const Vector<SValue>& left, const Vector<SValue>& right) -> bool {
+    if (++cnt_ % 4096 == 0) {
+      auto rc = txn_->triggerHeartbeat();
+      if (!rc.isSuccess()) {
+        RAISE(kRuntimeError, rc.getMessage());
+      }
+    }
+
     for (const auto& sort : sort_specs_) {
       SValue args[2];
 

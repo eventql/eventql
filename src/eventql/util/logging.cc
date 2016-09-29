@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -30,7 +30,6 @@
 
 const char* logLevelToStr(LogLevel log_level) {
   switch (log_level) {
-    case LogLevel::kFatal: return "FATAL";
     case LogLevel::kEmergency: return "EMERGENCY";
     case LogLevel::kAlert: return "ALERT";
     case LogLevel::kCritical: return "CRITICAL";
@@ -45,7 +44,6 @@ const char* logLevelToStr(LogLevel log_level) {
 }
 
 LogLevel strToLogLevel(const String& log_level) {
-  if (log_level == "FATAL") return LogLevel::kFatal;
   if (log_level == "EMERGENCY") return LogLevel::kEmergency;
   if (log_level == "ALERT") return LogLevel::kAlert;
   if (log_level == "CRITICAL") return LogLevel::kCritical;

@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -22,10 +22,10 @@
  * code of your own applications
  */
 #include <string>
+#include <assert.h>
 #include <eventql/util/bufferutil.h>
 #include <eventql/util/stringutil.h>
 #include <eventql/util/UTF8.h>
-
 
 void StringUtil::toStringVImpl(std::vector<std::string>* target) {}
 
@@ -117,6 +117,18 @@ std::string StringUtil::toString(bool value) {
   return value ? "true" : "false";
 }
 
+void StringUtil::ltrim(std::string* str) {
+  while (str->front() == ' ') {
+    str->erase(str->begin());
+  }
+}
+
+void StringUtil::rtrim(std::string* str) {
+  while (str->back() == ' ') {
+    str->pop_back();
+  }
+}
+
 void StringUtil::stripTrailingSlashes(std::string* str) {
   while (str->back() == '/') {
     str->pop_back();
@@ -141,6 +153,7 @@ void StringUtil::replaceAll(
 std::vector<std::string> StringUtil::split(
       const std::string& str,
       const std::string& pattern) {
+  assert(!pattern.empty());
   std::vector<std::string> parts;
 
   size_t begin = 0;
@@ -152,7 +165,7 @@ std::vector<std::string> StringUtil::split(
       break;
     } else {
       parts.emplace_back(str.substr(begin, end - begin));
-      begin = end + pattern.length();
+      begin = end + pattern.size();
     }
   }
 

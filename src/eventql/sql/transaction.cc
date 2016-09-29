@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -76,5 +76,16 @@ void* Transaction::getUserData() {
   return user_data_;
 }
 
+void Transaction::setHeartbeatCallback(std::function<ReturnCode ()> cb) {
+  heartbeat_cb_ = cb;
+}
+
+ReturnCode Transaction::triggerHeartbeat() {
+  if (heartbeat_cb_) {
+    return heartbeat_cb_();
+  } else {
+    return ReturnCode::success();
+  }
+}
 
 } // namespace csql

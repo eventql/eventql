@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -60,11 +60,11 @@ Status ConfigDirectoryFactory::getConfigDirectoryForServer(
           "missing config option: server.listen");
     }
 
-    auto zookeeper_addr = cfg->getString("zookeeper.hosts");
+    auto zookeeper_addr = cfg->getString("cluster.zookeeper_hosts");
     if (zookeeper_addr.isEmpty()) {
       return Status(
           eIllegalArgumentError,
-          "missing config option: zookeeper.hosts");
+          "missing config option: cluster.zookeeper_hosts");
     }
 
     cdir->reset(
@@ -131,11 +131,11 @@ Status ConfigDirectoryFactory::getConfigDirectoryForClient(
           "missing config option: cluster.name");
     }
 
-    auto zookeeper_addr = cfg->getString("zookeeper.hosts");
+    auto zookeeper_addr = cfg->getString("cluster.zookeeper_hosts");
     if (zookeeper_addr.isEmpty()) {
       return Status(
           eIllegalArgumentError,
-          "missing config option: zookeeper.hosts");
+          "missing config option: cluster.zookeeper_hosts");
     }
 
     cdir->reset(

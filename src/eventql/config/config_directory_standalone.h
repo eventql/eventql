@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -40,6 +40,10 @@ public:
 
   String getServerID() const override;
 
+  virtual bool electLeader() override;
+
+  virtual String getLeader() const override;
+
   ClusterConfig getClusterConfig() const override;
 
   void updateClusterConfig(ClusterConfig config) override;
@@ -50,6 +54,10 @@ public:
   ServerConfig getServerConfig(const String& sever_name) const override;
 
   void updateServerConfig(ServerConfig config) override;
+
+  ReturnCode publishServerStats(ServerStats stats) override {
+    return ReturnCode::success();
+  }
 
   Vector<ServerConfig> listServers() const override;
 
@@ -69,7 +77,8 @@ public:
 
   TableDefinition getTableConfig(
       const String& db_namespace,
-      const String& table_name) const override;
+      const String& table_name,
+      bool allow_cache = true) override;
 
   void updateTableConfig(
       const TableDefinition& table,
@@ -81,7 +90,7 @@ public:
   void setTableConfigChangeCallback(
       Function<void (const TableDefinition& tbl)> fn) override;
 
-  Status start() override;
+  Status start(bool create = false) override;
   void stop() override;
 
 protected:

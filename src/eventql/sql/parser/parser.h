@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -105,7 +105,10 @@ protected:
   ASTNode* createDatabaseStatement();
   ASTNode* columnDefinition();
   ASTNode* primaryKeyDefinition();
+  ASTNode* tablePropertyDefinition();
   ASTNode* tableName();
+  ASTNode* dropStatement();
+  ASTNode* dropTableStatement();
   ASTNode* insertStatement();
   ASTNode* insertIntoStatement();
   ASTNode* insertColumnList();
@@ -123,7 +126,11 @@ protected:
   ASTNode* showStatement();
   ASTNode* explainStatement();
   ASTNode* explainQueryStatement();
+  ASTNode* describePartitionsStatement();
   ASTNode* describeTableStatement();
+  ASTNode* clusterStatement();
+  ASTNode* clusterShowServersStatement();
+  ASTNode* useStatement();
 
   ASTNode* fromClause();
   ASTNode* tableReference();

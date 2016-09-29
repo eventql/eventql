@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
- *   - Laura Schlimmer <laura@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -26,50 +26,16 @@
 
 namespace http {
 
-HTTPRequestStream::HTTPRequestStream(
-    const HTTPRequest& req,
-    RefPtr<HTTPServerConnection> conn) :
-    req_(req),
-    conn_(conn) {}
+HTTPRequestStream::HTTPRequestStream(const HTTPRequest* req) : req_(req) {}
 
 const HTTPRequest& HTTPRequestStream::request() const {
-  return req_;
-}
-
-void HTTPRequestStream::readBody(Function<void (const void*, size_t)> fn) {
-  RefPtr<Wakeup> wakeup(new Wakeup());
-  bool error = false;
-
-  conn_->readRequestBody([this, fn, wakeup] (
-      const void* data,
-      size_t size,
-      bool last_chunk) {
-    fn(data, size);
-
-    if (last_chunk) {
-      wakeup->wakeup();
-    }
-  },
-  [&error, &wakeup] {
-    error = true;
-    wakeup->wakeup();
-  });
-
-  wakeup->waitForFirstWakeup();
-
-  if (error) {
-    RAISE(kIOError, "client error");
-  }
+  return *req_;
 }
 
 void HTTPRequestStream::readBody() {
-  readBody([this] (const void* data, size_t size) {
-    req_.appendBody(data, size);
-  });
 }
 
 void HTTPRequestStream::discardBody() {
-  readBody([this] (const void* data, size_t size) {});
 }
 
 }

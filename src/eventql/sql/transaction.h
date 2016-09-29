@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -24,6 +24,7 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/UnixTime.h>
+#include <eventql/util/return_code.h>
 #include <eventql/sql/csql.h>
 #include <eventql/sql/runtime/tablerepository.h>
 
@@ -35,12 +36,17 @@ class SymbolTable;
 class QueryBuilder;
 class TableProvider;
 class TableRepository;
+class QueryCache;
 
 class Transaction {
 public:
 
   static inline sql_txn* get(Transaction* ctx) {
     return (sql_txn*) ctx;
+  }
+
+  static inline Transaction* get(sql_txn* ctx) {
+    return (Transaction*) ctx;
   }
 
   Transaction(Runtime* runtime);
@@ -62,12 +68,16 @@ public:
 
   void* getUserData();
 
+  void setHeartbeatCallback(std::function<ReturnCode ()> cb);
+  ReturnCode triggerHeartbeat();
+
 protected:
   Runtime* runtime_;
   UnixTime now_;
   RefPtr<TableProvider> table_provider_;
   void* user_data_;
   Function<void (void*)> free_user_data_fn_;
+  std::function<ReturnCode ()> heartbeat_cb_;
 };
 
 

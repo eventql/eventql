@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -59,18 +59,9 @@ Status HTTPAuth::authenticateRequest(
         }
       }
     }
-  } else {
-    URI uri(request.uri());
-    URI::ParamList params = uri.queryParams();
-    URI::parseQueryString(request.body().toString(), &params);
-
-    String auth_token;
-    if (URI::getParam(params, "auth_token", &auth_token)) {
-      auth_data.emplace("auth_token", URI::urlDecode(auth_token));
-    }
   }
 
-  return client_auth->authenticateSession(session, auth_data);
+  return client_auth->authenticateNonInteractive(session, auth_data);
 }
 
 }

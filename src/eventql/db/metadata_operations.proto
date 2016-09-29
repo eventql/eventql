@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -22,7 +22,8 @@
  * code of your own applications
  */
 package eventql;
-import 'eventql/db/PartitionState.proto';
+import 'eventql/db/partition_state.proto';
+import 'eventql/db/table_config.proto';
 
 enum MetadataOperationType {
   METAOP_REMOVE_DEAD_SERVERS = 4;
@@ -30,6 +31,7 @@ enum MetadataOperationType {
   METAOP_FINALIZE_SPLIT = 6;
   METAOP_JOIN_SERVERS = 7;
   METAOP_FINALIZE_JOIN = 8;
+  METAOP_CREATE_PARTITION = 9;
 };
 
 message PartitionDiscoveryRequest {
@@ -74,6 +76,8 @@ message PartitionListRequest {
 message PartitionListResponseEntry {
   required bytes partition_id = 1;
   repeated string servers = 2;
+  optional bytes keyrange_begin = 3;
+  optional bytes keyrange_end = 4;
 };
 
 message PartitionListResponse {
@@ -84,11 +88,17 @@ message PartitionFindRequest {
   required string db_namespace = 1;
   required string table_id = 2;
   required bytes key = 3;
+  required bool allow_create = 4;
+  optional uint64 min_sequence_number = 5;
+  optional KeyspaceType keyspace = 6;
 };
 
 message PartitionFindResponse {
   required bytes partition_id = 1;
   repeated string servers_for_insert = 2;
+  optional uint64 sequence_number = 3;
+  optional bytes partition_keyrange_begin = 4;
+  optional bytes partition_keyrange_end = 5;
 };
 
 message MetadataOperationEnvelope {
@@ -102,6 +112,8 @@ message MetadataOperationEnvelope {
 
 message MetadataOperationResult {
   required bytes metadata_file_checksum = 1;
+  optional bytes metadata_txnid = 2;
+  optional uint64 metadata_txnseq = 3;
 };
 
 message RemoveDeadServersOperation {
@@ -116,6 +128,7 @@ message SplitPartitionOperation {
   required bytes split_partition_id_low = 5;
   required bytes split_partition_id_high = 6;
   required uint64 placement_id = 7;
+  optional bool finalize_immediately = 8;
 };
 
 message FinalizeSplitOperation {
@@ -137,3 +150,13 @@ message FinalizeJoinOperation {
   required string server_id = 2;
   required uint64 placement_id = 3;
 };
+
+message CreatePartitionOperation {
+  required bytes partition_id = 1;
+  required bytes begin = 2;
+  optional bytes end = 3;
+  repeated string servers = 4;
+  required uint64 placement_id = 5;
+};
+
+

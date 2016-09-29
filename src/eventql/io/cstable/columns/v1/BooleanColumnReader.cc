@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -103,7 +103,7 @@ bool BooleanColumnReader::readString(
     String* value) {
   uint64_t tmp;
   if (readUnsignedInt(rlvl, dlvl, &tmp)) {
-    *value = (value > 0 ? "true" : "false");
+    *value = (tmp > 0 ? "true" : "false");
     return true;
   } else {
     *value = "";

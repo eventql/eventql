@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -132,6 +132,15 @@ void rtrimExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   String str = argv[0].getString();
   while (str.back() == ' ') {
     str.pop_back();
+  }
+
+  *out = SValue::newString(str);
+}
+
+void concatExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
+  std::string str;
+  for (int i = 0; i < argc; ++i) {
+    str += argv[i].getString();
   }
 
   *out = SValue::newString(str);

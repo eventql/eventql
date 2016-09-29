@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -114,9 +114,9 @@ void MessageDecoder::decode(
       case FieldType::BOOLEAN: {
         auto val = reader.readVarUInt();
         if (val == 1) {
-          msg->addChild(fid, msg::TRUE);
+          msg->addChild(fid, msg::MSG_TRUE);
         } else {
-          msg->addChild(fid, msg::FALSE);
+          msg->addChild(fid, msg::MSG_FALSE);
         }
         break;
       }

@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
- *   - Laura Schlimmer <laura@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -23,11 +23,12 @@
  * code of your own applications
  */
 #include "eventql/eventql.h"
+#include <algorithm>
 #include <eventql/util/SHA1.h>
 #include <eventql/server/sql/table_provider.h>
 #include <eventql/db/table_service.h>
-#include <eventql/db/metadata_client.h>
 #include <eventql/sql/CSTableScan.h>
+#include <eventql/sql/qtree/QueryTreeUtil.h>
 #include <eventql/util/json/json.h>
 
 namespace eventql {
@@ -36,22 +37,21 @@ TSDBTableProvider::TSDBTableProvider(
     const String& tsdb_namespace,
     PartitionMap* partition_map,
     ConfigDirectory* cdir,
-    ReplicationScheme* replication_scheme,
     TableService* table_service,
     InternalAuth* auth) :
     tsdb_namespace_(tsdb_namespace),
     partition_map_(partition_map),
     cdir_(cdir),
-    replication_scheme_(replication_scheme),
     table_service_(table_service),
     auth_(auth) {}
 
 KeyRange TSDBTableProvider::findKeyRange(
+    KeyspaceType keyspace,
     const String& partition_key,
     const Vector<csql::ScanConstraint>& constraints) {
-  uint64_t lower_limit;
+  String lower_limit;
   bool has_lower_limit = false;
-  uint64_t upper_limit;
+  String upper_limit;
   bool has_upper_limit = false;
 
   for (const auto& c : constraints) {
@@ -59,9 +59,20 @@ KeyRange TSDBTableProvider::findKeyRange(
       continue;
     }
 
-    uint64_t val;
+    String val;
     try {
-      val = c.value.getInteger();
+      switch (c.value.getType()) {
+        case SQL_STRING:
+        case SQL_INTEGER:
+        case SQL_FLOAT:
+          val = encodePartitionKey(keyspace, c.value.getString());
+          break;
+        case SQL_TIMESTAMP:
+          val = encodePartitionKey(keyspace, c.value.toInteger().getString());
+          break;
+        default:
+          continue;
+      }
     } catch (const StandardException& e) {
       continue;
     }
@@ -76,7 +87,7 @@ KeyRange TSDBTableProvider::findKeyRange(
       case csql::ScanConstraintType::NOT_EQUAL_TO:
         break;
       case csql::ScanConstraintType::LESS_THAN:
-        upper_limit = val - 1;
+        upper_limit = val; // FIXME should be predecessor(val)
         has_upper_limit = true;
         break;
       case csql::ScanConstraintType::LESS_THAN_OR_EQUAL_TO:
@@ -84,7 +95,7 @@ KeyRange TSDBTableProvider::findKeyRange(
         has_upper_limit = true;
         break;
       case csql::ScanConstraintType::GREATER_THAN:
-        lower_limit = val + 1;
+        lower_limit = val; // FIXME should be sucessor(val)
         has_lower_limit = true;
         break;
       case csql::ScanConstraintType::GREATER_THAN_OR_EQUAL_TO:
@@ -96,11 +107,11 @@ KeyRange TSDBTableProvider::findKeyRange(
 
   KeyRange kr;
   if (has_lower_limit) {
-    kr.begin = String((const char*) &lower_limit, sizeof(lower_limit));
+    kr.begin = lower_limit;
   }
 
   if (has_upper_limit) {
-    kr.end = String((const char*) &upper_limit, sizeof(upper_limit));
+    kr.end = upper_limit;
   }
 
   return kr;
@@ -120,60 +131,150 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
     return None<ScopedPtr<csql::TableExpression>>();
   }
 
+  {
+    auto table_schema = table.get()->schema();
+    Set<String> table_schema_columns;
+    for (const auto& c : table_schema->columns()) {
+      table_schema_columns.insert(c.first);
+    }
+
+    auto check_columns = [&table_schema_columns] (
+        const RefPtr<csql::ColumnReferenceNode>& col) {
+      auto colname = col->columnName();
+      if (table_schema_columns.count(colname) == 0) {
+        RAISEF(kNotFoundError, "column(s) not found: $0", colname);
+      }
+    };
+
+    for (const auto& e : seqscan->selectList()) {
+      csql::QueryTreeUtil::findColumns(e->expression(), check_columns);
+    }
+
+    if (!seqscan->whereExpression().isEmpty()) {
+      csql::QueryTreeUtil::findColumns(
+          seqscan->whereExpression().get().get(),
+          check_columns);
+    }
+  }
+
   Vector<TableScan::PartitionLocation> partitions;
   if (table_ref.partition_key.isEmpty()) {
-    if (table.get()->partitionerType() == TBL_PARTITION_FIXED ||
-        table.get()->storage() != TBL_STORAGE_COLSM) {
-      auto partitioner = table.get()->partitioner();
-      for (const auto& p : partitioner->listPartitions(seqscan->constraints())) {
-        TableScan::PartitionLocation pl;
-        pl.partition_id = p;
-        if (!replication_scheme_->hasLocalReplica(p)) {
-          pl.servers = replication_scheme_->replicasFor(p);
-        }
-        partitions.emplace_back(pl);
+    auto keyrange = findKeyRange(
+        table.get()->getKeyspaceType(),
+        table.get()->config().config().partition_key(),
+        seqscan->constraints());
+
+    auto session = static_cast<Session*>(ctx->getUserData());
+
+    PartitionListResponse partition_list;
+    auto rc = session->getDatabaseContext()->metadata_client->listPartitions(
+        tsdb_namespace_,
+        table_ref.table_key,
+        keyrange,
+        &partition_list);
+
+    if (!rc.isSuccess()) {
+      RAISEF(kRuntimeError, "metadata lookup failure: $0", rc.message());
+    }
+
+    for (const auto& p : partition_list.partitions()) {
+      TableScan::PartitionLocation pl;
+      pl.partition_id = SHA1Hash(
+          p.partition_id().data(),
+          p.partition_id().size());
+
+      pl.qtree = seqscan->deepCopy().asInstanceOf<csql::SequentialScanNode>();
+
+      if (!pl.qtree->whereExpression().isEmpty()) {
+        auto where_expr = seqscan->whereExpression().get();
+        where_expr = simplifyWhereExpression(
+            table.get(),
+            p.keyrange_begin(),
+            p.keyrange_end(),
+            where_expr);
+
+        pl.qtree->setWhereExpression(where_expr);
       }
-    } else {
-      auto keyrange = findKeyRange(
-          table.get()->config().config().partition_key(),
-          seqscan->constraints());
 
-      MetadataClient metadata_client(cdir_);
-      PartitionListResponse partition_list;
-      auto rc = metadata_client.listPartitions(
-          tsdb_namespace_,
-          table_ref.table_key,
-          keyrange,
-          &partition_list);
-
-      if (!rc.isSuccess()) {
-        RAISEF(kRuntimeError, "metadata lookup failure: $0", rc.message());
-      }
-
-      for (const auto& p : partition_list.partitions()) {
-        TableScan::PartitionLocation pl;
-        pl.partition_id = SHA1Hash(
-            p.partition_id().data(),
-            p.partition_id().size());
-
-        for (const auto& s : p.servers()) {
-          auto server_cfg = cdir_->getServerConfig(s);
-          if (server_cfg.server_status() != SERVER_UP) {
-            continue;
-          }
-
-          ReplicaRef rref(SHA1::compute(s), server_cfg.server_addr());
-          rref.name = s;
-          pl.servers.emplace_back(rref);
+      for (const auto& s : p.servers()) {
+        auto server_cfg = cdir_->getServerConfig(s);
+        if (server_cfg.server_status() != SERVER_UP) {
+          continue;
         }
 
-        partitions.emplace_back(pl);
+        ReplicaRef rref(SHA1::compute(s), server_cfg.server_addr());
+        rref.name = s;
+        pl.servers.emplace_back(rref);
       }
+
+      partitions.emplace_back(pl);
     }
   } else {
     TableScan::PartitionLocation pl;
     pl.partition_id = table_ref.partition_key.get();
+    pl.qtree = seqscan;
+
+    auto partition = partition_map_->findPartition(
+        tsdb_namespace_,
+        table_ref.table_key,
+        pl.partition_id);
+
+    if (!pl.qtree->whereExpression().isEmpty() &&
+        !partition.isEmpty()) {
+      const auto& pstate = partition.get()->getSnapshot()->state;
+
+      auto where_expr = pl.qtree->whereExpression().get();
+      where_expr = simplifyWhereExpression(
+          table.get(),
+          pstate.partition_keyrange_begin(),
+          pstate.partition_keyrange_end(),
+          where_expr);
+
+      pl.qtree->setWhereExpression(where_expr);
+    }
+
     partitions.emplace_back(pl);
+  }
+
+  Option<SHA1Hash> cache_key;
+  for (const auto& p : partitions) {
+    if (!p.servers.empty()) { // FIXME better check if local partition
+      cache_key = None<SHA1Hash>();
+      break;
+    }
+
+    auto partition = partition_map_->findPartition(
+          tsdb_namespace_,
+          table_ref.table_key,
+          p.partition_id);
+
+    uint64_t lsm_sequence = 0;
+    if (!partition.isEmpty()) {
+      lsm_sequence = partition.get()->getSnapshot()->state.lsm_sequence();
+    }
+
+    SHA1Hash expression_fingerprint;
+    for (const auto& slnode : p.qtree->selectList()) {
+      expression_fingerprint = SHA1::compute(
+          expression_fingerprint.toString() + slnode->toString());
+    }
+
+    if (!p.qtree->whereExpression().isEmpty()) {
+      expression_fingerprint = SHA1::compute(
+          expression_fingerprint.toString() +
+          p.qtree->whereExpression().get()->toString());
+    }
+
+    cache_key = Some(
+        SHA1::compute(
+            StringUtil::format(
+                "$0~$1~$2~$3~$4~$5",
+                cache_key.isEmpty() ? "" : cache_key.get().toString(),
+                expression_fingerprint.toString(),
+                tsdb_namespace_,
+                table_ref.table_key,
+                p.partition_id,
+                lsm_sequence)));
   }
 
   return Option<ScopedPtr<csql::TableExpression>>(
@@ -185,6 +286,7 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
               table_ref.table_key,
               partitions,
               seqscan,
+              cache_key,
               partition_map_,
               auth_)));
 }
@@ -298,11 +400,12 @@ Status TSDBTableProvider::createTable(
       tsdb_namespace_,
       create_table.getTableName(),
       *msg_schema,
-      primary_key);
+      primary_key,
+      create_table.getProperties());
 }
 
 Status TSDBTableProvider::createDatabase(const String& database_name) {
-  return Status(eRuntimeError, "permission denied");
+  return table_service_->createDatabase(database_name);
 }
 
 Status TSDBTableProvider::alterTable(const csql::AlterTableNode& alter_table) {
@@ -344,6 +447,10 @@ Status TSDBTableProvider::alterTable(const csql::AlterTableNode& alter_table) {
       tbl_operations);
 }
 
+Status TSDBTableProvider::dropTable(const String& table_name) {
+  return table_service_->dropTable(tsdb_namespace_, table_name);
+}
+
 Status TSDBTableProvider::insertRecord(
     const String& table_name,
     Vector<Pair<String, csql::SValue>> data) {
@@ -353,84 +460,121 @@ Status TSDBTableProvider::insertRecord(
     return Status(eRuntimeError, "table not found");
   }
 
+  auto columns = schema.get()->columns();
   auto msg = new msg::DynamicMessage(schema.get());
-  for (auto e : data) {
-    if (!msg->addField(e.first, e.second.getString())) {
+  for (size_t i = 0; i < data.size(); ++i) {
+    String column = data[i].first;
+    if (column.empty()) {
+      if (i >= columns.size()) {
+        return Status(eRuntimeError, "more values than table columns"); //FIXME better msg
+      }
+
+      column = columns[i].first;
+    }
+
+    if (!msg->addField(column, data[i].second.getString())) {
       return Status(
           eRuntimeError,
-          StringUtil::format("field not found: $0", e.first)); //FIXME better error msg
+          StringUtil::format("field not found: $0", column)); //FIXME better error msg
     }
   }
 
-  try {
-    table_service_->insertRecord(
-        tsdb_namespace_,
-        table_name,
-        *msg);
-
-  } catch (const Exception& e) {
-    return Status(eRuntimeError, e.getMessage());
-  }
-
-  return Status::success();
+  return table_service_->insertRecord(
+      tsdb_namespace_,
+      table_name,
+      *msg);
 }
 
 Status TSDBTableProvider::insertRecord(
     const String& table_name,
     const String& json_str) {
-
-  auto json = json::parseJSON(json_str);
+  json::JSONObject json;
   try {
-    table_service_->insertRecord(
-        tsdb_namespace_,
-        table_name,
-        json.begin(),
-        json.end());
-  } catch (const Exception& e) {
-    return Status(eRuntimeError, e.getMessage());
+    json = json::parseJSON(json_str);
+  } catch (const std::exception& e) {
+    return ReturnCode::exception(e);
   }
 
-  return Status::success();
+  return table_service_->insertRecord(
+      tsdb_namespace_,
+      table_name,
+      json.begin(),
+      json.end());
 }
 
 void TSDBTableProvider::listTables(
     Function<void (const csql::TableInfo& table)> fn) const {
-  partition_map_->listTables(
+  table_service_->listTables(
       tsdb_namespace_,
-      [this, fn] (const TSDBTableInfo& table) {
-    fn(tableInfoForTable(table));
-  });
+      [this, fn] (const TableDefinition& table) {
+        fn(tableInfoForTable(table));
+      });
+}
+
+Status TSDBTableProvider::listPartitions(
+    const String& table_name,
+    Function<void (const TablePartitionInfo& partition)> fn) const {
+  return table_service_->listPartitions(
+      tsdb_namespace_,
+      table_name,
+      fn);
+}
+
+Status TSDBTableProvider::listServers(
+    Function<void (const ServerConfig& server)> fn) const {
+  try {
+    auto servers = cdir_->listServers();
+    for (const auto& s : servers) {
+      fn(s);
+    }
+    return Status::success();
+
+  } catch (const std::exception& e) {
+    return Status(eRuntimeError, e.what());
+  }
 }
 
 Option<csql::TableInfo> TSDBTableProvider::describe(
     const String& table_name) const {
   auto table_ref = TSDBTableRef::parse(table_name);
 
-  auto table = partition_map_->tableInfo(tsdb_namespace_, table_ref.table_key);
-  if (table.isEmpty()) {
+  auto table = cdir_->getTableConfig(tsdb_namespace_, table_ref.table_key);
+
+  if (table.deleted()) {
     return None<csql::TableInfo>();
   } else {
-    auto tblinfo = tableInfoForTable(table.get());
+    auto tblinfo = tableInfoForTable(table);
     tblinfo.table_name = table_name;
     return Some(tblinfo);
   }
 }
 
 csql::TableInfo TSDBTableProvider::tableInfoForTable(
-    const TSDBTableInfo& table) const {
+    const TableDefinition& table) const {
   csql::TableInfo ti;
-  ti.table_name = table.table_name;
+  ti.table_name = table.table_name();
 
-  for (const auto& tag : table.config.tags()) {
-    ti.tags.insert(tag);
-  }
-
-  for (const auto& col : table.schema->columns()) {
+  auto schema = msg::MessageSchema::decode(table.config().schema());
+  auto pkey = table.config().primary_key();
+  for (const auto& col : schema->columns()) {
     csql::ColumnInfo ci;
     ci.column_name = col.first;
     ci.type = col.second.typeName();
     ci.type_size = col.second.typeSize();
     ci.is_nullable = col.second.optional;
+    ci.is_primary_key = std::find(
+      pkey.begin(), pkey.end(), col.first) != pkey.end();
+
+    switch (col.second.encoding) {
+      case msg::EncodingHint::BITPACK:
+        ci.encoding = "BITPACK";
+        break;
+      case msg::EncodingHint::LEB128:
+        ci.encoding = "LEB128";
+        break;
+      default:
+        ci.encoding = "NONE";
+    }
 
     ti.columns.emplace_back(ci);
   }
@@ -440,6 +584,72 @@ csql::TableInfo TSDBTableProvider::tableInfoForTable(
 
 const String& TSDBTableProvider::getNamespace() const {
   return tsdb_namespace_;
+}
+
+RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
+      RefPtr<Table> table,
+      const String& keyrange_begin,
+      const String& keyrange_end,
+      RefPtr<csql::ValueExpressionNode> expr) const {
+  auto pkey_col = table->getPartitionKey();
+  auto pkeyspace = table->getKeyspaceType();
+
+  Vector<csql::ScanConstraint> constraints;
+  csql::QueryTreeUtil::findConstraints(expr, &constraints);
+
+  for (const auto& c : constraints) {
+    if (c.column_name != pkey_col) {
+      continue;
+    }
+
+    std::string c_val;
+    switch (c.value.getType()) {
+      case SQL_STRING:
+      case SQL_INTEGER:
+      case SQL_FLOAT:
+        c_val = encodePartitionKey(pkeyspace, c.value.getString());
+        break;
+      case SQL_TIMESTAMP:
+        c_val = encodePartitionKey(pkeyspace, c.value.toInteger().getString());
+        break;
+      default:
+        continue;
+    }
+
+    switch (c.type) {
+
+      case csql::ScanConstraintType::EQUAL_TO:
+      case csql::ScanConstraintType::NOT_EQUAL_TO:
+        continue;
+
+      case csql::ScanConstraintType::LESS_THAN:
+      case csql::ScanConstraintType::LESS_THAN_OR_EQUAL_TO:
+        if (keyrange_end.size() > 0 &&
+            comparePartitionKeys(pkeyspace, c_val, keyrange_end) >= 0) {
+          break;
+        } else {
+          continue;
+        }
+
+      case csql::ScanConstraintType::GREATER_THAN:
+      case csql::ScanConstraintType::GREATER_THAN_OR_EQUAL_TO:
+        if (keyrange_begin.size() > 0 &&
+            comparePartitionKeys( pkeyspace, c_val, keyrange_begin) <= 0) {
+          break;
+        } else {
+          continue;
+        }
+
+    }
+
+    expr = csql::QueryTreeUtil::removeConstraintFromPredicate(expr, c);
+  }
+
+  return expr;
+}
+
+void evqlVersionExpr(sql_txn* ctx, int argc, csql::SValue* argv, csql::SValue* out) {
+  *out = csql::SValue::newString("EventQL " + eventql::kVersionString);
 }
 
 } // namespace csql

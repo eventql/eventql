@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
- *   - Laura Schlimmer <laura@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -60,8 +60,12 @@ bool DescribeTableStatement::next(SValue* row, size_t row_len) {
     const auto& col = rows_[counter_];
     switch (row_len) {
       default:
+      case 6:
+        row[5] = SValue::newString(col.encoding); //Encoding
+      case 5:
+        row[4] = SValue::newNull(); //Description
       case 4:
-        row[3] = SValue::newNull(); //Description
+        row[3] = col.is_primary_key ? SValue::newString("YES") : SValue::newString("NO"); //Primary Key
       case 3:
         row[2] = col.is_nullable ? SValue::newString("YES") : SValue::newString("NO"); //Null
       case 2:

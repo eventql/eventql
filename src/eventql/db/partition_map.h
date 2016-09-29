@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -26,15 +26,14 @@
 #include <eventql/util/random.h>
 #include <eventql/util/option.h>
 #include <eventql/util/mdb/MDB.h>
-#include <eventql/db/TableConfig.pb.h>
-#include <eventql/db/Partition.h>
-#include <eventql/db/LazyPartition.h>
-#include <eventql/db/TSDBNodeConfig.pb.h>
-#include <eventql/db/TSDBTableInfo.h>
-#include <eventql/db/PartitionInfo.pb.h>
-#include <eventql/db/PartitionChangeNotification.h>
-#include <eventql/db/RecordEnvelope.pb.h>
-#include <eventql/db/ServerConfig.h>
+#include <eventql/db/table_config.pb.h>
+#include <eventql/db/partition.h>
+#include <eventql/db/partition.h>
+#include <eventql/db/table_info.h>
+#include <eventql/db/partition_info.pb.h>
+#include <eventql/db/partition_change_notification.h>
+#include <eventql/db/record_envelope.pb.h>
+#include <eventql/db/server_config.h>
 #include <eventql/server/server_stats.h>
 
 #include "eventql/eventql.h"
@@ -44,7 +43,7 @@ namespace eventql {
 class PartitionMap {
 public:
 
-  PartitionMap(ServerCfg* cfg);
+  PartitionMap(DatabaseContext* cfg);
 
   void configureTable(
       const TableDefinition& config,
@@ -56,17 +55,13 @@ public:
       const String& tsdb_namespace,
       const String& table_name) const;
 
-  void listTables(
-      const String& tsdb_namespace,
-      Function<void (const TSDBTableInfo& table)> fn) const;
+  //void listTables(
+  //    const String& tsdb_namespace,
+  //    Function<void (const TSDBTableInfo& table)> fn) const;
 
-  void listTablesReverse(
-      const String& tsdb_namespace,
-      Function<void (const TSDBTableInfo& table)> fn) const;
-
-  Option<TSDBTableInfo> tableInfo(
-      const String& tsdb_namespace,
-      const String& table_key) const;
+  //void listTablesReverse(
+  //    const String& tsdb_namespace,
+  //    Function<void (const TSDBTableInfo& table)> fn) const;
 
   Option<RefPtr<Partition>> findPartition(
       const String& tsdb_namespace,
@@ -103,7 +98,7 @@ public:
    * before calling this method. However there is no way to ensure that no
    * intermittent stores happen in the partition (in between checking the
    * precondition and calling this method). So the method returns a boolean
-   * indicating success or failure. 
+   * indicating success or failure.
    *
    * The method will return true iff the partition was succesfully dropped. A
    * false return value indicates that one of the two conditions above weren't
@@ -114,6 +109,19 @@ public:
       const String& table_name,
       const SHA1Hash& partition_key);
 
+  /**
+   * Drop a partition that was deleted using DROP TABLE
+   */
+  void dropPartition(
+      const String& tsdb_namespace,
+      const String& table_name,
+      const SHA1Hash& partition_key);
+
+  /**
+   * Blocks the calling thread until all partitions have been loaded
+   */
+  void waitUntilAllLoaded();
+
 protected:
 
   Option<RefPtr<Table>> findTableWithLock(
@@ -122,14 +130,16 @@ protected:
 
   void loadPartitions(const Vector<PartitionKey>& partitions);
 
-  ServerCfg* cfg_;
+  DatabaseContext* cfg_;
   RefPtr<mdb::MDB> db_;
 
   mutable std::mutex mutex_;
-  ConfigDirectory* cdir_;
   OrderedMap<String, RefPtr<Table>> tables_;
   OrderedMap<String, ScopedPtr<LazyPartition>> partitions_;
   Vector<PartitionChangeCallbackFn> callbacks_;
+  bool load_complete_;
+  std::mutex load_complete_mutex_;
+  std::condition_variable load_complete_cv_;
 };
 
 } // namespace tdsb

@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -47,6 +47,7 @@ public:
 
   SHA1Hash getInputTransactionID() const;
   SHA1Hash getOutputTransactionID() const;
+  MetadataOperationType getOperationType() const;
 
   Status perform(
       const MetadataFile& input,
@@ -66,6 +67,10 @@ protected:
       Vector<MetadataFile::PartitionMapEntry>* output) const;
 
   Status performFinalizeSplit(
+      const MetadataFile& input,
+      Vector<MetadataFile::PartitionMapEntry>* output) const;
+
+  Status performCreatePartition(
       const MetadataFile& input,
       Vector<MetadataFile::PartitionMapEntry>* output) const;
 

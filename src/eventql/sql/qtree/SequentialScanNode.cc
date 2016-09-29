@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -99,9 +99,18 @@ Option<RefPtr<ValueExpressionNode>> SequentialScanNode::whereExpression() const 
 }
 
 void SequentialScanNode::setWhereExpression(RefPtr<ValueExpressionNode> e) {
-  where_expr_ = Some(e);
+  auto expr_is_true =
+      dynamic_cast<LiteralExpressionNode*>(e.get()) &&
+      dynamic_cast<LiteralExpressionNode*>(e.get())->value().isBool() &&
+      dynamic_cast<LiteralExpressionNode*>(e.get())->value().getBool();
+
   constraints_.clear();
-  QueryTreeUtil::findConstraints(e, &constraints_);
+  if (expr_is_true) {
+    where_expr_ = None<RefPtr<ValueExpressionNode>>();
+  } else {
+    where_expr_ = Some(e);
+    QueryTreeUtil::findConstraints(e, &constraints_);
+  }
 }
 
 const String& SequentialScanNode::tableName() const {

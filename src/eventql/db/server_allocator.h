@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -33,14 +33,45 @@ namespace eventql {
 class ServerAllocator {
 public:
 
-  ServerAllocator(ConfigDirectory* cdir);
+  enum AllocationPolicy {
+    MUST_ALLOCATE,
+    BEST_EFFORT,
+    IDLE
+  };
+
+  ServerAllocator(
+      ConfigDirectory* cdir,
+      ProcessConfig* config);
 
   Status allocateServers(
+      AllocationPolicy policy,
       size_t num_servers,
-      Set<String>* servers) const;
+      const Set<String>& exclude_servers,
+      Vector<String>* out) const;
+
+  Status allocateStable(
+      AllocationPolicy policy,
+      const SHA1Hash& token,
+      size_t num_servers,
+      const Set<String>& exclude_servers,
+      Vector<String>* out) const;
 
 protected:
-  ConfigDirectory* cdir_;
+
+  struct ServerSlot {
+    uint64_t disk_free;
+    uint64_t partitions_loading;
+  };
+
+  void updateServerSlot(const ServerConfig& cfg);
+
+  mutable std::mutex mutex_;
+  std::map<std::string, ServerSlot> primary_servers_;
+  std::set<std::string> backup_servers_;
+  double load_limit_soft_;
+  double load_limit_hard_;
+  uint64_t partitions_loading_limit_hard_;
+  uint64_t partitions_loading_limit_soft_;
 };
 
 } // namespace eventql

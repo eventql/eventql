@@ -1,0 +1,20 @@
+[ ] binary protocol
+[ ] drop support
+[ ] delete support
+[ ] having support
+[ ] segments based replication
+[ ] unique vs. non-unique primary keys
+[ ] sorted + seekable cstables
+[ ] fast single-key lookups
+[ ] fast order by primary key scans
+[ ] raw scan api
+[ ] new mapreduce api
+[ ] write ahead log
+[ ] new parallel groupby
+[ ] distributed join
+[ ] external data sources
+[ ] syntax higlighting in docs
+[ ] docs: contributing + license
+[ ] enum support
+[ ] docs: collecting data: web tracking, mysql, kafka
+[ ] docs: examples -> dashboard

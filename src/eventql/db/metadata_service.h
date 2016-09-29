@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -28,7 +28,9 @@
 #include "eventql/util/SHA1.h"
 #include "eventql/db/metadata_file.h"
 #include "eventql/db/metadata_store.h"
+#include "eventql/db/metadata_cache.h"
 #include "eventql/db/metadata_operation.h"
+#include "eventql/db/database.h"
 #include "eventql/config/config_directory.h"
 
 namespace eventql {
@@ -37,8 +39,9 @@ class MetadataService {
 public:
 
   MetadataService(
-      ConfigDirectory* cdir,
-      MetadataStore* metadata_store);
+      DatabaseContext* dbctx,
+      MetadataStore* metadata_store,
+      MetadataCache* cache);
 
   Status getMetadataFile(
       const String& ns,
@@ -75,8 +78,22 @@ public:
       PartitionFindResponse* response);
 
 protected:
-  ConfigDirectory* cdir_;
+
+  Status createFinitePartition(
+      const PartitionFindRequest& request,
+      PartitionFindResponse* response,
+      const TableDefinition& table_config);
+
+  Status createUserDefinedPartition(
+      const PartitionFindRequest& request,
+      PartitionFindResponse* response,
+      const TableDefinition& table_config);
+
+  DatabaseContext* dbctx_;
   MetadataStore* metadata_store_;
+  MetadataCache* cache_;
+  std::mutex lockmap_mutex_;
+  std::map<std::string, std::unique_ptr<std::mutex>> lockmap_;
 };
 
 } // namespace eventql

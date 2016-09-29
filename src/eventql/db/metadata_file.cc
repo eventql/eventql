@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -32,7 +32,9 @@ MetadataFile::MetadataFile(
     const SHA1Hash& transaction_id,
     uint64_t transaction_seq,
     KeyspaceType keyspace_type,
-    const Vector<PartitionMapEntry>& partition_map) :
+    const Vector<PartitionMapEntry>& partition_map,
+    uint64_t flags) :
+    flags_(flags),
     transaction_id_(transaction_id),
     transaction_seq_(transaction_seq),
     keyspace_type_(keyspace_type),
@@ -63,7 +65,7 @@ MetadataFile::PartitionMapIter MetadataFile::getPartitionMapEnd() const {
   return partition_map_.end();
 }
 
-MetadataFile::PartitionMapIter MetadataFile::getPartitionMapAt(
+MetadataFile::PartitionMapIter MetadataFile::lookup(
     const String& key) const {
   if (partition_map_.empty()) {
     return partition_map_.end();
@@ -90,26 +92,60 @@ MetadataFile::PartitionMapIter MetadataFile::getPartitionMapAt(
   return partition_map_.begin() + low;
 }
 
+MetadataFile::PartitionMapIter MetadataFile::getPartitionMapAt(
+    const String& key) const {
+  if (key.empty() || partition_map_.empty()) {
+    return getPartitionMapEnd();
+  }
+
+  auto iter = lookup(key);
+  if (flags_ & MFILE_FINITE) {
+    if (compareKeys(iter->begin, key) <= 0 &&
+        compareKeys(iter->end, key) > 0) {
+      return iter;
+    } else {
+      return partition_map_.end();
+    }
+  } else if (flags_ & MFILE_USERDEFINED) {
+    if (compareKeys(iter->begin, key) == 0) {
+      return iter;
+    } else {
+      return partition_map_.end();
+    }
+  } else {
+    return iter;
+  }
+}
+
 MetadataFile::PartitionMapIter MetadataFile::getPartitionMapRangeBegin(
     const String& begin) const {
-  if (begin.empty()) {
+  if (begin.empty() || partition_map_.empty()) {
     return getPartitionMapBegin();
+  }
+
+  auto iter = lookup(begin);
+  if (flags_ & MFILE_FINITE) {
+    if (iter == partition_map_.end() || compareKeys(iter->end, begin) > 0) {
+      return iter;
+    } else {
+      return iter + 1;
+    }
   } else {
-    return getPartitionMapAt(begin);
+    return iter;
   }
 }
 
 MetadataFile::PartitionMapIter MetadataFile::getPartitionMapRangeEnd(
     const String& end) const {
-  if (end.empty()) {
+  if (end.empty() || partition_map_.empty()) {
     return getPartitionMapEnd();
+  }
+
+  auto iter = lookup(end);
+  if (iter == partition_map_.end() || compareKeys(iter->begin, end) >= 0) {
+    return iter;
   } else {
-    auto iter = getPartitionMapAt(end);
-    if (compareKeys(iter->begin, end) == 0) {
-      return iter;
-    } else {
-      return iter + 1;
-    }
+    return iter + 1;
   }
 }
 
@@ -145,6 +181,12 @@ Status MetadataFile::decode(InputStream* is) {
     return Status(eIOError, "invalid file format version");
   }
 
+  // flags
+  flags_ = 0;
+  if (version > 2) {
+    flags_ = is->readVarUInt();
+  }
+
   // transaction id
   is->readNextBytes(
       (char*) transaction_id_.mutableData(),
@@ -164,6 +206,11 @@ Status MetadataFile::decode(InputStream* is) {
 
     // begin
     e.begin = is->readLenencString();
+
+    // end
+    if (flags_ & MFILE_FINITE) {
+      e.end = is->readLenencString();
+    }
 
     // partition id
     is->readNextBytes(
@@ -260,6 +307,9 @@ Status MetadataFile::encode(OutputStream* os) const  {
   // file format version
   os->appendUInt32(kBinaryFormatVersion);
 
+  // file format version
+  os->appendVarUInt(flags_);
+
   // transaction id
   os->write((const char*) transaction_id_.data(), transaction_id_.size());
 
@@ -274,6 +324,11 @@ Status MetadataFile::encode(OutputStream* os) const  {
   for (const auto& p : partition_map_) {
     // begin
     os->appendLenencString(p.begin);
+
+    // end
+    if (flags_ & MFILE_FINITE) {
+      os->appendLenencString(p.end);
+    }
 
     // partition id
     os->write((const char*) p.partition_id.data(), p.partition_id.size());
@@ -339,6 +394,18 @@ Status MetadataFile::computeChecksum(SHA1Hash* checksum) const {
 
   *checksum = SHA1::compute(buf.data(), buf.size());
   return Status::success();
+}
+
+uint64_t MetadataFile::getFlags() const {
+  return flags_;
+}
+
+bool MetadataFile::hasFinitePartitions() const {
+  return flags_ & MFILE_FINITE;
+}
+
+bool MetadataFile::hasUserDefinedPartitions() const {
+  return flags_ & MFILE_USERDEFINED;
 }
 
 MetadataFile::PartitionMapEntry::PartitionMapEntry() : splitting(false) {}
@@ -419,6 +486,19 @@ String decodePartitionKey(
         return "";
       }
     }
+  }
+}
+
+KeyspaceType getKeyspace(const TableConfig& table_cfg) {
+  switch (table_cfg.partitioner()) {
+    case TBL_PARTITION_UINT64:
+    case TBL_PARTITION_TIMEWINDOW:
+      return KEYSPACE_UINT64;
+    case TBL_PARTITION_STRING:
+      return KEYSPACE_STRING;
+    case TBL_PARTITION_FIXED:
+    default:
+      RAISE(kIllegalArgumentError);
   }
 }
 

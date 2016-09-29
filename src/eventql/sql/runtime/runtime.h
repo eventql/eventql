@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -101,6 +101,9 @@ public:
   void setScheduler(ScopedPtr<Scheduler> scheduler);
   Scheduler* getScheduler();
 
+  QueryCache* getQueryCache() const;
+  void setQueryCache(QueryCache* cache);
+
 protected:
   thread::ThreadPool tpool_;
   RefPtr<SymbolTable> symbol_table_;
@@ -108,6 +111,7 @@ protected:
   RefPtr<QueryPlanBuilder> query_plan_builder_;
   Option<String> cachedir_;
   ScopedPtr<Scheduler> scheduler_;
+  QueryCache* query_cache_;
 };
 
 }

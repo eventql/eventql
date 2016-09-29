@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -26,12 +26,11 @@
 #include "eventql/config/process_config.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/SHA1.h>
-#include <eventql/util/mdb/MDB.h>
 #include <eventql/util/net/inetaddr.h>
 #include <eventql/util/http/httpclient.h>
 #include <eventql/config/namespace_config.h>
-#include <eventql/db/ClusterConfig.pb.h>
-#include <eventql/db/TableConfig.pb.h>
+#include <eventql/db/cluster_config.pb.h>
+#include <eventql/db/table_config.pb.h>
 
 namespace eventql {
 
@@ -47,7 +46,7 @@ public:
 
   virtual ~ConfigDirectory() = default;
 
-  virtual Status start() = 0;
+  virtual Status start(bool create = false) = 0;
   virtual void stop() = 0;
 
   virtual ClusterConfig getClusterConfig() const = 0;
@@ -61,9 +60,15 @@ public:
 
   virtual bool hasServerID() const { return true; }
 
+  virtual bool electLeader() = 0;
+
+  virtual String getLeader() const = 0;
+
   virtual ServerConfig getServerConfig(const String& sever_name) const = 0;
 
   virtual void updateServerConfig(ServerConfig config) = 0;
+
+  virtual ReturnCode publishServerStats(ServerStats stats) = 0;
 
   virtual Vector<ServerConfig> listServers() const = 0;
 
@@ -83,7 +88,8 @@ public:
 
   virtual TableDefinition getTableConfig(
       const String& db_namespace,
-      const String& table_name) const = 0;
+      const String& table_name,
+      bool allow_cache = true) = 0;
 
   virtual void updateTableConfig(
       const TableDefinition& table,

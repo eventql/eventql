@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -407,7 +407,16 @@ void MessageSchema::toJSON(json::JSONOutputStream* json) const {
     json->addComma();
 
     json->addObjectEntry("encoding_hint");
-    json->addString("NONE");
+    switch (field.encoding) {
+      case EncodingHint::BITPACK:
+        json->addString("BITPACK");
+        break;
+      case EncodingHint::LEB128:
+        json->addString("LEB128");
+        break;
+      default:
+        json->addString("NONE");
+    }
 
     if (field.type == FieldType::OBJECT) {
       json->addComma();

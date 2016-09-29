@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -29,6 +29,7 @@
 #include "eventql/db/metadata_file.h"
 #include "eventql/db/metadata_store.h"
 #include "eventql/config/config_directory.h"
+#include "eventql/transport/native/client_tcp.h"
 
 namespace eventql {
 
@@ -39,8 +40,11 @@ public:
 
   MetadataReplication(
       ConfigDirectory* cdir,
+      ProcessConfig* config,
       const String& server_name,
-      MetadataStore* metadata_store);
+      MetadataStore* metadata_store,
+      native_transport::TCPConnectionPool* conn_pool,
+      net::DNSCache* dns_cache);
 
   ~MetadataReplication();
 
@@ -62,8 +66,11 @@ protected:
   Status replicate(const ReplicationJob& job);
 
   ConfigDirectory* cdir_;
+  ProcessConfig* config_;
   String server_name_;
   MetadataStore* metadata_store_;
+  native_transport::TCPConnectionPool* conn_pool_;
+  net::DNSCache* dns_cache_;
   std::atomic<bool> running_;
   Vector<std::thread> threads_;
   thread::DelayedQueue<ReplicationJob> queue_;

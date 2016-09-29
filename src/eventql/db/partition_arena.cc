@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -21,9 +21,10 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <assert.h>
 #include "eventql/eventql.h"
 #include <eventql/db/partition_arena.h>
-#include <eventql/db/LSMTableIndex.h>
+#include <eventql/db/tablet_index.h>
 #include <eventql/util/protobuf/MessageDecoder.h>
 
 namespace eventql {
@@ -61,6 +62,9 @@ Set<SHA1Hash> PartitionArena::insertRecords(
     const ShreddedRecordList& records,
     Vector<bool> skip_flags,
     const Vector<bool>& update_flags) {
+  assert(records.getNumRecords() == skip_flags.size());
+  assert(records.getNumRecords() == update_flags.size());
+
   ScopedLock<std::mutex> lk(mutex_);
 
   if (!opened_) {
@@ -75,6 +79,7 @@ Set<SHA1Hash> PartitionArena::insertRecords(
 
     const auto& record_id = records.getRecordID(i);
     auto record_version = records.getRecordVersion(i);
+    assert(record_version > 1400000000000000);
 
     auto old = record_versions_.find(record_id);
     if (old == record_versions_.end()) {
@@ -129,6 +134,8 @@ Set<SHA1Hash> PartitionArena::insertRecords(
         }
       }
     }
+
+    assert(cur_rec + 1 == records.getNumRecords());
   }
 
   for (const auto& col : cstable_writer_->columns()) {

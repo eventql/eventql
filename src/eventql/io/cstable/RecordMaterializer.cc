@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -217,9 +217,9 @@ void RecordMaterializer::insertValue(
 
     case msg::FieldType::BOOLEAN:
       if (column->getUnsignedInteger() == 1) {
-        record->addChild(column->field_id, msg::TRUE);
+        record->addChild(column->field_id, msg::MSG_TRUE);
       } else {
-        record->addChild(column->field_id, msg::FALSE);
+        record->addChild(column->field_id, msg::MSG_FALSE);
       }
       break;
 

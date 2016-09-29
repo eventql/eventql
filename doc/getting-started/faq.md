@@ -1,6 +1,5 @@
-1.6 FAQ
+1.3 FAQ
 =======
-
 
 ### Why does EventQL require a strict schema? // Why isn't EventQL schemaless?
 
@@ -14,7 +13,7 @@ to read only the required columns we need to answer a query rather than scanning
 and discarding unwanted data from full rows which often leads to huge performance
 increases for IO-bound queries on very large datasets.
 
-Disassembling the records for columnar store requires a schema. While it would
+Disassembling the rows for columnar store requires a schema. While it would
 have been possible to generate a schema on the fly when building the columnar
 tables this would have meant a lot of negative implications on performance, IO
 load and the replication architecture.
@@ -27,7 +26,7 @@ an adaptive/ad-hoc schema approach.
 
 EventQL supports standard SQL, so any tool or language that can already connect to other SQL databases can also connect to EventQL.
 
-Additionally we offer native drivers in C, C++, Java, Python, Ruby, Go, Rust and JavaScript. The native drivers implement some additional features like query progress indication and improved serialization for nested records.
+Additionally we offer native drivers in C, C++, Java, Python, Ruby, Go, Rust and JavaScript. The native drivers implement some additional features like query progress indication and improved serialization for nested rows.
 
 ### Can I use BI Tools like Tableau with EventQl?
 

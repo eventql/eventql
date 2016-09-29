@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -34,8 +34,15 @@ namespace thread {
 class EventLoop : public TaskScheduler {
 public:
   void run(std::function<void()> task) override;
-  void runAsync(std::function<void()> task) override;
+  //void runAsync(std::function<void()> task) override;
+
   void runOnReadable(std::function<void()> task, int fd) override;
+  void runOnReadable(
+      std::function<void()> task,
+      int fd,
+      uint64_t timeout_micros,
+      std::function<void()> on_timeout);
+
   void runOnWritable(std::function<void()> task, int fd) override;
   void runOnWakeup(
       std::function<void()> task,

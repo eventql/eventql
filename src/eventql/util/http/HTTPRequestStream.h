@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
- *   - Laura Schlimmer <laura@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -34,7 +34,7 @@ namespace http {
 class HTTPRequestStream : public RefCounted {
 public:
 
-  HTTPRequestStream(const HTTPRequest& req, RefPtr<HTTPServerConnection> conn);
+  HTTPRequestStream(const HTTPRequest* req);
 
   /**
    * Retrieve the http request. The http request will not contain a request body
@@ -42,12 +42,6 @@ public:
    * retrieve the request body
    */
   const HTTPRequest& request() const;
-
-  /**
-   * Read the http request body in chunks. This method will call the provided
-   * callback for each chunk and return once all body chunks have been read
-   */
-  void readBody(Function<void (const void* data, size_t size)> fn);
 
   /**
    * Read the http request body into the contained HTTPRequest
@@ -60,8 +54,7 @@ public:
   void discardBody();
 
 protected:
-  HTTPRequest req_;
-  RefPtr<HTTPServerConnection> conn_;
+  const HTTPRequest* req_;
 };
 
 }

@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
- *   - Laura Schlimmer <laura@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -45,10 +45,14 @@ public:
   RefPtr<QueryTreeNode> deepCopy() const;
   String toString() const;
 
+  const std::vector<std::pair<std::string, std::string>>& getProperties() const;
+  void addProperty(const std::string& key, const std::string& value);
+
 protected:
   String table_name_;
   TableSchema table_schema_;
   Vector<String> primary_key_;
+  std::vector<std::pair<std::string, std::string>> properties_;
 };
 
 } // namespace csql

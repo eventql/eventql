@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -27,11 +27,13 @@
 
 namespace csql {
 
-PureFunction::PureFunction() : call(nullptr) {}
+PureFunction::PureFunction() : call(nullptr), has_side_effects(false) {}
 
 PureFunction::PureFunction(
-    void (*_call)(sql_txn* ctx, int argc, SValue* in, SValue* out)) :
-    call(_call) {}
+    void (*_call)(sql_txn* ctx, int argc, SValue* in, SValue* out),
+    bool _has_side_effects) :
+    call(_call),
+    has_side_effects(_has_side_effects) {}
 
 SFunction::SFunction() :
     type(FN_PURE),
@@ -53,5 +55,15 @@ bool SFunction::isAggregate() const {
     case FN_AGGREGATE: return true;
   }
 }
+
+bool SFunction::hasSideEffects() const {
+  switch (type) {
+    case FN_AGGREGATE:
+      return false;
+    case FN_PURE:
+      return vtable.t_pure.has_side_effects;
+  }
+}
+
 
 }

@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -29,7 +29,6 @@
 #include <eventql/util/exceptionhandler.h>
 #include <eventql/util/inspect.h>
 #include <eventql/util/logging.h>
-#include <eventql/util/StackTrace.h>
 
 CatchAndLogExceptionHandler::CatchAndLogExceptionHandler(
     const String& component) :
@@ -64,9 +63,6 @@ static std::string globalEHandlerMessage;
 static void globalSEGVHandler(int sig, siginfo_t* siginfo, void* ctx) {
   fprintf(stderr, "%s\n", globalEHandlerMessage.c_str());
   fprintf(stderr, "signal: %s\n", strsignal(sig));
-
-  StackTrace strace;
-  strace.debugPrint(2);
 
   exit(EXIT_FAILURE);
 }

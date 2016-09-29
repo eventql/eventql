@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -95,6 +95,8 @@ public:
 
     T_SHOW_TABLES,
     T_DESCRIBE_TABLE,
+    T_DESCRIBE_PARTITIONS,
+    T_CLUSTER_SHOW_SERVERS,
     T_EXPLAIN_QUERY,
     T_CREATE_TABLE,
     T_COLUMN_LIST,
@@ -104,8 +106,14 @@ public:
     T_NOT_NULL,
     T_COLUMN,
     T_COLUMN_TYPE,
+    T_TABLE_PROPERTY_LIST,
+    T_TABLE_PROPERTY,
+    T_TABLE_PROPERTY_KEY,
+    T_TABLE_PROPERTY_VALUE,
+    T_DROP_TABLE,
     T_DATABASE_NAME,
     T_CREATE_DATABASE,
+    T_USE_DATABASE,
     T_INSERT_INTO,
     T_VALUE_LIST,
     T_JSON_STRING,

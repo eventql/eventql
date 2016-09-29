@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
- *   - Laura Schlimmer <laura@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -22,13 +22,27 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#pragma once
+#include "eventql/eventql.h"
 #include <eventql/sql/expressions/table_expression.h>
 #include <eventql/auth/internal_auth.h>
 #include <eventql/db/partition_map.h>
-
-#include "eventql/eventql.h"
+#include <eventql/sql/transaction.h>
+#include <eventql/sql/scheduler/execution_context.h>
+#include <eventql/sql/qtree/SequentialScanNode.h>
 
 namespace eventql {
+
+struct ReplicaRef {
+  ReplicaRef(
+      SHA1Hash _unique_id,
+      String _addr);
+
+  SHA1Hash unique_id;
+  String addr;
+  String name;
+  bool is_local;
+};
 
 class TableScan : public csql::TableExpression {
 public:
@@ -36,6 +50,8 @@ public:
   struct PartitionLocation {
     SHA1Hash partition_id;
     Vector<ReplicaRef> servers;
+    Option<SHA1Hash> cache_key;
+    RefPtr<csql::SequentialScanNode> qtree;
   };
 
   TableScan(
@@ -45,12 +61,15 @@ public:
     const String& table_name,
     const Vector<PartitionLocation>& partitions,
     RefPtr<csql::SequentialScanNode> seqscan,
+    Option<SHA1Hash> cache_key,
     PartitionMap* partition_map,
     InternalAuth* auth);
 
   ScopedPtr<csql::ResultCursor> execute() override;
 
   size_t getNumColumns() const override;
+
+  Option<SHA1Hash> getCacheKey() const override;
 
 protected:
 
@@ -60,10 +79,12 @@ protected:
       const PartitionLocation& partition);
 
   ScopedPtr<csql::ResultCursor> openLocalPartition(
-      const SHA1Hash& partition_id);
+      const SHA1Hash& partition_id,
+      RefPtr<csql::SequentialScanNode> qtree);
 
   ScopedPtr<csql::ResultCursor> openRemotePartition(
       const SHA1Hash& partition_id,
+      RefPtr<csql::SequentialScanNode> qtree,
       const Vector<ReplicaRef> servers);
 
   csql::Transaction* txn_;
@@ -73,6 +94,7 @@ protected:
   String table_name_;
   Vector<PartitionLocation> partitions_;
   RefPtr<csql::SequentialScanNode> seqscan_;
+  Option<SHA1Hash> cache_key_;
   PartitionMap* partition_map_;
   InternalAuth* auth_;
   ScopedPtr<csql::ResultCursor> cur_cursor_;

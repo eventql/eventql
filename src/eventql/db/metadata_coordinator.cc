@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -22,16 +22,46 @@
  * code of your own applications
  */
 #include "eventql/db/metadata_coordinator.h"
+#include "eventql/transport/native/client_tcp.h"
+#include "eventql/transport/native/frames/error.h"
+#include "eventql/transport/native/frames/meta_createfile.h"
+#include "eventql/transport/native/frames/meta_performop.h"
+#include <eventql/util/logging.h>
 
 namespace eventql {
 
-MetadataCoordinator::MetadataCoordinator(ConfigDirectory* cdir) : cdir_(cdir) {}
+MetadataCoordinator::MetadataCoordinator(
+    ConfigDirectory* cdir,
+    ProcessConfig* config,
+    native_transport::TCPConnectionPool* conn_pool,
+    net::DNSCache* dns_cache) :
+    cdir_(cdir),
+    config_(config),
+    conn_pool_(conn_pool),
+    dns_cache_(dns_cache) {}
 
 Status MetadataCoordinator::performAndCommitOperation(
     const String& ns,
     const String& table_name,
-    MetadataOperation op) {
-  auto table_config = cdir_->getTableConfig(ns, table_name);
+    MetadataOperation op,
+    MetadataOperationResult* res /* = nullptr */) {
+  /* grab advisory lock */
+  auto lock_key = StringUtil::format("$0~$1", ns, table_name);
+
+  std::mutex* lock;
+  {
+    std::unique_lock<std::mutex> lockmap_mutex_holder(lockmap_mutex_);
+    auto& lock_iter = lockmap_[lock_key];
+    if (!lock_iter) {
+      lock_iter.reset(new std::mutex());
+    }
+    lock = lock_iter.get();
+  }
+
+  std::unique_lock<std::mutex> lock_holder(*lock);
+
+  /* get latest config */
+  auto table_config = cdir_->getTableConfig(ns, table_name, false);
   SHA1Hash input_txid(
       table_config.metadata_txnid().data(),
       table_config.metadata_txnid().size());
@@ -40,16 +70,18 @@ Status MetadataCoordinator::performAndCommitOperation(
     return Status(eConcurrentModificationError, "concurrent modification");
   }
 
+  /* perform operation */
   Vector<String> servers;
   for (const auto& s : table_config.metadata_servers()) {
     servers.emplace_back(s);
   }
 
-  auto rc = performOperation(ns, table_name, op, servers);
+  auto rc = performOperation(ns, table_name, op, servers, res);
   if (!rc.isSuccess()) {
     return rc;
   }
 
+  /* commit transaction */
   auto output_txid = op.getOutputTransactionID();
   table_config.set_metadata_txnid(output_txid.data(), output_txid.size());
   table_config.set_metadata_txnseq(table_config.metadata_txnseq() + 1);
@@ -61,7 +93,8 @@ Status MetadataCoordinator::performOperation(
     const String& ns,
     const String& table_name,
     MetadataOperation op,
-    const Vector<String>& servers) {
+    const Vector<String>& servers,
+    MetadataOperationResult* res /* = nullptr */) {
   size_t num_servers = servers.size();
   if (num_servers == 0) {
     return Status(eIllegalArgumentError, "server list can't be empty");
@@ -77,6 +110,10 @@ Status MetadataCoordinator::performOperation(
           SHA1Hash(
               result.metadata_file_checksum().data(),
               result.metadata_file_checksum().size()));
+
+      if (res) {
+        *res = result;
+      }
     } else {
       logDebug(
           "evqld",
@@ -123,37 +160,63 @@ Status MetadataCoordinator::performOperation(
       server,
       server_cfg.server_addr());
 
-  auto url = StringUtil::format(
-      "http://$0/rpc/perform_metadata_operation?namespace=$1&table=$2",
-      server_cfg.server_addr(),
-      URI::urlEncode(ns),
-      URI::urlEncode(table_name));
-
-  Buffer req_body;
+  std::string req_body;
   {
-    auto os = BufferOutputStream::fromBuffer(&req_body);
+    auto os = StringOutputStream::fromString(&req_body);
     auto rc = op.encode(os.get());
     if (!rc.isSuccess()) {
       return rc;
     }
   }
 
-  auto req = http::HTTPRequest::mkPost(url, req_body);
-  //auth_->signRequest(static_cast<Session*>(txn_->getUserData()), &req);
+  native_transport::MetaPerformopFrame m_frame;
+  m_frame.setDatabase(ns);
+  m_frame.setTable(table_name);
+  m_frame.setOperation(req_body);
 
-  http::HTTPClient http_client;
-  http::HTTPResponse res;
-  auto rc = http_client.executeRequest(req, &res);
+  auto idle_timeout = config_->getInt("server.s2s_idle_timeout", 0);
+  auto io_timeout = config_->getInt("server.s2s_io_timeout", 0);
+  native_transport::TCPClient client(
+      conn_pool_,
+      dns_cache_,
+      io_timeout,
+      idle_timeout);
+
+  auto rc = client.connect(server_cfg.server_addr(), true);
   if (!rc.isSuccess()) {
     return rc;
   }
 
-  if (res.statusCode() == 201) {
-    *result = msg::decode<MetadataOperationResult>(res.body());
-    return Status::success();
-  } else {
-    return Status(eIOError, res.body().toString());
+  rc = client.sendFrame(&m_frame, 0);
+  if (!rc.isSuccess()) {
+    return rc;
   }
+
+  uint16_t ret_opcode = 0;
+  uint16_t ret_flags;
+  std::string ret_payload;
+  rc = client.recvFrame(&ret_opcode, &ret_flags, &ret_payload, idle_timeout);
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  switch (ret_opcode) {
+    case EVQL_OP_META_PERFORMOP_RESULT:
+      break;
+    case EVQL_OP_ERROR: {
+      native_transport::ErrorFrame eframe;
+      eframe.parseFrom(ret_payload.data(), ret_payload.size());
+      return ReturnCode::error("ERUNTIME", eframe.getError());
+    }
+    default:
+      return ReturnCode::errorf(
+          "ERUNTIME",
+          "invalid opcode for META_PERFORMOP: $0",
+          ret_opcode);
+  }
+
+  *result = msg::decode<MetadataOperationResult>(ret_payload);
+  return ReturnCode::success();
 }
 
 Status MetadataCoordinator::createFile(
@@ -191,9 +254,9 @@ Status MetadataCoordinator::createFile(
     const String& ns,
     const String& table_name,
     const MetadataFile& file,
-    const String& server) {
-  auto server_cfg = cdir_->getServerConfig(server);
-  if (server_cfg.server_addr().empty()) {
+    const String& server_id) {
+  auto server = cdir_->getServerConfig(server_id);
+  if (server.server_addr().empty()) {
     return Status(eRuntimeError, "server is offline");
   }
 
@@ -203,88 +266,66 @@ Status MetadataCoordinator::createFile(
       ns,
       table_name,
       file.getTransactionID(),
-      server,
-      server_cfg.server_addr());
+      server_id,
+      server.server_addr());
 
-  auto url = StringUtil::format(
-      "http://$0/rpc/create_metadata_file?namespace=$1&table=$2",
-      server_cfg.server_addr(),
-      URI::urlEncode(ns),
-      URI::urlEncode(table_name));
-
-  Buffer req_body;
+  std::string req_body;
   {
-    auto os = BufferOutputStream::fromBuffer(&req_body);
+    auto os = StringOutputStream::fromString(&req_body);
     auto rc = file.encode(os.get());
     if (!rc.isSuccess()) {
       return rc;
     }
   }
 
-  auto req = http::HTTPRequest::mkPost(url, req_body);
-  //auth_->signRequest(static_cast<Session*>(txn_->getUserData()), &req);
+  native_transport::MetaCreatefileFrame m_frame;
+  m_frame.setDatabase(ns);
+  m_frame.setTable(table_name);
+  m_frame.setBody(req_body);
 
-  http::HTTPClient http_client;
-  http::HTTPResponse res;
-  auto rc = http_client.executeRequest(req, &res);
+  auto idle_timeout = config_->getInt("server.s2s_idle_timeout", 0);
+  auto io_timeout = config_->getInt("server.s2s_io_timeout", 0);
+  native_transport::TCPClient client(
+      conn_pool_,
+      dns_cache_,
+      io_timeout,
+      idle_timeout);
+
+  auto rc = client.connect(server.server_addr(), true);
   if (!rc.isSuccess()) {
     return rc;
   }
 
-  if (res.statusCode() == 201) {
-    return Status::success();
-  } else {
-    return Status(eIOError, res.body().toString());
-  }
-}
-
-Status MetadataCoordinator::discoverPartition(
-    PartitionDiscoveryRequest request,
-    PartitionDiscoveryResponse* response) {
-  auto table_cfg = cdir_->getTableConfig(
-      request.db_namespace(),
-      request.table_id());
-
-  if (table_cfg.metadata_txnseq() < request.min_txnseq()) {
-    return Status(eConcurrentModificationError, "concurrent modification");
+  rc = client.sendFrame(&m_frame, 0);
+  if (!rc.isSuccess()) {
+    return rc;
   }
 
-  request.set_requester_id(cdir_->getServerID());
-
-  http::HTTPClient http_client;
-  for (const auto& s : table_cfg.metadata_servers()) {
-    auto server = cdir_->getServerConfig(s);
-    if (server.server_status() != SERVER_UP) {
-      continue;
-    }
-
-    auto url = StringUtil::format(
-        "http://$0/rpc/discover_partition_metadata",
-        server.server_addr());
-
-    Buffer req_body;
-    auto req = http::HTTPRequest::mkPost(url, *msg::encode(request));
-    //auth_->signRequest(static_cast<Session*>(txn_->getUserData()), &req);
-
-    http::HTTPResponse res;
-    auto rc = http_client.executeRequest(req, &res);
-    if (!rc.isSuccess()) {
-      logDebug("evqld", "metadata discovery failed: $0", rc.message());
-      continue;
-    }
-
-    if (res.statusCode() == 200) {
-      *response = msg::decode<PartitionDiscoveryResponse>(res.body());
-      return Status::success();
-    } else {
-      logDebug(
-          "evqld",
-          "metadata discovery failed: $0",
-          res.body().toString());
-    }
+  uint16_t ret_opcode = 0;
+  uint16_t ret_flags;
+  std::string ret_payload;
+  rc = client.recvFrame(&ret_opcode, &ret_flags, &ret_payload, idle_timeout);
+  if (!rc.isSuccess()) {
+    return rc;
   }
 
-  return Status(eIOError, "no metadata server has the request transaction");
+  switch (ret_opcode) {
+    case EVQL_OP_ACK:
+      break;
+    case EVQL_OP_ERROR: {
+      native_transport::ErrorFrame eframe;
+      eframe.parseFrom(ret_payload.data(), ret_payload.size());
+      return ReturnCode::error("ERUNTIME", eframe.getError());
+    }
+    default:
+      return ReturnCode::errorf(
+          "ERUNTIME",
+          "invalid opcode for META_CREATEFILE: $0",
+          ret_opcode);
+  }
+
+  return ReturnCode::success();
 }
 
 } // namespace eventql
+

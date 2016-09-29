@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -25,7 +25,7 @@
 
 namespace eventql {
 
-Status TrustClientAuth::authenticateSession(
+Status TrustClientAuth::authenticateNonInteractive(
     Session* session,
     HashMap<String, String> auth_data) {
   const auto& user_id = auth_data["user"];

@@ -8,9 +8,6 @@
 *.so
 *.pb.h
 *.pb.cc
-src/evql
-src/evqld
-src/evql-mysql-import
 /config.h
 Makefile
 Makefile.in
@@ -41,3 +38,8 @@ src/Makefile.in
 .dirstamp
 compile
 test-driver
+libtool
+docker/server/cache/*
+docker/server/data/*
+docker/server/trash/*
+docker/server/metadata/*

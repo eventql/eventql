@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -32,6 +32,8 @@
 #include <eventql/sql/scheduler/execution_context.h>
 #include "eventql/sql/qtree/nodes/alter_table.h"
 #include "eventql/sql/qtree/nodes/create_table.h"
+#include "eventql/db/table_info.h"
+#include "eventql/config/config_directory.h"
 
 namespace csql {
 
@@ -47,14 +49,29 @@ public:
 
   virtual void listTables(Function<void (const TableInfo& table)> fn) const = 0;
 
+  virtual Status listPartitions(
+      const String& table_name,
+      Function<void (const ::eventql::TablePartitionInfo& partition)> fn) const {
+    return Status(eRuntimeError, "not yet implemented");
+  }
+
+  virtual Status listServers(
+      Function<void (const ::eventql::ServerConfig& server)> fn) const {
+    return Status(eNotImplementedError, "not implemented");
+  }
+
   virtual Option<TableInfo> describe(const String& table_name) const = 0;
 
   virtual Status createTable(const CreateTableNode& create_table) {
     RAISE(kRuntimeError, "can't create tables");
   }
 
-  virtual Status createDatabase(const String& database_name) {
+  virtual Status createDatabase(const std::string& database_name) {
     RAISE(kRuntimeError, "can't create databases");
+  }
+
+  virtual Status dropTable(const String& table_name) {
+    RAISE(kRuntimeError, "can't drop table");
   }
 
   virtual Status alterTable(const AlterTableNode& alter_table) {

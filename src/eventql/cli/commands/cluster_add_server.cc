@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
- *   - Laura Schlimmer <laura@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -44,14 +44,6 @@ Status ClusterAddServer::execute(
     OutputStream* stdout_os,
     OutputStream* stderr_os) {
   ::cli::FlagParser flags;
-  flags.defineFlag(
-      "cluster_name",
-      ::cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "node name",
-      "<string>");
 
   flags.defineFlag(
       "server_name",
@@ -83,10 +75,6 @@ Status ClusterAddServer::execute(
 
     ServerConfig cfg;
     cfg.set_server_id(flags.getString("server_name"));
-    for (size_t i = 0; i < 128; ++i) {
-      cfg.add_sha1_tokens(Random::singleton()->sha1().toString());
-    }
-
     cdir->updateServerConfig(cfg);
     cdir->stop();
 
@@ -111,12 +99,11 @@ const String& ClusterAddServer::getDescription() const {
 
 void ClusterAddServer::printHelp(OutputStream* stdout_os) const {
   stdout_os->write(StringUtil::format(
-      "evqlctl-$0 - $1\n\n", kName_, kDescription_));
+      "\nevqlctl-$0 - $1\n\n", kName_, kDescription_));
 
   stdout_os->write(
       "Usage: evqlctl cluster-add-server [OPTIONS]\n"
-      "   --cluster_name <node name>       The name of the cluster to add the server to.\n"
-      "   --server_name <server name>      The name of the server to add.\n");
+      "  --server_name            The name of the server to add.\n");
 }
 
 } // namespace cli

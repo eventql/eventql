@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -21,6 +21,19 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <string.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <sys/uio.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <limits.h>
+#include <stdint.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <poll.h>
+#include <netinet/tcp.h>
 #include "eventql/util/exception.h"
 #include "eventql/util/inspect.h"
 #include "eventql/util/logging.h"
@@ -34,329 +47,202 @@ std::string inspect(const http::HTTPServerConnection& conn) {
 
 namespace http {
 
-void HTTPServerConnection::start(
-    HTTPHandlerFactory* handler_factory,
-    ScopedPtr<net::TCPConnection> conn,
-    TaskScheduler* scheduler,
-    HTTPServerStats* stats) {
-  auto http_conn = new HTTPServerConnection(
-      handler_factory,
-      std::move(conn),
-      scheduler,
-      stats);
+HTTPServerConnection::HTTPServerConnection(
+    int fd,
+    uint64_t io_timeout,
+    const std::string& prelude_bytes) :
+    fd_(fd),
+    io_timeout_(io_timeout),
+    prelude_bytes_(prelude_bytes),
+    closed_(false) {
+  logTrace("http.server", "New HTTP connection: $0", inspect(*this));
 
-  // N.B. we don't leak the connection here. it is ref counted and will
-  // free itself
-  http_conn->incRef();
-  http_conn->nextRequest();
+  fcntl(fd, F_SETFL, fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
+
+  size_t nodelay = 1;
+  setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &nodelay, sizeof(nodelay));
 }
 
-HTTPServerConnection::HTTPServerConnection(
-    HTTPHandlerFactory* handler_factory,
-    ScopedPtr<net::TCPConnection> conn,
-    TaskScheduler* scheduler,
-    HTTPServerStats* stats) :
-    handler_factory_(handler_factory),
-    conn_(std::move(conn)),
-    scheduler_(scheduler),
-    parser_(HTTPParser::PARSE_HTTP_REQUEST),
-    on_write_completed_cb_(nullptr),
-    closed_(false),
-    stats_(stats) {
-  logTrace("http.server", "New HTTP connection: $0", inspect(*this));
-  stats_->total_connections.incr(1);
-  stats_->current_connections.incr(1);
+HTTPServerConnection::~HTTPServerConnection() {
+  close();
+}
 
-  conn_->setNonblocking(true);
-  read_buf_.reserve(kMinBufferSize);
+ReturnCode HTTPServerConnection::recvRequest(HTTPRequest* request) {
+  HTTPParser parser(HTTPParser::PARSE_HTTP_REQUEST);
 
-  parser_.onMethod([this] (HTTPMessage::kHTTPMethod method) {
-    cur_request_->setMethod(method);
+  parser.onMethod([request] (HTTPMessage::kHTTPMethod method) {
+    request->setMethod(method);
   });
 
-  parser_.onURI([this] (const char* data, size_t size) {
-    cur_request_->setURI(std::string(data, size));
+  parser.onURI([request] (const char* data, size_t size) {
+    request->setURI(std::string(data, size));
   });
 
-  parser_.onVersion([this] (const char* data, size_t size) {
-    cur_request_->setVersion(std::string(data, size));
+  parser.onVersion([request] (const char* data, size_t size) {
+    request->setVersion(std::string(data, size));
   });
 
-  parser_.onHeader([this] (
+  parser.onHeader([request] (
       const char* key,
       size_t key_size,
       const char* val,
       size_t val_size) {
-    cur_request_->addHeader(
+    request->addHeader(
         std::string(key, key_size),
         std::string(val, val_size));
   });
 
-  parser_.onHeadersComplete(
-      std::bind(&HTTPServerConnection::dispatchRequest, this));
-}
-
-HTTPServerConnection::~HTTPServerConnection() {
-  stats_->current_connections.decr(1);
-}
-
-void HTTPServerConnection::read() {
-  std::unique_lock<std::recursive_mutex> lk(mutex_);
-
-  size_t len;
-  try {
-    len = conn_->read(read_buf_.data(), read_buf_.allocSize());
-    stats_->received_bytes.incr(len);
-  } catch (Exception& e) {
-    if (e.ofType(kWouldBlockError)) {
-      return awaitRead();
-    }
-
-    if (on_error_cb_) {
-      on_error_cb_();
-    }
-
-    lk.unlock();
-    logDebug("http.server", e, "read() failed, closing...");
-
-    close();
-    return;
-  }
-
-  try {
-    if (len == 0) {
-      parser_.eof();
-
-      if (on_error_cb_) {
-        on_error_cb_();
-      }
-
-      lk.unlock();
-      close();
-      return;
-    } else {
-      parser_.parse((char *) read_buf_.data(), len);
-    }
-  } catch (Exception& e) {
-    logDebug("http.server", e, "HTTP parse error, closing...");
-
-    if (on_error_cb_) {
-      on_error_cb_();
-    }
-
-    lk.unlock();
-    close();
-    return;
-  }
-
-  if (parser_.state() != HTTPParser::S_DONE) {
-    awaitRead();
-  }
-}
-
-void HTTPServerConnection::write() {
-  std::unique_lock<std::recursive_mutex> lk(mutex_);
-
-  auto data = ((char *) write_buf_.data()) + write_buf_.mark();
-  auto size = write_buf_.size() - write_buf_.mark();
-
-  size_t len;
-  try {
-    len = conn_->write(data, size);
-    write_buf_.setMark(write_buf_.mark() + len);
-    stats_->sent_bytes.incr(len);
-  } catch (Exception& e) {
-    if (e.ofType(kWouldBlockError)) {
-      return awaitWrite();
-    }
-
-    logDebug("http.server", e, "write() failed, closing...");
-    if (on_error_cb_) {
-      on_error_cb_();
-    }
-
-    lk.unlock();
-    close();
-    return;
-  }
-
-  if (write_buf_.mark() < write_buf_.size()) {
-    awaitWrite();
-  } else {
-    write_buf_.clear();
-    lk.unlock();
-    if (on_write_completed_cb_) {
-      on_write_completed_cb_();
-    }
-  }
-}
-
-// precondition: must hold mutex
-void HTTPServerConnection::awaitRead() {
-  if (closed_) {
-    RAISE(kIllegalStateError, "read() on closed HTTP connection");
-  }
-
-  scheduler_->runOnReadable(
-      std::bind(&HTTPServerConnection::read, this),
-      *conn_);
-}
-
-// precondition: must hold mutex
-void HTTPServerConnection::awaitWrite() {
-  if (closed_) {
-    RAISE(kIllegalStateError, "write() on closed HTTP connection");
-  }
-
-  scheduler_->runOnWritable(
-      std::bind(&HTTPServerConnection::write, this),
-      *conn_);
-}
-
-void HTTPServerConnection::nextRequest() {
-  parser_.reset();
-  cur_request_.reset(new HTTPRequest());
-  cur_handler_.reset(nullptr);
-  on_write_completed_cb_ = nullptr;
-  on_error_cb_ = nullptr;
-  body_buf_.clear();
-
-  parser_.onBodyChunk([this] (const char* data, size_t size) {
-    std::unique_lock<std::recursive_mutex> lk(mutex_);
-    body_buf_.append(data, size);
+  parser.onBodyChunk([request] (
+      const char* data,
+      size_t size) {
+    request->appendBody(data, size);
   });
 
-  awaitRead();
-}
 
-void HTTPServerConnection::dispatchRequest() {
-  stats_->total_requests.incr(1);
-  stats_->current_requests.incr(1);
+  if (!prelude_bytes_.empty()) {
+    try {
+      parser.parse(prelude_bytes_.data(), prelude_bytes_.size());
+    } catch (const std::exception& e) {
+      return ReturnCode::error("EPARSE", e.what());
+    }
 
-  cur_handler_= handler_factory_->getHandler(this, cur_request_.get());
-  cur_handler_->handleHTTPRequest();
-}
+    prelude_bytes_.clear();
+  }
 
-void HTTPServerConnection::readRequestBody(
-    Function<void (const void*, size_t, bool)> callback,
-    Function<void()> on_error) {
-  std::unique_lock<std::recursive_mutex> lk(mutex_);
+  std::string read_buf;
+  read_buf.resize(4096);
 
-  switch (parser_.state()) {
-    case HTTPParser::S_REQ_METHOD:
-    case HTTPParser::S_REQ_URI:
-    case HTTPParser::S_REQ_VERSION:
-    case HTTPParser::S_RES_VERSION:
-    case HTTPParser::S_RES_STATUS_CODE:
-    case HTTPParser::S_RES_STATUS_NAME:
-    case HTTPParser::S_HEADER:
-      RAISE(kIllegalStateError, "can't read body before headers are parsed");
-    case HTTPParser::S_BODY:
-    case HTTPParser::S_DONE:
+  while (parser.state() != HTTPParser::S_DONE) {
+    int read_rc = ::read(fd_, &read_buf[0], read_buf.size());
+    switch (read_rc) {
+      case 0:
+        close();
+        return ReturnCode::error("EIO", "connection unexpectedly closed");
+      case -1:
+        if (errno == EAGAIN || errno == EINTR) {
+          break;
+        } else {
+          close();
+          return ReturnCode::error("EIO", strerror(errno));
+        }
+      default:
+        try {
+          parser.parse(read_buf.data(), read_rc);
+        } catch (const std::exception& e) {
+          return ReturnCode::error("EPARSE", e.what());
+        }
+        break;
+    }
+
+    if (parser.state() == HTTPParser::S_DONE) {
       break;
-  }
-
-  auto read_body_chunk_fn = [this, callback] (const char* data, size_t size) {
-    std::unique_lock<std::recursive_mutex> lk(mutex_);
-    body_buf_.append(data, size);
-    auto last_chunk = parser_.state() == HTTPParser::S_DONE;
-
-    if (last_chunk || body_buf_.size() > 0) {
-      BufferRef chunk(new Buffer(body_buf_));
-
-      scheduler_->runAsync([callback, chunk, last_chunk] {
-        callback(
-            (const char*) chunk->data(),
-            chunk->size(),
-            last_chunk);
-      });
-
-      body_buf_.clear();
     }
-  };
 
-  parser_.onBodyChunk(read_body_chunk_fn);
-  on_error_cb_ = on_error;
-  lk.unlock();
-  read_body_chunk_fn(nullptr, 0);
-}
+    struct pollfd p;
+    p.fd = fd_;
+    p.events = POLLIN;
 
-void HTTPServerConnection::discardRequestBody(
-    Function<void ()> callback,
-    Function<void()> on_error) {
-  readRequestBody([callback] (const void* data, size_t size, bool last) {
-    if (last) {
-      callback();
+    int poll_rc = poll(&p, 1, io_timeout_ / 1000);
+    switch (poll_rc) {
+      case 0:
+        close();
+        return ReturnCode::error("EIO", "operation timed out");
+      case -1:
+        if (errno == EAGAIN || errno == EINTR) {
+          break;
+        } else {
+          close();
+          return ReturnCode::error("EIO", strerror(errno));
+        }
     }
-  }, on_error);
-}
-
-void HTTPServerConnection::writeResponse(
-    const HTTPResponse& resp,
-    Function<void()> ready_callback,
-    Function<void()> on_error) {
-  std::lock_guard<std::recursive_mutex> lk(mutex_);
-
-  if (parser_.state() != HTTPParser::S_DONE) {
-    RAISE(kIllegalStateError, "can't write response before request is read");
   }
 
-  BufferOutputStream os(&write_buf_);
-  HTTPGenerator::generate(resp, &os);
-  on_write_completed_cb_ = ready_callback;
-  on_error_cb_ = on_error;
-  awaitWrite();
+  return ReturnCode::success();
 }
 
-void HTTPServerConnection::writeResponseBody(
-    const void* data,
-    size_t size,
-    Function<void()> ready_callback,
-    Function<void()> on_error) {
-  std::lock_guard<std::recursive_mutex> lk(mutex_);
-
-  if (parser_.state() != HTTPParser::S_DONE) {
-    RAISE(kIllegalStateError, "can't write response before request is read");
+ReturnCode HTTPServerConnection::sendResponse(const HTTPResponse& res) {
+  auto rc = sendResponseHeaders(res);
+  if (!rc.isSuccess()) {
+    return rc;
   }
 
-  write_buf_.append(data, size);
-  on_write_completed_cb_ = ready_callback;
-  on_error_cb_ = on_error;
-  awaitWrite();
+  return sendResponseBodyChunk(
+      (const char*) res.body().data(),
+      res.body().size());
 }
 
-void HTTPServerConnection::finishResponse() {
-  stats_->current_requests.decr(1);
+ReturnCode HTTPServerConnection::sendResponseHeaders(const HTTPResponse& res) {
+  Buffer write_buf;
+  BufferOutputStream os(&write_buf);
+  HTTPGenerator::generateHeaders(res, &os);
 
-  if (false && cur_request_->keepalive()) {
-    std::lock_guard<std::recursive_mutex> lk(mutex_);
-    nextRequest();
-  } else {
-    close();
-  }
+  return write((const char*) write_buf.data(), write_buf.size());
 }
 
-// precondition: must not hold mutex
-void HTTPServerConnection::close() {
-  std::unique_lock<std::recursive_mutex> lk(mutex_);
+ReturnCode HTTPServerConnection::sendResponseBodyChunk(
+    const char* data,
+    size_t size) {
+  return write(data, size);
+}
 
-  logTrace("http.server", "HTTP connection close: $0", inspect(*this));
+ReturnCode HTTPServerConnection::write(const char* data, size_t size) {
+  size_t pos = 0;
+  while (pos < size) {
+    int write_rc = ::write(fd_, data + pos, size - pos);
+    switch (write_rc) {
+      case 0:
+        close();
+        return ReturnCode::error("EIO", "connection unexpectedly closed");
+      case -1:
+        if (errno == EAGAIN || errno == EINTR) {
+          break;
+        } else {
+          close();
+          return ReturnCode::error("EIO", strerror(errno));
+        }
+      default:
+        pos += write_rc;
+        break;
+    }
 
-  if (closed_) {
-    RAISE(kIllegalStateError, "HTTP connection is already closed");
+    if (pos == size) {
+      break;
+    }
+
+    struct pollfd p;
+    p.fd = fd_;
+    p.events = POLLOUT;
+    int poll_rc = poll(&p, 1, io_timeout_ / 1000);
+    switch (poll_rc) {
+      case 0:
+        close();
+        return ReturnCode::error("EIO", "operation timed out");
+      case -1:
+        if (errno == EAGAIN || errno == EINTR) {
+          break;
+        } else {
+          close();
+          return ReturnCode::error("EIO", strerror(errno));
+        }
+    }
   }
 
-  closed_ = true;
-  scheduler_->cancelFD(conn_->fd());
-  conn_->close();
-
-  lk.unlock();
-  decRef();
+  return ReturnCode::success();
 }
 
 bool HTTPServerConnection::isClosed() const {
-  std::unique_lock<std::recursive_mutex> lk(mutex_);
   return closed_;
+}
+
+void HTTPServerConnection::close() {
+  if (closed_) {
+    return;
+  }
+
+  logTrace("http.server", "HTTP connection close: $0", inspect(*this));
+
+  ::close(fd_);
+  closed_ = true;
 }
 
 } // namespace http

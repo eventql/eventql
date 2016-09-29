@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -28,11 +28,14 @@
 #include <eventql/util/io/fileutil.h>
 #include <eventql/io/sstable/sstablereader.h>
 #include <eventql/db/partition_map.h>
-#include <eventql/db/PartitionState.pb.h>
-#include <eventql/db/PartitionReplication.h>
+#include <eventql/db/partition_state.pb.h>
+#include <eventql/db/partition_replication.h>
 #include <eventql/db/metadata_coordinator.h>
-
+#include <eventql/db/partition_reader.h>
+#include <eventql/db/partition_writer.h>
+#include <eventql/db/metadata_client.h>
 #include "eventql/eventql.h"
+#include "eventql/db/file_tracker.h"
 
 namespace eventql {
 
@@ -44,10 +47,10 @@ static mdb::MDBOptions tsdb_mdb_opts() {
 };
 
 PartitionMap::PartitionMap(
-    ServerCfg* cfg) :
+    DatabaseContext* cfg) :
     cfg_(cfg),
     db_(mdb::MDB::open(cfg_->db_path, tsdb_mdb_opts())),
-    cdir_(cfg->config_directory) {}
+    load_complete_(false) {}
 
 Option<RefPtr<Table>> PartitionMap::findTable(
     const String& stream_ns,
@@ -72,6 +75,14 @@ Option<RefPtr<Table>> PartitionMap::findTableWithLock(
 void PartitionMap::configureTable(
     const TableDefinition& table,
     Set<SHA1Hash>* affected_partitions /* = nullptr */) {
+  if (table.config().partitioner() == TBL_PARTITION_FIXED) {
+    return;
+  }
+
+  if (table.config().storage() != TBL_STORAGE_COLSM) {
+    return;
+  }
+
   std::unique_lock<std::mutex> lk(mutex_);
   auto tbl_key = table.customer() + "~" + table.table_name();
   bool metadata_changed = false;
@@ -147,11 +158,6 @@ void PartitionMap::open() {
     auto table_key = value.toString();
     auto table = findTableWithLock(tsdb_namespace, table_key);
 
-    auto mem_key = tsdb_namespace + "~" + table_key + "~";
-    mem_key.append((char*) partition_key.data(), partition_key.size());
-
-    partitions_.emplace(mem_key, mkScoped(new LazyPartition()));
-
     if (table.isEmpty()) {
       logWarning(
           "tsdb",
@@ -160,6 +166,11 @@ void PartitionMap::open() {
           partition_key.toString());
       continue;
     }
+
+    auto mem_key = tsdb_namespace + "~" + table_key + "~";
+    mem_key.append((char*) partition_key.data(), partition_key.size());
+
+    partitions_.emplace(mem_key, mkScoped(new LazyPartition()));
 
     partitions.emplace_back(
         std::make_tuple(tsdb_namespace, table_key, partition_key));
@@ -188,6 +199,10 @@ void PartitionMap::loadPartitions(const Vector<PartitionKey>& partitions) {
           std::get<2>(p).toString());
     }
   }
+
+  std::unique_lock<std::mutex> lk(load_complete_mutex_);
+  load_complete_ = true;
+  load_complete_cv_.notify_all();
 }
 
 RefPtr<Partition> PartitionMap::findOrCreatePartition(
@@ -242,9 +257,7 @@ RefPtr<Partition> PartitionMap::findOrCreatePartition(
         partition_key.size());
     discovery_request.set_lookup_by_id(true);
 
-    MetadataCoordinator coordinator(cdir_);
-    PartitionDiscoveryResponse discovery_response;
-    auto rc = coordinator.discoverPartition(
+    auto rc = cfg_->metadata_client->discoverPartition(
         discovery_request,
         &discovery_info);
 
@@ -337,37 +350,37 @@ Option<RefPtr<Partition>> PartitionMap::findPartition(
   }
 }
 
-void PartitionMap::listTables(
-    const String& tsdb_namespace,
-    Function<void (const TSDBTableInfo& table)> fn) const {
-  for (const auto& tbl : tables_) {
-    if (tbl.second->tsdbNamespace() != tsdb_namespace) {
-      continue;
-    }
-
-    TSDBTableInfo ti;
-    ti.table_name = tbl.second->name();
-    ti.config = tbl.second->config();
-    ti.schema = tbl.second->schema();
-    fn(ti);
-  }
-}
-
-void PartitionMap::listTablesReverse(
-    const String& tsdb_namespace,
-    Function<void (const TSDBTableInfo& table)> fn) const {
-  for (auto cur = tables_.rbegin(); cur != tables_.rend(); ++cur) {
-    if (cur->second->tsdbNamespace() != tsdb_namespace) {
-      continue;
-    }
-
-    TSDBTableInfo ti;
-    ti.table_name = cur->second->name();
-    ti.config = cur->second->config();
-    ti.schema = cur->second->schema();
-    fn(ti);
-  }
-}
+//void PartitionMap::listTables(
+//    const String& tsdb_namespace,
+//    Function<void (const TSDBTableInfo& table)> fn) const {
+//  for (const auto& tbl : tables_) {
+//    if (tbl.second->tsdbNamespace() != tsdb_namespace) {
+//      continue;
+//    }
+//
+//    TSDBTableInfo ti;
+//    ti.table_name = tbl.second->name();
+//    ti.config = tbl.second->config();
+//    ti.schema = tbl.second->schema();
+//    fn(ti);
+//  }
+//}
+//
+//void PartitionMap::listTablesReverse(
+//    const String& tsdb_namespace,
+//    Function<void (const TSDBTableInfo& table)> fn) const {
+//  for (auto cur = tables_.rbegin(); cur != tables_.rend(); ++cur) {
+//    if (cur->second->tsdbNamespace() != tsdb_namespace) {
+//      continue;
+//    }
+//
+//    TSDBTableInfo ti;
+//    ti.table_name = cur->second->name();
+//    ti.config = cur->second->config();
+//    ti.schema = cur->second->schema();
+//    fn(ti);
+//  }
+//}
 
 bool PartitionMap::dropLocalPartition(
     const String& tsdb_namespace,
@@ -375,7 +388,7 @@ bool PartitionMap::dropLocalPartition(
     const SHA1Hash& partition_key) {
   auto partition_opt = findPartition(tsdb_namespace, table_name, partition_key);
   if (partition_opt.isEmpty()) {
-    RAISE(kNotFoundError, "partition not found");
+    return true;
   }
 
   auto partition = partition_opt.get();
@@ -386,7 +399,7 @@ bool PartitionMap::dropLocalPartition(
 
   /* check preconditions */
   try {
-    auto repl = partition->getReplicationStrategy(cfg_->repl_scheme, nullptr);
+    auto repl = partition->getReplicationStrategy();
     if (!repl->shouldDropPartition()) {
       RAISE(kIllegalStateError, "can't delete partition");
     }
@@ -398,7 +411,7 @@ bool PartitionMap::dropLocalPartition(
 
   /* start deletion */
   logInfo(
-      "z1.core",
+      "evqld",
       "Partition $0/$1/$2 is not owned by this node and is fully replicated," \
       " trying to unload and drop",
       tsdb_namespace,
@@ -432,44 +445,80 @@ bool PartitionMap::dropLocalPartition(
   txn->del(db_key);
   txn->commit();
 
-  /* delete partition data from disk (move to trash) */
-  {
-    auto src_path = FileUtil::joinPaths(
-        cfg_->db_path,
-        StringUtil::format(
-            "$0/$1/$2",
-            tsdb_namespace,
-            SHA1::compute(table_name).toString(),
-            partition_key.toString()));
-
-    auto dst_path = FileUtil::joinPaths(
-        cfg_->db_path,
-        StringUtil::format(
-            "../../trash/$0~$1~$2~$3",
-            tsdb_namespace,
-            SHA1::compute(table_name).toString(),
-            partition_key.toString(),
-            Random::singleton()->hex64()));
-
-    FileUtil::mv(src_path, dst_path);
-  }
+  /* move partition data to trash */
+  cfg_->file_tracker->deleteFile(
+      StringUtil::format(
+          "$0/$1/$2",
+          tsdb_namespace,
+          SHA1::compute(table_name).toString(),
+          partition_key.toString()));
 
   return true;
 }
 
-Option<TSDBTableInfo> PartitionMap::tableInfo(
-      const String& tsdb_namespace,
-      const String& table_key) const {
-  auto table = findTable(tsdb_namespace, table_key);
-  if (table.isEmpty()) {
-    return None<TSDBTableInfo>();
+void PartitionMap::dropPartition(
+    const String& tsdb_namespace,
+    const String& table_name,
+    const SHA1Hash& partition_key) {
+  auto partition_opt = findPartition(tsdb_namespace, table_name, partition_key);
+  if (partition_opt.isEmpty()) {
+    return;
   }
 
-  TSDBTableInfo ti;
-  ti.table_name = table.get()->name();
-  ti.config = table.get()->config();
-  ti.schema = table.get()->schema();
-  return Some(ti);
+  auto table_config = cfg_->config_directory->getTableConfig(
+      tsdb_namespace,
+      table_name);
+
+  auto partition = partition_opt.get();
+  auto partition_writer = partition->getWriter();
+
+  /* lock partition */
+  partition_writer->lock();
+
+  /* check preconditions */
+  auto partition_gen = partition->getSnapshot()->state.table_generation();
+  if (partition_gen >= table_config.generation()) {
+    partition_writer->unlock();
+    return;
+  }
+
+  /* start deletion */
+  logInfo(
+      "evqld",
+      "Dropping partition $0/$1/$2",
+      tsdb_namespace,
+      table_name,
+      partition_key.toString());
+
+  /* freeze partition and unlock waiting writers (they will fail) */
+  partition_writer->freeze();
+  partition_writer->unlock();
+
+  /* prepare access keys */
+  auto db_key = tsdb_namespace + "~";
+  db_key.append((char*) partition_key.data(), partition_key.size());
+
+  auto mem_key = tsdb_namespace + "~" + table_name + "~";
+  mem_key.append((char*) partition_key.data(), partition_key.size());
+
+  /* grab the main lock */
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  /* delete from in memory partition map */
+  auto iter = partitions_.find(mem_key);
+  if (iter == partitions_.end()) {
+    /* somebody else already deleted this partition */
+    return;
+  } else {
+    partitions_.erase(iter);
+  }
+
+  /* delete from on disk partition map */
+  auto txn = db_->startTransaction(false);
+  txn->del(db_key);
+  txn->commit();
+
+  return;
 }
 
 void PartitionMap::subscribeToPartitionChanges(PartitionChangeCallbackFn fn) {
@@ -483,6 +532,12 @@ void PartitionMap::publishPartitionChange(
   }
 }
 
+void PartitionMap::waitUntilAllLoaded() {
+  std::unique_lock<std::mutex> lk(load_complete_mutex_);
+  while (!load_complete_) {
+    load_complete_cv_.wait(lk);
+  }
+}
 
 } // namespace tdsb
 

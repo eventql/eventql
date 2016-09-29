@@ -7,11 +7,11 @@ You can build an `.aar` package by executing:
 
 ## Usage
 
-1. Add the zscale-android.aar as a new Module to your app.
+1. Add the eventql-android.aar as a new Module to your app.
 2. Add dependencies to app/build.gradle
 ```gradle
 dependencies {
-    compile project(':zscale-android')
+    compile project(':eventql-android')
 }
 ```
 3. Add permisions to `app/src/main/AndroidManifest.xml`

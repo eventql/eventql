@@ -1,25 +1,22 @@
-POST /api/v1/tables/create_table
+POST /api/v1/tables/create
 ================
 
-Create a new EventQL table or overwrite an existing table.
+Create a new EventQL table.<br>
 
-Every table needs a primary key whose first column must be of type DATETIME.
+A table must have a unique primary key whose first column is treated as
+partition key to distribute the rows among the hosts. The partition key can be
+of type `string`, `uint64` or `datetime`. 
 
-Please make sure that each field has a unique numeric ID (it's basically
-a protobuf schema).
+**NOTE for high-volume timeseries:** If you are planning to store large volumes
+timeseries-structured data in the table, please see the
+[Timeseries & Logs page](../../../../collecting-data/high-volume-timeseries-logs) for
+tips to get the best performance.
 
-How to choose a good partition size? Currently it's best to aim for roughly
-250MB-1Gper partition. If unsure, leave it with the default. In the future the
-parition size will be automatically adjusted on the fly so you don't have to
-choose one. Tables with a fixed partition size will automatically transition
-to this new scheme.
+To learn more about primary keys and understand how to choose one to get the
+best performance, read on the [Partitioning](../../../../tables/partitioning/) page.
 
 ###Resource Information
 <table class='http_api create_table'>
-  <tr>
-    <td>Authentication required?</td>
-    <td>Yes</td>
-  </tr>
   <tr>
     <td>Content-Type</td>
     <td>application/json</td>
@@ -29,67 +26,113 @@ to this new scheme.
 ###Parameters
 <table class='http_api create_table'>
   <tr>
-    <td>table&#95;name</td>
-    <td>name of the table to be created/overwritten</td>
+    <td>table_name</td>
+    <td>The name of the table to be created.</td>
   </tr>
   <tr>
-    <td>table&#95;type</td>
-    <td>the type of the table to be created. must be "timeseries"</td>
+    <td>primary_key</td>
+    <td>An array of column names that should be the primary key for this table</td>
   </tr>
   <tr>
-    <td>schema</td>
-    <td>the json schema of the table</td>
+    <td>database (optional)</td>
+    <td>The name of the database.
   </tr>
   <tr>
-    <td>update (optional)</td>
-    <td>if true, overwrite an existing table if a table with the same name exists. Note that this should not be used for regular schema maintenance as it's fairly unsafe (it will hard-overwrite the tables schema). Use the add_field/remove_field calls instead to manage an existing table schema.</td>
+    <td>columns.name</td>
+    <td>The name of the column</td>
   </tr>
   <tr>
-    <td>partition_size (optional)</td>
-    <td>the partition size in microseconds, defaults to 4h</td>
+    <td>columns.type</td>
+    <td>The SQL data type of the column</td>
+  </tr>
+  <tr>
+    <td>columns.optional</td>
+    <td>True if the column is optional, false otherwise</td>
+  </tr>
+  <tr>
+    <td>columns.repeated</td>
+    <td>True if the column is repeated, false otherwise</td>
+  </tr>
+  <tr>
+    <td>columns.subcolumns</td>
+    <td>The child columns of an OBJECT column.</td>
+  </tr>
+  <tr>
+    <td>properties (optional)</td>
+    <td>A list of key=value property pairs, encoded as an array of 2-element string arrays</td>
   </tr>
 </table>
 
-
-###Example Request
+### Example Request
 
         >> POST /api/v1/tables/create_table HTTP/1.1
-        >> Authorization: Token <authtoken>
         >> Content-Type: application/json
         >> Content-Length: ...
         >>
         >> {
         >>   "table_name": "my_sensor_table",
-        >>   "table_type": "timeseries",
-        >>   "schema": {
-        >>      "columns": [
-        >>          {
-        >>             "id": 1,
-        >>             "name": "time",
-        >>             "type": "DATETIME",
-        >>             "optional": false,
-        >>             "repeated": false
-        >>          },
-        >>          {
-        >>             "id": 2,
-        >>             "name": "sensor_name",
-        >>             "type": "STRING",
-        >>             "optional": false,
-        >>             "repeated": false
-        >>          },
-        >>          {
-        >>             "id": 3,
-        >>             "name": "sensor_value",
-        >>             "type": "DOUBLE",
-        >>             "optional": true,
-        >>             "repeated": false
-        >>          }
-        >>      ]
-        >>   }
+        >>   "primary_key": ["time", "sensor_name"],
+        >>   "columns": [
+        >>       {
+        >>          "name": "time",
+        >>          "type": "DATETIME"
+        >>       },
+        >>       {
+        >>          "name": "sensor_name",
+        >>          "type": "STRING"
+        >>       },
+        >>       {
+        >>          "name": "sensor_value",
+        >>          "type": "DOUBLE"
+        >>       }
+        >>   ],
+        >>   "properties": [
+        >>      [ "partition_size_hint", "300000000" ]
+        >>   ]
         >> }
 
 
-###Example Response
+### Example Request of a table with nested columns
+
+        >> POST /api/v1/tables/create_table HTTP/1.1
+        >> Content-Type: application/json
+        >> Content-Length: ...
+        >>
+        >> {
+        >>   "table_name": "my_sensor_table",
+        >>   "primary_key": ["time", "sensor_name"],
+        >>   "columns": [
+        >>       {
+        >>          "name": "time",
+        >>          "type": "DATETIME"
+        >>       },
+        >>       {
+        >>          "name": "sensor_name",
+        >>          "type": "STRING"
+        >>       },
+        >>       {
+        >>          "name": "measurements",
+        >>          "type": "OBJECT",
+        >>          "repeated": true,
+        >>          "subcolumns": [
+        >>              {
+        >>                "name": "id",
+        >>                "type": "STRING",
+        >>              },
+        >>              {
+        >>                "name": "value",
+        >>                "type": "DOUBLE",
+        >>              }
+        >>          ]
+        >>        }
+        >>   ],
+        >>   "properties": [
+        >>      [ "partition_size_hint", "300000000" ]
+        >>   ]
+        >> }
+
+### Example Response
 
         << HTTP/1.1 201 CREATED
         << Content-Length: 0
+

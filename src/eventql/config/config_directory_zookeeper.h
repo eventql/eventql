@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -25,6 +25,7 @@
 #include "eventql/eventql.h"
 #include "eventql/config/config_directory.h"
 #include "eventql/util/protobuf/msg.h"
+#include "eventql/util/thread/threadpool.h"
 
 typedef struct _zhandle zhandle_t;
 
@@ -45,6 +46,10 @@ public:
 
   bool hasServerID() const override;
 
+  virtual bool electLeader() override;
+
+  virtual String getLeader() const override;
+
   ClusterConfig getClusterConfig() const override;
 
   void updateClusterConfig(ClusterConfig config) override;
@@ -55,6 +60,8 @@ public:
   ServerConfig getServerConfig(const String& sever_name) const override;
 
   void updateServerConfig(ServerConfig config) override;
+
+  ReturnCode publishServerStats(ServerStats stats) override;
 
   Vector<ServerConfig> listServers() const override;
 
@@ -74,7 +81,8 @@ public:
 
   TableDefinition getTableConfig(
       const String& db_namespace,
-      const String& table_name) const override;
+      const String& table_name,
+      bool allow_cache = true) override;
 
   void updateTableConfig(
       const TableDefinition& table,
@@ -86,8 +94,7 @@ public:
   void setTableConfigChangeCallback(
       Function<void (const TableDefinition& tbl)> fn) override;
 
-  Status start() override;
-
+  Status start(bool create = false) override;
   void stop() override;
 
   /** don't call this! (can't be private b/c it needs to be called from c binding) */
@@ -104,29 +111,28 @@ protected:
     CLOSED = 5
   };
 
-  using CallbackList = Vector<Function<void()>>;
-
+  void reconnect(std::unique_lock<std::mutex>* lk);
   Status connect(std::unique_lock<std::mutex>* lk);
-  Status load();
+  Status load(bool run_callbacks);
 
   void updateClusterConfigWithLock(ClusterConfig config);
 
   void handleSessionEvent(int state);
   void handleConnectionEstablished();
   void handleConnectionLost();
-  Status handleChangeEvent(const String& vpath, CallbackList* events);
+  Status handleChangeEvent(const String& vpath, bool run_callbacks);
 
-  Status sync(CallbackList* events);
-  Status syncClusterConfig(CallbackList* events);
-  Status syncLiveServers(CallbackList* events);
-  Status syncLiveServer(CallbackList* events, const String& server);
-  Status syncServers(CallbackList* events);
-  Status syncServer(CallbackList* events, const String& server);
-  Status syncNamespaces(CallbackList* events);
-  Status syncNamespace(CallbackList* events, const String& ns);
-  Status syncTables(CallbackList* events, const String& ns);
+  Status sync(bool run_callbacks);
+  Status syncClusterConfig(bool run_callbacks);
+  Status syncLiveServers(bool run_callbacks);
+  Status syncLiveServer(bool run_callbacks, const String& server);
+  Status syncServers(bool run_callbacks);
+  Status syncServer(bool run_callbacks, const String& server);
+  Status syncNamespaces(bool run_callbacks);
+  Status syncNamespace(bool run_callbacks, const String& ns);
+  Status syncTables(bool run_callbacks, const String& ns);
   Status syncTable(
-      CallbackList* events,
+      bool run_callbacks,
       const String& ns,
       const String& table_name);
 
@@ -136,7 +142,7 @@ protected:
       String key,
       Buffer* buf,
       bool watch = false,
-      struct Stat* stat = nullptr);
+      struct Stat* stat = nullptr) const;
 
   template <typename T>
   bool getProtoNode(
@@ -150,25 +156,30 @@ protected:
       Vector<String>* children,
       bool watch = false);
 
+  void runWatchdog();
+  void runLogtail();
+
   const char* getErrorString(int code) const;
 
   String zookeeper_addrs_;
   size_t zookeeper_timeout_;
   String cluster_name_;
   Option<String> server_name_;
+  size_t server_stats_version_;
   String listen_addr_;
   String global_prefix_;
   String path_prefix_;
   ZKState state_;
   zhandle_t* zk_;
+  bool is_leader_;
   mutable std::mutex mutex_;
   std::condition_variable cv_;
-
-  ClusterConfig getPatchedClusterConfig() const;
+  int logpipe_[2];
+  FILE* logfile_;
 
   ClusterConfig cluster_config_;
   HashMap<String, ServerConfig> servers_;
-  HashMap<String, String> servers_live_;
+  HashMap<String, ServerStats> servers_live_;
   HashMap<String, NamespaceConfig> namespaces_;
   HashMap<String, TableDefinition> tables_;
 
@@ -177,6 +188,9 @@ protected:
   Vector<Function<void (const NamespaceConfig& cfg)>> on_namespace_change_;
   Vector<Function<void (const TableDefinition& cfg)>> on_table_change_;
 
+  std::thread watchdog_;
+  std::thread logtail_;
+  thread::ThreadPool callback_scheduler_;
 };
 
 template <typename T>

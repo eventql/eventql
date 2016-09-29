@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -22,17 +22,26 @@
  * code of your own applications
  */
 #include "eventql/db/metadata_replication.h"
+#include "eventql/transport/native/client_tcp.h"
+#include "eventql/transport/native/frames/error.h"
+#include "eventql/transport/native/frames/meta_getfile.h"
 #include "eventql/util/application.h"
 
 namespace eventql {
 
 MetadataReplication::MetadataReplication(
     ConfigDirectory* cdir,
+    ProcessConfig* config,
     const String& server_name,
-    MetadataStore* store) :
+    MetadataStore* store,
+    native_transport::TCPConnectionPool* conn_pool,
+    net::DNSCache* dns_cache) :
     cdir_(cdir),
+    config_(config),
     server_name_(server_name),
-    metadata_store_(store) {
+    metadata_store_(store),
+    conn_pool_(conn_pool),
+    dns_cache_(dns_cache) {
   cdir_->setTableConfigChangeCallback([this] (const TableDefinition& tbl) {
     applyTableConfigChange(tbl);
   });
@@ -107,51 +116,78 @@ Status MetadataReplication::replicate(const ReplicationJob& job) {
     return Status::success();
   }
 
-  http::HTTPClient http_client;
+  auto idle_timeout = config_->getInt("server.s2s_idle_timeout", 0);
+  auto io_timeout = config_->getInt("server.s2s_io_timeout", 0);
+
+  native_transport::MetaGetfileFrame m_frame;
+  m_frame.setDatabase(job.db_namespace);
+  m_frame.setTable(job.table_id);
+  m_frame.setTransactionID(job.transaction_id);
+
   for (const auto& s : job.servers) {
-    try {
-      auto server = cdir_->getServerConfig(s);
-      if (server.server_status() != SERVER_UP) {
-        continue;
-      }
-
-      auto url = StringUtil::format(
-          "http://$0/rpc/fetch_metadata_file?namespace=$1&table=$2&txid=$3",
-          server.server_addr(),
-          URI::urlEncode(job.db_namespace),
-          URI::urlEncode(job.table_id),
-          job.transaction_id.toString());
-
-      Buffer body;
-      auto req = http::HTTPRequest::mkPost(url, body);
-      //auth_->signRequest(static_cast<Session*>(txn_->getUserData()), &req);
-
-      http::HTTPResponse res;
-      auto rc = http_client.executeRequest(req, &res);
-      if (!rc.isSuccess()) {
-        logWarning("evqld", "metadata fetch failed: $0", rc.message());
-        continue;
-      }
-
-      if (res.statusCode() != 200) {
-        logWarning(
-            "evqld",
-            "metadata fetch failed: $0",
-            res.body().toString());
-        continue;
-      }
-
-      auto is = res.getBodyInputStream();
-      MetadataFile file;
-      file.decode(is.get());
-
-      return metadata_store_->storeMetadataFile(
-          job.db_namespace,
-          job.table_id,
-          file);
-    } catch (const std::exception& e) {
-      logWarning("evqld", "metadata fetch failed: $0", e.what());
+    auto server = cdir_->getServerConfig(s);
+    if (server.server_status() != SERVER_UP) {
+      logWarning("evqld", "metadata server is down: $0", s);
+      continue;
     }
+
+    native_transport::TCPClient client(
+        conn_pool_,
+        dns_cache_,
+        io_timeout,
+        idle_timeout);
+
+    auto rc = client.connect(server.server_addr(), true);
+    if (!rc.isSuccess()) {
+      logWarning(
+          "evqld",
+          "can't connect to metadata server: $0",
+          rc.getMessage());
+      continue;
+    }
+
+    rc = client.sendFrame(&m_frame, 0);
+    if (!rc.isSuccess()) {
+      logWarning("evqld", "metadata request failed: $0", rc.getMessage());
+      continue;
+    }
+
+    uint16_t ret_opcode = 0;
+    uint16_t ret_flags;
+    std::string ret_payload;
+    rc = client.recvFrame(&ret_opcode, &ret_flags, &ret_payload, idle_timeout);
+    if (!rc.isSuccess()) {
+      logWarning("evqld", "metadata request failed: $0", rc.getMessage());
+      continue;
+    }
+
+    switch (ret_opcode) {
+      case EVQL_OP_META_GETFILE_RESULT:
+        break;
+      case EVQL_OP_ERROR: {
+        native_transport::ErrorFrame eframe;
+        eframe.parseFrom(ret_payload.data(), ret_payload.size());
+        logWarning("evqld", "metadata request failed: $0", eframe.getError());
+        continue;
+      }
+      default:
+        logWarning("evqld", "metadata request failed: invalid opcode");
+        continue;
+    }
+
+
+    MetadataFile file;
+    auto is = StringInputStream::fromString(ret_payload);
+    rc = file.decode(is.get());
+    if (!rc.isSuccess()) {
+      logWarning("evqld", "invalid metadata file: $0", rc.getMessage());
+      continue;
+    }
+
+    return metadata_store_->storeMetadataFile(
+        job.db_namespace,
+        job.table_id,
+        file);
   }
 
   return Status(eIOError, "no metadata server responded");

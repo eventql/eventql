@@ -1,7 +1,8 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -22,45 +23,28 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
 #include "eventql/util/VFS.h"
 #include "eventql/util/http/httpservice.h"
 #include "eventql/util/http/HTTPSSEStream.h"
 #include "eventql/util/json/json.h"
 #include "eventql/util/web/SecureCookie.h"
-#include "eventql/AnalyticsSession.pb.h"
 #include "eventql/sql/runtime/runtime.h"
 #include "eventql/auth/internal_auth.h"
 #include "eventql/config/config_directory.h"
 #include "eventql/db/table_service.h"
-#include "eventql/transport/http/LogfileAPIServlet.h"
-#include "eventql/transport/http/MapReduceAPIServlet.h"
-#include "eventql/RemoteTSDBScanParams.pb.h"
+#include "eventql/transport/http/mapreduce_servlet.h"
 #include "eventql/auth/client_auth.h"
 #include "eventql/auth/internal_auth.h"
 #include "eventql/server/sql_service.h"
-
-#include "eventql/eventql.h"
+#include "eventql/db/database.h"
 
 namespace eventql {
 
-struct AnalyticsQuery;
-
-class AnalyticsServlet : public http::StreamingHTTPService {
+class APIServlet : public http::StreamingHTTPService {
 public:
 
-  AnalyticsServlet(
-      const String& cachedir,
-      InternalAuth* auth,
-      ClientAuth* client_auth,
-      InternalAuth* internal_auth,
-      csql::Runtime* sql,
-      eventql::TableService* tsdb,
-      ConfigDirectory* customer_dir,
-      PartitionMap* pmap,
-      SQLService* sql_service,
-      LogfileService* logfile_service,
-      MapReduceService* mapreduce_service,
-      TableService* table_service);
+  APIServlet(Database* db);
 
   void handleHTTPRequest(
       RefPtr<http::HTTPRequestStream> req_stream,
@@ -77,17 +61,6 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
-  void pushEvents(
-      const URI& uri,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void insertIntoMetric(
-      const URI& uri,
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
   void listTables(
       Session* session,
       const http::HTTPRequest* req,
@@ -95,7 +68,6 @@ protected:
 
   void fetchTableDefinition(
       Session* session,
-      const String& table_name,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
@@ -114,12 +86,7 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
-  void addTableTag(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void removeTableTag(
+  void dropTable(
       Session* session,
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
@@ -129,12 +96,6 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
-  void uploadTable(
-      const URI& uri,
-      Session* session,
-      http::HTTPRequestStream* req_stream,
-      http::HTTPResponse* res);
-
   void executeSQL(
       Session* session,
       const http::HTTPRequest* req,
@@ -142,165 +103,41 @@ protected:
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_ASCII(
-      const URI::ParamList& params,
+      const std::string& query,
+      const std::string& database,
       Session* session,
-      const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_BINARY(
-      const URI::ParamList& params,
+      const std::string& query,
+      const std::string& database,
       Session* session,
-      const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_JSON(
-      const URI::ParamList& params,
+      const std::string& query,
+      const std::string& database,
       Session* session,
-      const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_JSONSSE(
-      const URI::ParamList& params,
+      const std::string& query,
+      const std::string& database,
       Session* session,
-      const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
   void executeSQL_CSV(
-      const URI::ParamList& params,
+      const std::string& query,
+      const std::string& database,
       Session* session,
-      const http::HTTPRequest* req,
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
-  void executeQTree(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res,
-      RefPtr<http::HTTPResponseStream> res_stream);
-
-  void executeSQLAggregatePartition(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void executeSQLScanPartition(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res,
-      RefPtr<http::HTTPResponseStream> res_stream);
-
-  void executeDrilldownQuery(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res,
-      RefPtr<http::HTTPResponseStream> res_stream);
-
-  void pipelineInfo(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void sessionTrackingListEvents(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void sessionTrackingEventInfo(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void sessionTrackingEventAdd(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void sessionTrackingEventRemove(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void sessionTrackingEventAddField(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void sessionTrackingEventRemoveField(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void sessionTrackingListAttributes(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void performLogin(
-      const URI& uri,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  void performLogout(
-      const URI& uri,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
-  inline void expectHTTPPost(const http::HTTPRequest& req) {
-    if (req.method() != http::HTTPMessage::M_POST) {
-      RAISE(kIllegalArgumentError, "expected HTTP POST request");
-    }
-  }
-
-  String getCookieDomain(const http::HTTPRequest& req) {
-    auto domain = req.getHeader("Host");
-    auto ppos = domain.find(":");
-    if (ppos != String::npos) {
-      domain.erase(domain.begin() + ppos, domain.end());
-    }
-
-    auto parts = StringUtil::split(domain, ".");
-    if (parts.size() > 2) {
-      parts.erase(parts.begin(), parts.end() - 2);
-    }
-
-    if (parts.size() == 2) {
-      return "." + StringUtil::join(parts, ".");
-    } else {
-      return "";
-    }
-  }
-
-  void catchAndReturnErrors(
-      http::HTTPResponse* resp,
-      Function<void ()> fn) const {
-    try {
-      fn();
-    } catch (const StandardException& e) {
-      resp->setStatus(http::kStatusInternalServerError);
-      resp->addBody(e.what());
-    }
-  }
-
-  String cachedir_;
-  InternalAuth* auth_;
-  ClientAuth* client_auth_;
-  InternalAuth* internal_auth_;
-  csql::Runtime* sql_;
-  eventql::TableService* tsdb_;
-  ConfigDirectory* customer_dir_;
-
-  PartitionMap* pmap_;
-
-  SQLService* sql_service_;
-  LogfileService* logfile_service_;
-  MapReduceService* mapreduce_service_;
-  TableService* table_service_;
-
-  LogfileAPIServlet logfile_api_;
+  Database* db_;
   MapReduceAPIServlet mapreduce_api_;
 };
 

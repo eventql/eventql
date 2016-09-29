@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -43,8 +43,11 @@ enum kFunctionType {
  */
 struct PureFunction {
   PureFunction();
-  PureFunction(void (*_call)(sql_txn* ctx, int argc, SValue* in, SValue* out));
+  PureFunction(
+      void (*_call)(sql_txn* ctx, int argc, SValue* in, SValue* out),
+      bool _has_side_effects = false);
   void (*call)(sql_txn* ctx, int argc, SValue* in, SValue* out);
+  bool has_side_effects;
 };
 
 /**
@@ -68,6 +71,7 @@ struct SFunction {
   SFunction(AggregateFunction fn);
 
   bool isAggregate() const;
+  bool hasSideEffects() const;
 
   kFunctionType type;
   union {

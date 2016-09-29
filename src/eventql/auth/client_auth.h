@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -26,6 +26,7 @@
 #include "eventql/server/session.h"
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/status.h"
+#include "eventql/transport/native/connection.h"
 
 namespace eventql {
 
@@ -34,9 +35,19 @@ public:
 
   virtual ~ClientAuth() = default;
 
-  virtual Status authenticateSession(
+  virtual Status authenticateNonInteractive(
       Session* session,
       HashMap<String, String> auth_data) = 0;
+
+  virtual bool authenticateInteractiveSupported() {
+    return false;
+  }
+
+  virtual Status authenticateInteractive(
+      Session* session,
+      native_transport::NativeConnection* connection) {
+    return Status(eRuntimeError, "interactive auth not supported");
+  }
 
   virtual Status changeNamespace(
       Session* session,

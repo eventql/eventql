@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
- *   - Laura Schlimmer <laura@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -37,8 +37,6 @@ public:
 
   static const String& kDefaultHost;
   static const int kDefaultPort;
-  static const String& kDefaultUser;
-  static const String& kDefaultHistoryPath;
   static const uint64_t kDefaultHistoryMaxSize;
 
   enum class kLanguage { SQL, JAVASCRIPT };
@@ -49,11 +47,13 @@ public:
 
   int getPort() const;
 
-  String getUser() const;
+  Option<String> getUser() const;
 
   bool getBatchMode() const;
 
   bool getQuietMode() const;
+
+  uint64_t getTimeout() const;
 
   Option<String> getDatabase() const;
 
@@ -67,12 +67,14 @@ public:
 
   Option<String> getExec() const;
 
-  String getHistoryPath() const;
+  Option<String> getHistoryPath() const;
 
   uint64_t getHistoryMaxSize() const;
 
 protected:
   RefPtr<ProcessConfig> cfg_;
+  String default_user_;
+  String default_history_path_;
 };
 
 } // namespace cli

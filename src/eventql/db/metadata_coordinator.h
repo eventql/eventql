@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -27,34 +27,37 @@
 #include "eventql/db/metadata_operation.h"
 #include "eventql/db/metadata_file.h"
 #include "eventql/config/config_directory.h"
+#include "eventql/transport/native/client_tcp.h"
 
 namespace eventql {
 
 class MetadataCoordinator {
 public:
 
-  MetadataCoordinator(ConfigDirectory* cdir);
+  MetadataCoordinator(
+      ConfigDirectory* cdir,
+      ProcessConfig* config,
+      native_transport::TCPConnectionPool* conn_pool,
+      net::DNSCache* dns_cache);
 
   Status performAndCommitOperation(
       const String& ns,
       const String& table_name,
-      MetadataOperation op);
+      MetadataOperation op,
+      MetadataOperationResult* res = nullptr);
 
   Status performOperation(
       const String& ns,
       const String& table_name,
       MetadataOperation op,
-      const Vector<String>& servers);
+      const Vector<String>& servers,
+      MetadataOperationResult* res = nullptr);
 
   Status createFile(
       const String& ns,
       const String& table_name,
       const MetadataFile& file,
       const Vector<String>& servers);
-
-  Status discoverPartition(
-      PartitionDiscoveryRequest request,
-      PartitionDiscoveryResponse* response);
 
 protected:
 
@@ -72,6 +75,11 @@ protected:
       MetadataOperationResult* result);
 
   ConfigDirectory* cdir_;
+  ProcessConfig* config_;
+  native_transport::TCPConnectionPool* conn_pool_;
+  net::DNSCache* dns_cache_;
+  std::mutex lockmap_mutex_;
+  std::map<std::string, std::unique_ptr<std::mutex>> lockmap_;
 };
 
 

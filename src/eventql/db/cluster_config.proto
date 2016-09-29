@@ -1,0 +1,46 @@
+package eventql;
+
+enum DHTNodeStatus {
+  DHTNODE_JOINING = 0;
+  DHTNODE_LIVE = 1;
+  DHTNODE_MAINTENANCE = 2;
+  DHTNODE_LEAVING = 3;
+};
+
+message DHTNode {
+  required string name = 2;
+  required string addr = 3;
+  required DHTNodeStatus status = 4;
+};
+
+message ClusterConfig {
+  optional uint32 version = 1;
+  optional uint32 replication_factor = 4 [default = 3];
+};
+
+enum ServerStatus {
+  SERVER_DOWN = 0;
+  SERVER_UP = 1;
+};
+
+message ServerStats {
+  optional string listen_addr = 1;
+  optional double load_factor = 2;
+  optional uint64 disk_used = 3;
+  optional uint64 disk_available = 4;
+  optional uint64 partitions_loaded = 5;
+  optional uint64 partitions_assigned = 6;
+  optional string buildinfo = 7;
+  optional bool noalloc = 8;
+};
+
+message ServerConfig {
+  optional uint64 version = 1;
+  required string server_id = 2;
+  optional string server_addr = 3;
+  optional ServerStatus server_status = 4;
+  optional bool is_leaving = 6;
+  optional bool is_dead = 7;
+  optional ServerStats server_stats = 9;
+};
+

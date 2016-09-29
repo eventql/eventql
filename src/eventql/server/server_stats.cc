@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -25,8 +25,8 @@
 
 namespace eventql {
 
-Z1Stats* z1stats() {
-  static Z1Stats singleton;
+struct evqld_stats* evqld_stats() {
+  static struct evqld_stats singleton;
   return &singleton;
 }
 

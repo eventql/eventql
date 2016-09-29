@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
- *   - Laura Schlimmer <laura@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -23,7 +23,14 @@
  * code of your own applications
  */
 #include <eventql/sql/result_cursor.h>
+#include <eventql/sql/transaction.h>
+#include <eventql/sql/scheduler/execution_context.h>
+#include <eventql/sql/CSTableScan.h>
+#include <eventql/sql/qtree/SequentialScanNode.h>
 #include <eventql/db/partition_map.h>
+#include <eventql/db/partition_reader.h>
+#include <eventql/server/sql/table_provider.h>
+#include <eventql/transport/native/client_tcp.h>
 
 #include "eventql/eventql.h"
 
@@ -57,6 +64,39 @@ protected:
   ScopedPtr<csql::ResultCursor> cur_cursor_;
   ScopedPtr<csql::CSTableScan> cur_scan_;
   ScopedPtr<PartitionArena::SkiplistReader> cur_skiplist_;
+};
+
+class RemotePartitionCursor : public csql::ResultCursor {
+public:
+
+  RemotePartitionCursor(
+      Session* session,
+      csql::Transaction* txn,
+      csql::ExecutionContext* execution_context,
+      const std::string& database,
+      RefPtr<csql::SequentialScanNode> stmt,
+      const std::vector<std::string>& servers);
+
+  bool next(csql::SValue* row, int row_len) override;
+
+  size_t getNumColumns() override;
+
+protected:
+
+  ReturnCode fetchRows();
+
+  csql::Transaction* txn_;
+  csql::ExecutionContext* execution_context_;
+  std::string database_;
+  RefPtr<csql::SequentialScanNode> stmt_;
+  std::vector<std::string> servers_;
+  std::vector<csql::SValue> row_buf_;
+  size_t ncols_;
+  size_t row_buf_pos_;
+  bool running_;
+  bool done_;
+  uint64_t timeout_;
+  native_transport::TCPClient client_;
 };
 
 class StaticPartitionCursor : public csql::ResultCursor {

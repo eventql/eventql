@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -32,14 +32,12 @@
 #include <eventql/cli/commands/cluster_add_server.h>
 #include <eventql/cli/commands/cluster_create.h>
 #include <eventql/cli/commands/cluster_status.h>
+#include <eventql/cli/commands/cluster_list.h>
 #include <eventql/cli/commands/cluster_remove_server.h>
-#include <eventql/cli/commands/namespace_create.h>
-#include <eventql/cli/commands/rebalance.h>
-#include <eventql/cli/commands/table_set_primary_key.h>
+#include <eventql/cli/commands/database_create.h>
 #include <eventql/cli/commands/table_split.h>
 #include <eventql/cli/commands/table_split_finalize.h>
-#include <eventql/cli/commands/table_disable_replication.h>
-#include <eventql/cli/commands/cluster_set_allocation_policy.h>
+#include <eventql/cli/commands/table_config_set.h>
 
 using namespace eventql;
 
@@ -126,13 +124,11 @@ int main(int argc, const char** argv) {
   commands.emplace_back(new eventql::cli::ClusterCreate(process_config));
   commands.emplace_back(new eventql::cli::ClusterRemoveServer(process_config));
   commands.emplace_back(new eventql::cli::ClusterStatus(process_config));
-  commands.emplace_back(new eventql::cli::NamespaceCreate(process_config));
-  commands.emplace_back(new eventql::cli::Rebalance(process_config));
+  commands.emplace_back(new eventql::cli::ClusterList(process_config));
+  commands.emplace_back(new eventql::cli::DatabaseCreate(process_config));
   commands.emplace_back(new eventql::cli::TableSplit(process_config));
   commands.emplace_back(new eventql::cli::TableSplitFinalize(process_config));
-  commands.emplace_back(new eventql::cli::TableSetPrimaryKey(process_config));
-  commands.emplace_back(new eventql::cli::TableDisableReplication(process_config));
-  commands.emplace_back(new eventql::cli::ClusterSetAllocationPolicy(process_config));
+  commands.emplace_back(new eventql::cli::TableConfigSet(process_config));
 
   /* print help/version and exit */
   bool print_help = flags.isSet("help");
@@ -148,7 +144,7 @@ int main(int argc, const char** argv) {
     stdout_os->write(
         StringUtil::format(
             "EventQL $0 ($1)\n"
-            "Copyright (c) 2016, zScale Techology GmbH. All rights reserved.\n\n",
+            "Copyright (c) 2016, DeepCortex GmbH. All rights reserved.\n\n",
             kVersionString,
             kBuildID));
   }
@@ -211,6 +207,10 @@ int main(int argc, const char** argv) {
           stdin_is.get(),
           stdout_os.get(),
           stderr_os.get());
+
+      if (!rc.isSuccess()) {
+        stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
+      }
 
       return rc.isSuccess() ? 0 : 1;
     }

@@ -1,8 +1,8 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
- *   - Laura Schlimmer <laura@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -42,14 +42,6 @@ Status ClusterCreate::execute(
     OutputStream* stdout_os,
     OutputStream* stderr_os) {
   ::cli::FlagParser flags;
-  flags.defineFlag(
-      "cluster_name",
-      ::cli::FlagParser::T_STRING,
-      true,
-      NULL,
-      NULL,
-      "node name",
-      "<string>");
 
   try {
     flags.parseArgv(argv);
@@ -61,7 +53,7 @@ Status ClusterCreate::execute(
           &cdir);
 
       if (rc.isSuccess()) {
-        rc = cdir->start();
+        rc = cdir->start(true);
       }
 
       if (!rc.isSuccess()) {
@@ -71,6 +63,7 @@ Status ClusterCreate::execute(
     }
 
     ClusterConfig cfg;
+    cfg.set_version(1);
     cdir->updateClusterConfig(cfg);
 
     cdir->stop();
@@ -99,8 +92,8 @@ void ClusterCreate::printHelp(OutputStream* stdout_os) const {
       "\nevqlctl-$0 - $1\n\n", kName_, kDescription_));
 
   stdout_os->write(
-      "Usage: evqlctl [OPTIONS]\n"
-      "  --cluster_name <node name>       The name of the cluster to create.\n"
+      "Usage: evqlctl cluster-create [OPTIONS]\n"
+      "  \n"
   );
 }
 

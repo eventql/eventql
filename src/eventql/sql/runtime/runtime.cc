@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -57,7 +57,8 @@ Runtime::Runtime(
     symbol_table_(symbol_table),
     query_builder_(query_builder),
     query_plan_builder_(query_plan_builder),
-    scheduler_(std::move(scheduler)) {}
+    scheduler_(std::move(scheduler)),
+    query_cache_(nullptr) {}
 
 ScopedPtr<QueryPlan> Runtime::buildQueryPlan(
     Transaction* txn,
@@ -218,5 +219,13 @@ Scheduler* Runtime::getScheduler() {
   return scheduler_.get();
 }
 
+QueryCache* Runtime::getQueryCache() const {
+  return query_cache_;
+}
+
+void Runtime::setQueryCache(QueryCache* cache) {
+  query_cache_ = cache;
+}
 
 }
+

@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 zScale Technology GmbH <legal@zscale.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@zscale.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -59,8 +59,8 @@ union MessageObjectValues {
 
 struct TrueType {};
 struct FalseType {};
-static const TrueType TRUE {};
-static const FalseType FALSE {};
+static const TrueType MSG_TRUE {};
+static const FalseType MSG_FALSE {};
 
 struct MessageObject {
   explicit MessageObject(uint32_t id = 0);
