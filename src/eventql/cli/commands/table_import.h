@@ -49,6 +49,7 @@ public:
   void printHelp(OutputStream* stdout_os) const override;
 
 protected:
+  Status run(const std::string& file);
   Status uploadBatch(std::vector<std::string> batch);
 
   static const String kName_;
@@ -57,6 +58,9 @@ protected:
   native_transport::TCPClient* client_;
   std::string database_;
   std::string table_;
+  std::string host_;
+  uint64_t port_;
+  std::vector<std::pair<std::string, std::string>> auth_data_;
 };
 
 } // namespace cli

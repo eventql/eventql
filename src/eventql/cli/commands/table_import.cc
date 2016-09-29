@@ -99,10 +99,8 @@ Status TableImport::execute(
       "number of connections",
       "<num>");
 
-  std::unique_ptr<FileInputStream> is;
   try {
     flags.parseArgv(argv);
-    is = FileInputStream::openFile(flags.getString("file"));
 
   } catch (const Exception& e) {
 
@@ -115,37 +113,48 @@ Status TableImport::execute(
 
   database_ = flags.getString("database");
   table_ = flags.getString("table");
+  host_ = flags.getString("host");
+  port_ = flags.getInt("port");
 
   /* auth data */
-  std::vector<std::pair<std::string, std::string>> auth_data;
   if (process_cfg_->hasProperty("client.user")) {
-    auth_data.emplace_back(
+    auth_data_.emplace_back(
         "user",
         process_cfg_->getString("client.user").get());
   }
 
   if (process_cfg_->hasProperty("client.password")) {
-    auth_data.emplace_back(
+    auth_data_.emplace_back(
         "password",
         process_cfg_->getString("client.").get());
   }
 
   if (process_cfg_->hasProperty("client.auth_token")) {
-    auth_data.emplace_back(
+    auth_data_.emplace_back(
         "auth_token",
         process_cfg_->getString("client.auth_token").get());
   }
 
-  auto host = flags.getString("host");
-  auto port = flags.getInt("port");
-
   client_ = new native_transport::TCPClient(nullptr, nullptr);
+
+  return run(flags.getString("file"));
+}
+
+Status TableImport::run(const std::string& file) {
+  std::unique_ptr<FileInputStream> is;
+  try {
+    is = FileInputStream::openFile(file);
+
+  } catch (const Exception& e) {
+    return Status(e);
+  }
+
   /* connect */
   auto rc = client_->connect(
-      host,
-      port,
+      host_,
+      port_,
       false,
-      auth_data);
+      auth_data_);
   if (!rc.isSuccess()) {
     return rc;
   }
@@ -180,6 +189,7 @@ Status TableImport::execute(
 
   client_->close();
   return Status::success();
+
 }
 
 Status TableImport::uploadBatch(std::vector<std::string> batch) {
