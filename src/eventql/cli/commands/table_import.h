@@ -57,6 +57,7 @@ protected:
   static const String kDescription_;
   RefPtr<ProcessConfig> process_cfg_;
   bool done_;
+  Status status_;
   std::mutex mutex_;
   std::condition_variable cv_;
   size_t num_threads_;
