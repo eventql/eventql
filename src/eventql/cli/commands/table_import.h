@@ -23,9 +23,11 @@
  * code of your own applications
  */
 #pragma once
+#include <queue>
 #include <eventql/eventql.h>
 #include "eventql/cli/commands/cli_command.h"
 #include "eventql/config/process_config.h"
+#include "eventql/transport/native/client_tcp.h"
 
 namespace eventql {
 namespace cli {
@@ -33,6 +35,9 @@ namespace cli {
 class TableImport : public CLICommand {
 public:
   TableImport(RefPtr<ProcessConfig> process_cfg);
+
+  static const uint64_t kDefaultBatchSize = 25; //FIXME
+  static const uint64_t kDefaultNumThreads = 2; //FIXME
 
   Status execute(
       const std::vector<std::string>& argv,
@@ -46,9 +51,20 @@ public:
   void printHelp(OutputStream* stdout_os) const override;
 
 protected:
+  void runThread(size_t idx);
+
   static const String kName_;
   static const String kDescription_;
   RefPtr<ProcessConfig> process_cfg_;
+  bool done_;
+  std::mutex mutex_;
+  std::condition_variable cv_;
+  size_t num_threads_;
+  std::vector<std::thread> threads_;
+  std::vector<std::unique_ptr<native_transport::TCPClient>> clients_;
+  std::queue<std::vector<std::string>> batches_;
+  std::string database_;
+  std::string table_;
 };
 
 } // namespace cli

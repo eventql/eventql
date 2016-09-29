@@ -25,7 +25,6 @@
 #include <eventql/cli/commands/table_import.h>
 #include <eventql/util/cli/flagparser.h>
 #include "eventql/util/logging.h"
-#include "eventql/transport/native/client_tcp.h"
 #include "eventql/transport/native/frames/insert.h"
 #include "eventql/transport/native/frames/error.h"
 
@@ -37,7 +36,8 @@ const String TableImport::kDescription_ = "Import json or csv data to a table.";
 
 TableImport::TableImport(
     RefPtr<ProcessConfig> process_cfg) :
-    process_cfg_(process_cfg) {}
+    process_cfg_(process_cfg),
+    done_(false) {}
 
 Status TableImport::execute(
     const std::vector<std::string>& argv,
@@ -91,6 +91,15 @@ Status TableImport::execute(
       "file path",
       "<string>");
 
+  flags.defineFlag(
+      "connections",
+      ::cli::FlagParser::T_INTEGER,
+      false,
+      "c",
+      "10",
+      "number of connections",
+      "<num>");
+
   std::unique_ptr<FileInputStream> is;
   try {
     flags.parseArgv(argv);
@@ -104,6 +113,19 @@ Status TableImport::execute(
         e.getMessage()));
     return Status(e);
   }
+
+  /* init threads */
+  num_threads_ = flags.isSet("connections") ?
+      flags.getInt("connections") :
+      kDefaultNumThreads;
+
+  threads_.resize(num_threads_);
+  for (size_t i = 0; i < num_threads_; ++i) {
+    clients_.emplace_back(new native_transport::TCPClient(nullptr, nullptr));
+  }
+
+  database_ = flags.getString("database");
+  table_ = flags.getString("table");
 
   /* auth data */
   std::vector<std::pair<std::string, std::string>> auth_data;
@@ -125,73 +147,138 @@ Status TableImport::execute(
         process_cfg_->getString("client.auth_token").get());
   }
 
-  auto rc = Status::success();
+  auto host = flags.getString("host");
+  auto port = flags.getInt("port");
 
   /* connect */
-  native_transport::TCPClient client(nullptr, nullptr);
-  rc = client.connect(
-      flags.getString("host"),
-      flags.getInt("port"),
-      false,
-      auth_data);
-  if (!rc.isSuccess()) {
-    goto exit;
-  }
-
-  /* insert */
-  {
-    native_transport::InsertFrame i_frame;
-    i_frame.setDatabase(flags.getString("database"));
-    i_frame.setTable(flags.getString("table"));
-    i_frame.setRecordEncoding(EVQL_INSERT_CTYPE_JSON);
-
-    std::string line;
-    while (is->readLine(&line)) {
-      i_frame.addRecord(line);
-      line.clear();
-    }
-
-    rc = client.sendFrame(&i_frame, 0);
+  for (size_t i = 0; i < num_threads_; ++i) {
+    auto rc = clients_[i]->connect(
+        host,
+        port,
+        false,
+        auth_data);
     if (!rc.isSuccess()) {
-      goto exit;
+      return rc;
     }
   }
+
+  /* run */
+  for (size_t i = 0; i < num_threads_; ++i) {
+    threads_[i] = std::thread(std::bind(&TableImport::runThread, this, i));
+  }
+
+  /* push line batches into the queue */
+  std::vector<std::string> batch;
+  std::string line;
+  uint64_t cur_size = 0;
+  while (is->readLine(&line)) {
+    if (cur_size + line.size() > kDefaultBatchSize) {
+      std::unique_lock<std::mutex> lk(mutex_);
+      batches_.push(batch);
+      batch.clear();
+      cur_size = 0;
+    }
+
+    batch.emplace_back(line);
+    cur_size += line.size();
+    line.clear();
+  }
+  batches_.push(batch);
 
   {
-    uint16_t ret_opcode = 0;
-    uint16_t ret_flags;
-    std::string ret_payload;
-    while (ret_opcode != EVQL_OP_ACK) {
-      rc = client.recvFrame(
-          &ret_opcode,
-          &ret_flags,
-          &ret_payload,
-          kMicrosPerSecond); // FIXME
+    std::unique_lock<std::mutex> lk(mutex_);
+    done_ = true;
+    cv_.notify_all();
+  }
 
-      if (!rc.isSuccess()) {
-        goto exit;
-      }
-
-      switch (ret_opcode) {
-        case EVQL_OP_ACK:
-        case EVQL_OP_HEARTBEAT:
-          continue;
-        case EVQL_OP_ERROR: {
-          native_transport::ErrorFrame eframe;
-          eframe.parseFrom(ret_payload.data(), ret_payload.size());
-          rc = ReturnCode::error("ERUNTIME", eframe.getError());
-          goto exit;
-        }
-        default:
-          rc = ReturnCode::error("ERUNTIME", "unexpected opcode");
-          goto exit;
-      }
+  for (auto& t : threads_) {
+    if (t.joinable()) {
+      t.join();
     }
   }
 
-exit:
-  client.close();
-  return rc;
+  for (size_t i = 0; i < clients_.size(); ++i) {
+    clients_[i]->close();
+  }
+
+  return Status::success();
+//exit:
+//  return rc;
+}
+
+void TableImport::runThread(size_t idx) {
+  for (;;) {
+    std::unique_lock<std::mutex> lk(mutex_);
+    //if (error_) { //FIXME handle error
+    //  return;
+    //}
+
+    if (batches_.size() == 0) {
+      if (done_) {
+        return;
+      }
+
+      //FIXME wait?
+      continue;
+    }
+
+    std::vector<std::string> batch;
+    batch = batches_.front();
+    batches_.pop();
+
+    lk.unlock();
+    iputs("got batch", 1);
+    //do upload
+  }
+  ///* insert */
+  //native_transport::InsertFrame i_frame;
+  //i_frame.setDatabase(database_);
+  //i_frame.setTable(table_);
+  //i_frame.setRecordEncoding(EVQL_INSERT_CTYPE_JSON);
+
+  //auto rc = Status::success();
+  //rc = clients_[idx]->sendFrame(&i_frame, 0);
+  //if (!rc.isSuccess()) {
+  //  clients_[idx]->close();
+  ////FIXME handle error
+  //  //goto exit;
+  //}
+
+  //uint16_t ret_opcode = 0;
+  //uint16_t ret_flags;
+  //std::string ret_payload;
+  //while (ret_opcode != EVQL_OP_ACK) {
+  //  rc = clients_[idx]->recvFrame(
+  //      &ret_opcode,
+  //      &ret_flags,
+  //      &ret_payload,
+  //      kMicrosPerSecond); // FIXME
+
+  //  if (!rc.isSuccess()) {
+  //    clients_[idx]->close();
+  ////FIXME handle error
+  //    //goto exit;
+  //  }
+
+  //  switch (ret_opcode) {
+  //    case EVQL_OP_ACK:
+  //    case EVQL_OP_HEARTBEAT:
+  //      continue;
+  //    case EVQL_OP_ERROR: {
+  //      native_transport::ErrorFrame eframe;
+  //      eframe.parseFrom(ret_payload.data(), ret_payload.size());
+  //      rc = ReturnCode::error("ERUNTIME", eframe.getError());
+  //      clients_[idx]->close();
+  ////FIXME handle error
+  //      //goto exit;
+  //    }
+  //    default:
+  //      rc = ReturnCode::error("ERUNTIME", "unexpected opcode");
+  //      clients_[idx]->close();
+  ////FIXME handle error
+  //      //goto exit;
+  //  }
+  //}
 }
 
 const String& TableImport::getName() const {
@@ -208,6 +295,7 @@ void TableImport::printHelp(OutputStream* stdout_os) const {
 
   stdout_os->write(
       "Usage: evqlctl table-import [OPTIONS]\n"
+      "   -c, --connections <num>     Number of concurrent connections\n"
       "  -d, --database <db>          Select a database.\n"
       "  -t, --table <tbl>            Select a destination table.\n"
       "  -f, --file <file>            Set the path of the file to import.\n"
