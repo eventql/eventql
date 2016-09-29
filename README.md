@@ -8,9 +8,9 @@ runs super-fast SQL and MapReduce queries.
 
 **More information:**
 [Documentation](http://eventql.io/),
-[Download](http://eventql.io/),
-[Architecture](http://eventql.io/),
-[Getting Started](http://eventql.io/)
+[Download](https://eventql.io/download/),
+[Architecture](https://eventql.io/documentation/internals/architecture/),
+[Getting Started](https://eventql.io/documentation/getting-started/first-steps/)
 
 
 ## Features
