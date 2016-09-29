@@ -72,12 +72,8 @@ similar coordination service.
 
 ## Use Cases
 
-EventQL allows you to write and update large volumes of rows (i.e. JSON events)
-into tables in real-time. You can then correlate and aggregate the stored data
-with standard SQL,
-
-Here are a few more example scenarios that are particularly well suited to
-EventQL's design:
+Here are a few example scenarios that are particularly well suited to EventQL's
+design:
 
 - Storage and analysis of streaming event, timeseries or relational data
 - High volume event and sensor data logging
