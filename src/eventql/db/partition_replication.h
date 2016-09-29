@@ -130,7 +130,7 @@ protected:
       const Vector<bool>& upload_skiplist,
       ShreddedRecordListBuilder* upload_builder);
 
-  size_t uploadBatchTo(
+  ReturnCode uploadBatchTo(
       const String& host,
       const SHA1Hash& target_partition_id,
       const ShreddedRecordList& batch);

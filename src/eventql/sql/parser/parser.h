@@ -128,6 +128,8 @@ protected:
   ASTNode* explainQueryStatement();
   ASTNode* describePartitionsStatement();
   ASTNode* describeTableStatement();
+  ASTNode* clusterStatement();
+  ASTNode* clusterShowServersStatement();
   ASTNode* useStatement();
 
   ASTNode* fromClause();

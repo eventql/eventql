@@ -70,15 +70,8 @@ MapTableTask::MapTableTask(
     kr.end = encodePartitionKey(keyspace, table_ref_.keyrange_limit.get());
   }
 
-  MetadataClient metadata_client(
-      cdir_,
-      config_,
-      session->getDatabaseContext()->metadata_cache,
-      session->getDatabaseContext()->connection_pool,
-      session->getDatabaseContext()->dns_cache);
-
   PartitionListResponse partition_list;
-  auto rc = metadata_client.listPartitions(
+  auto rc = session->getDatabaseContext()->metadata_client->listPartitions(
       session->getEffectiveNamespace(),
       table_ref_.table_key,
       kr,

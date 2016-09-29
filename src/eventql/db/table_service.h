@@ -67,6 +67,8 @@ public:
 
   TableService(DatabaseContext* dbctx);
 
+  Status createDatabase(const String& db_name);
+
   Status createTable(
       const String& db_namespace,
       const String& table_name,

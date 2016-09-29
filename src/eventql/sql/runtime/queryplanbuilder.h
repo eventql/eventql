@@ -200,6 +200,10 @@ public:
       Transaction* txn,
       ASTNode* ast);
 
+  QueryTreeNode* buildClusterShowServers(
+      Transaction* txn,
+      ASTNode* ast);
+
   QueryTreeNode* buildCreateTable(
       Transaction* txn,
       ASTNode* ast);

@@ -33,7 +33,6 @@
 #include "eventql/util/io/TerminalOutputStream.h"
 #include "eventql/util/wallclock.h"
 #include "eventql/util/json/json.h"
-#include "eventql/util/json/jsonrpc.h"
 #include "eventql/util/http/httpclient.h"
 #include "eventql/util/http/HTTPSSEResponseHandler.h"
 #include "eventql/util/cli/CLI.h"
@@ -199,10 +198,7 @@ Status Console::runQuery(const String& query) {
 
   ProgressCBType on_progress = [this, &stdout_os, &line_dirty, is_tty] () {
     auto status_line = StringUtil::format(
-        "[$0/$1] $2 tasks running ($3%)",
-        evql_client_getstat(client_, EVQL_STAT_TASKSCOMPLETED),
-        evql_client_getstat(client_, EVQL_STAT_TASKSTOTAL),
-        evql_client_getstat(client_, EVQL_STAT_TASKSRUNNING),
+        "[$0%] Query running...",
         evql_client_getstat(client_, EVQL_STAT_PROGRESSPERMILL) / 10.0);
 
     if (is_tty) {

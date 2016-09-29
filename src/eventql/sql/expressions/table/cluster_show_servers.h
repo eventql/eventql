@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -21,40 +21,33 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/util/json/jsonutil.h"
+#pragma once
+#include "eventql/eventql.h"
+#include <eventql/util/stdtypes.h>
+#include <eventql/sql/qtree/ShowTablesNode.h>
+#include <eventql/sql/runtime/tablerepository.h>
 
-namespace json {
+namespace csql {
 
-template <typename T>
-T JSONRPCRequest::getArg(size_t index, const std::string& name) const {
-  auto begin = paramsBegin();
-  auto end = paramsEnd();
+class ClusterShowServersExpression : public TableExpression {
+public:
 
-  switch (begin->type) {
-    case json::JSON_OBJECT_BEGIN: {
-      auto iter = JSONUtil::objectLookup(begin, end, name);
-      if (iter == end) {
-        RAISEF(kIndexError, "missing argument: $0", name);
-      }
+  static const size_t kNumColumns = 8;
 
-      return fromJSON<T>(iter, end);
-    }
+  ClusterShowServersExpression(Transaction* txn);
 
-    case json::JSON_ARRAY_BEGIN: {
-      JSONObject::const_iterator iter;
-      try {
-        iter = JSONUtil::arrayLookup(begin, end, index);
-      } catch (const std::exception& e) {
-        RAISEF(kIndexError, "missing argument: $0", name);
-      }
+  ScopedPtr<ResultCursor> execute() override;
 
-      return fromJSON<T>(iter, end);
-    }
+  size_t getNumColumns() const override;
 
-    default:
-      RAISE(kParseError, "params type must be array or object");
+protected:
 
-  }
-}
+  bool next(SValue* row, size_t row_len);
 
-} // namespace json
+  Transaction* txn_;
+  Vector<eventql::ServerConfig> rows_;
+  size_t counter_;
+};
+
+} //csql
+

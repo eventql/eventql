@@ -47,6 +47,7 @@ public:
 
   SHA1Hash getInputTransactionID() const;
   SHA1Hash getOutputTransactionID() const;
+  MetadataOperationType getOperationType() const;
 
   Status perform(
       const MetadataFile& input,

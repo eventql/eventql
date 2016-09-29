@@ -34,25 +34,18 @@
 #include "eventql/util/thread/threadpool.h"
 #include "eventql/util/thread/FixedSizeThreadPool.h"
 #include "eventql/util/wallclock.h"
-#include "eventql/util/VFS.h"
-#include "eventql/util/rpc/ServerGroup.h"
-#include "eventql/util/rpc/RPC.h"
-#include "eventql/util/rpc/RPCClient.h"
 #include "eventql/util/cli/flagparser.h"
 #include "eventql/util/json/json.h"
-#include "eventql/util/json/jsonrpc.h"
 #include "eventql/util/io/FileLock.h"
 #include "eventql/util/stats/statsdagent.h"
 #include "eventql/io/sstable/SSTableServlet.h"
 #include "eventql/util/mdb/MDB.h"
 #include "eventql/util/mdb/MDBUtil.h"
-#include "eventql/transport/http/api_servlet.h"
 #include "eventql/db/table_config.pb.h"
 #include "eventql/db/table_service.h"
 #include "eventql/db/metadata_coordinator.h"
 #include "eventql/db/metadata_replication.h"
 #include "eventql/db/metadata_service.h"
-#include "eventql/transport/http/rpc_servlet.h"
 #include "eventql/db/replication_worker.h"
 #include "eventql/db/tablet_index_cache.h"
 #include "eventql/db/compaction_worker.h"
@@ -61,13 +54,11 @@
 #include "eventql/db/monitor.h"
 #include "eventql/db/database.h"
 #include "eventql/db/server_allocator.h"
-#include "eventql/transport/http/default_servlet.h"
 #include "eventql/sql/defaults.h"
 #include "eventql/sql/runtime/query_cache.h"
 #include "eventql/config/config_directory.h"
 #include "eventql/config/config_directory_zookeeper.h"
 #include "eventql/config/config_directory_standalone.h"
-#include "eventql/transport/http/status_servlet.h"
 #include "eventql/server/sql/scheduler.h"
 #include "eventql/server/sql/table_provider.h"
 #include "eventql/server/listener.h"
@@ -113,6 +104,8 @@ protected:
   std::unique_ptr<MetadataStore> metadata_store_;
   std::unique_ptr<MetadataCache> metadata_cache_;
   std::unique_ptr<MetadataService> metadata_service_;
+  std::unique_ptr<MetadataClient> metadata_client_;
+  std::unique_ptr<MetadataCoordinator> metadata_coordinator_;
   std::unique_ptr<PartitionMap> partition_map_;
   std::unique_ptr<TableService> table_service_;
   std::unique_ptr<ReplicationWorker> replication_worker_;
@@ -305,6 +298,22 @@ ReturnCode DatabaseImpl::start() {
           metadata_store_.get(),
           metadata_cache_.get()));
 
+  metadata_client_.reset(
+      new MetadataClient(
+          config_dir_.get(),
+          cfg_,
+          metadata_store_.get(),
+          metadata_cache_.get(),
+          connection_pool_.get(),
+          dns_cache_.get()));
+
+  metadata_coordinator_.reset(
+      new MetadataCoordinator(
+          config_dir_.get(),
+          cfg_,
+          connection_pool_.get(),
+          dns_cache_.get()));
+
   /* server config */
   server_cfg_.reset(new ServerCfg());
   server_cfg_->db_path = tsdb_dir;
@@ -396,6 +405,8 @@ ReturnCode DatabaseImpl::start() {
     database_context_->lsm_index_cache = server_cfg_->idx_cache.get();
     database_context_->metadata_store = metadata_store_.get();
     database_context_->metadata_cache = metadata_cache_.get();
+    database_context_->metadata_client = metadata_client_.get();
+    database_context_->metadata_coordinator = metadata_coordinator_.get();
     database_context_->internal_auth = internal_auth_.get();
     database_context_->client_auth = client_auth_.get();
     database_context_->sql_runtime = sql_.get();
@@ -428,7 +439,9 @@ ReturnCode DatabaseImpl::start() {
             tbl.table_name(),
             partition_id);
 
-        replication_worker_->enqueuePartition(partition.get(), 0);
+        replication_worker_->enqueuePartition(
+            partition.get(),
+            (uint64_t) ReplicationWorker::ReplicationOptions::CORK);
       } catch (const std::exception& e) {
         logError(
             "evqld",
@@ -466,7 +479,7 @@ ReturnCode DatabaseImpl::start() {
             config_dir_.get(),
             cfg_,
             server_alloc_.get(),
-            metadata_cache_.get(),
+            metadata_client_.get(),
             cfg_->getInt("cluster.rebalance_interval").get(),
             connection_pool_.get(),
             dns_cache_.get()));

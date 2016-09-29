@@ -40,7 +40,7 @@ public:
       ConfigDirectory* cdir,
       ProcessConfig* config,
       ServerAllocator* server_alloc,
-      MetadataCache* metadata_cache,
+      MetadataClient* metadata_client,
       uint64_t rebalance_interval,
       native_transport::TCPConnectionPool* conn_pool,
       net::DNSCache* dns_cache);

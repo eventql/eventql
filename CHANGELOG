@@ -31,13 +31,21 @@ EventQL v0.5.0 beta;
   * Added the DESCRIBE PARTITIONS table statement to obtain information about
     the partitions of a table
 
+  * Added the USE statement to switch databases
+
   * Added the following new configuration options: server.disk_capacity,
     server.load_limit_{soft,hard}, server.partitions_loading_limit_{soft,hard},
     server.loadinfo_publish_interval, server.noalloc,
     server.s2s_pool_max_connections, server.s2s_pool_max_connections_per_host,
-    server.s2s_pool_linger_timeout
+    server.s2s_pool_linger_timeout, cluster.allow_create_database
 
   * Added new sql functions: usleep, fnv32
+
+  * Added the CREATE DATABASE statement
+
+  * Added the CLUSTER SHOW SERVERS statement and the cluster-list command to
+    obtain information about the servers of the current cluster.
+
 
 EventQL v0.4.0 beta;
 

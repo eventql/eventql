@@ -165,15 +165,9 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
         seqscan->constraints());
 
     auto session = static_cast<Session*>(ctx->getUserData());
-    MetadataClient metadata_client(
-        cdir_,
-        session->getDatabaseContext()->config,
-        session->getDatabaseContext()->metadata_cache,
-      session->getDatabaseContext()->connection_pool,
-      session->getDatabaseContext()->dns_cache);
 
     PartitionListResponse partition_list;
-    auto rc = metadata_client.listPartitions(
+    auto rc = session->getDatabaseContext()->metadata_client->listPartitions(
         tsdb_namespace_,
         table_ref.table_key,
         keyrange,
@@ -411,7 +405,7 @@ Status TSDBTableProvider::createTable(
 }
 
 Status TSDBTableProvider::createDatabase(const String& database_name) {
-  return Status(eRuntimeError, "permission denied");
+  return table_service_->createDatabase(database_name);
 }
 
 Status TSDBTableProvider::alterTable(const csql::AlterTableNode& alter_table) {
@@ -524,6 +518,20 @@ Status TSDBTableProvider::listPartitions(
       tsdb_namespace_,
       table_name,
       fn);
+}
+
+Status TSDBTableProvider::listServers(
+    Function<void (const ServerConfig& server)> fn) const {
+  try {
+    auto servers = cdir_->listServers();
+    for (const auto& s : servers) {
+      fn(s);
+    }
+    return Status::success();
+
+  } catch (const std::exception& e) {
+    return Status(eRuntimeError, e.what());
+  }
 }
 
 Option<csql::TableInfo> TSDBTableProvider::describe(

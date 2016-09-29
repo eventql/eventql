@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -21,15 +21,36 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/util/json/json.h"
+#pragma once
+#include <eventql/eventql.h>
+#include "eventql/cli/commands/cli_command.h"
+#include "eventql/config/process_config.h"
 
-namespace json {
+namespace eventql {
+namespace cli {
 
-template <typename T>
-void JSONRPCResponse::successAndReturn(const T& ret_val) {
-  success([&ret_val] (json::JSONOutputStream* json) {
-    toJSON(ret_val, json);
-  });
-}
+class ClusterList : public CLICommand {
+public:
+  ClusterList(RefPtr<ProcessConfig> process_cfg);
 
-}
+  Status execute(
+      const std::vector<std::string>& argv,
+      FileInputStream* stdin_is,
+      OutputStream* stdout_os,
+      OutputStream* stderr_os) override;
+
+
+  const std::string& getName() const override;
+  const std::string& getDescription() const override;
+  void printHelp(OutputStream* stdout_os) const override;
+
+protected:
+  static const std::string kName_;
+  static const std::string kDescription_;
+  static const std::string kQuery_;
+  RefPtr<ProcessConfig> process_cfg_;
+};
+
+} // namespace cli
+} // namespace eventql
+

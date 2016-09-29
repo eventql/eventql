@@ -250,17 +250,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/util/json/jsonoutputstream_impl.h \
     eventql/util/json/jsonpointer.cc \
     eventql/util/json/jsonpointer.h \
-    eventql/util/json/jsonrpc.cc \
-    eventql/util/json/jsonrpc.h \
-    eventql/util/json/jsonrpc_impl.h \
-    eventql/util/json/jsonrpchttpadapter.cc \
-    eventql/util/json/jsonrpchttpadapter.h \
-    eventql/util/json/jsonrpcrequest.cc \
-    eventql/util/json/jsonrpcrequest.h \
-    eventql/util/json/jsonrpcrequest_impl.h \
-    eventql/util/json/jsonrpcresponse.cc \
-    eventql/util/json/jsonrpcresponse.h \
-    eventql/util/json/jsonrpcresponse_impl.h \
     eventql/util/json/jsonutil.cc \
     eventql/util/json/jsonutil.h \
     eventql/util/logging.cc \
@@ -322,22 +311,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/util/random.cc \
     eventql/util/random.h \
     eventql/util/Serializable.h \
-    eventql/util/rpc/RPCContext.cc \
-    eventql/util/rpc/RPCContext.h \
-    eventql/util/rpc/RPCRequest.cc \
-    eventql/util/rpc/RPCRequest.h \
-    eventql/util/rpc/RPCService.cc \
-    eventql/util/rpc/RPCService.h \
-    eventql/util/rpc/RPCService_impl.h \
-    eventql/util/rpc/RPCStub.cc \
-    eventql/util/rpc/RPCStub.h \
-    eventql/util/rpc/RPC.cc \
-    eventql/util/rpc/RPCClient.cc \
-    eventql/util/rpc/RPCClient.h \
-    eventql/util/rpc/ServerGroup.cc \
-    eventql/util/rpc/ServerGroup.h \
-    eventql/util/rpc/RPC.h \
-    eventql/util/rpc/RPC_impl.h \
     eventql/util/stats/counter.h \
     eventql/util/stats/counter_impl.h \
     eventql/util/stats/counterstat.h \
@@ -620,6 +593,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/expressions/table/describe_table.h \
     eventql/sql/expressions/table/describe_partitions.cc \
     eventql/sql/expressions/table/describe_partitions.h \
+    eventql/sql/expressions/table/cluster_show_servers.cc \
+    eventql/sql/expressions/table/cluster_show_servers.h \
     eventql/sql/expressions/table/groupby.cc \
     eventql/sql/expressions/table/groupby.h \
     eventql/sql/expressions/table/limit.cc \
@@ -728,6 +703,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/qtree/nodes/insert_json.h \
     eventql/sql/qtree/nodes/describe_partitions.cc \
     eventql/sql/qtree/nodes/describe_partitions.h \
+    eventql/sql/qtree/nodes/cluster_show_servers.cc \
+    eventql/sql/qtree/nodes/cluster_show_servers.h \
     eventql/sql/qtree/qtree_coder.cc \
     eventql/sql/qtree/qtree_coder.h \
     eventql/sql/qtree/qtree_coder_impl.h \
@@ -853,8 +830,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/db/table_service.h \
     eventql/transport/http/http_transport.cc \
     eventql/transport/http/http_transport.h \
-    eventql/transport/http/rpc_servlet.cc \
-    eventql/transport/http/rpc_servlet.h \
     eventql/transport/native/connection.cc \
     eventql/transport/native/connection.h \
     eventql/transport/native/connection_tcp.cc \
@@ -1029,6 +1004,8 @@ evqlctl_SOURCES = \
     $(EVQL_PROTO_SOURCES_) \
     eventql/cli/commands/cli_command.h \
     eventql/cli/commands/cli_command.cc \
+    eventql/cli/cli_config.cc \
+    eventql/cli/cli_config.h \
     eventql/cli/commands/cluster_add_server.h \
     eventql/cli/commands/cluster_add_server.cc \
     eventql/cli/commands/cluster_create.h \
@@ -1037,6 +1014,8 @@ evqlctl_SOURCES = \
     eventql/cli/commands/cluster_status.cc \
     eventql/cli/commands/cluster_remove_server.h \
     eventql/cli/commands/cluster_remove_server.cc \
+    eventql/cli/commands/cluster_list.h \
+    eventql/cli/commands/cluster_list.cc \
     eventql/cli/commands/database_create.h \
     eventql/cli/commands/database_create.cc \
     eventql/cli/commands/table_config_set.h \
@@ -1050,6 +1029,7 @@ evqlctl_SOURCES = \
     eventql/evqlctl.cc
 
 evqlctl_LDADD = \
+    libevqlclient.la \
     $(SIMDCOMP_LDADD) \
     $(INIH_LDADD) \
     $(ZOOKEEPER_LDADD) \

@@ -88,7 +88,8 @@ public:
 
   virtual TableDefinition getTableConfig(
       const String& db_namespace,
-      const String& table_name) const = 0;
+      const String& table_name,
+      bool allow_cache = true) = 0;
 
   virtual void updateTableConfig(
       const TableDefinition& table,
