@@ -39,7 +39,7 @@ parallel
 among a number of equally privileged servers. Given enough machines you can store
 and query thousands if terrabytes of data in a single table.
 
-- **Real-time, low-latency operations.** You don't have to batch-load data
+- **Streaming, low-latency operations.** You don't have to batch-load data
 into EventQL - it can handle large volumes of streaming insert and update
 operations. All mutations are immediately visible and minimal SQL query latency
 is ~0.1ms.
