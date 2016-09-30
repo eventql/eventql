@@ -36,7 +36,8 @@ class TableImport : public CLICommand {
 public:
   TableImport(RefPtr<ProcessConfig> process_cfg);
 
-  static const uint64_t kDefaultBatchSize = 25; //FIXME
+  static const uint64_t kDefaultBatchSize = 64; //FIXME
+  static const size_t kDefaultNumThreads = 16;
 
   Status execute(
       const std::vector<std::string>& argv,
@@ -53,7 +54,10 @@ protected:
   using UploadBatch = std::vector<std::string>;
 
   Status run(const std::string& file);
-  Status uploadBatch(const UploadBatch& batch);
+  void runThread();
+  Status uploadBatch(
+      native_transport::TCPClient* client,
+      const UploadBatch& batch);
 
   /**
    * Returns true on success, false if execution was aborted or is completed
@@ -66,7 +70,6 @@ protected:
   static const String kName_;
   static const String kDescription_;
   RefPtr<ProcessConfig> process_cfg_;
-  native_transport::TCPClient* client_;
   std::string database_;
   std::string table_;
   std::string host_;
@@ -77,6 +80,8 @@ protected:
   ReturnCode status_;
   bool complete_;
   std::deque<UploadBatch> queue_;
+  size_t num_threads_;
+  std::vector<std::thread> threads_;
 };
 
 } // namespace cli

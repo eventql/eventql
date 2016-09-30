@@ -117,6 +117,10 @@ Status TableImport::execute(
   table_ = flags.getString("table");
   host_ = flags.getString("host");
   port_ = flags.getInt("port");
+  num_threads_ = flags.isSet("connections") ?
+      flags.getInt("connections") :
+      kDefaultNumThreads;
+  threads_.resize(num_threads_);
 
   /* auth data */
   if (process_cfg_->hasProperty("client.user")) {
@@ -137,8 +141,6 @@ Status TableImport::execute(
         process_cfg_->getString("client.auth_token").get());
   }
 
-  client_ = new native_transport::TCPClient(nullptr, nullptr);
-
   return run(flags.getString("file"));
 }
 
@@ -151,18 +153,11 @@ Status TableImport::run(const std::string& file) {
     return Status(e);
   }
 
-  /* connect to server */
-  auto rc = client_->connect(
-      host_,
-      port_,
-      false,
-      auth_data_);
-  if (!rc.isSuccess()) {
-    return rc;
-  }
 
   /* start threads */
-
+  for (size_t i = 0; i < num_threads_; ++i) {
+    threads_[i] = std::thread(std::bind(&TableImport::runThread, this));
+  }
 
   /* read and enqueue lines in batches */
   std::vector<std::string> batch;
@@ -199,10 +194,46 @@ Status TableImport::run(const std::string& file) {
 exit:
 
   /* join threads */
-  // for (const ...
+  for (auto& t : threads_) {
+    if (t.joinable()) {
+      t.join();
+    }
+  }
 
-  client_->close();
   return status_;
+}
+
+void TableImport::runThread() {
+  try {
+    native_transport::TCPClient client(nullptr, nullptr);
+    /* connect to server */
+    auto rc = client.connect(
+        host_,
+        port_,
+        false,
+        auth_data_);
+    if (!rc.isSuccess()) {
+      setError(rc);
+      return;
+    }
+
+    UploadBatch batch;
+    while (popBatch(&batch)) {
+      auto rc = uploadBatch(&client, batch);
+      if (!rc.isSuccess()) {
+        setError(rc);
+        client.close();
+        return;
+      }
+
+      batch.clear();
+    }
+
+    client.close();
+
+  } catch (const std::exception& e) {
+    setError(ReturnCode::exception(e));
+  }
 }
 
 static const size_t kMaxQueueSize = 32;
@@ -260,7 +291,9 @@ void TableImport::setError(const ReturnCode& err) {
   cv_.notify_all();
 }
 
-Status TableImport::uploadBatch(const UploadBatch& batch) {
+Status TableImport::uploadBatch(
+    native_transport::TCPClient* client,
+    const UploadBatch& batch) {
   /* insert */
   native_transport::InsertFrame i_frame;
   i_frame.setDatabase(database_);
@@ -271,7 +304,7 @@ Status TableImport::uploadBatch(const UploadBatch& batch) {
     i_frame.addRecord(l);
   }
 
-  auto rc = client_->sendFrame(&i_frame, 0);
+  auto rc = client->sendFrame(&i_frame, 0);
   if (!rc.isSuccess()) {
     return rc;
   }
@@ -280,7 +313,7 @@ Status TableImport::uploadBatch(const UploadBatch& batch) {
   uint16_t ret_flags;
   std::string ret_payload;
   while (ret_opcode != EVQL_OP_ACK) {
-    auto rc = client_->recvFrame(
+    auto rc = client->recvFrame(
         &ret_opcode,
         &ret_flags,
         &ret_payload,
