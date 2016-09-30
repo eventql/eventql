@@ -91,6 +91,7 @@ int main(int argc, const char** argv) {
 
   Application::init();
   Application::logToStderr("evqlctl");
+  signal(SIGPIPE, SIG_DFL);
 
   /* load config */
   ProcessConfigBuilder config_builder;
