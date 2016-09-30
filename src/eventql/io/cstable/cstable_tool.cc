@@ -135,6 +135,7 @@ static int cstable_dump(std::vector<std::string> args) {
 
 int main(int argc, const char** argv) {
   Application::init();
+  signal(SIGPIPE, SIG_DFL);
 
   if (argc <= 1) {
     std::cerr << "usage: cstable_tool <cmd> ..." << std::endl;
