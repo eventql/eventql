@@ -204,31 +204,36 @@ exit:
 }
 
 void TableImport::runThread() {
-  native_transport::TCPClient client(nullptr, nullptr);
-  /* connect to server */
-  auto rc = client.connect(
-      host_,
-      port_,
-      false,
-      auth_data_);
-  if (!rc.isSuccess()) {
-    setError(rc);
-    return;
-  }
-
-  UploadBatch batch;
-  while (popBatch(&batch)) {
-    auto rc = uploadBatch(&client, batch);
+  try {
+    native_transport::TCPClient client(nullptr, nullptr);
+    /* connect to server */
+    auto rc = client.connect(
+        host_,
+        port_,
+        false,
+        auth_data_);
     if (!rc.isSuccess()) {
       setError(rc);
-      client.close();
       return;
     }
 
-    batch.clear();
-  }
+    UploadBatch batch;
+    while (popBatch(&batch)) {
+      auto rc = uploadBatch(&client, batch);
+      if (!rc.isSuccess()) {
+        setError(rc);
+        client.close();
+        return;
+      }
 
-  client.close();
+      batch.clear();
+    }
+
+    client.close();
+
+  } catch (const std::exception& e) {
+    setError(e);
+  }
 }
 
 static const size_t kMaxQueueSize = 32;
