@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #include <iostream>
+#include <signal.h>
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/application.h"
 #include "eventql/util/cli/flagparser.h"
