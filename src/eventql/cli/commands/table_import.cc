@@ -22,6 +22,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <unistd.h>
 #include <iostream>
 #include <sstream>
 #include <iomanip>
