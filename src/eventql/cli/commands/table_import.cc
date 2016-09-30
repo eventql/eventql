@@ -409,6 +409,7 @@ double TableImportStats::getRollingRPS() const {
 }
 
 uint64_t TableImportStats::getTotalRowCount() const {
+  std::unique_lock<std::mutex> lk(mutex_);
   return total_row_count_;
 }
 
