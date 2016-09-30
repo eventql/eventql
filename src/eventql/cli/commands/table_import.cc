@@ -232,7 +232,7 @@ void TableImport::runThread() {
     client.close();
 
   } catch (const std::exception& e) {
-    setError(e);
+    setError(ReturnCode::exception(e));
   }
 }
 
