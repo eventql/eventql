@@ -164,19 +164,16 @@ Status TableImport::run(InputStream* is) {
   /* read and enqueue lines in batches */
   std::vector<std::string> batch;
   std::string line;
-  uint64_t cur_size = 0;
   while (is->readLine(&line)) {
-    if (cur_size + line.size() > kDefaultBatchSize) {
+    if (batch.size() > kDefaultBatchSize) {
       if (!enqueueBatch(std::move(batch))) {
         goto exit;
       }
 
       batch.clear();
-      cur_size = 0;
     }
 
     batch.emplace_back(line);
-    cur_size += line.size();
     line.clear();
 
     // FIXME rate limiting
