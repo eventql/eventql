@@ -49,8 +49,19 @@ public:
   void printHelp(OutputStream* stdout_os) const override;
 
 protected:
+
+  using UploadBatch = std::vector<std::string>;
+
   Status run(const std::string& file);
-  Status uploadBatch(std::vector<std::string> batch);
+  Status uploadBatch(const UploadBatch& batch);
+
+  /**
+   * Returns true on success, false if execution was aborted or is completed
+   */
+  bool enqueueBatch(UploadBatch&& batch);
+  bool popBatch(UploadBatch* batch);
+
+  void setError(ReturnCode err);
 
   static const String kName_;
   static const String kDescription_;
@@ -61,6 +72,11 @@ protected:
   std::string host_;
   uint64_t port_;
   std::vector<std::pair<std::string, std::string>> auth_data_;
+  std::mutex mutex_;
+  std::condition_variable cv_;
+  ReturnCode status_;
+  bool complete_;
+  std::deque<UploadBatch> queue_;
 };
 
 } // namespace cli

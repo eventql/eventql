@@ -36,7 +36,9 @@ const String TableImport::kDescription_ = "Import json or csv data to a table.";
 
 TableImport::TableImport(
     RefPtr<ProcessConfig> process_cfg) :
-    process_cfg_(process_cfg) {}
+    process_cfg_(process_cfg),
+    status_(ReturnCode::success()),
+    complete_(false) {}
 
 Status TableImport::execute(
     const std::vector<std::string>& argv,
@@ -149,7 +151,7 @@ Status TableImport::run(const std::string& file) {
     return Status(e);
   }
 
-  /* connect */
+  /* connect to server */
   auto rc = client_->connect(
       host_,
       port_,
@@ -159,15 +161,17 @@ Status TableImport::run(const std::string& file) {
     return rc;
   }
 
+  /* start threads */
+
+
+  /* read and enqueue lines in batches */
   std::vector<std::string> batch;
   std::string line;
   uint64_t cur_size = 0;
   while (is->readLine(&line)) {
     if (cur_size + line.size() > kDefaultBatchSize) {
-      auto rc = uploadBatch(batch);
-      if (!rc.isSuccess()) {
-        client_->close();
-        return rc;
+      if (!enqueueBatch(std::move(batch))) {
+        goto exit;
       }
 
       batch.clear();
@@ -180,19 +184,83 @@ Status TableImport::run(const std::string& file) {
   }
 
   if (batch.size() > 0) {
-    auto rc = uploadBatch(batch);
-    if (!rc.isSuccess()) {
-      client_->close();
-      return rc;
+    if (!enqueueBatch(std::move(batch))) {
+      goto exit;
     }
   }
 
-  client_->close();
-  return Status::success();
+  /* send upload complete signal to trigger thread shutdown */
+  {
+    std::unique_lock<std::mutex> lk(mutex_);
+    complete_ = true;
+    cv_.notify_all();
+  }
 
+exit:
+
+  /* join threads */
+  // for (const ...
+
+  client_->close();
+  return status_;
 }
 
-Status TableImport::uploadBatch(std::vector<std::string> batch) {
+static const size_t kMaxQueueSize = 32;
+
+bool TableImport::enqueueBatch(UploadBatch&& batch) {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  for (;;) {
+    if (!status_.isSuccess() || complete_) {
+      return false;
+    }
+
+    if (queue_.size() < kMaxQueueSize) {
+      break;
+    }
+
+    cv_.wait(lk);
+  }
+
+
+  queue_.push_back(std::move(batch));
+  cv_.notify_all();
+  return true;
+}
+
+bool TableImport::popBatch(UploadBatch* batch) {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  for (;;) {
+    if (!status_.isSuccess()) {
+      return false;
+    }
+
+    if (!queue_.empty()) {
+      break;
+    }
+
+    if (complete_) {
+      return false;
+    } else {
+      cv_.wait(lk);
+    }
+  }
+
+
+  *batch = queue.front();
+  queue.pop_front();
+  cv_.notify_all();
+  return true;
+}
+
+void TableImport::setError(const ReturnCode& err) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  status_ = err;
+  cv_.notify_all();
+}
+
+Status TableImport::uploadBatch(const UploadBatch& batch) {
   /* insert */
   native_transport::InsertFrame i_frame;
   i_frame.setDatabase(database_);
