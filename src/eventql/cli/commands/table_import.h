@@ -75,7 +75,7 @@ protected:
 
   using UploadBatch = std::vector<std::string>;
 
-  Status run(const std::string& file);
+  Status run(InputStream* is);
   void runThread();
   Status uploadBatch(
       native_transport::TCPClient* client,

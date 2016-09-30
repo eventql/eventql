@@ -145,18 +145,17 @@ Status TableImport::execute(
         process_cfg_->getString("client.auth_token").get());
   }
 
-  return run(flags.getString("file"));
+
+  auto filename = flags.getString("file");
+  if (filename == "-") {
+    return run(stdin_is);
+  } else {
+    auto is = FileInputStream::openFile(filename);
+    return run(is.get());
+  }
 }
 
-Status TableImport::run(const std::string& file) {
-  std::unique_ptr<FileInputStream> is;
-  try {
-    is = FileInputStream::openFile(file);
-
-  } catch (const Exception& e) {
-    return Status(e);
-  }
-
+Status TableImport::run(InputStream* is) {
   /* start threads */
   for (size_t i = 0; i < num_threads_; ++i) {
     threads_[i] = std::thread(std::bind(&TableImport::runThread, this));
