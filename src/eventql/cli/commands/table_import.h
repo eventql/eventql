@@ -28,9 +28,31 @@
 #include "eventql/cli/commands/cli_command.h"
 #include "eventql/config/process_config.h"
 #include "eventql/transport/native/client_tcp.h"
+#include "eventql/util/rolling_stat.h"
 
 namespace eventql {
 namespace cli {
+
+class TableImportStats {
+public:
+
+  TableImportStats();
+
+  void addInsert(uint64_t num_rows);
+
+  /**
+    * rolling rows/second
+    */
+  double getRollingRPS() const;
+  uint64_t getTotalRowCount() const;
+
+protected:
+
+  RollingStat rolling_rps_;
+  uint64_t total_row_count_;
+  mutable std::mutex mutex_;
+};
+
 
 class TableImport : public CLICommand {
 public:
@@ -66,6 +88,7 @@ protected:
   bool popBatch(UploadBatch* batch);
 
   void setError(const ReturnCode& err);
+  void printStats();
 
   static const String kName_;
   static const String kDescription_;
@@ -82,6 +105,8 @@ protected:
   std::deque<UploadBatch> queue_;
   size_t num_threads_;
   std::vector<std::thread> threads_;
+  TableImportStats stats_;
+  bool is_tty_;
 };
 
 } // namespace cli

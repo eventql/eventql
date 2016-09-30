@@ -22,9 +22,11 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <iostream>
+#include <sstream>
+#include <iomanip>
 #include <eventql/cli/commands/table_import.h>
 #include <eventql/util/cli/flagparser.h>
-#include "eventql/util/logging.h"
 #include "eventql/transport/native/frames/insert.h"
 #include "eventql/transport/native/frames/error.h"
 
@@ -121,6 +123,7 @@ Status TableImport::execute(
       flags.getInt("connections") :
       kDefaultNumThreads;
   threads_.resize(num_threads_);
+  is_tty_ = ::isatty(STDERR_FILENO);
 
   /* auth data */
   if (process_cfg_->hasProperty("client.user")) {
@@ -152,7 +155,6 @@ Status TableImport::run(const std::string& file) {
   } catch (const Exception& e) {
     return Status(e);
   }
-
 
   /* start threads */
   for (size_t i = 0; i < num_threads_; ++i) {
@@ -226,7 +228,9 @@ void TableImport::runThread() {
         return;
       }
 
+      stats_.addInsert(batch.size());
       batch.clear();
+      printStats();
     }
 
     client.close();
@@ -340,6 +344,29 @@ Status TableImport::uploadBatch(
   return Status::success();
 }
 
+static const char kEraseEscapeSequence[] = "\e[2K";
+void TableImport::printStats() {
+  std::stringstream line;
+
+  if (is_tty_) {
+    line << kEraseEscapeSequence << "\r";
+  }
+
+  line << std::fixed
+      << "Inserting... "
+      << "rate="
+      << std::setprecision(2) << stats_.getRollingRPS()
+      << "rows/s"
+      << ", total="
+      << stats_.getTotalRowCount();
+
+  if (!is_tty_) {
+    line << "\n";
+  }
+
+  std::cerr << line.str();
+}
+
 const String& TableImport::getName() const {
   return kName_;
 }
@@ -360,6 +387,29 @@ void TableImport::printHelp(OutputStream* stdout_os) const {
       "  -f, --file <file>            Set the path of the file to import.\n"
       "  -h, --host <hostname>        Set the EventQL hostname.\n"
       "  -p, --port <port>            Set the EventQL port.\n");
+}
+
+TableImportStats::TableImportStats() : total_row_count_(0) {}
+
+void TableImportStats::addInsert(uint64_t num_rows) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  rolling_rps_.addValue(num_rows);
+  total_row_count_ += num_rows;
+}
+
+double TableImportStats::getRollingRPS() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  uint64_t value;
+  uint64_t count;
+  uint64_t interval_us;
+  rolling_rps_.computeAggregate(&value, &count, &interval_us);
+
+  return double(value) / (double(interval_us) / kMicrosPerSecond);
+}
+
+uint64_t TableImportStats::getTotalRowCount() const {
+  return total_row_count_;
 }
 
 } // namespace cli
