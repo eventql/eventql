@@ -179,6 +179,9 @@ Status TableImport::run(const std::string& file) {
     batch.emplace_back(line);
     cur_size += line.size();
     line.clear();
+
+    // FIXME rate limiting
+    printStats();
   }
 
   if (batch.size() > 0) {
@@ -193,6 +196,8 @@ Status TableImport::run(const std::string& file) {
     complete_ = true;
     cv_.notify_all();
   }
+
+  printStats();
 
 exit:
 
@@ -231,7 +236,6 @@ void TableImport::runThread() {
 
       stats_.addInsert(batch.size());
       batch.clear();
-      printStats();
     }
 
     client.close();
