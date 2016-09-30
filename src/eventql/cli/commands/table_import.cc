@@ -369,7 +369,7 @@ void TableImport::printStats() {
     line << "\n";
   }
 
-  std::cerr << line.str();
+  std::cerr << line.str() << std::flush;
 }
 
 const String& TableImport::getName() const {
