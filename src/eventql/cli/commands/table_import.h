@@ -61,7 +61,7 @@ protected:
   bool enqueueBatch(UploadBatch&& batch);
   bool popBatch(UploadBatch* batch);
 
-  void setError(ReturnCode err);
+  void setError(const ReturnCode& err);
 
   static const String kName_;
   static const String kDescription_;

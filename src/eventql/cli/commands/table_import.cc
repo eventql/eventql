@@ -248,8 +248,8 @@ bool TableImport::popBatch(UploadBatch* batch) {
   }
 
 
-  *batch = queue.front();
-  queue.pop_front();
+  *batch = queue_.front();
+  queue_.pop_front();
   cv_.notify_all();
   return true;
 }
