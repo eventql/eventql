@@ -1,6 +1,6 @@
 # Process this file with automake to produce Makefile.in
 
-bin_PROGRAMS = evql evqld evqlctl evqlslap
+bin_PROGRAMS = evql evqld evqlctl evqlslap cstable_tool
 lib_LTLIBRARIES = libevqlclient.la
 check_LIBRARIES = libevqlcore.a
 
@@ -1056,6 +1056,24 @@ evqlslap_LDADD = \
     $(SPIDERMONKEY_LDADD)
 
 evqlslap_LDFLAGS = -static
+
+################## BIN: cstable_tool ####################
+cstable_tool_SOURCES = \
+    ${EVQL_CORE_SOURCES_} \
+    $(EVQL_PROTO_SOURCES_) \
+    eventql/io/cstable/cstable_tool.cc
+
+cstable_tool_LDADD = \
+    libevqlclient.la \
+    $(ZOOKEEPER_LDADD) \
+    $(LINENOISE_LDADD) \
+    $(INIH_LDADD) \
+    $(SIMDCOMP_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD) \
+    $(SPIDERMONKEY_LDADD)
+
+cstable_tool_LDFLAGS = -static
 
 ################ LIB: libevqlclient.a ###################
 libevqlclient_la_SOURCES = eventql/client.c

@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <iostream>
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/application.h"
 #include "eventql/util/cli/flagparser.h"
@@ -32,10 +33,13 @@
 #include "eventql/io/cstable/cstable_reader.h"
 #include "eventql/eventql.h"
 
-int main(int argc, const char** argv) {
-  Application::init();
+static int cstable_dump(std::vector<std::string> args) {
+  if (args.size() <= 0) {
+    std::cerr << "usage: cstable_tool dump <file>" << std::endl;
+    return 1;
+  }
 
-  String filename(argv[1]);
+  String filename(args[0]);
   auto cstable = cstable::CSTableReader::openFile(filename);
   iputs("== GENERAL ==\n >> number of records: $0", cstable->numRecords());
 
@@ -91,5 +95,27 @@ int main(int argc, const char** argv) {
   }
 
   return 0;
+}
+
+int main(int argc, const char** argv) {
+  Application::init();
+
+  if (argc <= 1) {
+    std::cerr << "usage: cstable_tool <cmd> ..." << std::endl;
+    return 1;
+  }
+
+  std::string cmd(argv[1]);
+  std::vector<std::string> args;
+  for (int i = 2; i < argc; ++i) {
+    args.emplace_back(argv[i]);
+  }
+
+  if (cmd == "dump") {
+    return cstable_dump(args);
+  }
+
+  std::cerr << "error: unknown command: " << cmd << std::endl;
+  return 1;
 }
 
