@@ -263,6 +263,7 @@ void TCPAsyncClient::addRPC(
   task->payload = std::move(payload);
   task->hosts = hosts;
   task->privdata = privdata;
+  task->started = false;
   runq_.push_back(task);
   ++num_tasks_;
 }
@@ -337,8 +338,12 @@ ReturnCode TCPAsyncClient::handleReady(Connection* connection) {
       connection->task->payload.data(),
       connection->task->payload.size());
 
-  if (rpc_started_cb_) {
-    rpc_started_cb_(connection->task->privdata);
+  if (!connection->task->started) {
+    if (rpc_started_cb_) {
+      rpc_started_cb_(connection->task->privdata);
+    }
+
+    connection->task->started = true;
   }
 
   return ReturnCode::success();
@@ -408,8 +413,12 @@ ReturnCode TCPAsyncClient::handleIdle(Connection* connection) {
         connection->task->payload.data(),
         connection->task->payload.size());
 
-    if (rpc_started_cb_) {
-      rpc_started_cb_(connection->task->privdata);
+    if (!connection->task->started) {
+      if (rpc_started_cb_) {
+        rpc_started_cb_(connection->task->privdata);
+      }
+
+      connection->task->started = true;
     }
   } else {
     connection->state = ConnectionState::CLOSE;

@@ -435,8 +435,8 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
   rpc_scheduler_.setRPCStartedCallback([this] (void* privdata) {
     execution_context_->incrementNumTasksRunning();
   });
-  rpc_scheduler_.setRPCCompletedCallback([this] (void* privdata, bool success) {
 
+  rpc_scheduler_.setRPCCompletedCallback([this] (void* privdata, bool success) {
     if (success) {
       execution_context_->incrementNumTasksCompleted();
     } else {

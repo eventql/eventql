@@ -154,6 +154,7 @@ protected:
     uint16_t flags;
     std::string payload;
     void* privdata;
+    bool started;
   };
 
   enum class ConnectionState {
