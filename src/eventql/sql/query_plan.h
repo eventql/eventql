@@ -86,6 +86,9 @@ public:
    * between 0.0 and 1.0 
    */
   double getProgress() const;
+  uint64_t getTasksCount() const;
+  uint64_t getTasksRunningCount() const;
+  uint64_t getTasksCompletedCount() const;
 
   /**
    * Sets a callback that will be called every time the progress changes

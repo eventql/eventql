@@ -33,10 +33,13 @@ public:
   ExecutionContext();
 
   void incrementNumTasks(size_t n = 1);
-  void incrementNumTasksRunning(size_t n = 1);
   void incrementNumTasksCompleted(size_t n = 1);
+  void incrementNumTasksRunning(size_t n = 1);
 
   double getProgress() const;
+  uint64_t getTasksCount() const;
+  uint64_t getTasksCompletedCount() const;
+  uint64_t getTasksRunningCount() const;
 
   void setProgressCallback(Function<void()> cb);
 

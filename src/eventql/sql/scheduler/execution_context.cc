@@ -67,4 +67,16 @@ double ExecutionContext::getProgress() const {
   return (double) num_tasks_completed_ / (double) num_tasks_;
 }
 
+uint64_t ExecutionContext::getTasksCount() const {
+  return num_tasks_;
+}
+
+uint64_t ExecutionContext::getTasksCompletedCount() const {
+  return num_tasks_completed_;
+}
+
+uint64_t ExecutionContext::getTasksRunningCount() const {
+  return num_tasks_running_;
+}
+
 } //namespace csql
