@@ -118,7 +118,8 @@ public:
               size_t payload_len)>;
 
   using RPCStartedCallbackType = std::function<void (void* privdata)>;
-  using RPCCompletedCallbackType = std::function<void (void* privdata)>;
+  using RPCCompletedCallbackType =
+      std::function<void (void* privdata, bool success)>;
 
   TCPAsyncClient(
       ProcessConfig* config,
@@ -193,7 +194,7 @@ protected:
 
   Task* popTask(const std::string* hostname = nullptr);
   ReturnCode failTask(Task* task, const ReturnCode& fail_rc);
-  void completeTask(Task* task);
+  void completeTask(Task* task, bool success);
 
   ReturnCode startNextTask();
   ReturnCode startConnection(Task* task);
