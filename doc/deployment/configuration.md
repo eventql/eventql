@@ -351,7 +351,7 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
   </tr>
   <tr>
     <td><b>server.query_max_concurrent_shards_per_host</b></td>
-    <td>4</td>
+    <td>6</td>
     <td>
       The default maximum number of shards to be executed on any given host
       for a single query.

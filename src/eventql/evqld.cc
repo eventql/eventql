@@ -242,7 +242,7 @@ int main(int argc, const char** argv) {
   evql_conf_set(conf, "server.heartbeat_interval", "1000000");
   evql_conf_set(conf, "server.query_progress_rate_limit", "250000");
   evql_conf_set(conf, "server.query_max_concurrent_shards", "256");
-  evql_conf_set(conf, "server.query_max_concurrent_shards_per_host", "4");
+  evql_conf_set(conf, "server.query_max_concurrent_shards_per_host", "6");
   evql_conf_set(conf, "server.query_failed_shard_policy", "tolerate");
   evql_conf_set(conf, "server.loadinfo_publish_interval", "900000000");
   evql_conf_set(conf, "server.load_limit_hard", "0.98");
