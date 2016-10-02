@@ -35,19 +35,21 @@ public:
   void incrementNumTasks(size_t n = 1);
   void incrementNumTasksCompleted(size_t n = 1);
   void incrementNumTasksRunning(size_t n = 1);
+  void incrementNumTasksFailed(size_t n = 1);
 
   double getProgress() const;
   uint64_t getTasksCount() const;
   uint64_t getTasksCompletedCount() const;
   uint64_t getTasksRunningCount() const;
+  uint64_t getTasksFailedCount() const;
 
   void setProgressCallback(Function<void()> cb);
 
 protected:
-  mutable std::mutex mutex_;
   size_t num_tasks_;
   size_t num_tasks_running_;
   size_t num_tasks_completed_;
+  size_t num_tasks_failed_;
   Function<void()> progress_callback_;
 };
 

@@ -40,7 +40,8 @@ public:
       double progress,
       size_t tasks_total,
       size_t tasks_complete,
-      size_t tasks_running);
+      size_t tasks_running,
+      size_t tasks_failed);
 
 protected:
 

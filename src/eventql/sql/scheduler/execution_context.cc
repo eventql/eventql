@@ -23,6 +23,7 @@
  * code of your own applications
  */
 #include "eventql/eventql.h"
+#include "eventql/util/inspect.h"
 #include <eventql/sql/scheduler/execution_context.h>
 
 namespace csql {
@@ -30,21 +31,42 @@ namespace csql {
 ExecutionContext::ExecutionContext() :
     num_tasks_(0),
     num_tasks_running_(0),
-    num_tasks_completed_(0) {}
+    num_tasks_completed_(0),
+    num_tasks_failed_(0) {}
 
 void ExecutionContext::incrementNumTasks(size_t n /* = 1 */) {
-  std::unique_lock<std::mutex> lk(mutex_);
   num_tasks_ += n;
 }
 
 void ExecutionContext::incrementNumTasksRunning(size_t n /* = 1 */) {
-  std::unique_lock<std::mutex> lk(mutex_);
   num_tasks_running_ += n;
+
+  if (progress_callback_) {
+    progress_callback_();
+  }
 }
 
 void ExecutionContext::incrementNumTasksCompleted(size_t n /* = 1 */) {
-  std::unique_lock<std::mutex> lk(mutex_);
   num_tasks_completed_ += n;
+  if (n > num_tasks_running_) {
+    num_tasks_running_ = 0;
+  } else {
+    num_tasks_running_ -= n;
+  }
+
+  if (progress_callback_) {
+    progress_callback_();
+  }
+}
+
+void ExecutionContext::incrementNumTasksFailed(size_t n /* = 1 */) {
+  num_tasks_completed_ += n;
+  num_tasks_failed_ += n;
+  if (n > num_tasks_running_) {
+    num_tasks_running_ = 0;
+  } else {
+    num_tasks_running_ -= n;
+  }
 
   if (progress_callback_) {
     progress_callback_();
@@ -77,6 +99,10 @@ uint64_t ExecutionContext::getTasksCompletedCount() const {
 
 uint64_t ExecutionContext::getTasksRunningCount() const {
   return num_tasks_running_;
+}
+
+uint64_t ExecutionContext::getTasksFailedCount() const {
+  return num_tasks_failed_;
 }
 
 } //namespace csql

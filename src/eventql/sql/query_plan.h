@@ -89,6 +89,7 @@ public:
   uint64_t getTasksCount() const;
   uint64_t getTasksRunningCount() const;
   uint64_t getTasksCompletedCount() const;
+  uint64_t getTasksFailedCount() const;
 
   /**
    * Sets a callback that will be called every time the progress changes

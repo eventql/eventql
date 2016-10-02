@@ -1126,7 +1126,8 @@ void APIServlet::executeSQL_JSONSSE(
           qplan->getProgress(),
           qplan->getTasksCount(),
           qplan->getTasksCompletedCount(),
-          qplan->getTasksRunningCount());
+          qplan->getTasksRunningCount(),
+          qplan->getTasksFailedCount());
     });
 
     Vector<csql::ResultList> results;
@@ -1140,7 +1141,8 @@ void APIServlet::executeSQL_JSONSSE(
         qplan->getProgress(),
         qplan->getTasksCount(),
         qplan->getTasksCompletedCount(),
-        qplan->getTasksRunningCount());
+        qplan->getTasksRunningCount(),
+        qplan->getTasksFailedCount());
 
    json_sse_codec.sendResults(results);
   } catch (const StandardException& e) {
