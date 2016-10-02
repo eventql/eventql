@@ -706,7 +706,7 @@ TCPAsyncClient::Task* TCPAsyncClient::popTask(
       continue;
     }
 
-    if (connections_per_host_[iter_host] >= max_concurrent_tasks_per_host_) {
+    if (connections_per_host_[iter_host] + 1 >= max_concurrent_tasks_per_host_) {
       ++iter;
       continue;
     }
@@ -730,7 +730,7 @@ ReturnCode TCPAsyncClient::failTask(Task* task, const ReturnCode& fail_rc) {
     task->hosts.erase(task->hosts.begin());
 
     const auto& task_host = task->hosts.front();
-    if (connections_per_host_[task_host] >= max_concurrent_tasks_per_host_) {
+    if (connections_per_host_[task_host] + 1 >= max_concurrent_tasks_per_host_) {
       --num_tasks_running_;
       runq_.emplace_back(task);
       return ReturnCode::success();
