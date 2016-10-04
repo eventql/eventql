@@ -47,6 +47,8 @@ EventQL v0.5.0 beta;
   * Added the CLUSTER SHOW SERVERS statement and the cluster-list command to
     obtain information about the servers of the current cluster.
 
+  * Added the table-import command to the evqlctl util
+
 
 EventQL v0.4.0 beta;
 
