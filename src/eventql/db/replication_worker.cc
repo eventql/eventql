@@ -97,7 +97,8 @@ String ReplicationInfo::toString() const {
 }
 
 ReplicationWorker::ReplicationWorker(
-    PartitionMap* pmap) :
+    PartitionMap* pmap,
+    size_t replication_threads_max) :
     pmap_(pmap),
     queue_([] (
         const Pair<uint64_t, RefPtr<Partition>>& a,
@@ -105,7 +106,7 @@ ReplicationWorker::ReplicationWorker(
       return a.first < b.first;
     }),
     running_(false),
-    num_replication_threads_(8),
+    num_replication_threads_(replication_threads_max),
     replication_infos_(num_replication_threads_) {
   pmap->subscribeToPartitionChanges([this] (
       RefPtr<eventql::PartitionChangeNotification> change) {

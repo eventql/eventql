@@ -146,6 +146,11 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
     <td>The number of background compaction threads to start</td>
   </tr>
   <tr>
+    <td><b>server.replication_threads_max</b></td>
+    <td>2</td>
+    <td>The max number of background replication threads to start</td>
+  </tr>
+  <tr>
     <td><b>server.client_auth_backend</b></td>
     <td>&mdash;</td>
     <td></td>

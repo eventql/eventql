@@ -64,7 +64,10 @@ public:
 
   static const uint64_t kReplicationCorkWindowMicros = 10 * kMicrosPerSecond;
 
-  ReplicationWorker(PartitionMap* pmap);
+  ReplicationWorker(
+      PartitionMap* pmap,
+      size_t replication_threads_max);
+
   ~ReplicationWorker();
 
   void enqueuePartition(

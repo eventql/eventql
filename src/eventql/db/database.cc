@@ -327,7 +327,9 @@ ReturnCode DatabaseImpl::start() {
   table_service_.reset(new TableService(database_context_.get()));
 
   replication_worker_.reset(
-      new ReplicationWorker(partition_map_.get()));
+      new ReplicationWorker(
+          partition_map_.get(),
+          cfg_->getInt("server.replication_threads_max", 0)));
 
   compaction_worker_.reset(
       new CompactionWorker(
