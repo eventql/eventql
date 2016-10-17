@@ -92,7 +92,7 @@ Before we can start we need to install some build dependencies. Currently
 you need a modern c++ compiler, libz, autotools and python (for spidermonkey/mozbuild)
 
     # Ubuntu
-    $ apt-get install clang++ cmake make automake autoconf zlib1g-dev
+    $ apt-get install clang make automake autoconf libtool zlib1g-dev
 
     # OSX
     $ brew install automake autoconf
