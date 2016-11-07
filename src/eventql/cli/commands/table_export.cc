@@ -99,20 +99,73 @@ Status TableExport::execute(
     return Status(e);
   }
 
-  auto rc = connect(
-      flags.getString("database"),
-      flags.getString("host"),
-      flags.getInt("port"));
+  /* connect */
+  {
+    auto rc = connect(
+        flags.getString("database"),
+        flags.getString("host"),
+        flags.getInt("port"));
 
-  if (!rc.isSuccess()) {
-    close();
-    return rc;
+    if (!rc.isSuccess()) {
+      close();
+      return rc;
+    }
   }
 
-  auto query = StringUtil::format(
-      "SELECT * FROM $0;",
-      flags.getString("table"));
+  /* send query */
+  {
+    auto query = StringUtil::format(
+        "SELECT * FROM $0;",
+        flags.getString("table"));
 
+    int query_flags = 0;
+    query_flags |= EVQL_QUERY_PROGRESS;
+
+    int rc = evql_query(client_, query.c_str(), NULL, query_flags);
+
+    /* receive result */
+    std::vector<std::string> result_columns;
+    size_t result_ncols;
+    if (rc == 0) {
+      rc = evql_num_columns(client_, &result_ncols);
+    }
+
+    for (int i = 0; rc == 0 && i < result_ncols; ++i) {
+      const char* colname;
+      size_t colname_len;
+      rc = evql_column_name(client_, i, &colname, &colname_len);
+      if (rc == -1) {
+        break;
+      }
+
+      result_columns.emplace_back(colname, colname_len);
+    }
+
+    if (rc == 0) {
+        //TODO write header
+        //results.addHeader(result_columns);
+    }
+
+    size_t result_nrows = 0;
+    while (rc >= 0) {
+      const char** fields;
+      size_t* field_lens;
+      rc = evql_fetch_row(client_, &fields, &field_lens);
+      if (rc < 1) {
+        break;
+      }
+
+      ++result_nrows;
+
+      std::vector<std::string> row;
+      for (int i = 0; i < result_ncols; ++i) {
+        row.emplace_back(fields[i], field_lens[i]);
+      }
+
+      //TODO
+      //results.addRow(row);
+    }
+  }
 
   stderr_os->write("exporting table");
 
@@ -180,15 +233,18 @@ Status TableExport::connect(
         0);
   }
 
-  auto rc = evql_client_connect(
-      client_,
-      host.c_str(),
-      port,
-      database.c_str(),
-      0);
+  /* connect */
+  {
+    auto rc = evql_client_connect(
+        client_,
+        host.c_str(),
+        port,
+        database.c_str(),
+        0);
 
-  if (rc < 0) {
-    return Status(eIOError, evql_client_geterror(client_));
+    if (rc < 0) {
+      return Status(eIOError, evql_client_geterror(client_));
+    }
   }
 
   return Status::success();
