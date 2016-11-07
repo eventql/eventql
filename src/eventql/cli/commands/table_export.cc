@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #include "eventql/util/cli/flagparser.h"
+#include "eventql/util/csv/CSVOutputStream.h"
 #include "eventql/cli/commands/table_export.h"
 
 namespace eventql {
@@ -87,8 +88,10 @@ Status TableExport::execute(
       "port",
       "<integer>");
 
+  std::unique_ptr<FileOutputStream> file;
   try {
     flags.parseArgv(argv);
+    file = FileOutputStream::openFile(flags.getString("file"));
 
   } catch (const Exception& e) {
 
@@ -112,6 +115,7 @@ Status TableExport::execute(
     }
   }
 
+
   /* send query */
   {
     auto query = StringUtil::format(
@@ -124,6 +128,8 @@ Status TableExport::execute(
     int rc = evql_query(client_, query.c_str(), NULL, query_flags);
 
     /* receive result */
+    CSVOutputStream csv_stream(std::unique_ptr<OutputStream>(file.release()));
+
     std::vector<std::string> result_columns;
     size_t result_ncols;
     if (rc == 0) {
@@ -142,8 +148,7 @@ Status TableExport::execute(
     }
 
     if (rc == 0) {
-        //TODO write header
-        //results.addHeader(result_columns);
+      csv_stream.appendRow(result_columns);
     }
 
     size_t result_nrows = 0;
@@ -162,8 +167,7 @@ Status TableExport::execute(
         row.emplace_back(fields[i], field_lens[i]);
       }
 
-      //TODO
-      //results.addRow(row);
+      csv_stream.appendRow(row);
     }
   }
 
