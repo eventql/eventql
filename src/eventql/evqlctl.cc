@@ -39,6 +39,7 @@
 #include <eventql/cli/commands/table_split_finalize.h>
 #include <eventql/cli/commands/table_config_set.h>
 #include <eventql/cli/commands/table_import.h>
+#include <eventql/cli/commands/table_export.h>
 
 using namespace eventql;
 
@@ -132,6 +133,7 @@ int main(int argc, const char** argv) {
   commands.emplace_back(new eventql::cli::TableSplitFinalize(process_config));
   commands.emplace_back(new eventql::cli::TableConfigSet(process_config));
   commands.emplace_back(new eventql::cli::TableImport(process_config));
+  commands.emplace_back(new eventql::cli::TableExport(process_config));
 
   /* print help/version and exit */
   bool print_help = flags.isSet("help");
