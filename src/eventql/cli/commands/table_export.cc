@@ -31,10 +31,22 @@ namespace cli {
 const std::string TableExport::kName_ = "table-export";
 const std::string TableExport::kDescription_ = "Export a table to a csv file";
 
+static const char kEraseEscapeSequence[] = "\e[2K";
+
 TableExport::TableExport(
     RefPtr<ProcessConfig> process_cfg) :
     process_cfg_(process_cfg),
     client_(nullptr) {}
+
+TableExport::~TableExport() {
+  if (client_) {
+    evql_client_destroy(client_);
+  }
+}
+
+void callProgressCB(evql_client_t* client, void* cb) {
+  (*static_cast<std::function<void ()>*>(cb))();
+}
 
 Status TableExport::execute(
     const std::vector<std::string>& argv,
@@ -115,6 +127,22 @@ Status TableExport::execute(
     }
   }
 
+  /* setup progress */
+  bool is_tty = stdout_os->isTTY();
+  std::function<void ()> on_progress = [this, stdout_os, is_tty] () {
+    auto status_line = StringUtil::format(
+        "[$0%] Exporting...",
+        evql_client_getstat(client_, EVQL_STAT_PROGRESSPERMILL) / 10.0);
+
+    if (is_tty) {
+      stdout_os->write(kEraseEscapeSequence);
+      stdout_os->write("\r" + status_line);
+    } else {
+      stdout_os->write(status_line + "\n");
+    }
+  };
+
+  evql_client_setprogresscb(client_, callProgressCB, &on_progress);
 
   /* send query */
   {
@@ -171,7 +199,14 @@ Status TableExport::execute(
     }
   }
 
-  stderr_os->write("exporting table");
+  close();
+
+  if (is_tty) {
+    stdout_os->write(kEraseEscapeSequence);
+    stdout_os->write("\r");
+  }
+
+  stdout_os->write("DONE \n");
 
   return Status::success();
 }
@@ -237,7 +272,6 @@ Status TableExport::connect(
         0);
   }
 
-  /* connect */
   {
     auto rc = evql_client_connect(
         client_,

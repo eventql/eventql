@@ -33,6 +33,7 @@ class TableExport : public CLICommand {
 public:
 
   TableExport(RefPtr<ProcessConfig> process_cfg);
+  ~TableExport();
 
   Status execute(
       const std::vector<std::string>& argv,
