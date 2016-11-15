@@ -89,3 +89,15 @@ Set table config parameters
         --value                  The value to set the parameter to
 
 
+### table-export
+
+Export a table to a csv file
+
+      Usage: evqlctl table-export [OPTIONS]
+        -d, --database <db>          Select a database.
+        -t, --table <tbl>            Select a destination table.
+        -h, --host <hostname>        Set the EventQL hostname.
+        -p, --port <port>            Set the EventQL port.
+        -f, --file <file>            Set the path of the output file.
+        -q, --query <querystr>       Set the query to execute.
+
