@@ -67,19 +67,10 @@ Status TableExport::execute(
   flags.defineFlag(
       "table",
       ::cli::FlagParser::T_STRING,
-      true,
+      false,
       "t",
       NULL,
       "table",
-      "<string>");
-
-  flags.defineFlag(
-      "file",
-      ::cli::FlagParser::T_STRING,
-      true,
-      "f",
-      NULL,
-      "file",
       "<string>");
 
   flags.defineFlag(
@@ -100,10 +91,33 @@ Status TableExport::execute(
       "port",
       "<integer>");
 
-  std::unique_ptr<FileOutputStream> file;
+  flags.defineFlag(
+      "query",
+      ::cli::FlagParser::T_STRING,
+      false,
+      "q",
+      NULL,
+      "query_str",
+      "<string>");
+
+  flags.defineFlag(
+      "file",
+      ::cli::FlagParser::T_STRING,
+      false,
+      "f",
+      NULL,
+      "file",
+      "<string>");
+
+  std::unique_ptr<OutputStream> file;
   try {
     flags.parseArgv(argv);
-    file = FileOutputStream::openFile(flags.getString("file"));
+
+    if (flags.isSet("file")) {
+      file = FileOutputStream::openFile(flags.getString("file"));
+    } else {
+      file = OutputStream::getStdout();
+    }
 
   } catch (const Exception& e) {
 
@@ -112,6 +126,15 @@ Status TableExport::execute(
        e.getTypeName(),
         e.getMessage()));
     return Status(e);
+  }
+
+  std::string query;
+  if (flags.isSet("query")) {
+    query = flags.getString("query");
+  } else if (flags.isSet("table")) {
+    query = StringUtil::format("SELECT * FROM $0", flags.getString("table"));
+  } else {
+    return Status(eRuntimeError, "missing --table or --query flag");
   }
 
   /* connect */
@@ -128,17 +151,17 @@ Status TableExport::execute(
   }
 
   /* setup progress */
-  bool is_tty = stdout_os->isTTY();
-  std::function<void ()> on_progress = [this, stdout_os, is_tty] () {
+  const bool is_tty = stderr_os->isTTY();
+  std::function<void ()> on_progress = [this, stderr_os, is_tty] () {
     auto status_line = StringUtil::format(
         "[$0%] Exporting...",
         evql_client_getstat(client_, EVQL_STAT_PROGRESSPERMILL) / 10.0);
 
     if (is_tty) {
-      stdout_os->write(kEraseEscapeSequence);
-      stdout_os->write("\r" + status_line);
+      stderr_os->write(kEraseEscapeSequence);
+      stderr_os->write("\r" + status_line);
     } else {
-      stdout_os->write(status_line + "\n");
+      stderr_os->write(status_line + "\n");
     }
   };
 
@@ -146,17 +169,13 @@ Status TableExport::execute(
 
   /* send query */
   {
-    auto query = StringUtil::format(
-        "SELECT * FROM $0;",
-        flags.getString("table"));
-
     int query_flags = 0;
     query_flags |= EVQL_QUERY_PROGRESS;
 
     int rc = evql_query(client_, query.c_str(), NULL, query_flags);
 
     /* receive result */
-    CSVOutputStream csv_stream(std::unique_ptr<OutputStream>(file.release()));
+    CSVOutputStream csv_stream(std::move(file));
 
     std::vector<std::string> result_columns;
     size_t result_ncols;
@@ -202,11 +221,11 @@ Status TableExport::execute(
   close();
 
   if (is_tty) {
-    stdout_os->write(kEraseEscapeSequence);
-    stdout_os->write("\r");
+    stderr_os->write(kEraseEscapeSequence);
+    stderr_os->write("\r");
   }
 
-  stdout_os->write("DONE \n");
+  stderr_os->write("DONE \n");
 
   return Status::success();
 }
@@ -310,9 +329,10 @@ void TableExport::printHelp(OutputStream* stdout_os) const {
       "Usage: evqlctl table-export [OPTIONS]\n"
       "  -d, --database <db>          Select a database.\n"
       "  -t, --table <tbl>            Select a destination table.\n"
-      "  -f, --file <file>            Set the path of the output file.\n"
       "  -h, --host <hostname>        Set the EventQL hostname.\n"
-      "  -p, --port <port>            Set the EventQL port.\n");
+      "  -p, --port <port>            Set the EventQL port.\n"
+      "  -f, --file <file>            Set the path of the output file.\n"
+      "  -q, --query <querystr>       Set the query to execute.\n");
 }
 
 
