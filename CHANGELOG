@@ -49,6 +49,8 @@ EventQL v0.5.0 beta;
 
   * Added the table-import command to the evqlctl util
 
+  * Fixed a bug in the http api where api/v1/tables/list returned incorrect
+    json
 
 EventQL v0.4.0 beta;
 
