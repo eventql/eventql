@@ -41,6 +41,10 @@ Status TrustInternalAuth::signRequest(
     Session* session,
     http::HTTPRequest* request) const {
   request->addHeader("X-EventQL-Namespace", session->getEffectiveNamespace());
+  request->addHeader(
+      "Authorization",
+      StringUtil::format("Token $0", session->getAuthToken()));
+
   return Status::success();
 }
 
