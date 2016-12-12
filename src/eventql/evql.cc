@@ -330,6 +330,10 @@ int main(int argc, const char** argv) {
     cfg_builder.setProperty("client.auth_token", flags.getString("auth_token"));
   }
 
+  if (flags.isSet("file")) {
+    cfg_builder.setProperty("client.file", flags.getString("file"));
+  }
+
   if (flags.isSet("lang")) {
     cfg_builder.setProperty("client.lang", flags.getString("lang"));
   }
