@@ -1122,7 +1122,7 @@ ReturnCode ZookeeperConfigDirectory::publishServerStats(
       path.c_str(),
       (const char*) buf->data(),
       buf->size(),
-      server_stats_version_++);
+      server_stats_version_ + 1);
 
   if (rc) {
     return ReturnCode::errorf(
@@ -1130,6 +1130,7 @@ ReturnCode ZookeeperConfigDirectory::publishServerStats(
         "zoo_set() failed: $0",
         getErrorString(rc));
   } else {
+    ++server_stats_version_;
     return ReturnCode::success();
   }
 }
