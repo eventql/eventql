@@ -1122,7 +1122,7 @@ ReturnCode ZookeeperConfigDirectory::publishServerStats(
       path.c_str(),
       (const char*) buf->data(),
       buf->size(),
-      server_stats_version_ + 1);
+      server_stats_version_);
 
   if (rc) {
     return ReturnCode::errorf(
