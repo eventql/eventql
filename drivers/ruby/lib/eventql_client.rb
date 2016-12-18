@@ -10,6 +10,27 @@ class EventQL::Client
     EventQL::Query.new(self, query_str, opts)
   end
 
+  def insert!(data, opts = {})
+    request = Net::HTTP::Post.new("/api/v1/tables/insert")
+    request.add_field("Content-Type", "application/json")
+
+    if has_auth_token?
+      request.add_field("Authorization", "Token #{get_auth_token}")
+    end
+
+    request.body = data.to_json
+    puts request.body
+
+    http = Net::HTTP.new(get_host, get_port)
+    response = http.request(request)
+
+    if response.code.to_i == 201
+      return true
+    else
+      raise "HTTP ERROR (#{response.code}): #{response.body[0..128]}"
+    end
+  end
+
   def get_host
     return @opts[:host]
   end
