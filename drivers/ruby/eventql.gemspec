@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name = "eventql"
-  s.version = "0.0.2"
+  s.version = "0.0.3"
   s.authors = ["Paul Asmuth"]
   s.date = "2016-12-18"
   s.description = "EventQL ruby driver"
