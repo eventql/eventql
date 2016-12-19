@@ -83,8 +83,6 @@ int evql_server_start(evql_server_t* server) {
     return 0;
   } else {
     server->error = rc.getMessage();
-    delete server->database;
-    server->database = nullptr;
     return 1;
   }
 }
@@ -128,6 +126,7 @@ void evql_server_shutdown(evql_server_t* server) {
     server->database->shutdown();
     delete server->database;
     server->database = nullptr;
+    server->error.clear();
   }
 }
 

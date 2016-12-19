@@ -191,7 +191,6 @@ ReturnCode DatabaseImpl::start() {
       FileUtil::mkdir(cache_dir);
     }
   } catch (const std::exception& e) {
-    shutdown();
     return ReturnCode::error("EIO", e.what());
   }
 
@@ -199,7 +198,6 @@ ReturnCode DatabaseImpl::start() {
     server_lock_.reset(new FileLock(FileUtil::joinPaths(tsdb_dir, "__lock")));
     server_lock_->lock();
   } catch (const std::exception& e) {
-    shutdown();
     return ReturnCode::error("EIO", e.what());
   }
 
@@ -214,7 +212,6 @@ ReturnCode DatabaseImpl::start() {
     }
 
     if (!rc.isSuccess()) {
-      shutdown();
       return ReturnCode::error(
           "ERUNTIME",
           "Can't connect to config backend: %s", rc.message().c_str());
@@ -245,13 +242,11 @@ ReturnCode DatabaseImpl::start() {
             cfg_->getInt("server.cachedir_maxsize").get(),
             cfg_->getInt("server.gc_interval").get()));
   } catch (const std::exception& e) {
-    shutdown();
     return ReturnCode::error("ERUNTIME", e.what());
   }
 
   /* client auth */
   if (!cfg_->hasProperty("server.client_auth_backend")) {
-    shutdown();
     return ReturnCode::error("EARG", "missing 'server.client_auth_backend'");
   }
 
@@ -260,7 +255,6 @@ ReturnCode DatabaseImpl::start() {
     client_auth_.reset(new TrustClientAuth());
   } else if (client_auth_opt.get() == "legacy") {
     if (!cfg_->hasProperty("server.legacy_auth_secret")) {
-      shutdown();
       return ReturnCode::error("EARG", "missing 'server.legacy_auth_secret'");
     }
 
@@ -268,7 +262,6 @@ ReturnCode DatabaseImpl::start() {
         new LegacyClientAuth(
             cfg_->getString("server.legacy_auth_secret").get()));
   } else {
-    shutdown();
     return ReturnCode::error(
         "EARG",
         "invalid client auth backend: " + client_auth_opt.get());
@@ -465,7 +458,6 @@ ReturnCode DatabaseImpl::start() {
   try {
     partition_map_->open();
   } catch (const std::exception& e) {
-    shutdown();
     return ReturnCode::error("ERUNTIME", e.what());
   }
 
