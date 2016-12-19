@@ -26,8 +26,8 @@ export NM=x86_64-linux-gnu-nm
 export STRIP=x86_64-linux-gnu-strip
 export RANLIB=x86_64-linux-gnu-ranlib
 export OBJDUMP=x86_64-linux-gnu-objdump
-export CXXFLAGS="-static-libstdc++ -static-libgcc -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free"
-export LDFLAGS="-ltcmalloc"
+export CXXFLAGS="-static-libstdc++ -static-libgcc"
+export LDFLAGS=""
 
 ../../../$PACKAGE-$VERSION/configure --host=x86_64-linux-gnu --prefix=/usr/local
 #(cd src && make clean)
