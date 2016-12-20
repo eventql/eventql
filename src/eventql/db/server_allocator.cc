@@ -92,7 +92,7 @@ Status ServerAllocator::allocateServers(
   size_t num_alloced = 0;
   auto excluded = exclude_servers;
 
-  uint64_t max_loading_partitions;
+  uint64_t max_loading_partitions = 0;
   switch (policy) {
     case AllocationPolicy::MUST_ALLOCATE:
     case AllocationPolicy::BEST_EFFORT:
