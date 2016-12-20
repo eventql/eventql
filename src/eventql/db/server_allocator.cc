@@ -174,7 +174,12 @@ Status ServerAllocator::allocateServers(
   if (num_alloced >= num_servers) {
     return Status::success();
   } else {
-    return Status(eRuntimeError, "not enough live servers");
+    return Status(
+        eRuntimeError,
+        StringUtil::format(
+            "not enough live servers (got=$0, required=$1)",
+            num_alloced,
+            num_servers));
   }
 }
 
