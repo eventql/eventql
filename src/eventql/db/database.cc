@@ -201,11 +201,17 @@ ReturnCode DatabaseImpl::start() {
     return ReturnCode::error("EIO", e.what());
   }
 
+  /* database context */
+  database_context_.reset(new DatabaseContext());
+  database_context_->db_path = tsdb_dir;
+  database_context_->config = cfg_;
+
   /* config dir */
   {
     auto rc = ConfigDirectoryFactory::getConfigDirectoryForServer(
         cfg_,
-        &config_dir_);
+        &config_dir_,
+        database_context_.get());
 
     if (rc.isSuccess()) {
       rc = config_dir_->start();
@@ -218,10 +224,6 @@ ReturnCode DatabaseImpl::start() {
     }
   }
 
-  /* database context */
-  database_context_.reset(new DatabaseContext());
-  database_context_->db_path = tsdb_dir;
-  database_context_->config = cfg_;
   database_context_->config_directory = config_dir_.get();
 
   /* file tracker */
@@ -483,6 +485,7 @@ ReturnCode DatabaseImpl::start() {
 
   monitor_.reset(new Monitor(database_context_.get()));
   monitor_->startMonitorThread();
+  database_context_->monitor = monitor_.get();
 
   return ReturnCode::success();
 }

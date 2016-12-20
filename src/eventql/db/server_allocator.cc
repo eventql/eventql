@@ -106,7 +106,7 @@ Status ServerAllocator::allocateServers(
   // try allocating from primary servers
   while (num_alloced < num_servers) {
     std::vector<WeightedServer> weighted_servers;
-    uint64_t weight = 0;
+    uint64_t weight = 1;
     {
       std::unique_lock<std::mutex> lk(mutex_);
       for (const auto& s : primary_servers_) {

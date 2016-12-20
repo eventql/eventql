@@ -35,10 +35,35 @@
 
 namespace eventql {
 
-Monitor::Monitor(DatabaseContext* dbctx) : dbctx_(dbctx) {}
+Monitor::Monitor(DatabaseContext* dbctx) : dbctx_(dbctx), load_factor_(0) {}
 
 Monitor::~Monitor() {
   assert(thread_running_ == false);
+}
+
+double Monitor::getLoadFactor() const {
+  std::unique_lock<std::mutex> lk(stats_mutex_);
+  return load_factor_;
+}
+
+uint64_t Monitor::getDiskUsed() const {
+  std::unique_lock<std::mutex> lk(stats_mutex_);
+  return disk_used_;
+}
+
+uint64_t Monitor::getDiskAvailable() const {
+  std::unique_lock<std::mutex> lk(stats_mutex_);
+  return disk_available_;
+}
+
+uint64_t Monitor::getPartitionsLoaded() const {
+  std::unique_lock<std::mutex> lk(stats_mutex_);
+  return partitions_loaded_;
+}
+
+uint64_t Monitor::getPartitionsAssigned() const {
+  std::unique_lock<std::mutex> lk(stats_mutex_);
+  return partitions_assigned_;
 }
 
 ReturnCode Monitor::runMonitorProcedure() {
@@ -93,6 +118,15 @@ ReturnCode Monitor::runMonitorProcedure() {
       disk_available / 0x100000,
       partitions_loaded,
       partitions_assigned);
+
+  {
+    std::unique_lock<std::mutex> lk(stats_mutex_);
+    load_factor_ = load_factor;
+    disk_used_ = disk_used;
+    disk_available_ = disk_available;
+    partitions_loaded_ = partitions_loaded;
+    partitions_assigned_ = partitions_assigned;
+  }
 
   ServerStats sstats;
   sstats.set_load_factor(load_factor);
