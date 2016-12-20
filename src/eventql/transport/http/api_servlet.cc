@@ -267,10 +267,8 @@ void APIServlet::listTables(
 
     json.addObjectEntry("name");
     json.addString(table.table_name());
-    json.addComma();
 
     json.endObject();
-
   };
 
   dbctx->table_service->listTables(
