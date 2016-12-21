@@ -1,4 +1,4 @@
-EventQL v0.4.0 beta;
+EventQL v0.4.0 (v0.4.0-rc0, git267e851) beta; 2016-12-20 13:43:47 +0000
 
   * Changed the parallel GROUP BY operation to use the new native protocol and
     to schedule all remote partial group bys from a a single thread using
