@@ -1,3 +1,8 @@
+EventQL v0.4.1 beta;
+
+  * Fixed a potential modulo by zero errror in server allocator
+
+
 EventQL v0.4.0 (v0.4.0-rc0, git267e851) beta; 2016-12-20 13:43:47 +0000
 
   * Changed the parallel GROUP BY operation to use the new native protocol and

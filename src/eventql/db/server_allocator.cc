@@ -157,17 +157,19 @@ Status ServerAllocator::allocateServers(
       }
     }
 
-    size_t idx = Random::singleton()->random64() % all_servers.size();
-    for (int i = 0; i < all_servers.size() && num_alloced < num_servers; ++i) {
-      const auto& s = all_servers[++idx % all_servers.size()];
+    if (!all_servers.empty()) {
+      size_t idx = Random::singleton()->random64() % all_servers.size();
+      for (int i = 0; i < all_servers.size() && num_alloced < num_servers; ++i) {
+        const auto& s = all_servers[++idx % all_servers.size()];
 
-      if (excluded.count(s) > 0) {
-        continue;
+        if (excluded.count(s) > 0) {
+          continue;
+        }
+
+        out->emplace_back(s);
+        excluded.insert(s);
+        ++num_alloced;
       }
-
-      out->emplace_back(s);
-      excluded.insert(s);
-      ++num_alloced;
     }
   }
 
