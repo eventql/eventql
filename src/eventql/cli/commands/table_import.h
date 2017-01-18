@@ -109,6 +109,7 @@ protected:
   bool is_tty_;
   EVQL_INSERT_CTYPE format_;
   std::string csv_header_;
+  uint64_t timeout_;
 };
 
 } // namespace cli

@@ -135,6 +135,7 @@ Status TableImport::execute(
       kDefaultNumThreads;
   threads_.resize(num_threads_);
   is_tty_ = ::isatty(STDERR_FILENO);
+  timeout_ =  process_cfg_->getInt("client.timeout").get();
 
   /* format */
   auto format_str = flags.getString("format");
@@ -250,7 +251,12 @@ exit:
 
 void TableImport::runThread() {
   try {
-    native_transport::TCPClient client(nullptr, nullptr);
+    native_transport::TCPClient client(
+        nullptr,
+        nullptr,
+        timeout_,
+        timeout_);
+
     /* connect to server */
     auto rc = client.connect(
         host_,
