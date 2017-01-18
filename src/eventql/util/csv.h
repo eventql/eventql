@@ -24,46 +24,16 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "eventql/eventql.h"
-#include "eventql/util/io/inputstream.h"
-#include "eventql/util/io/outputstream.h"
 #include "eventql/util/return_code.h"
 
 namespace eventql {
-namespace native_transport {
 
-class InsertFrame {
-public:
+ReturnCode parseCSVLine(
+    const std::string& line,
+    std::vector<std::string>* columns,
+    char column_separator = ',',
+    char quote_char = '"',
+    char escape_char = '\\');
 
-  static const uint16_t kOpcode = EVQL_OP_INSERT;
-
-  InsertFrame();
-
-  void setDatabase(const std::string& database);
-  void setTable(const std::string& table);
-  void setRecordEncoding(uint64_t encoding);
-  void setRecordEncodingInfo(const std::string& str);
-  void addRecord(const std::string& record);
-
-  const std::string& getDatabase() const;
-  const std::string& getTable() const;
-  uint64_t getRecordEncoding() const;
-  const std::string& getRecordEncodingInfo() const;
-  const std::vector<std::string>& getRecords() const;
-
-  ReturnCode parseFrom(InputStream* is);
-  ReturnCode writeTo(OutputStream* os) const;
-  void clear();
-
-protected:
-  uint64_t flags_;
-  std::string database_;
-  std::string table_;
-  uint64_t record_encoding_;
-  std::string record_encoding_info_;
-  std::vector<std::string> records_;
-};
-
-} // namespace native_transport
 } // namespace eventql
 

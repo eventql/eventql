@@ -40,6 +40,11 @@ void InsertFrame::setRecordEncoding(uint64_t encoding) {
   record_encoding_ = encoding;
 }
 
+void InsertFrame::setRecordEncodingInfo(const std::string& str) {
+  flags_ |= EVQL_INSERT_HAS_ENCODING_INFO;
+  record_encoding_info_ = str;
+}
+
 void InsertFrame::addRecord(const std::string& record) {
   records_.emplace_back(record);
 }
@@ -56,6 +61,10 @@ uint64_t InsertFrame::getRecordEncoding() const {
   return record_encoding_;
 }
 
+const std::string& InsertFrame::getRecordEncodingInfo() const {
+  return record_encoding_info_;
+}
+
 const std::vector<std::string>& InsertFrame::getRecords() const {
   return records_;
 }
@@ -65,6 +74,10 @@ ReturnCode InsertFrame::parseFrom(InputStream* is) try {
   database_ = is->readLenencString();
   table_ = is->readLenencString();
   record_encoding_ = is->readVarUInt();
+  if (flags_ & EVQL_INSERT_HAS_ENCODING_INFO) {
+    record_encoding_info_ = is->readLenencString();
+  }
+
   auto records_count = is->readVarUInt();
   for (uint64_t i = 0; i < records_count; ++i) {
     records_.emplace_back(is->readLenencString());
@@ -80,6 +93,10 @@ ReturnCode InsertFrame::writeTo(OutputStream* os) const try {
   os->appendLenencString(database_);
   os->appendLenencString(table_);
   os->appendVarUInt(record_encoding_);
+  if (flags_ & EVQL_INSERT_HAS_ENCODING_INFO) {
+    os->appendLenencString(record_encoding_info_);
+  }
+
   os->appendVarUInt(records_.size());
   for (const auto& r : records_) {
     os->appendLenencString(r);

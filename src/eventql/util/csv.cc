@@ -21,49 +21,54 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include <string>
-#include <vector>
-#include "eventql/eventql.h"
-#include "eventql/util/io/inputstream.h"
-#include "eventql/util/io/outputstream.h"
-#include "eventql/util/return_code.h"
+#include "eventql/util/csv.h"
 
 namespace eventql {
-namespace native_transport {
 
-class InsertFrame {
-public:
+ReturnCode parseCSVLine(
+    const std::string& line,
+    std::vector<std::string>* columns,
+    char column_separator /* = ',' */,
+    char quote_char /* = '"' */,
+    char escape_char /* = '\\' */) {
+  columns->clear();
+  std::string column;
+  bool quoted = false;
+  bool escaped = false;
 
-  static const uint16_t kOpcode = EVQL_OP_INSERT;
+  for (const auto& byte : line) {
+    if (byte == escape_char) {
+      if (escaped) {
+        column += escape_char;
+        escaped = false;
+      } else {
+        escaped = true;
+      }
+      continue;
+    }
 
-  InsertFrame();
+    if (!escaped && byte == quote_char) {
+      quoted = !quoted;
+      continue;
+    }
 
-  void setDatabase(const std::string& database);
-  void setTable(const std::string& table);
-  void setRecordEncoding(uint64_t encoding);
-  void setRecordEncodingInfo(const std::string& str);
-  void addRecord(const std::string& record);
+    if (!quoted && byte == column_separator) {
+      columns->emplace_back(column);
+      column.clear();
+      continue;
+    }
 
-  const std::string& getDatabase() const;
-  const std::string& getTable() const;
-  uint64_t getRecordEncoding() const;
-  const std::string& getRecordEncodingInfo() const;
-  const std::vector<std::string>& getRecords() const;
+    column += byte;
+    escaped = false;
+  }
 
-  ReturnCode parseFrom(InputStream* is);
-  ReturnCode writeTo(OutputStream* os) const;
-  void clear();
+  if (quoted) {
+    return ReturnCode::error("EIO", "invalid csv line");
+  } else {
+    columns->emplace_back(column);
+    return ReturnCode::success();
+  }
+}
 
-protected:
-  uint64_t flags_;
-  std::string database_;
-  std::string table_;
-  uint64_t record_encoding_;
-  std::string record_encoding_info_;
-  std::vector<std::string> records_;
-};
-
-} // namespace native_transport
 } // namespace eventql
 

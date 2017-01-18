@@ -26,6 +26,7 @@
 #include "eventql/transport/native/connection.h"
 #include "eventql/transport/native/frames/insert.h"
 #include "eventql/auth/client_auth.h"
+#include "eventql/util/csv.h"
 #include "eventql/util/logging.h"
 #include "eventql/util/wallclock.h"
 #include "eventql/server/session.h"
@@ -34,6 +35,16 @@
 
 namespace eventql {
 namespace native_transport {
+
+ReturnCode performOperation_INSERT_JSON(
+    Session* session,
+    TableService* table_service,
+    InsertFrame* i_frame);
+
+ReturnCode performOperation_INSERT_CSV(
+    Session* session,
+    TableService* table_service,
+    InsertFrame* i_frame);
 
 ReturnCode performOperation_INSERT(
     Database* database,
@@ -70,33 +81,15 @@ ReturnCode performOperation_INSERT(
   /* perform insert */
   auto rc = ReturnCode::success();
   switch (i_frame.getRecordEncoding()) {
-
-    case EVQL_INSERT_CTYPE_JSON: {
-      std::vector<json::JSONObject> records;
-      for (const auto& r : i_frame.getRecords()) {
-        try {
-          records.emplace_back(json::parseJSON(r));
-        } catch (const std::exception& e) {
-          rc = ReturnCode::exception(e);
-          break;
-        }
-      }
-
-      if (rc.isSuccess()) {
-        rc = dbctx->table_service->insertRecords(
-            session->getEffectiveNamespace(),
-            i_frame.getTable(),
-            &*records.begin(),
-            &*records.end());
-      }
-
+    case EVQL_INSERT_CTYPE_JSON:
+      rc = performOperation_INSERT_JSON(session, dbctx->table_service, &i_frame);
       break;
-    }
-
+    case EVQL_INSERT_CTYPE_CSV:
+      rc = performOperation_INSERT_CSV(session, dbctx->table_service, &i_frame);
+      break;
     default:
       rc = ReturnCode::error("ERUNTIME", "invalid record encoding");
       break;
-
   }
 
   if (rc.isSuccess()) {
@@ -106,6 +99,71 @@ ReturnCode performOperation_INSERT(
   }
 
   return ReturnCode::success();
+}
+
+ReturnCode performOperation_INSERT_JSON(
+    Session* session,
+    TableService* table_service,
+    InsertFrame* i_frame) {
+  std::vector<json::JSONObject> records;
+  for (const auto& r : i_frame->getRecords()) {
+    try {
+      records.emplace_back(json::parseJSON(r));
+    } catch (const std::exception& e) {
+      return ReturnCode::exception(e);
+    }
+  }
+
+  return table_service->insertRecords(
+      session->getEffectiveNamespace(),
+      i_frame->getTable(),
+      &*records.begin(),
+      &*records.end());
+}
+
+ReturnCode performOperation_INSERT_CSV(
+    Session* session,
+    TableService* table_service,
+    InsertFrame* i_frame) {
+  auto table_schema = table_service->tableSchema(
+      session->getEffectiveNamespace(),
+      i_frame->getTable());
+
+  if (table_schema.isEmpty()) {
+    return ReturnCode::error("ERUNTIME", "table not found");
+  }
+
+  std::vector<std::string> header;
+  {
+    auto rc = parseCSVLine(i_frame->getRecordEncodingInfo(), &header);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  std::vector<msg::DynamicMessage> records;
+  for (const auto& r : i_frame->getRecords()) {
+    std::vector<std::string> columns;
+    auto rc = parseCSVLine(r, &columns);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+
+    if (columns.size() != header.size()) {
+      return ReturnCode::error("ERUNTIME", "inconsistent number of columns");
+    }
+
+    records.emplace_back(table_schema.get());
+    for (size_t i = 0; i < columns.size(); ++i) {
+      records.back().addField(header[i], columns[i]);
+    }
+  }
+
+  return table_service->insertRecords(
+      session->getEffectiveNamespace(),
+      i_frame->getTable(),
+      &*records.begin(),
+      &*records.end());
 }
 
 } // namespace native_transport

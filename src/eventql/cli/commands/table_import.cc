@@ -34,8 +34,11 @@
 namespace eventql {
 namespace cli {
 
+enum class TableImportInputFormat { JSON, CSV };
+
 const String TableImport::kName_ = "table-import";
 const String TableImport::kDescription_ = "Import json or csv data to a table.";
+static const char kEraseEscapeSequence[] = "\e[2K\r";
 
 TableImport::TableImport(
     RefPtr<ProcessConfig> process_cfg) :
@@ -104,14 +107,21 @@ Status TableImport::execute(
       "number of connections",
       "<num>");
 
+  flags.defineFlag(
+      "format",
+      ::cli::FlagParser::T_STRING,
+      false,
+      "F",
+      "json",
+      "input format (json or csv)",
+      "<format>");
+
   try {
     flags.parseArgv(argv);
-
   } catch (const Exception& e) {
-
     stderr_os->write(StringUtil::format(
         "$0: $1\n",
-       e.getTypeName(),
+        e.getTypeName(),
         e.getMessage()));
     return Status(e);
   }
@@ -125,6 +135,16 @@ Status TableImport::execute(
       kDefaultNumThreads;
   threads_.resize(num_threads_);
   is_tty_ = ::isatty(STDERR_FILENO);
+
+  /* format */
+  auto format_str = flags.getString("format");
+  if (format_str == "json") {
+    format_ = EVQL_INSERT_CTYPE_JSON;
+  } else if (format_str == "csv") {
+    format_ = EVQL_INSERT_CTYPE_CSV;
+  } else {
+    return Status(eRuntimeError, "invalid format");
+  }
 
   /* auth data */
   if (process_cfg_->hasProperty("client.user")) {
@@ -161,9 +181,18 @@ Status TableImport::run(InputStream* is) {
     threads_[i] = std::thread(std::bind(&TableImport::runThread, this));
   }
 
+  /* if the input is a csv, read and store the header line */
+  if (format_ == EVQL_INSERT_CTYPE_CSV) {
+    if (!is->readLine(&csv_header_)) {
+      return Status(eRuntimeError, "csv needs a header");
+    }
+
+    StringUtil::chomp(&csv_header_);
+  }
+
   /* read and enqueue lines in batches */
-  std::vector<std::string> batch;
   std::string line;
+  std::vector<std::string> batch;
   while (is->readLine(&line)) {
     if (batch.size() > kDefaultBatchSize) {
       if (!enqueueBatch(std::move(batch))) {
@@ -202,6 +231,18 @@ exit:
     if (t.joinable()) {
       t.join();
     }
+  }
+
+  if (is_tty_) {
+    std::cerr << kEraseEscapeSequence << std::flush;
+  }
+
+  if (status_.isSuccess()) {
+    std::cerr
+        << "Successfully imported "
+        << stats_.getTotalRowCount()
+        << " row(s)"
+        << std::endl;
   }
 
   return status_;
@@ -303,10 +344,16 @@ Status TableImport::uploadBatch(
   native_transport::InsertFrame i_frame;
   i_frame.setDatabase(database_);
   i_frame.setTable(table_);
-  i_frame.setRecordEncoding(EVQL_INSERT_CTYPE_JSON);
+  i_frame.setRecordEncoding(format_);
+
+  if (format_ == EVQL_INSERT_CTYPE_CSV) {
+    i_frame.setRecordEncodingInfo(csv_header_);
+  }
 
   for (auto l : batch) {
-    i_frame.addRecord(l);
+    auto line = l;
+    StringUtil::chomp(&line);
+    i_frame.addRecord(line);
   }
 
   auto rc = client->sendFrame(&i_frame, 0);
@@ -345,12 +392,11 @@ Status TableImport::uploadBatch(
   return Status::success();
 }
 
-static const char kEraseEscapeSequence[] = "\e[2K";
 void TableImport::printStats() {
   std::stringstream line;
 
   if (is_tty_) {
-    line << kEraseEscapeSequence << "\r";
+    line << kEraseEscapeSequence;
   }
 
   line << std::fixed

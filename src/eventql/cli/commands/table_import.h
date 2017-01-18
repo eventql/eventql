@@ -107,6 +107,8 @@ protected:
   std::vector<std::thread> threads_;
   TableImportStats stats_;
   bool is_tty_;
+  EVQL_INSERT_CTYPE format_;
+  std::string csv_header_;
 };
 
 } // namespace cli

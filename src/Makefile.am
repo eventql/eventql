@@ -106,6 +106,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/util/CivilTime.cc \
     eventql/util/CivilTime.h \
     eventql/util/CivilTime_impl.h \
+    eventql/util/csv.cc \
+    eventql/util/csv.h \
     eventql/util/HMAC.cc \
     eventql/util/HMAC.h \
     eventql/util/ISO8601.cc \
