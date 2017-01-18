@@ -90,6 +90,8 @@ protected:
   void setError(const ReturnCode& err);
   void printStats();
 
+  void printError(const std::string& error);
+
   static const String kName_;
   static const String kDescription_;
   RefPtr<ProcessConfig> process_cfg_;

@@ -41,6 +41,7 @@ public:
 
   const std::string& getError() const;
 
+  bool isRetryable() const;
   void writeToString(std::string* str, bool header = true);
 
   void clear();

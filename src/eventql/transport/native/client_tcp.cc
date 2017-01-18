@@ -226,6 +226,15 @@ void TCPClient::close() {
   }
 }
 
+bool TCPClient::isConnected() const {
+  if (!conn_) {
+    return false;
+  }
+
+
+  return !conn_->isClosed();
+}
+
 TCPAsyncClient::TCPAsyncClient(
     ProcessConfig* config,
     ConfigDirectory* config_dir,

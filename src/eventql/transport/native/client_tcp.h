@@ -90,6 +90,7 @@ public:
       uint16_t flags);
 
   void close();
+  bool isConnected() const;
 
 protected:
 

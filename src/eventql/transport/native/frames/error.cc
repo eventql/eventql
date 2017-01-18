@@ -37,6 +37,9 @@ const std::string& ErrorFrame::getError() const {
   return error_;
 }
 
+bool ErrorFrame::isRetryable() const {
+  return true;
+}
 
 } // namespace native_transport
 } // namespace eventql

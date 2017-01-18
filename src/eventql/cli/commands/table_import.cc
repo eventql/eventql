@@ -103,7 +103,7 @@ Status TableImport::execute(
       ::cli::FlagParser::T_INTEGER,
       false,
       "c",
-      "10",
+      "4",
       "number of connections",
       "<num>");
 
@@ -257,12 +257,12 @@ void TableImport::runThread() {
         timeout_,
         timeout_);
 
-    /* connect to server */
     auto rc = client.connect(
         host_,
         port_,
         false,
         auth_data_);
+
     if (!rc.isSuccess()) {
       setError(rc);
       return;
@@ -362,40 +362,78 @@ Status TableImport::uploadBatch(
     i_frame.addRecord(line);
   }
 
-  auto rc = client->sendFrame(&i_frame, 0);
-  if (!rc.isSuccess()) {
-    return rc;
-  }
-
-  uint16_t ret_opcode = 0;
-  uint16_t ret_flags;
-  std::string ret_payload;
-  while (ret_opcode != EVQL_OP_ACK) {
-    auto rc = client->recvFrame(
-        &ret_opcode,
-        &ret_flags,
-        &ret_payload,
-        kMicrosPerSecond); // FIXME
-
-    if (!rc.isSuccess()) {
-      return rc;
+  size_t retry_timeout = kMicrosPerSecond;
+  size_t retry_timeout_max = kMicrosPerSecond * 30;
+  for (size_t nretry = 0; nretry < 100; ++nretry) {
+    if (nretry > 0) {
+      usleep(retry_timeout);
+      retry_timeout = std::min(retry_timeout * 2, retry_timeout_max);
     }
 
-    switch (ret_opcode) {
-      case EVQL_OP_ACK:
-      case EVQL_OP_HEARTBEAT:
+    if (!client->isConnected()) {
+      auto rc = client->connect(
+          host_,
+          port_,
+          false,
+          auth_data_);
+
+      if (!rc.isSuccess()) {
+        printError(rc.getMessage());
         continue;
-      case EVQL_OP_ERROR: {
-        native_transport::ErrorFrame eframe;
-        eframe.parseFrom(ret_payload.data(), ret_payload.size());
-        return ReturnCode::error("ERUNTIME", eframe.getError());
       }
-      default:
-        return ReturnCode::error("ERUNTIME", "unexpected opcode");
+    }
+
+    auto rc = client->sendFrame(&i_frame, 0);
+    if (!rc.isSuccess()) {
+      printError(rc.getMessage());
+      continue;
+    }
+
+    uint16_t ret_opcode = 0;
+    uint16_t ret_flags;
+    std::string ret_payload;
+    bool success = true;
+    while (success && ret_opcode != EVQL_OP_ACK) {
+      auto rc = client->recvFrame(
+          &ret_opcode,
+          &ret_flags,
+          &ret_payload,
+          kMicrosPerSecond); // FIXME
+
+      if (!rc.isSuccess()) {
+        printError(rc.getMessage());
+        success = false;
+        break;
+      }
+
+      switch (ret_opcode) {
+        case EVQL_OP_ACK:
+        case EVQL_OP_HEARTBEAT:
+          continue;
+        case EVQL_OP_ERROR: {
+          native_transport::ErrorFrame eframe;
+          eframe.parseFrom(ret_payload.data(), ret_payload.size());
+          if (!eframe.isRetryable()) {
+            return ReturnCode::error("ERUNTIME", eframe.getError());
+          }
+
+          printError(eframe.getError());
+          success = false;
+          break;
+        }
+        default:
+          return ReturnCode::error("ERUNTIME", "unexpected opcode");
+      }
+    }
+
+    if (success) {
+      return Status::success();
+    } else {
+      continue;
     }
   }
 
-  return Status::success();
+  return ReturnCode::error("ERUNTIME", "retry limit reacehd");
 }
 
 void TableImport::printStats() {
@@ -414,10 +452,14 @@ void TableImport::printStats() {
       << stats_.getTotalRowCount();
 
   if (!is_tty_) {
-    line << "\n";
+    line << std::endl;
   }
 
   std::cerr << line.str() << std::flush;
+}
+
+void TableImport::printError(const std::string& error) {
+  std::cerr << kEraseEscapeSequence << "ERROR: " << error << std::endl;
 }
 
 const String& TableImport::getName() const {
