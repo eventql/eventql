@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <unistd.h>
 #include <eventql/db/partition_replication.h>
 #include <eventql/db/partition_writer.h>
 #include <eventql/db/metadata_operations.pb.h>
@@ -230,7 +231,7 @@ void LSMPartitionReplication::replicateToUnsafe(
       }
 
       // upload batch
-      auto rc = uploadBatchTo(
+      auto rc = uploadBatchWithRetries(
           server_cfg.server_addr(),
           SHA1Hash(replica.partition_id().data(), replica.partition_id().size()),
           upload_builder.get());
@@ -677,6 +678,25 @@ void LSMPartitionReplication::readBatchPayload(
       }
     }
   }
+}
+
+ReturnCode LSMPartitionReplication::uploadBatchWithRetries(
+    const String& host,
+    const SHA1Hash& target_partition_id,
+    const ShreddedRecordList& batch) {
+  size_t retry_timeout = kRetryTimeoutMin;
+  for (size_t nretry = 0; nretry < kRetries; ++nretry) {
+    auto rc = uploadBatchTo(host, target_partition_id, batch);
+    if (rc.isSuccess()) {
+      return rc;
+    }
+
+    logWarning("Replication error: $0", rc.getMessage());
+    usleep(retry_timeout);
+    retry_timeout = std::min(retry_timeout * 2, kRetryTimeoutMax);
+  }
+
+  return ReturnCode::error("ERUNTIME", "max retries reached");
 }
 
 ReturnCode LSMPartitionReplication::uploadBatchTo(

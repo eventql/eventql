@@ -36,6 +36,9 @@ class ReplicationInfo;
 class PartitionReplication : public RefCounted {
 public:
   static const char kStateFileName[];
+  static const size_t kRetries = 10;
+  static const size_t kRetryTimeoutMin = kMicrosPerSecond / 2;
+  static const size_t kRetryTimeoutMax = kMicrosPerSecond * 10;
 
   PartitionReplication(
       RefPtr<Partition> partition);
@@ -134,6 +137,11 @@ protected:
       size_t upload_batchsize,
       const Vector<bool>& upload_skiplist,
       ShreddedRecordListBuilder* upload_builder);
+
+  ReturnCode uploadBatchWithRetries(
+      const String& host,
+      const SHA1Hash& target_partition_id,
+      const ShreddedRecordList& batch);
 
   ReturnCode uploadBatchTo(
       const String& host,
