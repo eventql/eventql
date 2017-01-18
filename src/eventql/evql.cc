@@ -273,7 +273,7 @@ int main(int argc, const char** argv) {
 
   /* console options */
   eventql::ProcessConfigBuilder cfg_builder;
-  cfg_builder.setProperty("client.timeout", "5000000");
+  cfg_builder.setClientDefaults();
 
   if (flags.isSet("config")) {
     auto config_file_path = flags.getString("config");

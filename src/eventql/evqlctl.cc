@@ -95,6 +95,8 @@ int main(int argc, const char** argv) {
 
   /* load config */
   ProcessConfigBuilder config_builder;
+  config_builder.setClientDefaults();
+
   if (flags.isSet("config")) {
     auto rc = config_builder.loadFile(flags.getString("config"));
     if (!rc.isSuccess()) {
