@@ -230,7 +230,6 @@ void LSMPartitionReplication::replicateToUnsafe(
 
       // skip batch if no records to upload
       if (upload_nskipped == upload_batchsize) {
-        *replicated_offset = tbl.last_sequence();
         continue;
       }
 
@@ -240,14 +239,15 @@ void LSMPartitionReplication::replicateToUnsafe(
           SHA1Hash(replica.partition_id().data(), replica.partition_id().size()),
           upload_builder.get());
 
-      if (rc.isSuccess()) {
-        *replicated_offset = tbl.last_sequence();
-        records_sent += upload_batchsize - upload_nskipped;
-        replication_info->setTargetHostStatus(bytes_sent, records_sent);
-      } else {
+      if (!rc.isSuccess()) {
         RAISE(kRuntimeError, rc.getMessage());
       }
+
+      records_sent += upload_batchsize - upload_nskipped;
+      replication_info->setTargetHostStatus(bytes_sent, records_sent);
     }
+
+    *replicated_offset = tbl.last_sequence();
   }
 }
 
