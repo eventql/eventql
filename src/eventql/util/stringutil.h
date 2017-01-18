@@ -62,6 +62,13 @@ public:
   static void stripTrailingSlashes(std::string* str);
 
   /**
+   * Remove trailing newlines
+   *
+   * @param str the string to remove trailing newlines from
+   */
+  static void chomp(std::string* str);
+
+  /**
    * Remove leading whitespace from the string
    *
    * @param str the string to remove leading whitespace from
