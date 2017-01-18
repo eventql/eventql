@@ -41,6 +41,9 @@
 namespace eventql {
 
 const char PartitionReplication::kStateFileName[] = "_repl";
+const size_t PartitionReplication::kRetries = 10;
+const size_t PartitionReplication::kRetryTimeoutMin = kMicrosPerSecond / 2;
+const size_t PartitionReplication::kRetryTimeoutMax = kMicrosPerSecond * 10;
 
 PartitionReplication::PartitionReplication(
     RefPtr<Partition> partition) :

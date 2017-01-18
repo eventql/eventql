@@ -36,9 +36,9 @@ class ReplicationInfo;
 class PartitionReplication : public RefCounted {
 public:
   static const char kStateFileName[];
-  static const size_t kRetries = 10;
-  static const size_t kRetryTimeoutMin = kMicrosPerSecond / 2;
-  static const size_t kRetryTimeoutMax = kMicrosPerSecond * 10;
+  static const size_t kRetries;
+  static const size_t kRetryTimeoutMin;
+  static const size_t kRetryTimeoutMax;
 
   PartitionReplication(
       RefPtr<Partition> partition);
