@@ -455,10 +455,12 @@ void TableImport::printStats() {
     line << std::endl;
   }
 
+  std::unique_lock<std::mutex> lk(print_mutex_);
   std::cerr << line.str() << std::flush;
 }
 
 void TableImport::printError(const std::string& error) {
+  std::unique_lock<std::mutex> lk(print_mutex_);
   std::cerr << kEraseEscapeSequence << "ERROR: " << error << std::endl;
 }
 

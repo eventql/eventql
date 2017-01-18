@@ -112,6 +112,7 @@ protected:
   EVQL_INSERT_CTYPE format_;
   std::string csv_header_;
   uint64_t timeout_;
+  std::mutex print_mutex_;
 };
 
 } // namespace cli
