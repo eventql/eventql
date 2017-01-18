@@ -230,6 +230,7 @@ void LSMPartitionReplication::replicateToUnsafe(
 
       // skip batch if no records to upload
       if (upload_nskipped == upload_batchsize) {
+        *replicated_offset = tbl.last_sequence();
         continue;
       }
 
