@@ -232,7 +232,7 @@ void LSMPartitionReplication::replicateToUnsafe(
 
       // upload batch
       auto rc = uploadBatchWithRetries(
-          server_cfg.server_addr(),
+          replica.server_id(),
           SHA1Hash(replica.partition_id().data(), replica.partition_id().size()),
           upload_builder.get());
 
@@ -681,12 +681,21 @@ void LSMPartitionReplication::readBatchPayload(
 }
 
 ReturnCode LSMPartitionReplication::uploadBatchWithRetries(
-    const String& host,
+    const String& server_id,
     const SHA1Hash& target_partition_id,
     const ShreddedRecordList& batch) {
   size_t retry_timeout = kRetryTimeoutMin;
   for (size_t nretry = 0; nretry < kRetries; ++nretry) {
-    auto rc = uploadBatchTo(host, target_partition_id, batch);
+    auto server_cfg = dbctx_->config_directory->getServerConfig(server_id);
+    if (server_cfg.server_status() != SERVER_UP) {
+      return ReturnCode::error("ERUNTIME", "server is down");
+    }
+
+    auto rc = uploadBatchTo(
+        server_cfg.server_addr(),
+        target_partition_id,
+        batch);
+
     if (rc.isSuccess()) {
       return rc;
     }

@@ -139,7 +139,7 @@ protected:
       ShreddedRecordListBuilder* upload_builder);
 
   ReturnCode uploadBatchWithRetries(
-      const String& host,
+      const String& server_id,
       const SHA1Hash& target_partition_id,
       const ShreddedRecordList& batch);
 
