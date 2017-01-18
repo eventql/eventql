@@ -106,9 +106,14 @@ protected:
   Status finalizeSplit();
   Status finalizeJoin(const ReplicationTarget& target);
 
-  void replicateTo(
+  ReturnCode replicateTo(
       const ReplicationTarget& replica,
-      uint64_t replicated_offset,
+      uint64_t* replicated_offset,
+      ReplicationInfo* replication_info);
+
+  void replicateToUnsafe(
+      const ReplicationTarget& replica,
+      uint64_t* replicated_offset,
       ReplicationInfo* replication_info);
 
   void readBatchMetadata(
