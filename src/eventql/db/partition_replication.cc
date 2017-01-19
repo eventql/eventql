@@ -166,6 +166,8 @@ void LSMPartitionReplication::replicateToUnsafe(
     const ReplicationTarget& replica,
     uint64_t* replicated_offset,
     ReplicationInfo* replication_info) {
+  replication_info->setTargetHost(replica.server_id());
+
   auto server_cfg = dbctx_->config_directory->getServerConfig(
       replica.server_id());
 
@@ -292,12 +294,11 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
 
   // push all outstanding data to all replication targets
   auto head_offset = snap_->state.lsm_sequence();
-  bool dirty = false;
   bool success = true;
   HashMap<SHA1Hash, size_t> replicas_per_partition;
   Vector<ReplicationTarget> completed_joins;
 
-  // FIXME: replicate all targets in parallel
+  std::vector<std::tuple<ReplicationTarget, uint64_t, ReturnCode>> repl_targets;
   for (const auto& r : snap_->state.replication_targets()) {
     auto replica_offset = replicatedOffsetFor(repl_state, r);
     SHA1Hash target_partition_id(
@@ -323,17 +324,23 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
         head_offset,
         head_offset - replica_offset);
 
-    replication_info->setTargetHost(r.server_id());
+    repl_targets.emplace_back(r, replica_offset, ReturnCode::success());
+  }
 
-    auto rc = replicateTo(r, &replica_offset, replication_info);
-    setReplicatedOffsetFor(&repl_state, r, replica_offset);
-    dirty = true;
+  replicateParallel(&repl_targets, replication_info);
 
-    if (rc.isSuccess()) {
+  for (auto& r : repl_targets) {
+    SHA1Hash target_partition_id(
+        std::get<0>(r).partition_id().data(),
+        std::get<0>(r).partition_id().size());
+
+    setReplicatedOffsetFor(&repl_state, std::get<0>(r), std::get<1>(r));
+
+    if (std::get<2>(r).isSuccess()) {
       ++replicas_per_partition[target_partition_id];
 
-      if (r.is_joining()) {
-        completed_joins.emplace_back(r);
+      if (std::get<0>(r).is_joining()) {
+        completed_joins.emplace_back(std::get<0>(r));
       }
     } else {
       success = false;
@@ -344,13 +351,13 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
         snap_->state.tsdb_namespace(),
         snap_->state.table_key(),
         snap_->key.toString(),
-        r.server_id(),
-        rc.getMessage());
+        std::get<0>(r).server_id(),
+        std::get<2>(r).getMessage());
     }
   }
 
   // commit new replication state
-  if (dirty) {
+  if (!repl_targets.empty()) {
     auto& writer = dynamic_cast<LSMPartitionWriter&>(*partition_->getWriter());
     writer.commitReplicationState(repl_state);
   }
@@ -406,6 +413,17 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
   }
 
   return success;
+}
+
+void LSMPartitionReplication::replicateParallel(
+    std::vector<std::tuple<ReplicationTarget, uint64_t, ReturnCode>>* targets,
+    ReplicationInfo* replication_info) {
+  for (auto& r : *targets) {
+    std::get<2>(r) = replicateTo(
+        std::get<0>(r),
+        &std::get<1>(r),
+        replication_info);
+  }
 }
 
 Status LSMPartitionReplication::fetchAndApplyMetadataTransaction() {

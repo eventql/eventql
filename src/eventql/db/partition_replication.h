@@ -109,6 +109,10 @@ protected:
   Status finalizeSplit();
   Status finalizeJoin(const ReplicationTarget& target);
 
+  void replicateParallel(
+      std::vector<std::tuple<ReplicationTarget, uint64_t, ReturnCode>>* targets,
+      ReplicationInfo* replication_info);
+
   ReturnCode replicateTo(
       const ReplicationTarget& replica,
       uint64_t* replicated_offset,
