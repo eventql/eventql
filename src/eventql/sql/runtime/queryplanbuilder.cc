@@ -458,6 +458,11 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(
     }
   }
 
+  /* return error if group by column is missing */
+  if (group_expressions.size() == 0) {
+    RAISE(kRuntimeError, "GROUP BY column missing");
+  }
+
   /* copy ast for child and swap out select lists*/
   auto child_ast = ast->deepCopy();
   child_ast->removeChildrenByType(ASTNode::T_GROUP_BY);
