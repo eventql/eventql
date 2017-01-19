@@ -61,12 +61,15 @@ CompactionWorker::~CompactionWorker() {
   stop();
 }
 
-void CompactionWorker::enqueuePartition(RefPtr<Partition> partition) {
+void CompactionWorker::enqueuePartition(
+    RefPtr<Partition> partition,
+    bool immediate /* = false */) {
   std::unique_lock<std::mutex> lk(mutex_);
   enqueuePartitionWithLock(partition);
 }
 
-void CompactionWorker::enqueuePartitionWithLock(RefPtr<Partition> partition) {
+void CompactionWorker::enqueuePartitionWithLock(
+    RefPtr<Partition> partition) {
   auto interval = partition->getTable()->commitInterval();
 
   auto uuid = partition->uuid();

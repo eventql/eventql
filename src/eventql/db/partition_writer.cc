@@ -31,6 +31,7 @@
 #include <eventql/db/server_allocator.h>
 #include <eventql/db/metadata_operations.pb.h>
 #include <eventql/db/metadata_coordinator.h>
+#include <eventql/db/compaction_worker.h>
 #include <eventql/util/logging.h>
 #include <eventql/util/random.h>
 #include <eventql/util/wallclock.h>
@@ -171,11 +172,15 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(
     abort();
   }
 
+  if (needsPromptCommit()) {
+    dbctx_->compaction_worker->enqueuePartition(partition_, true);
+  }
+
   if (needsUrgentCommit()) {
     logWarning(
         "evqld",
         "Partition $0/$1/$2 needs urgent commit -- overloaded or "
-        "kMaxArenaRecords too low?",
+        "kMaxArenaRecordsHard too low?",
         snap->state.tsdb_namespace(),
         snap->state.table_key(),
         snap->key.toString());
@@ -202,8 +207,12 @@ bool LSMPartitionWriter::needsCommit() {
   return head_->getSnapshot()->head_arena->size() > 0;
 }
 
+bool LSMPartitionWriter::needsPromptCommit() {
+  return head_->getSnapshot()->head_arena->size() > kMaxArenaRecordsSoft;
+}
+
 bool LSMPartitionWriter::needsUrgentCommit() {
-  return head_->getSnapshot()->head_arena->size() > kMaxArenaRecords;
+  return head_->getSnapshot()->head_arena->size() > kMaxArenaRecordsHard;
 }
 
 bool LSMPartitionWriter::needsCompaction() {

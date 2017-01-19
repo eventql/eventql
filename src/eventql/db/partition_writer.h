@@ -81,7 +81,8 @@ class LSMPartitionWriter : public PartitionWriter {
 public:
   static const size_t kDefaultPartitionSplitThresholdBytes = 1024llu * 1024llu * 512llu;
   static const size_t kDefaultPartitionSplitThresholdRows = 2000000llu;
-  static const size_t kMaxArenaRecords = 1024 * 1024;
+  static const size_t kMaxArenaRecordsSoft = 1024 * 128;
+  static const size_t kMaxArenaRecordsHard = 1024 * 1024 * 2;
   static const size_t kMaxLSMTables = 96;
 
   LSMPartitionWriter(
@@ -94,6 +95,7 @@ public:
 
   bool commit() override;
   bool needsCommit();
+  bool needsPromptCommit();
   bool needsUrgentCommit();
 
   bool compact(bool force = false) override;

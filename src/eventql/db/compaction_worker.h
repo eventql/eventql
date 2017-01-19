@@ -37,7 +37,9 @@ public:
   CompactionWorker(PartitionMap* pmap, size_t nthreads);
   ~CompactionWorker();
 
-  void enqueuePartition(RefPtr<Partition> partition);
+  void enqueuePartition(
+      RefPtr<Partition> partition,
+      bool immediate = false);
 
 protected:
 
