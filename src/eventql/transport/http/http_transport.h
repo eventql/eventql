@@ -27,6 +27,7 @@
 #include "eventql/transport/http/default_servlet.h"
 #include "eventql/transport/http/status_servlet.h"
 #include "eventql/transport/http/api_servlet.h"
+#include "eventql/webui/webui.h"
 
 namespace eventql {
 
@@ -45,6 +46,7 @@ protected:
   DefaultServlet default_servlet_;
   StatusServlet status_servlet_;
   APIServlet api_servlet_;
+  WebUIServlet webui_servlet_;
 };
 
 } // namespace eventql

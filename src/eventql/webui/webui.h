@@ -23,22 +23,22 @@
  */
 #pragma once
 #include <memory>
-#include <eventql/util/http/http_request.h>
-#include <eventql/util/http/http_response.h>
-#include <eventql/util/uri.h>
+#include "eventql/util/http/httpservice.h"
 
 namespace eventql {
 
-class WebUI {
+class WebUIServlet : public http::StreamingHTTPService {
 public:
 
-  WebUI(const std::string& dynamic_asset_path = "");
+  WebUIServlet();
 
   void handleHTTPRequest(
-      http::HTTPRequest* request,
-      http::HTTPResponse* response);
+      RefPtr<http::HTTPRequestStream> req_stream,
+      RefPtr<http::HTTPResponseStream> res_stream);
 
 private:
+
+  const std::string kAssetPath = "eventql/webui";
 
   std::string getPreludeHTML() const;
   std::string getAppHTML() const;
@@ -50,7 +50,6 @@ private:
       const std::string& asset_path,
       const std::string& content_type) const;
 
-  std::string dynamic_asset_path_;
 };
 
 } //namespace eventql

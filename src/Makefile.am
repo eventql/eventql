@@ -967,7 +967,12 @@ eventql/mapreduce/mapreduce_preludejs.cc:
 	echo 'eventql/mapreduce/prelude.js:${srcdir}/eventql/mapreduce/prelude.js' | ${srcdir}/eventql/util/assets.sh $(builddir)/eventql/mapreduce/mapreduce_preludejs.cc
 
 ################# BIN: evqld ####################
-evqld_SOURCES = ${EVQL_CORE_SOURCES_} ${EVQL_PROTO_SOURCES_} eventql/evqld.cc
+evqld_SOURCES = \
+    ${EVQL_CORE_SOURCES_} \
+    ${EVQL_PROTO_SOURCES_} \
+    eventql/webui/webui.cc \
+    eventql/webui/webui.h \
+    eventql/evqld.cc
 
 evqld_LDADD = \
     $(ZOOKEEPER_LDADD) \

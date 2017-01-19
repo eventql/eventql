@@ -21,78 +21,67 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/webui/webui.h>
-#include <metricd/util/logging.h>
-#include <eventql/util/io/fileutil.h>
+#include "eventql/webui/webui.h"
+#include "eventql/util/logging.h"
+#include "eventql/util/io/fileutil.h"
 
 namespace eventql {
 
-WebUI::WebUI(
-    const std::string& dynamic_asset_path /* = "" */) :
-    dynamic_asset_path_(dynamic_asset_path) {}
+WebUIServlet::WebUIServlet() {}
 
-void WebUI::handleHTTPRequest(
-    http::HTTPRequest* request,
-    http::HTTPResponse* response) {
+void WebUIServlet::handleHTTPRequest(
+    RefPtr<http::HTTPRequestStream> req_stream,
+    RefPtr<http::HTTPResponseStream> res_stream) {
 
-  logDebug(
-      "HTTP request: $0 $1",
-      http::getHTTPMethodName(request->method()),
-      request->uri());
+  const auto& req = req_stream->request();
+  URI uri(req.uri());
 
-  URI uri(request->uri());
-  const auto& path = uri.path();
+  logDebug("eventql", "HTTP Request: $0 $1", req.method(), req.uri());
 
-  if (path == "/") {
-    response->setStatus(http::kStatusFound);
-    response->addHeader("Location", "/ui/");
+  http::HTTPResponse res;
+  res.populateFromRequest(req);
+
+  if (uri.path() == "/ui") {
+    res.setStatus(http::kStatusOK);
+    res.addHeader("Content-Type", "text/html; charset=utf-8");
+    res.addBody(getPreludeHTML());
+    res_stream->writeResponse(res);
     return;
   }
 
-  if (StringUtil::beginsWith(path, "/ui/")) {
-    response->setStatus(http::kStatusOK);
-    response->addHeader("Content-Type", "text/html; charset=utf-8");
-    response->addBody(getPreludeHTML());
+  if (StringUtil::beginsWith(uri.path(), "/ui/assets/app.html")) {
+    res.setStatus(http::kStatusOK);
+    res.addHeader("Content-Type", "text/html; charset=utf-8");
+    res.addBody(getAppHTML());
+    res_stream->writeResponse(res);
     return;
   }
 
-  if (StringUtil::beginsWith(path, "/assets/app.html")) {
-    response->setStatus(http::kStatusOK);
-    response->addHeader("Content-Type", "text/html; charset=utf-8");
-    response->addBody(getAppHTML());
+  if (uri.path() == "/ui/favicon.ico") {
+    res.setStatus(http::kStatusOK);
+    res.addHeader("Content-Type", "image/x-icon");
+    res.addBody(getAssetFile("favicon.ico"));
+    res_stream->writeResponse(res);
     return;
   }
 
-  if (path == "/favicon.ico") {
-    response->setStatus(http::kStatusOK);
-    response->addHeader("Content-Type", "image/x-icon");
-    response->addBody(getAssetFile("favicon.ico"));
-    return;
-  }
-
-  if (path == "/fontawesome.woff") {
-    response->setStatus(http::kStatusOK);
-    response->addHeader("Content-Type", "application/x-font-woff");
-    response->addBody(getAssetFile("fontawesome.woff"));
-    return;
-  }
-
-  response->setStatus(http::kStatusNotFound);
-  response->addHeader("Content-Type", "text/plain; charset=utf-8");
-  response->addBody("not found");
+  res.setStatus(http::kStatusNotFound);
+  res.addHeader("Content-Type", "text/plain; charset=utf-8");
+  res.addBody("not found");
+  res_stream->writeResponse(res);
 }
 
-std::string WebUI::getPreludeHTML() const {
+std::string WebUIServlet::getPreludeHTML() const {
   return getAssetFile("prelude.html");
 }
 
-std::string WebUI::getAppHTML() const {
+std::string WebUIServlet::getAppHTML() const {
   auto assets_lst = FileUtil::read(
-      FileUtil::joinPaths(dynamic_asset_path_, "assets.lst")).toString();
+      FileUtil::joinPaths(kAssetPath, "assets.lst")).toString();
 
   std::string app_html;
   for (const auto& f : StringUtil::split(assets_lst, "\n")) {
-    auto file_path = FileUtil::joinPaths(dynamic_asset_path_, f);
+    auto file_path = FileUtil::joinPaths(kAssetPath, f);
     if (!FileUtil::exists(file_path)) {
       continue;
     }
@@ -115,12 +104,10 @@ std::string WebUI::getAppHTML() const {
   return app_html;
 }
 
-std::string WebUI::getAssetFile(const std::string& file) const {
-  if (!dynamic_asset_path_.empty()) {
-    auto file_path = FileUtil::joinPaths(dynamic_asset_path_, file);
-    if (FileUtil::exists(file_path)) {
-      return FileUtil::read(file_path).toString();
-    }
+std::string WebUIServlet::getAssetFile(const std::string& file) const {
+  auto file_path = FileUtil::joinPaths(kAssetPath, file);
+  if (FileUtil::exists(file_path)) {
+    return FileUtil::read(file_path).toString();
   }
 
   return "";
