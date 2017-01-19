@@ -67,12 +67,13 @@ LSMPartitionWriter::LSMPartitionWriter(
             partition_,
             dbctx->lsm_index_cache)),
     dbctx_(dbctx),
-    partition_split_threshold_(kDefaultPartitionSplitThresholdBytes) {
+    partition_split_threshold_bytes_(kDefaultPartitionSplitThresholdBytes),
+    partition_split_threshold_rows_(kDefaultPartitionSplitThresholdRows) {
   auto table = partition_->getTable();
   auto table_cfg = table->config();
 
   if (table_cfg.config().override_partition_split_threshold() > 0) {
-    partition_split_threshold_ =
+    partition_split_threshold_bytes_ =
         table_cfg.config().override_partition_split_threshold();
   }
 }
@@ -419,12 +420,16 @@ bool LSMPartitionWriter::needsSplit() const {
     return false;
   }
 
-  size_t size = 0;
+  size_t size_bytes = 0;
+  size_t size_rows = 0;
   for (const auto& tbl : snap->state.lsm_tables()) {
-    size += tbl.size_bytes();
+    size_bytes += tbl.size_bytes();
+    size_rows += tbl.size_rows();
   }
 
-  return size > partition_split_threshold_;
+  return
+      size_bytes > partition_split_threshold_bytes_ ||
+      size_rows > partition_split_threshold_rows_;
 }
 
 Status LSMPartitionWriter::split() {
