@@ -31,12 +31,12 @@
 #include "eventql/eventql.h"
 
 namespace eventql {
+class ReplicationInfo;
 
-class ReplicationInfo {
+class ReplicationInfoEntry {
 public:
 
-  ReplicationInfo();
-  void reset();
+  ReplicationInfoEntry();
   void setPartition(String name);
   void setTargetHost(String host_name);
   void setTargetHostStatus(size_t bytes_sent, size_t records_sent);
@@ -45,13 +45,45 @@ public:
 
 protected:
   mutable std::mutex mutex_;
-  bool is_idle_;
   String cur_partition_;
   String cur_target_host_;
   UnixTime cur_partition_since_;
-  UnixTime cur_target_host_since_;
   uint64_t cur_target_host_bytes_sent_;
   uint64_t cur_target_host_records_sent_;
+};
+
+class ReplicationInfoEntryRef {
+public:
+
+  ReplicationInfoEntryRef(
+      ReplicationInfo* info,
+      ReplicationInfoEntry* entry);
+
+  ReplicationInfoEntryRef(const ReplicationInfoEntryRef& o) = delete;
+  ReplicationInfoEntryRef(ReplicationInfoEntryRef&& o);
+  ReplicationInfoEntryRef& operator=(const ReplicationInfoEntryRef& o) = delete;
+  ~ReplicationInfoEntryRef();
+
+  ReplicationInfoEntry* operator*();
+  ReplicationInfoEntry* operator->();
+
+protected:
+  ReplicationInfo* info_;
+  ReplicationInfoEntry* entry_;
+};
+
+class ReplicationInfo {
+public:
+
+  ReplicationInfoEntryRef addEntry();
+  void removeEntry(ReplicationInfoEntry* entry);
+
+  std::vector<std::shared_ptr<ReplicationInfoEntry>> listEntries() const;
+
+protected:
+  mutable std::mutex mutex_;
+  std::map<ReplicationInfoEntry*, std::shared_ptr<ReplicationInfoEntry>> entries_;
+  uint64_t seq_;
 };
 
 class ReplicationWorker {
@@ -78,7 +110,7 @@ public:
   void start();
   void stop();
 
-  const ReplicationInfo* getReplicationInfo(size_t thread_id) const;
+  const ReplicationInfo* getReplicationInfo() const;
 
 protected:
 
@@ -102,7 +134,7 @@ protected:
   mutable std::mutex mutex_;
   std::condition_variable cv_;
   size_t num_replication_threads_;
-  Vector<ReplicationInfo> replication_infos_;
+  ReplicationInfo replication_info_;
 };
 
 } // namespace eventql

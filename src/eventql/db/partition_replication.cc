@@ -166,7 +166,14 @@ void LSMPartitionReplication::replicateToUnsafe(
     const ReplicationTarget& replica,
     uint64_t* replicated_offset,
     ReplicationInfo* replication_info) {
-  replication_info->setTargetHost(replica.server_id());
+  auto rinfo_ent = replication_info->addEntry();
+  rinfo_ent->setPartition(StringUtil::format(
+      "$0/$1/$2",
+      snap_->state.tsdb_namespace(),
+      snap_->state.table_key(),
+      snap_->key));
+
+  rinfo_ent->setTargetHost(replica.server_id());
 
   auto server_cfg = dbctx_->config_directory->getServerConfig(
       replica.server_id());
@@ -246,7 +253,7 @@ void LSMPartitionReplication::replicateToUnsafe(
       }
 
       records_sent += upload_batchsize - upload_nskipped;
-      replication_info->setTargetHostStatus(bytes_sent, records_sent);
+      rinfo_ent->setTargetHostStatus(bytes_sent, records_sent);
     }
 
     *replicated_offset = tbl.last_sequence();

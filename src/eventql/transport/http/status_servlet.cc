@@ -254,14 +254,13 @@ void StatusServlet::renderDashboard(
   }
   html += "</table>";
 
-  html += "<h3>Background Threads</h3>";
+  auto repl_infos = ctx->replication_worker->getReplicationInfo()->listEntries();
+  html += "<h3>Replication</h3>";
   html += "<table cellspacing=0 border=1>";
-  auto num_replication_threads = ctx->replication_worker->getNumThreads();
-  for (size_t i = 0; i < num_replication_threads; ++i) {
+  for (const auto& repl_info : repl_infos) {
     html += StringUtil::format(
-        "<tr><td><em>Replication Thread #$0:</em> $1</td></tr>",
-        i + 1,
-        ctx->replication_worker->getReplicationInfo(i)->toString());
+        "<tr><td><em>Replication Thread:</em> $0</td></tr>",
+        repl_info->toString());
   }
   html += "</table>";
 
