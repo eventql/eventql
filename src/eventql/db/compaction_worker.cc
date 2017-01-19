@@ -82,6 +82,11 @@ void CompactionWorker::startImmediateCompaction(RefPtr<Partition> partition) {
     }
 
     if (immediate_set_.size() > kImmediateCompactionMaxThreads) {
+      logWarning(
+          "evqld",
+          "maximum number of immediate compaction threads reached -- "
+          "kImmediateCompactionMaxThreads or num_compaction_threads too low?");
+
       enqueuePartitionWithLock(partition);
       return;
     }
