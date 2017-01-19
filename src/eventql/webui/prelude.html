@@ -17,31 +17,33 @@
     <link rel="icon" type="image/png" sizes="96x96" href="/a/_/a/favicon-96x96.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/a/_/a/favicon-16x16.png">
     <meta name="msapplication-TileImage" content="/a/_/a/assets/ms-icon-144x144.png">
-    <link rel="stylesheet" type="text/css" href="/prelude.css" />
     <meta name="google" content="notranslate" />
     <style type="text/css">
       .headbar { display: none; }
     </style>
   </head>
   <body>
-    <nav class="navbar">
-      <div>
-        <a class="logo" href="/a/">
-          <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAMAAACelLz8AAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAACMVBMVEUAAAA2htE4h9I+i9M+itM7idMxgtAkfM0mfc4qf89WmdksgM8/i9QvgdBGj9U1hdEyhNEugdA1htEnfc0pfs5Sl9cvgtAmfM4ke80/i9Mnfc5UmNkugNA3h9I2hdI7iNIqf845iNMofs5Ul9gtgM8of84vgs85iNIyg9E0hdEpf84pfs8mfc0sf886iNIzhNEwgtAwgdAxg9A3htFQl9hBjdQ6idIlfM56r+CAsuJDjtSJuOTN4fTM4fR2reDz+fyVv+fZ6Pemyeri7vnf7PhioNz1+f3o8vpJktUugNDE3PL3+v2WwOZhn9t5ruAqf8+myeuAs+Kix+my0e6KuOTk7/ldndra6Pfr8/pup972+f241O5hntyPu+Xq8/p3reCJt+TA2fE+i9PW5vZPldivz+1cnNswgtDB2vHQ4/Riodzs9Pqoyuwpfs6Bs+Jrpt7c6vgofs6GteNnpN2RvOb1+fxwqd8iesxno93Q4vRCjdTc6ve41e8ugM/y+PzF3fKmyOtioNtMlNbs9PtQltham9rj7fnb6fex0O6JuONSl9hentuOu+WrzOzt9fuRveZJkdaKt+Ti7fm00u6pyuu21O/K3/PX5vaLueWEtOPd6/jH3vJgn9vJ3/Pn8fmMuuVenduCs+Pe6/hcndpbnNp0rOCbw+iw0O7Q4vXu9fvq8vqXwOd0q+CJt+P0+fw1hdFDjtVvqN+gxumwz+2vz+ylyetQl9h7sOGuzuyNuuUAAABQ85CMAAAAOHRSTlMAOycUFBR269ix650UiU5OYolO2MTEidjrFNjYiTs7FLEnxNidxIknYk7ExNidFGJ2dnY7sScU6+fEVIMAAAABYktHRACIBR1IAAAACXBIWXMAAAsSAAALEgHS3X78AAABZ0lEQVQoz2NgIBowMjIxYxNnYWWzsLRiwqqH3drG1o4Dmwwnl72DoxM3K4YEDy+fs4urm7sHP7oMs4Cnl7ePr7e3nyC6E4T8A7y9A4O8vYOF0XWJhHh7h4aFe3tHiIqhyohHRnl7R8d4A0GsBLKEpJR0HFAwPgEklcjPiCTDlpQMEkxJBZHeabwIJwikZ4CEMrOywVI5MnAZ2dwAsFBePpjyLpCTh/mosAgiVFwCoUvLFKBhXF4BEamsqoYwvGtqFcHho6Rc5+3tXN8Q39gUmwyRam5RAUnxt7a1d3R2dff0uvT1T5g4CSxnpwqSUrOYPGXqtOmlYKHkGd0zZwHp2UzqIDmmOb1z53nDgOP8BQsXeXsv1gA7Q1NLpmrJ0vnLlq9YCZJctXrN2nWTtaHOZ+UXlNLRXb+ha2PPps3V3u1bUrfyIKcDPSZ9A0M2Izbjbdt37DQxNcOSDFiNxcy1jRlYiE+GyAAAT91vEYdc8uwAAAAASUVORK5CYII=" width="26" height="26" class="icon" />
-        </a>
+    <div id="evql_body">
+      <nav class="navbar">
+        <div>
+          <a class="logo" href="/ui">EventQL Cloud</a>
 
-        <div class="navi"></div>
-      </div>
-    </nav>
+          <div class="navi">
+            <div class="main_navi">
+              <a href="/ui">Console</a>
+              <a href="/ui/sql">Editor</a>
+            </div>
+          </div>
+        </div>
+      </nav>
 
-    <div class="evql_body">
       <div id="evql_viewport"></div>
     </div>
 
     <script type="text/javascript">
       window.setTimeout(function() {
         var http = new XMLHttpRequest();
-        http.open("GET", "/assets/app.html", true);
+        http.open("GET", "/ui/assets/app.html", true);
         http.send();
 
         http.onreadystatechange = function() {
@@ -65,9 +67,9 @@
                 document.head.appendChild(script);
               }
 
-              FnordMetric.init();
+              EventQL.init();
             } else {
-              console.log("ERROR: unable to load /assets/app.html");
+              console.log("ERROR: unable to load /ui/assets/app.html");
             }
           }
         }

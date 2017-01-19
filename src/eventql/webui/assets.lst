@@ -1,0 +1,10 @@
+app.js
+app.css
+routes.js
+util/event_source_handler.js
+util/template.js
+util/dom.js
+util/api.js
+views/console/console.css
+views/console/console.html
+views/console/console.js

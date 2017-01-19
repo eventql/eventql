@@ -25,20 +25,24 @@
 this.EventQL = (function() {
   'use strict';
 
+  const VERSION = "v0.4.1";
+
   var app = this;
   var current_path;
   var router;
   var viewport_elem;
-  var widgets = {};
   var current_view;
+  var api_stubs = {};
 
   var init = function() {
-    console.log(">> EventQL Cloud v0.4.1");
+    console.log(">> EventQL Cloud ", VERSION);
+
+    api_stubs.evql = new API({}, "test"); //FIXME get auth data and database name
 
     document.querySelector(".navbar").style.display = "block";
     showLoader();
 
-    viewport_elem = document.getElementById("fm_viewport");
+    viewport_elem = document.getElementById("evql_viewport");
     setPath(window.location.pathname + window.location.search);
 
     /* handle history entry change */
@@ -165,7 +169,8 @@ this.EventQL = (function() {
   this.hideLoader = hideLoader;
   this.views = {};
   this.util = {};
-  this.api_base_path = "/api/v1";
+  this.api_stubs = api_stubs;
+  this.version = VERSION;
   return this;
 }).apply(this.EventQL || {});
 
