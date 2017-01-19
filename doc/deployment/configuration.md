@@ -258,7 +258,7 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
   </td>
   <tr>
     <td><b>server.c2s_io_timeout</b></td>
-    <td>1s</td>
+    <td>60s</td>
     <td>
       How long should the server wait for data on a connection to a client when
       it expects the data to arrive immediately. (optional, unit: microseconds)
@@ -408,7 +408,7 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
   </tr>
   <tr>
     <td><b>client.timeout</b></td>
-    <td>5s</td>
+    <td>60s</td>
     <td>Timeout to use when connecting to server (unit is microseconds)</td>
   </tr>
   <tr>

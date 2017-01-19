@@ -232,7 +232,7 @@ int main(int argc, const char** argv) {
   evql_conf_set(conf, "server.cachedir_maxsize", "68719476736");
   evql_conf_set(conf, "server.noleader", "false");
   evql_conf_set(conf, "server.noalloc", "false");
-  evql_conf_set(conf, "server.c2s_io_timeout", "1000000");
+  evql_conf_set(conf, "server.c2s_io_timeout", "60000000");
   evql_conf_set(conf, "server.c2s_idle_timeout", "1800000000");
   evql_conf_set(conf, "server.s2s_io_timeout", "1000000");
   evql_conf_set(conf, "server.s2s_idle_timeout", "5000000");
