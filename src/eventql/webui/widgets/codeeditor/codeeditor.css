@@ -1,0 +1,347 @@
+.evql_codeeditor {
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+  height: 100%;
+}
+
+/* BASICS */
+.evql_codeeditor .CodeMirror {
+  /* Set height, width, borders, and global font properties here */
+  font: 14px monospace;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.1);
+}
+
+.evql_codeeditor .CodeMirror-scroll {
+  /* Set scrolling behaviour here */
+  overflow: auto;
+}
+
+/* PADDING */
+
+.evql_codeeditor .CodeMirror-lines {
+  padding: 4px 4px; /* Vertical padding around content */
+}
+.evql_codeeditor .CodeMirror pre {
+  padding: 2px 4px; /* Horizontal padding of content */
+}
+
+.evql_codeeditor .CodeMirror-scrollbar-filler, .evql_codeeditor .CodeMirror-gutter-filler {
+  background-color: white; /* The little square between H and V scrollbars */
+}
+
+/* GUTTER */
+
+.evql_codeeditor .CodeMirror-gutters {
+  border-right: 1px solid #dbdedf;
+  background: rgba(0,0,0,.3);
+  white-space: nowrap;
+  background-color: none;
+}
+
+.evql_codeeditor .CodeMirror-linenumbers {}
+.evql_codeeditor .CodeMirror-linenumber {
+  padding: 0 25px 0 6px;
+  min-width: 20px;
+  text-align: right;
+  color: #a6a5ab;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+}
+
+.evql_codeeditor .CodeMirror-guttermarker { color: black; }
+.evql_codeeditor .CodeMirror-guttermarker-subtle { color: #999; }
+
+/* CURSOR */
+
+.evql_codeeditor .CodeMirror div.CodeMirror-cursor {
+  border-left: 1px solid black;
+}
+/* Shown when moving in bi-directional text */
+.evql_codeeditor .CodeMirror div.CodeMirror-secondarycursor {
+  border-left: 1px solid silver;
+}
+.evql_codeeditor .CodeMirror.cm-keymap-fat-cursor div.CodeMirror-cursor {
+  width: auto;
+  border: 0;
+  background: #7e7;
+}
+.evql_codeeditor .cm-animate-fat-cursor {
+  width: auto;
+  border: 0;
+  -webkit-animation: blink 1.06s steps(1) infinite;
+  -moz-animation: blink 1.06s steps(1) infinite;
+  animation: blink 1.06s steps(1) infinite;
+}
+@-moz-keyframes blink {
+  0% { background: #7e7; }
+  50% { background: none; }
+  100% { background: #7e7; }
+}
+@-webkit-keyframes blink {
+  0% { background: #7e7; }
+  50% { background: none; }
+  100% { background: #7e7; }
+}
+@keyframes blink {
+  0% { background: #7e7; }
+  50% { background: none; }
+  100% { background: #7e7; }
+}
+
+/* Can style cursor different in overwrite (non-insert) mode */
+.evql_codeeditor div.CodeMirror-overwrite div.CodeMirror-cursor {}
+
+.evql_codeeditor .cm-tab { display: inline-block; }
+
+.evql_codeeditor .CodeMirror-ruler {
+  border-left: 1px solid #ccc;
+  position: absolute;
+}
+
+/* DEFAULT THEME */
+
+.evql_codeeditor .cm-s-default .cm-keyword {color: #708;}
+.evql_codeeditor .cm-s-default .cm-atom {color: #219;}
+.evql_codeeditor .cm-s-default .cm-number {color: #164;}
+.evql_codeeditor .cm-s-default .cm-def {color: #00f;}
+.evql_codeeditor .cm-s-default .cm-variable,
+.evql_codeeditor .cm-s-default .cm-punctuation,
+.evql_codeeditor .cm-s-default .cm-property,
+.evql_codeeditor .cm-s-default .cm-operator {}
+.evql_codeeditor .cm-s-default .cm-variable-2 {color: #05a;}
+.evql_codeeditor .cm-s-default .cm-variable-3 {color: #085;}
+.evql_codeeditor .cm-s-default .cm-comment {color: #a50;}
+.evql_codeeditor .cm-s-default .cm-string {color: #a11;}
+.evql_codeeditor .cm-s-default .cm-string-2 {color: #f50;}
+.evql_codeeditor .cm-s-default .cm-meta {color: #555;}
+.evql_codeeditor .cm-s-default .cm-qualifier {color: #555;}
+.evql_codeeditor .cm-s-default .cm-builtin {color: #30a;}
+.evql_codeeditor .cm-s-default .cm-bracket {color: #997;}
+.evql_codeeditor .cm-s-default .cm-tag {color: #170;}
+.evql_codeeditor .cm-s-default .cm-attribute {color: #00c;}
+.evql_codeeditor .cm-s-default .cm-header {color: blue;}
+.evql_codeeditor .cm-s-default .cm-quote {color: #090;}
+.evql_codeeditor .cm-s-default .cm-hr {color: #999;}
+.evql_codeeditor .cm-s-default .cm-link {color: #00c;}
+.evql_codeeditor .cm-negative {color: #d44;}
+.evql_codeeditor .cm-positive {color: #292;}
+.evql_codeeditor .cm-header, .cm-strong {font-weight: bold;}
+.evql_codeeditor .cm-em {font-style: italic;}
+.evql_codeeditor .cm-link {text-decoration: underline;}
+.evql_codeeditor .cm-s-default .cm-error {color: #f00;}
+.evql_codeeditor .cm-invalidchar {color: #f00;}
+
+/* Default styles for common addons */
+
+.evql_codeeditor div.CodeMirror span.CodeMirror-matchingbracket {color: #0f0;}
+.evql_codeeditor div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
+.evql_codeeditor .CodeMirror-matchingtag { background: rgba(255, 150, 0, .3); }
+.evql_codeeditor .CodeMirror-activeline-background {background: #e8f2ff;}
+
+/* STOP */
+
+/* The rest of this file contains styles related to the mechanics of
+   the editor. You probably shouldn't touch them. */
+
+.evql_codeeditor .CodeMirror {
+  line-height: 1;
+  position: relative;
+  overflow: hidden;
+  background: white;
+  color: black;
+}
+
+.evql_codeeditor .CodeMirror-scroll {
+  /* 30px is the magic margin used to hide the element's real scrollbars */
+  /* See overflow: hidden in .CodeMirror */
+  margin-bottom: -30px; margin-right: -30px;
+  padding-bottom: 30px;
+  height: 100%;
+  outline: none; /* Prevent dragging from highlighting the element */
+  position: relative;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+}
+
+.evql_codeeditor .CodeMirror-sizer {
+  position: relative;
+  border-right: 30px solid transparent;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+}
+
+/* The fake, visible scrollbars. Used to force redraw during scrolling
+   before actuall scrolling happens, thus preventing shaking and
+   flickering artifacts. */
+.evql_codeeditor .CodeMirror-vscrollbar, 
+.evql_codeeditor .CodeMirror-hscrollbar, 
+.evql_codeeditor .CodeMirror-scrollbar-filler, 
+.evql_codeeditor .CodeMirror-gutter-filler {
+  position: absolute;
+  z-index: 6;
+  display: none;
+}
+.evql_codeeditor .CodeMirror-vscrollbar {
+  right: 0; top: 0;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+.evql_codeeditor .CodeMirror-hscrollbar {
+  bottom: 0; left: 0;
+  overflow-y: hidden;
+  overflow-x: scroll;
+}
+.evql_codeeditor .CodeMirror-scrollbar-filler {
+  right: 0; bottom: 0;
+}
+.evql_codeeditor .CodeMirror-gutter-filler {
+  left: 0; bottom: 0;
+}
+
+.evql_codeeditor .CodeMirror-gutters {
+  position: absolute; left: 0; top: 0;
+  padding-bottom: 30px;
+  z-index: 3;
+}
+.evql_codeeditor .CodeMirror-gutter {
+  white-space: normal;
+  height: 100%;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+  padding-bottom: 30px;
+  margin-bottom: -32px;
+  display: inline-block;
+  /* Hack to make IE7 behave */
+  *zoom:1;
+  *display:inline;
+}
+.evql_codeeditor .CodeMirror-gutter-elt {
+  position: absolute;
+  cursor: default;
+  z-index: 4;
+}
+
+.evql_codeeditor .CodeMirror-lines {
+  padding: 10px 10px;
+  cursor: text;
+  min-height: 1px; /* prevents collapsing before first draw */
+}
+.evql_codeeditor .CodeMirror pre {
+  /* Reset some styles that the rest of the page might have set */
+  -moz-border-radius: 0; -webkit-border-radius: 0; border-radius: 0;
+  border-width: 0;
+  background: transparent;
+  font-family: inherit;
+  font-size: inherit;
+  margin: 0;
+  white-space: pre;
+  word-wrap: normal;
+  line-height: inherit;
+  color: inherit;
+  z-index: 2;
+  position: relative;
+  overflow: visible;
+}
+.evql_codeeditor .CodeMirror-wrap pre {
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  word-break: normal;
+}
+
+.evql_codeeditor .CodeMirror-linebackground {
+  position: absolute;
+  left: 0; right: 0; top: 0; bottom: 0;
+  z-index: 0;
+}
+
+.evql_codeeditor .CodeMirror-linewidget {
+  position: relative;
+  z-index: 2;
+  overflow: auto;
+}
+
+.evql_codeeditor .CodeMirror-widget {}
+
+.evql_codeeditor .CodeMirror-wrap .CodeMirror-scroll {
+  overflow-x: hidden;
+}
+
+.evql_codeeditor .CodeMirror-measure {
+  position: absolute;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+.evql_codeeditor .CodeMirror-measure pre { position: static; }
+
+.evql_codeeditor .CodeMirror div.CodeMirror-cursor {
+  position: absolute;
+  border-right: none;
+  width: 0;
+}
+
+div.CodeMirror-cursors {
+  visibility: hidden;
+  position: relative;
+  z-index: 1;
+}
+.evql_codeeditor .CodeMirror-focused div.CodeMirror-cursors {
+  visibility: visible;
+}
+
+.evql_codeeditor .CodeMirror-selected { background: #d9d9d9; }
+.evql_codeeditor .CodeMirror-focused .CodeMirror-selected { background: #d7d4f0; }
+.evql_codeeditor .CodeMirror-crosshair { cursor: crosshair; }
+
+.evql_codeeditor .cm-searching {
+  background: #ffa;
+  background: rgba(255, 255, 0, .4);
+}
+
+/* IE7 hack to prevent it from returning funny offsetTops on the spans */
+.evql_codeeditor .CodeMirror span { *vertical-align: text-bottom; }
+
+/* Used to force a border model for a node */
+.evql_codeeditor .cm-force-border { padding-right: .1px; }
+
+@media print {
+  /* Hide the cursor when printing */
+  .evql_codeeditor .CodeMirror div.CodeMirror-cursors {
+    visibility: hidden;
+  }
+}
+
+.evql_codeeditor code {
+  display: block;
+  padding: 20px;
+  word-break: break-all;
+}
+
+/* Resizer Tooltip */
+.evql_codeeditor .evql_codeeditor-resizer-tooltip {
+  height: 20px;
+  cursor: row-resize;
+  display: none;
+  position: relative;
+  top: -20px;
+  z-index: 999;
+  background: transparent;
+}
+
+.evql_codeeditor[data-resizable] .evql_codeeditor-resizer-tooltip {
+  display: block;
+}
+
+.evql_codeeditor[data-readonly] .CodeMirror .CodeMirror-cursor {
+  visibility: hidden;
+}
