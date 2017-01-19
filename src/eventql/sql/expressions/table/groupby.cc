@@ -401,7 +401,6 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
 
     if (flags & EVQL_ENDOFREQUEST) {
       ++num_parts_completed;
-      execution_context_->incrementNumTasksCompleted();
     }
 
     MemoryInputStream is(payload, payload_size);
@@ -436,8 +435,13 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
   rpc_scheduler_.setRPCStartedCallback([this] (void* privdata) {
     execution_context_->incrementNumTasksRunning();
   });
-  rpc_scheduler_.setRPCCompletedCallback([this] (void* privdata) {
-    execution_context_->incrementNumTasksCompleted();
+
+  rpc_scheduler_.setRPCCompletedCallback([this] (void* privdata, bool success) {
+    if (success) {
+      execution_context_->incrementNumTasksCompleted();
+    } else {
+      execution_context_->incrementNumTasksFailed();
+    }
   });
 
   auto rc = rpc_scheduler_.execute();
@@ -463,6 +467,13 @@ size_t GroupByMergeExpression::getNumColumns() const {
 void GroupByMergeExpression::addPart(
     GroupByNode* node,
     std::vector<std::string> hosts) {
+  execution_context_->incrementNumTasks();
+  if (hosts.empty()) {
+    execution_context_->incrementNumTasksRunning();
+    execution_context_->incrementNumTasksFailed();
+    return;
+  }
+
   std::string qtree_coded;
   auto qtree_coded_os = StringOutputStream::fromString(&qtree_coded);
   QueryTreeCoder qtree_coder(txn_);
@@ -483,7 +494,6 @@ void GroupByMergeExpression::addPart(
       std::move(payload),
       hosts);
 
-  execution_context_->incrementNumTasks();
   ++num_parts_;
 }
 

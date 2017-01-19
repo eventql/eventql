@@ -170,6 +170,10 @@ Status ProcessConfigBuilder::loadDefaultConfigFile(const String& process) {
   }
 }
 
+void ProcessConfigBuilder::setClientDefaults() {
+  setProperty("client.timeout", "5000000");
+}
+
 void ProcessConfigBuilder::setProperty(const String& key, const String& value) {
   properties_[key] = value;
 }

@@ -21,21 +21,62 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <iostream>
+#include <signal.h>
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/application.h"
 #include "eventql/util/cli/flagparser.h"
 #include "eventql/util/cli/CLI.h"
 #include "eventql/util/csv/CSVInputStream.h"
 #include "eventql/util/io/file.h"
+#include "eventql/util/io/fileutil.h"
 #include "eventql/util/inspect.h"
 #include "eventql/util/human.h"
+#include "eventql/util/json/jsonoutputstream.h"
+#include "eventql/util/protobuf/JSONEncoder.h"
 #include "eventql/io/cstable/cstable_reader.h"
+#include "eventql/io/cstable/RecordMaterializer.h"
 #include "eventql/eventql.h"
 
-int main(int argc, const char** argv) {
-  Application::init();
+static int cstable_dump_json(std::vector<std::string> args) {
+  if (args.size() < 2) {
+    std::cerr
+        << "usage: cstable_tool dump-json <file.cst> <schema.json>"
+        << std::endl;
 
-  String filename(argv[1]);
+    return 1;
+  }
+
+  msg::MessageSchema schema(nullptr);
+  auto schema_json = json::parseJSON(FileUtil::read(args[1]).toString());
+  schema.fromJSON(schema_json.begin(), schema_json.end());
+
+  auto cstable_reader = cstable::CSTableReader::openFile(args[0]);
+  cstable::RecordMaterializer cstable_materializer(
+      &schema,
+      cstable_reader.get());
+
+  for (size_t i = 0; i < cstable_reader->numRecords(); ++i) {
+    msg::MessageObject msg;
+    cstable_materializer.nextRecord(&msg);
+
+    std::string json_str;
+    json::JSONOutputStream json(StringOutputStream::fromString(&json_str));
+    msg::JSONEncoder::encode(msg, schema, &json);
+
+    std::cout << json_str << std::endl;
+  }
+
+  return 0;
+}
+
+static int cstable_dump(std::vector<std::string> args) {
+  if (args.size() < 1) {
+    std::cerr << "usage: cstable_tool dump <file>" << std::endl;
+    return 1;
+  }
+
+  String filename(args[0]);
   auto cstable = cstable::CSTableReader::openFile(filename);
   iputs("== GENERAL ==\n >> number of records: $0", cstable->numRecords());
 
@@ -91,5 +132,32 @@ int main(int argc, const char** argv) {
   }
 
   return 0;
+}
+
+int main(int argc, const char** argv) {
+  Application::init();
+  signal(SIGPIPE, SIG_DFL);
+
+  if (argc <= 1) {
+    std::cerr << "usage: cstable_tool <cmd> ..." << std::endl;
+    return 1;
+  }
+
+  std::string cmd(argv[1]);
+  std::vector<std::string> args;
+  for (int i = 2; i < argc; ++i) {
+    args.emplace_back(argv[i]);
+  }
+
+  if (cmd == "dump") {
+    return cstable_dump(args);
+  }
+
+  if (cmd == "dump-json") {
+    return cstable_dump_json(args);
+  }
+
+  std::cerr << "error: unknown command: " << cmd << std::endl;
+  return 1;
 }
 

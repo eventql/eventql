@@ -39,6 +39,12 @@ public:
   Monitor(DatabaseContext* dbctx);
   ~Monitor();
 
+  double getLoadFactor() const;
+  uint64_t getDiskUsed() const;
+  uint64_t getDiskAvailable() const;
+  uint64_t getPartitionsLoaded() const;
+  uint64_t getPartitionsAssigned() const;
+
   ReturnCode runMonitorProcedure();
 
   void startMonitorThread();
@@ -51,6 +57,12 @@ protected:
   bool thread_running_;
   std::mutex mutex_;
   std::condition_variable cv_;
+  mutable std::mutex stats_mutex_;
+  double load_factor_;
+  uint64_t disk_used_;
+  uint64_t disk_available_;
+  uint64_t partitions_loaded_;
+  uint64_t partitions_assigned_;
 };
 
 } // namespace eventql

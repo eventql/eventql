@@ -70,6 +70,14 @@ void Session::setDisplayNamespace(const String& ns) {
   display_namespace_ = ns;
 }
 
+String Session::getAuthToken() const {
+  return auth_token_;
+}
+
+void Session::setAuthToken(const String& token) {
+  auth_token_ = token;
+}
+
 const DatabaseContext* Session::getDatabaseContext() {
   return database_context_;
 }

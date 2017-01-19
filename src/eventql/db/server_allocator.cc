@@ -92,7 +92,7 @@ Status ServerAllocator::allocateServers(
   size_t num_alloced = 0;
   auto excluded = exclude_servers;
 
-  uint64_t max_loading_partitions;
+  uint64_t max_loading_partitions = 0;
   switch (policy) {
     case AllocationPolicy::MUST_ALLOCATE:
     case AllocationPolicy::BEST_EFFORT:
@@ -106,7 +106,7 @@ Status ServerAllocator::allocateServers(
   // try allocating from primary servers
   while (num_alloced < num_servers) {
     std::vector<WeightedServer> weighted_servers;
-    uint64_t weight = 0;
+    uint64_t weight = 1;
     {
       std::unique_lock<std::mutex> lk(mutex_);
       for (const auto& s : primary_servers_) {
@@ -157,24 +157,31 @@ Status ServerAllocator::allocateServers(
       }
     }
 
-    size_t idx = Random::singleton()->random64() % all_servers.size();
-    for (int i = 0; i < all_servers.size() && num_alloced < num_servers; ++i) {
-      const auto& s = all_servers[++idx % all_servers.size()];
+    if (!all_servers.empty()) {
+      size_t idx = Random::singleton()->random64() % all_servers.size();
+      for (int i = 0; i < all_servers.size() && num_alloced < num_servers; ++i) {
+        const auto& s = all_servers[++idx % all_servers.size()];
 
-      if (excluded.count(s) > 0) {
-        continue;
+        if (excluded.count(s) > 0) {
+          continue;
+        }
+
+        out->emplace_back(s);
+        excluded.insert(s);
+        ++num_alloced;
       }
-
-      out->emplace_back(s);
-      excluded.insert(s);
-      ++num_alloced;
     }
   }
 
   if (num_alloced >= num_servers) {
     return Status::success();
   } else {
-    return Status(eRuntimeError, "not enough live servers");
+    return Status(
+        eRuntimeError,
+        StringUtil::format(
+            "not enough live servers (got=$0, required=$1)",
+            num_alloced,
+            num_servers));
   }
 }
 

@@ -273,7 +273,7 @@ int main(int argc, const char** argv) {
 
   /* console options */
   eventql::ProcessConfigBuilder cfg_builder;
-  cfg_builder.setProperty("client.timeout", "5000000");
+  cfg_builder.setClientDefaults();
 
   if (flags.isSet("config")) {
     auto config_file_path = flags.getString("config");
@@ -328,6 +328,10 @@ int main(int argc, const char** argv) {
 
   if (flags.isSet("auth_token")) {
     cfg_builder.setProperty("client.auth_token", flags.getString("auth_token"));
+  }
+
+  if (flags.isSet("file")) {
+    cfg_builder.setProperty("client.file", flags.getString("file"));
   }
 
   if (flags.isSet("lang")) {

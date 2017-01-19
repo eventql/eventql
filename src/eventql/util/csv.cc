@@ -21,31 +21,53 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/auth/internal_auth_trust.h"
+#include "eventql/util/csv.h"
 
 namespace eventql {
 
-Status TrustInternalAuth::verifyRequest(
-    Session* session,
-    const http::HTTPRequest& request) const {
-  auto hdrval = request.getHeader("X-EventQL-Namespace");
-  if (hdrval.empty()) {
-    return Status(eRuntimeError, "missing X-EventQL-Namespace header");
-  } else {
-    session->setEffectiveNamespace(hdrval);
-    return Status::success();
+ReturnCode parseCSVLine(
+    const std::string& line,
+    std::vector<std::string>* columns,
+    char column_separator /* = ',' */,
+    char quote_char /* = '"' */,
+    char escape_char /* = '\\' */) {
+  columns->clear();
+  std::string column;
+  bool quoted = false;
+  bool escaped = false;
+
+  for (const auto& byte : line) {
+    if (byte == escape_char) {
+      if (escaped) {
+        column += escape_char;
+        escaped = false;
+      } else {
+        escaped = true;
+      }
+      continue;
+    }
+
+    if (!escaped && byte == quote_char) {
+      quoted = !quoted;
+      continue;
+    }
+
+    if (!quoted && byte == column_separator) {
+      columns->emplace_back(column);
+      column.clear();
+      continue;
+    }
+
+    column += byte;
+    escaped = false;
   }
-}
 
-Status TrustInternalAuth::signRequest(
-    Session* session,
-    http::HTTPRequest* request) const {
-  request->addHeader("X-EventQL-Namespace", session->getEffectiveNamespace());
-  request->addHeader(
-      "Authorization",
-      StringUtil::format("Token $0", session->getAuthToken()));
-
-  return Status::success();
+  if (quoted) {
+    return ReturnCode::error("EIO", "invalid csv line");
+  } else {
+    columns->emplace_back(column);
+    return ReturnCode::success();
+  }
 }
 
 } // namespace eventql

@@ -226,6 +226,15 @@ void TCPClient::close() {
   }
 }
 
+bool TCPClient::isConnected() const {
+  if (!conn_) {
+    return false;
+  }
+
+
+  return !conn_->isClosed();
+}
+
 TCPAsyncClient::TCPAsyncClient(
     ProcessConfig* config,
     ConfigDirectory* config_dir,
@@ -263,6 +272,7 @@ void TCPAsyncClient::addRPC(
   task->payload = std::move(payload);
   task->hosts = hosts;
   task->privdata = privdata;
+  task->started = false;
   runq_.push_back(task);
   ++num_tasks_;
 }
@@ -337,8 +347,12 @@ ReturnCode TCPAsyncClient::handleReady(Connection* connection) {
       connection->task->payload.data(),
       connection->task->payload.size());
 
-  if (rpc_started_cb_) {
-    rpc_started_cb_(connection->task->privdata);
+  if (!connection->task->started) {
+    if (rpc_started_cb_) {
+      rpc_started_cb_(connection->task->privdata);
+    }
+
+    connection->task->started = true;
   }
 
   return ReturnCode::success();
@@ -367,7 +381,7 @@ ReturnCode TCPAsyncClient::handleResult(
   }
 
   if (flags & EVQL_ENDOFREQUEST) {
-    completeTask(task);
+    completeTask(task, true);
     connection->task = nullptr;
     return handleIdle(connection);
   } else {
@@ -408,8 +422,12 @@ ReturnCode TCPAsyncClient::handleIdle(Connection* connection) {
         connection->task->payload.data(),
         connection->task->payload.size());
 
-    if (rpc_started_cb_) {
-      rpc_started_cb_(connection->task->privdata);
+    if (!connection->task->started) {
+      if (rpc_started_cb_) {
+        rpc_started_cb_(connection->task->privdata);
+      }
+
+      connection->task->started = true;
     }
   } else {
     connection->state = ConnectionState::CLOSE;
@@ -419,6 +437,10 @@ ReturnCode TCPAsyncClient::handleIdle(Connection* connection) {
 }
 
 ReturnCode TCPAsyncClient::execute() {
+  if (num_tasks_ == 0) {
+    return ReturnCode::success();
+  }
+
   fd_set op_read, op_write, op_error;
   while (num_tasks_complete_ < num_tasks_) {
     for (size_t i = num_tasks_running_; i < max_concurrent_tasks_; ++i) {
@@ -731,7 +753,7 @@ ReturnCode TCPAsyncClient::failTask(Task* task, const ReturnCode& fail_rc) {
     }
   }
 
-  completeTask(task);
+  completeTask(task, false);
 
   if (tolerate_failures_) {
     logError("evqld", "Client error: $0", fail_rc.getMessage());
@@ -741,9 +763,9 @@ ReturnCode TCPAsyncClient::failTask(Task* task, const ReturnCode& fail_rc) {
   }
 }
 
-void TCPAsyncClient::completeTask(Task* task) {
+void TCPAsyncClient::completeTask(Task* task, bool success) {
   if (rpc_completed_cb_) {
-    rpc_completed_cb_(task->privdata);
+    rpc_completed_cb_(task->privdata, success);
   }
 
   delete task;

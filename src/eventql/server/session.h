@@ -44,6 +44,9 @@ public:
   String getDisplayNamespace() const;
   void setDisplayNamespace(const String& ns);
 
+  String getAuthToken() const;
+  void setAuthToken(const String& token);
+
   const DatabaseContext* getDatabaseContext();
 
   void setHeartbeatCallback(std::function<ReturnCode ()> cb);
@@ -63,6 +66,7 @@ protected:
   String user_id_;
   String effective_namespace_;
   String display_namespace_;
+  String auth_token_;
   std::function<ReturnCode ()> heartbeat_cb_;
   uint64_t heartbeat_last_;
   uint64_t heartbeat_interval_;

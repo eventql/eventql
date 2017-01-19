@@ -21,32 +21,19 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/auth/internal_auth_trust.h"
+#pragma once
+#include <string>
+#include <vector>
+#include "eventql/util/return_code.h"
 
 namespace eventql {
 
-Status TrustInternalAuth::verifyRequest(
-    Session* session,
-    const http::HTTPRequest& request) const {
-  auto hdrval = request.getHeader("X-EventQL-Namespace");
-  if (hdrval.empty()) {
-    return Status(eRuntimeError, "missing X-EventQL-Namespace header");
-  } else {
-    session->setEffectiveNamespace(hdrval);
-    return Status::success();
-  }
-}
-
-Status TrustInternalAuth::signRequest(
-    Session* session,
-    http::HTTPRequest* request) const {
-  request->addHeader("X-EventQL-Namespace", session->getEffectiveNamespace());
-  request->addHeader(
-      "Authorization",
-      StringUtil::format("Token $0", session->getAuthToken()));
-
-  return Status::success();
-}
+ReturnCode parseCSVLine(
+    const std::string& line,
+    std::vector<std::string>* columns,
+    char column_separator = ',',
+    char quote_char = '"',
+    char escape_char = '\\');
 
 } // namespace eventql
 

@@ -36,6 +36,9 @@ class ReplicationInfo;
 class PartitionReplication : public RefCounted {
 public:
   static const char kStateFileName[];
+  static const size_t kRetries;
+  static const size_t kRetryTimeoutMin;
+  static const size_t kRetryTimeoutMax;
 
   PartitionReplication(
       RefPtr<Partition> partition);
@@ -106,9 +109,14 @@ protected:
   Status finalizeSplit();
   Status finalizeJoin(const ReplicationTarget& target);
 
-  void replicateTo(
+  ReturnCode replicateTo(
       const ReplicationTarget& replica,
-      uint64_t replicated_offset,
+      uint64_t* replicated_offset,
+      ReplicationInfo* replication_info);
+
+  void replicateToUnsafe(
+      const ReplicationTarget& replica,
+      uint64_t* replicated_offset,
       ReplicationInfo* replication_info);
 
   void readBatchMetadata(
@@ -129,6 +137,11 @@ protected:
       size_t upload_batchsize,
       const Vector<bool>& upload_skiplist,
       ShreddedRecordListBuilder* upload_builder);
+
+  ReturnCode uploadBatchWithRetries(
+      const String& server_id,
+      const SHA1Hash& target_partition_id,
+      const ShreddedRecordList& batch);
 
   ReturnCode uploadBatchTo(
       const String& host,

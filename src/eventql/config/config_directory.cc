@@ -29,7 +29,8 @@ namespace eventql {
 
 Status ConfigDirectoryFactory::getConfigDirectoryForServer(
     const ProcessConfig* cfg,
-    ScopedPtr<ConfigDirectory>* cdir) {
+    ScopedPtr<ConfigDirectory>* cdir,
+    DatabaseContext* dbctx) {
   auto config_backend = cfg->getString("cluster.coordinator");
   if (config_backend.isEmpty()) {
     return Status(
@@ -100,7 +101,8 @@ Status ConfigDirectoryFactory::getConfigDirectoryForServer(
     cdir->reset(
         new StandaloneConfigDirectory(
             server_dir_ext,
-            server_listen.get()));
+            server_listen.get(),
+            dbctx));
 
     return Status::success();
   }

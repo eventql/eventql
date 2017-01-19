@@ -42,11 +42,13 @@ public:
   void setDatabase(const std::string& database);
   void setTable(const std::string& table);
   void setRecordEncoding(uint64_t encoding);
+  void setRecordEncodingInfo(const std::string& str);
   void addRecord(const std::string& record);
 
   const std::string& getDatabase() const;
   const std::string& getTable() const;
   uint64_t getRecordEncoding() const;
+  const std::string& getRecordEncodingInfo() const;
   const std::vector<std::string>& getRecords() const;
 
   ReturnCode parseFrom(InputStream* is);
@@ -58,6 +60,7 @@ protected:
   std::string database_;
   std::string table_;
   uint64_t record_encoding_;
+  std::string record_encoding_info_;
   std::vector<std::string> records_;
 };
 

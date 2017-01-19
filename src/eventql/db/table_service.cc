@@ -582,8 +582,12 @@ Status TableService::listPartitions(
 
     switch (metadata_file->getKeyspaceType()) {
       case KEYSPACE_UINT64: {
-        uint64_t keyrange_uint = -1;
-        memcpy((char*) &keyrange_uint, e.begin.data(), sizeof(uint64_t));
+        uint64_t keyrange_uint = 0;
+        if (!e.begin.empty()) {
+          assert(e.begin.size() == sizeof(uint64_t));
+          memcpy((char*) &keyrange_uint, e.begin.data(), sizeof(uint64_t));
+        }
+
         p_info.keyrange_begin = StringUtil::format(
             "$0 [$1]",
             UnixTime(keyrange_uint),
@@ -626,8 +630,12 @@ Status TableService::listPartitions(
 
     switch (metadata_file->getKeyspaceType()) {
       case KEYSPACE_UINT64: {
-        uint64_t keyrange_uint = -1;
-        memcpy((char*) &keyrange_uint, keyrange_end.data(), sizeof(uint64_t));
+        uint64_t keyrange_uint = 0;
+        if (!keyrange_end.empty()) {
+          assert(keyrange_end.size() == sizeof(uint64_t));
+          memcpy((char*) &keyrange_uint, keyrange_end.data(), sizeof(uint64_t));
+        }
+
         p_info.keyrange_end = StringUtil::format(
             "$0 [$1]",
             UnixTime(keyrange_uint),

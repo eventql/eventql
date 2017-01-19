@@ -112,6 +112,46 @@ double QueryPlan::getProgress() const {
   return progress / num_queries;
 }
 
+uint64_t QueryPlan::getTasksCount() const {
+  size_t num_queries = qtrees_.size();
+  uint64_t n = 0;
+  for (size_t i = 0; i < num_queries; ++i) {
+    n += execution_contexts_[i].getTasksCount();
+  }
+
+  return n;
+}
+
+uint64_t QueryPlan::getTasksCompletedCount() const {
+  size_t num_queries = qtrees_.size();
+  uint64_t n = 0;
+  for (size_t i = 0; i < num_queries; ++i) {
+    n += execution_contexts_[i].getTasksCompletedCount();
+  }
+
+  return n;
+}
+
+uint64_t QueryPlan::getTasksRunningCount() const {
+  size_t num_queries = qtrees_.size();
+  uint64_t n = 0;
+  for (size_t i = 0; i < num_queries; ++i) {
+    n += execution_contexts_[i].getTasksRunningCount();
+  }
+
+  return n;
+}
+
+uint64_t QueryPlan::getTasksFailedCount() const {
+  size_t num_queries = qtrees_.size();
+  uint64_t n = 0;
+  for (size_t i = 0; i < num_queries; ++i) {
+    n += execution_contexts_[i].getTasksFailedCount();
+  }
+
+  return n;
+}
+
 void QueryPlan::setProgressCallback(Function<void()> cb) {
   progress_callback_ = cb;
 }

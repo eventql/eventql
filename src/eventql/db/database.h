@@ -49,6 +49,7 @@ class MetadataCache;
 class MetadataClient;
 class MetadataCoordinator;
 class ServerAllocator;
+class Monitor;
 namespace native_transport {
 class TCPConnectionPool;
 }
@@ -75,6 +76,7 @@ struct DatabaseContext {
   MetadataService* metadata_service;
   net::DNSCache* dns_cache;
   native_transport::TCPConnectionPool* connection_pool;
+  Monitor* monitor;
 };
 
 class Database {

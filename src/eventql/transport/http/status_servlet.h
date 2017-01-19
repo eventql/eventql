@@ -49,6 +49,10 @@ protected:
       http::HTTPRequest* request,
       http::HTTPResponse* response);
 
+  void renderStats(
+      http::HTTPRequest* request,
+      http::HTTPResponse* response);
+
   void renderNamespacesPage(
       http::HTTPRequest* request,
       http::HTTPResponse* response);

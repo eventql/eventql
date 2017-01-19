@@ -391,17 +391,24 @@ Binary Protocols.
     lenencstr      database
     lenencstr      table
     lenencint      records_encoding
+    lenenecstr     records_encoding_info | if EVQL_INSERT_HAS_ENCODING_INFO
     lenencint      records_count
     lenenecstr     *records
 
   Fields:
-    flags              Currently unused
-    database           The database in which the records should be inserted
-    table              The table in which the records should be inserted
-    records_count      The number of records in this INSERT frame
-    records            The list of records
-    records_encoding   The record encoding:
-                         0x01  JSON
+    flags                  Currently unused
+    database               The database in which the records should be inserted
+    table                  The table in which the records should be inserted
+    records_count          The number of records in this INSERT frame
+    records                The list of records
+    records_encoding       The record encoding:
+                             0x01  JSON
+                             0x02  CSV
+    records_encoding_info  Set to the csv header if the encoding is CSV
+
+  Flags:
+    0x01  EVQL_INSERT_HAS_ENCODING_INFO
+          Set if the records_encoding_info field is set
 
   Response:
     After sending an INSERT message, the client should expect to receive one of

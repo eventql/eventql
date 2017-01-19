@@ -267,10 +267,8 @@ void APIServlet::listTables(
 
     json.addObjectEntry("name");
     json.addString(table.table_name());
-    json.addComma();
 
     json.endObject();
-
   };
 
   dbctx->table_service->listTables(
@@ -1121,7 +1119,13 @@ void APIServlet::executeSQL_JSONSSE(
 
     JSONSSECodec json_sse_codec(sse_stream);
     qplan->setProgressCallback([&json_sse_codec, &qplan] () {
-      json_sse_codec.sendProgress(qplan->getProgress());
+      json_sse_codec.sendProgress(
+          false,
+          qplan->getProgress(),
+          qplan->getTasksCount(),
+          qplan->getTasksCompletedCount(),
+          qplan->getTasksRunningCount(),
+          qplan->getTasksFailedCount());
     });
 
     Vector<csql::ResultList> results;
@@ -1130,7 +1134,15 @@ void APIServlet::executeSQL_JSONSSE(
       qplan->execute(i, &results.back());
     }
 
-   json_sse_codec.sendResults(results); 
+    json_sse_codec.sendProgress(
+        true,
+        qplan->getProgress(),
+        qplan->getTasksCount(),
+        qplan->getTasksCompletedCount(),
+        qplan->getTasksRunningCount(),
+        qplan->getTasksFailedCount());
+
+   json_sse_codec.sendResults(results);
   } catch (const StandardException& e) {
     Buffer buf;
     json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));

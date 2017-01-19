@@ -146,6 +146,11 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
     <td>The number of background compaction threads to start</td>
   </tr>
   <tr>
+    <td><b>server.replication_threads_max</b></td>
+    <td>2</td>
+    <td>The max number of background replication threads to start</td>
+  </tr>
+  <tr>
     <td><b>server.client_auth_backend</b></td>
     <td>&mdash;</td>
     <td></td>
@@ -351,7 +356,7 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
   </tr>
   <tr>
     <td><b>server.query_max_concurrent_shards_per_host</b></td>
-    <td>4</td>
+    <td>6</td>
     <td>
       The default maximum number of shards to be executed on any given host
       for a single query.

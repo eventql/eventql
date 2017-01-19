@@ -46,6 +46,7 @@ Status LegacyClientAuth::authenticateNonInteractive(
   auto token_data = msg::decode<LegacyAuthTokenData>(auth_token.get().data());
   session->setEffectiveNamespace(token_data.db_namespace());
   session->setUserID(token_data.userid());
+  session->setAuthToken(auth_token_str);
 
   return Status::success();
 }

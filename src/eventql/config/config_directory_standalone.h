@@ -30,13 +30,15 @@
 typedef struct _zhandle zhandle_t;
 
 namespace eventql {
+class DatabaseContext;
 
 class StandaloneConfigDirectory : public ConfigDirectory {
 public:
 
   StandaloneConfigDirectory(
       const String& datadir,
-      const String& listen_addr);
+      const String& listen_addr,
+      DatabaseContext* dbctx = nullptr);
 
   String getServerID() const override;
 
@@ -96,6 +98,7 @@ public:
 protected:
   mutable std::mutex mutex_;
   String listen_addr_;
+  DatabaseContext* dbctx_;
   RefPtr<mdb::MDB> db_;
   ClusterConfig cluster_config_;
   HashMap<String, NamespaceConfig> namespaces_;

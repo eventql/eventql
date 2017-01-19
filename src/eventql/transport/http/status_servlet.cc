@@ -104,6 +104,11 @@ void StatusServlet::handleHTTPRequest(
       url.path().substr(kPathPrefix.size()),
       "/");
 
+  if (path_parts.size() == 1 && path_parts[0] == "stats") {
+    renderStats(request, response);
+    return;
+  }
+
   if (path_parts.size() == 2 && path_parts[0] == "db") {
     renderNamespacePage(
         path_parts[1],
@@ -263,6 +268,72 @@ void StatusServlet::renderDashboard(
   response->setStatus(http::kStatusOK);
   response->addHeader("Content-Type", "text/html; charset=utf-8");
   response->addBody(html);
+}
+
+void StatusServlet::renderStats(
+    http::HTTPRequest* request,
+    http::HTTPResponse* response) {
+  auto ctx = db_->getSession()->getDatabaseContext();
+  auto cdir = ctx->config_directory;
+  auto zs = evqld_stats();
+  String out;
+
+  out += StringUtil::format("eventql.version:$0\n", kVersionString);
+  out += StringUtil::format("eventql.build_id:$0\n", kBuildID);
+
+  out += StringUtil::format(
+      "eventql.memory_used:$0\n",
+      Application::getCurrentMemoryUsage());
+
+  out += StringUtil::format(
+      "eventql.memory_used_peak:$0\n",
+      Application::getPeakMemoryUsage());
+
+  struct rlimit fd_limit;
+  memset(&fd_limit, 0, sizeof(fd_limit));
+  ::getrlimit(RLIMIT_NOFILE, &fd_limit);
+  out += StringUtil::format("eventql.fd_limit_soft:$0\n", fd_limit.rlim_cur);
+  out += StringUtil::format("eventql.fd_limit_hard:$0\n", fd_limit.rlim_max);
+
+  out += StringUtil::format(
+      "eventql.disk_files_referenced:$0\n",
+      ctx->file_tracker->getNumReferencedFiles());
+
+  out += StringUtil::format(
+      "eventql.disk_cache_size:$0\n",
+      zs->cache_size.get());
+
+  out += StringUtil::format(
+      "eventql.segment_index_cache_size:$0\n",
+      ctx->lsm_index_cache->size());
+
+  out += StringUtil::format(
+      "eventql.metadata_cache_size:$0\n",
+      ctx->metadata_store->getCacheSize());
+
+  out += StringUtil::format(
+      "eventql.partitions_assigned:$0\n",
+      zs->num_partitions.get());
+
+  out += StringUtil::format(
+      "eventql.partitions_loaded:$0\n",
+      zs->num_partitions_opened.get());
+
+  out += StringUtil::format(
+      "eventql.partitions_loading:$0\n",
+      zs->num_partitions_loading.get());
+
+  out += StringUtil::format(
+      "eventql.partitions_dirty:$0\n",
+      zs->compaction_queue_length.get());
+
+  out += StringUtil::format(
+      "eventql.replication_queue_length:$0\n",
+      zs->replication_queue_length.get());
+
+  response->setStatus(http::kStatusOK);
+  response->addHeader("Content-Type", "text/plain; charset=utf-8");
+  response->addBody(out);
 }
 
 void StatusServlet::renderNamespacePage(

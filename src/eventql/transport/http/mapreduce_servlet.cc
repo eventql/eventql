@@ -57,7 +57,7 @@ void MapReduceAPIServlet::handle(
     res.setStatus(http::kStatusUnauthorized);
     res.addHeader("Connection", "close");
     res.addHeader("Content-Type", "text/html; charset=utf-8");
-    res.addBody(Assets::getAsset("eventql/webui/401.html"));
+    res.addBody("unauthorized");
     res_stream->writeResponse(res);
     return;
   }

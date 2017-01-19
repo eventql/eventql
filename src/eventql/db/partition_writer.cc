@@ -171,10 +171,26 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(
   }
 
   if (needsUrgentCommit()) {
+    logWarning(
+        "evqld",
+        "Partition $0/$1/$2 needs urgent commit -- overloaded or "
+        "kMaxArenaRecords too low?",
+        snap->state.tsdb_namespace(),
+        snap->state.table_key(),
+        snap->key.toString());
+
     commit();
   }
 
   if (needsUrgentCompaction()) {
+    logWarning(
+        "evqld",
+        "Partition $0/$1/$2 needs urgent compaction -- overloaded or "
+        "kMaxLSMTables too low?",
+        snap->state.tsdb_namespace(),
+        snap->state.table_key(),
+        snap->key.toString());
+
     compact();
   }
 

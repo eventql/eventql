@@ -90,6 +90,7 @@ public:
       uint16_t flags);
 
   void close();
+  bool isConnected() const;
 
 protected:
 
@@ -118,7 +119,8 @@ public:
               size_t payload_len)>;
 
   using RPCStartedCallbackType = std::function<void (void* privdata)>;
-  using RPCCompletedCallbackType = std::function<void (void* privdata)>;
+  using RPCCompletedCallbackType =
+      std::function<void (void* privdata, bool success)>;
 
   TCPAsyncClient(
       ProcessConfig* config,
@@ -153,6 +155,7 @@ protected:
     uint16_t flags;
     std::string payload;
     void* privdata;
+    bool started;
   };
 
   enum class ConnectionState {
@@ -193,7 +196,7 @@ protected:
 
   Task* popTask(const std::string* hostname = nullptr);
   ReturnCode failTask(Task* task, const ReturnCode& fail_rc);
-  void completeTask(Task* task);
+  void completeTask(Task* task, bool success);
 
   ReturnCode startNextTask();
   ReturnCode startConnection(Task* task);

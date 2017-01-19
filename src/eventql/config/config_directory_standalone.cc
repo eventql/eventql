@@ -22,13 +22,17 @@
  * code of your own applications
  */
 #include "eventql/config/config_directory_standalone.h"
+#include "eventql/db/database.h"
+#include "eventql/db/monitor.h"
 
 namespace eventql {
 
 StandaloneConfigDirectory::StandaloneConfigDirectory(
     const String& datadir,
-    const String& listen_addr) :
-    listen_addr_(listen_addr) {
+    const String& listen_addr,
+    DatabaseContext* dbctx /* = nullptr */) :
+    listen_addr_(listen_addr),
+    dbctx_(dbctx) {
   cluster_config_.set_replication_factor(1);
 
   mdb::MDBOptions opts;
@@ -122,6 +126,20 @@ ServerConfig StandaloneConfigDirectory::getServerConfig(
   c.set_server_id("localhost");
   c.set_server_addr(listen_addr_);
   c.set_server_status(SERVER_UP);
+
+  auto ss = c.mutable_server_stats();
+  double load_factor = 0.0f;
+  if (dbctx_ && dbctx_->monitor) {
+    auto m = dbctx_->monitor;
+    ss->set_load_factor(m->getLoadFactor());
+    ss->set_disk_used(m->getDiskUsed());
+    ss->set_disk_available(m->getDiskAvailable());
+    ss->set_partitions_loaded(m->getPartitionsLoaded());
+    ss->set_partitions_assigned(m->getPartitionsAssigned());
+  } else {
+    ss->set_load_factor(0.0f);
+  }
+
   return c;
 }
 

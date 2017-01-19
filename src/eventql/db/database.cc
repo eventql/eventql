@@ -191,7 +191,6 @@ ReturnCode DatabaseImpl::start() {
       FileUtil::mkdir(cache_dir);
     }
   } catch (const std::exception& e) {
-    shutdown();
     return ReturnCode::error("EIO", e.what());
   }
 
@@ -199,32 +198,32 @@ ReturnCode DatabaseImpl::start() {
     server_lock_.reset(new FileLock(FileUtil::joinPaths(tsdb_dir, "__lock")));
     server_lock_->lock();
   } catch (const std::exception& e) {
-    shutdown();
     return ReturnCode::error("EIO", e.what());
-  }
-
-  /* config dir */
-  {
-    auto rc = ConfigDirectoryFactory::getConfigDirectoryForServer(
-        cfg_,
-        &config_dir_);
-
-    if (rc.isSuccess()) {
-      rc = config_dir_->start();
-    }
-
-    if (!rc.isSuccess()) {
-      shutdown();
-      return ReturnCode::error(
-          "ERUNTIME",
-          "Can't connect to config backend: %s", rc.message().c_str());
-    }
   }
 
   /* database context */
   database_context_.reset(new DatabaseContext());
   database_context_->db_path = tsdb_dir;
   database_context_->config = cfg_;
+
+  /* config dir */
+  {
+    auto rc = ConfigDirectoryFactory::getConfigDirectoryForServer(
+        cfg_,
+        &config_dir_,
+        database_context_.get());
+
+    if (rc.isSuccess()) {
+      rc = config_dir_->start();
+    }
+
+    if (!rc.isSuccess()) {
+      return ReturnCode::error(
+          "ERUNTIME",
+          "Can't connect to config backend: %s", rc.message().c_str());
+    }
+  }
+
   database_context_->config_directory = config_dir_.get();
 
   /* file tracker */
@@ -245,13 +244,11 @@ ReturnCode DatabaseImpl::start() {
             cfg_->getInt("server.cachedir_maxsize").get(),
             cfg_->getInt("server.gc_interval").get()));
   } catch (const std::exception& e) {
-    shutdown();
     return ReturnCode::error("ERUNTIME", e.what());
   }
 
   /* client auth */
   if (!cfg_->hasProperty("server.client_auth_backend")) {
-    shutdown();
     return ReturnCode::error("EARG", "missing 'server.client_auth_backend'");
   }
 
@@ -260,7 +257,6 @@ ReturnCode DatabaseImpl::start() {
     client_auth_.reset(new TrustClientAuth());
   } else if (client_auth_opt.get() == "legacy") {
     if (!cfg_->hasProperty("server.legacy_auth_secret")) {
-      shutdown();
       return ReturnCode::error("EARG", "missing 'server.legacy_auth_secret'");
     }
 
@@ -268,7 +264,6 @@ ReturnCode DatabaseImpl::start() {
         new LegacyClientAuth(
             cfg_->getString("server.legacy_auth_secret").get()));
   } else {
-    shutdown();
     return ReturnCode::error(
         "EARG",
         "invalid client auth backend: " + client_auth_opt.get());
@@ -327,7 +322,9 @@ ReturnCode DatabaseImpl::start() {
   table_service_.reset(new TableService(database_context_.get()));
 
   replication_worker_.reset(
-      new ReplicationWorker(partition_map_.get()));
+      new ReplicationWorker(
+          partition_map_.get(),
+          cfg_->getInt("server.replication_threads_max", 0)));
 
   compaction_worker_.reset(
       new CompactionWorker(
@@ -463,7 +460,6 @@ ReturnCode DatabaseImpl::start() {
   try {
     partition_map_->open();
   } catch (const std::exception& e) {
-    shutdown();
     return ReturnCode::error("ERUNTIME", e.what());
   }
 
@@ -489,6 +485,7 @@ ReturnCode DatabaseImpl::start() {
 
   monitor_.reset(new Monitor(database_context_.get()));
   monitor_->startMonitorThread();
+  database_context_->monitor = monitor_.get();
 
   return ReturnCode::success();
 }

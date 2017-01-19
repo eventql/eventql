@@ -54,6 +54,8 @@ public:
   Status loadFile(const String& file);
   Status loadDefaultConfigFile(const String& process);
 
+  void setClientDefaults();
+
   void setProperty(const String& key, const String& value);
   void setProperty(
       const String& section,

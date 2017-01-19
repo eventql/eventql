@@ -38,6 +38,7 @@
 #include <eventql/cli/commands/table_split.h>
 #include <eventql/cli/commands/table_split_finalize.h>
 #include <eventql/cli/commands/table_config_set.h>
+#include <eventql/cli/commands/table_import.h>
 
 using namespace eventql;
 
@@ -90,9 +91,12 @@ int main(int argc, const char** argv) {
 
   Application::init();
   Application::logToStderr("evqlctl");
+  signal(SIGPIPE, SIG_DFL);
 
   /* load config */
   ProcessConfigBuilder config_builder;
+  config_builder.setClientDefaults();
+
   if (flags.isSet("config")) {
     auto rc = config_builder.loadFile(flags.getString("config"));
     if (!rc.isSuccess()) {
@@ -129,6 +133,7 @@ int main(int argc, const char** argv) {
   commands.emplace_back(new eventql::cli::TableSplit(process_config));
   commands.emplace_back(new eventql::cli::TableSplitFinalize(process_config));
   commands.emplace_back(new eventql::cli::TableConfigSet(process_config));
+  commands.emplace_back(new eventql::cli::TableImport(process_config));
 
   /* print help/version and exit */
   bool print_help = flags.isSet("help");

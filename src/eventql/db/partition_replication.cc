@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <unistd.h>
 #include <eventql/db/partition_replication.h>
 #include <eventql/db/partition_writer.h>
 #include <eventql/db/metadata_operations.pb.h>
@@ -40,6 +41,9 @@
 namespace eventql {
 
 const char PartitionReplication::kStateFileName[] = "_repl";
+const size_t PartitionReplication::kRetries = 10;
+const size_t PartitionReplication::kRetryTimeoutMin = kMicrosPerSecond / 2;
+const size_t PartitionReplication::kRetryTimeoutMax = kMicrosPerSecond * 10;
 
 PartitionReplication::PartitionReplication(
     RefPtr<Partition> partition) :
@@ -146,9 +150,21 @@ bool LSMPartitionReplication::needsReplication() const {
   return false;
 }
 
-void LSMPartitionReplication::replicateTo(
+ReturnCode LSMPartitionReplication::replicateTo(
     const ReplicationTarget& replica,
-    uint64_t replicated_offset,
+    uint64_t* replicated_offset,
+    ReplicationInfo* replication_info) {
+  try {
+    replicateToUnsafe(replica, replicated_offset, replication_info);
+    return ReturnCode::success();
+  } catch (const std::exception& e) {
+    return ReturnCode::error("ERUNTIME", e.what());
+  }
+}
+
+void LSMPartitionReplication::replicateToUnsafe(
+    const ReplicationTarget& replica,
+    uint64_t* replicated_offset,
     ReplicationInfo* replication_info) {
   auto server_cfg = dbctx_->config_directory->getServerConfig(
       replica.server_id());
@@ -166,7 +182,7 @@ void LSMPartitionReplication::replicateTo(
 
   const auto& tables = snap_->state.lsm_tables();
   for (const auto& tbl : tables) {
-    if (tbl.last_sequence() < replicated_offset) {
+    if (tbl.last_sequence() <= *replicated_offset) {
       continue;
     }
 
@@ -192,7 +208,7 @@ void LSMPartitionReplication::replicateTo(
       readBatchMetadata(
           cstable.get(),
           upload_batchsize,
-          replicated_offset,
+          *replicated_offset,
           nrecs_cur,
           tbl.has_skiplist(),
           pkey_col.get(),
@@ -218,8 +234,8 @@ void LSMPartitionReplication::replicateTo(
       }
 
       // upload batch
-      auto rc = uploadBatchTo(
-          server_cfg.server_addr(),
+      auto rc = uploadBatchWithRetries(
+          replica.server_id(),
           SHA1Hash(replica.partition_id().data(), replica.partition_id().size()),
           upload_builder.get());
 
@@ -230,6 +246,8 @@ void LSMPartitionReplication::replicateTo(
       records_sent += upload_batchsize - upload_nskipped;
       replication_info->setTargetHostStatus(bytes_sent, records_sent);
     }
+
+    *replicated_offset = tbl.last_sequence();
   }
 }
 
@@ -279,6 +297,7 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
   HashMap<SHA1Hash, size_t> replicas_per_partition;
   Vector<ReplicationTarget> completed_joins;
 
+  // FIXME: replicate all targets in parallel
   for (const auto& r : snap_->state.replication_targets()) {
     auto replica_offset = replicatedOffsetFor(repl_state, r);
     SHA1Hash target_partition_id(
@@ -306,32 +325,27 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
 
     replication_info->setTargetHost(r.server_id());
 
-    try {
-      replicateTo(r, replica_offset, replication_info);
+    auto rc = replicateTo(r, &replica_offset, replication_info);
+    setReplicatedOffsetFor(&repl_state, r, replica_offset);
+    dirty = true;
 
-      setReplicatedOffsetFor(&repl_state, r, head_offset);
-      {
-        auto& writer = dynamic_cast<LSMPartitionWriter&>(*partition_->getWriter());
-          writer.commitReplicationState(repl_state);
-      }
-
-      dirty = true;
+    if (rc.isSuccess()) {
       ++replicas_per_partition[target_partition_id];
 
       if (r.is_joining()) {
         completed_joins.emplace_back(r);
       }
-    } catch (const std::exception& e) {
+    } else {
       success = false;
 
       logError(
         "evqld",
-        e,
-        "Error while replicating partition $0/$1/$2 to $3",
+        "Error while replicating partition $0/$1/$2 to $3: $4",
         snap_->state.tsdb_namespace(),
         snap_->state.table_key(),
         snap_->key.toString(),
-        r.server_id());
+        r.server_id(),
+        rc.getMessage());
     }
   }
 
@@ -668,6 +682,34 @@ void LSMPartitionReplication::readBatchPayload(
       }
     }
   }
+}
+
+ReturnCode LSMPartitionReplication::uploadBatchWithRetries(
+    const String& server_id,
+    const SHA1Hash& target_partition_id,
+    const ShreddedRecordList& batch) {
+  size_t retry_timeout = kRetryTimeoutMin;
+  for (size_t nretry = 0; nretry < kRetries; ++nretry) {
+    auto server_cfg = dbctx_->config_directory->getServerConfig(server_id);
+    if (server_cfg.server_status() != SERVER_UP) {
+      return ReturnCode::error("ERUNTIME", "server is down");
+    }
+
+    auto rc = uploadBatchTo(
+        server_cfg.server_addr(),
+        target_partition_id,
+        batch);
+
+    if (rc.isSuccess()) {
+      return rc;
+    }
+
+    logWarning("Replication error: $0", rc.getMessage());
+    usleep(retry_timeout);
+    retry_timeout = std::min(retry_timeout * 2, kRetryTimeoutMax);
+  }
+
+  return ReturnCode::error("ERUNTIME", "max retries reached");
 }
 
 ReturnCode LSMPartitionReplication::uploadBatchTo(

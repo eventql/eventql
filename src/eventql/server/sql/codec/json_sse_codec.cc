@@ -89,7 +89,13 @@ void JSONSSECodec::sendResults(const Vector<csql::ResultList>& results) {
   output_->sendEvent(buf, Some(String("result")));
 }
 
-void JSONSSECodec::sendProgress(double progress) {
+void JSONSSECodec::sendProgress(
+    bool done,
+    double progress,
+    size_t tasks_total,
+    size_t tasks_complete,
+    size_t tasks_running,
+    size_t tasks_failed) {
   if (output_->isClosed()) {
     return;
   }
@@ -103,10 +109,22 @@ void JSONSSECodec::sendProgress(double progress) {
   json.addObjectEntry("progress");
   json.addFloat(progress);
   json.addComma();
+  json.addObjectEntry("tasks_total");
+  json.addInteger(tasks_total);
+  json.addComma();
+  json.addObjectEntry("tasks_complete");
+  json.addInteger(tasks_complete);
+  json.addComma();
+  json.addObjectEntry("tasks_running");
+  json.addInteger(tasks_running);
+  json.addComma();
+  json.addObjectEntry("tasks_failed");
+  json.addInteger(tasks_failed);
+  json.addComma();
   json.addObjectEntry("message");
   if (progress == 0.0f) {
     json.addString("Waiting...");
-  } else if (progress == 1.0f) {
+  } else if (done) {
     json.addString("Downloading...");
   } else {
     json.addString("Running...");

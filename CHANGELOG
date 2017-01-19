@@ -1,55 +1,15 @@
-EventQL v0.5.0 beta;
+EventQL v0.4.1 beta;
 
-  * Changed the DESCRIBE TABLE statement to return a new "encoding" column that
-    contains information about the column's encoding settings
+  * Fixed a potential modulo by zero errror in server allocator
 
-  * Changed the server allocator to assign new partitions to servers using
-    a weighted random scheme, taking into a account the load facotr and the
-    number of available bytes on disk for each server
+  * Add support for INSERT frames with CSV encoding in the protocol
 
-  * Changed all metadata operations to use the native protocol
+  * Added --format flag and CSV support to evqlctl-table-import
 
-  * Added the evqlslap benchmark and load testing tool
+  * Added the ALTER TABLE SET PROPERTY statement to update the table properties
+    enable_async_split, partition_split_threshold and disable_replication
 
-  * Added caching for metadata lookups
-
-  * Added internal (server-to-server) connection pooling for native TCP
-    connections
-
-  * Added a new "user defined partitioning" mode that can be enabled by setting
-    user_defined_partitioning=true on a table and allows to explicitly specify
-    the partition key for each row
-
-  * Added a new monitor thread that publishes disk usage and other load
-    information to the coordination service
-
-  * Added new frames to native protocol: ACK, INSERT, REPL_INSERT,
-    META_GETFILE{_RESULT}, META_CREATEFILE, META_PERFORMOP{_RESULT},
-    META_DISCOVER{_RESULT}, META_LISTPARTITIONS{_RESULT},
-    META_FINDPARTITION{_RESULT}
-
-  * Added the DESCRIBE PARTITIONS table statement to obtain information about
-    the partitions of a table
-
-  * Added the USE statement to switch databases
-
-  * Added the following new configuration options: server.disk_capacity,
-    server.load_limit_{soft,hard}, server.partitions_loading_limit_{soft,hard},
-    server.loadinfo_publish_interval, server.noalloc,
-    server.s2s_pool_max_connections, server.s2s_pool_max_connections_per_host,
-    server.s2s_pool_linger_timeout, cluster.allow_create_database
-
-  * Added new sql functions: usleep, fnv32
-
-  * Added the CREATE DATABASE statement
-
-  * Added the CLUSTER SHOW SERVERS statement and the cluster-list command to
-    obtain information about the servers of the current cluster.
-
-  * Made table properties enable_async_split, partition_split_threshold and
-    disable_replication updateable via ALTER TABLE SET PROPERTY
-
-EventQL v0.4.0 beta;
+EventQL v0.4.0 (v0.4.0-rc0, git267e851) beta; 2016-12-20 13:43:47 +0000
 
   * Changed the parallel GROUP BY operation to use the new native protocol and
     to schedule all remote partial group bys from a a single thread using
@@ -75,6 +35,15 @@ EventQL v0.4.0 beta;
 
   * Changed the zookeeper backend to explicitly reconnect on session timeouts
     and not rely on the built-in reconnect mechanism
+
+  * Changed the DESCRIBE TABLE statement to return a new "encoding" column that
+    contains information about the column's encoding settings
+
+  * Changed the server allocator to assign new partitions to servers using
+    a weighted random scheme, taking into a account the load facotr and the
+    number of available bytes on disk for each server
+
+  * Changed all metadata operations to use the native protocol
 
   * Removed the obsolete "sha1_tokens" field from the cluster/server config
 
@@ -108,7 +77,47 @@ EventQL v0.4.0 beta;
     server.query_progress_rate_limit, cluster.allow_anonymous,
     cluster.allow_drop_table, server.query_max_concurrent_shards,
     server.query_max_concurrent_shards_per_host,
-    server.query_failed_shard_policy, client.timeout
+    server.query_failed_shard_policy, client.timeout, server.disk_capacity,
+    server.load_limit_{soft,hard}, server.partitions_loading_limit_{soft,hard},
+    server.loadinfo_publish_interval, server.noalloc,
+    server.s2s_pool_max_connections, server.s2s_pool_max_connections_per_host,
+    server.s2s_pool_linger_timeout, cluster.allow_create_database,
+    server.replication_threads_max
+
+  * Added the evqlslap benchmark and load testing tool
+
+  * Added caching for metadata lookups
+
+  * Added internal (server-to-server) connection pooling for native TCP
+    connections
+
+  * Added a new "user defined partitioning" mode that can be enabled by setting
+    user_defined_partitioning=true on a table and allows to explicitly specify
+    the partition key for each row
+
+  * Added a new monitor thread that publishes disk usage and other load
+    information to the coordination service
+
+  * Added new frames to native protocol: ACK, INSERT, REPL_INSERT,
+    META_GETFILE{_RESULT}, META_CREATEFILE, META_PERFORMOP{_RESULT},
+    META_DISCOVER{_RESULT}, META_LISTPARTITIONS{_RESULT},
+    META_FINDPARTITION{_RESULT}
+
+  * Added the DESCRIBE PARTITIONS table statement to obtain information about
+    the partitions of a table
+
+  * Added the USE statement to switch databases
+
+  * Added new sql functions: usleep, fnv32
+
+  * Added the CREATE DATABASE statement
+
+  * Added the CLUSTER SHOW SERVERS statement and the cluster-list command to
+    obtain information about the servers of the current cluster.
+
+  * Added the table-import command to the evqlctl util
+
+  * Added a basic ruby driver (drivers/ruby)
 
 
 EventQL v0.3.2 (v0.3.2, gitb0ea6bc) beta; 2016-09-13 15:23:08 +0000

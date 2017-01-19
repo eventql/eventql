@@ -135,6 +135,12 @@ void StringUtil::stripTrailingSlashes(std::string* str) {
   }
 }
 
+void StringUtil::chomp(std::string* str) {
+  while (str->back() == '\n' || str->back() == '\r') {
+    str->pop_back();
+  }
+}
+
 void StringUtil::replaceAll(
     std::string* str,
     const std::string& pattern,

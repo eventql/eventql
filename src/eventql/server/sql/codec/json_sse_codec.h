@@ -35,7 +35,13 @@ public:
   JSONSSECodec(RefPtr<http::HTTPSSEStream> sse_stream);
 
   void sendResults(const Vector<csql::ResultList>& results);
-  void sendProgress(double progress);
+  void sendProgress(
+      bool done,
+      double progress,
+      size_t tasks_total,
+      size_t tasks_complete,
+      size_t tasks_running,
+      size_t tasks_failed);
 
 protected:
 

@@ -163,6 +163,7 @@ void BinaryMessageWriter::append(void const* data, size_t size) {
     }
 
     ptr_ = new_ptr;
+    size_ = resize;
   }
 
   memcpy(((char*) ptr_) + used_, data, size);

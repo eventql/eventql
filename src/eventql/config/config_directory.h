@@ -33,6 +33,7 @@
 #include <eventql/db/table_config.pb.h>
 
 namespace eventql {
+class DatabaseContext;
 
 enum ConfigTopic : uint64_t {
   CUSTOMERS = 1,
@@ -108,7 +109,8 @@ public:
 
   static Status getConfigDirectoryForServer(
       const ProcessConfig* cfg,
-      ScopedPtr<ConfigDirectory>* cdir);
+      ScopedPtr<ConfigDirectory>* cdir,
+      DatabaseContext* dbctx);
 
   static Status getConfigDirectoryForClient(
       const ProcessConfig* cfg,

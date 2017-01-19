@@ -103,6 +103,10 @@ void MapReduceScheduler::execute(const MapReduceShardList& shards) {
 
     cv_.wait(lk);
   }
+
+  while (num_shards_running_ > 0) {
+    cv_.wait(lk);
+  }
 }
 
 size_t MapReduceScheduler::startJobs() {
