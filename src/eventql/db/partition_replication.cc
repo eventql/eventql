@@ -44,6 +44,7 @@ const char PartitionReplication::kStateFileName[] = "_repl";
 const size_t PartitionReplication::kRetries = 10;
 const size_t PartitionReplication::kRetryTimeoutMin = kMicrosPerSecond / 2;
 const size_t PartitionReplication::kRetryTimeoutMax = kMicrosPerSecond * 10;
+const size_t PartitionReplication::kDefaultReplicationConcurrency = 6;
 
 PartitionReplication::PartitionReplication(
     RefPtr<Partition> partition) :
@@ -334,7 +335,8 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
     repl_targets.emplace_back(r, replica_offset, ReturnCode::success());
   }
 
-  replicateParallel(&repl_targets, replication_info);
+  auto replication_concurrency = kDefaultReplicationConcurrency;
+  replicateParallel(&repl_targets, replication_info, replication_concurrency);
 
   for (auto& r : repl_targets) {
     SHA1Hash target_partition_id(
@@ -424,12 +426,44 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
 
 void LSMPartitionReplication::replicateParallel(
     std::vector<std::tuple<ReplicationTarget, uint64_t, ReturnCode>>* targets,
-    ReplicationInfo* replication_info) {
-  for (auto& r : *targets) {
-    std::get<2>(r) = replicateTo(
-        std::get<0>(r),
-        &std::get<1>(r),
-        replication_info);
+    ReplicationInfo* rinfo,
+    size_t concurrency) {
+  if (concurrency < 2) {
+    for (auto& r : *targets) {
+      std::get<2>(r) = replicateTo(std::get<0>(r), &std::get<1>(r), rinfo);
+    }
+
+    return;
+  }
+
+  std::mutex tlock;
+  std::condition_variable tcv;
+  size_t tcount = 0;
+  for (size_t idx = 0; idx < targets->size(); ++idx) {
+    std::unique_lock<std::mutex> lk(tlock);
+    while (tcount >= concurrency) {
+      tcv.wait(lk);
+    }
+
+    ++tcount;
+
+    auto t = std::thread([this, idx, targets, &tcount, &tlock, &tcv, rinfo] {
+      std::get<2>((*targets)[idx]) = replicateTo(
+          std::get<0>((*targets)[idx]),
+          &std::get<1>((*targets)[idx]),
+          rinfo);
+
+      std::unique_lock<std::mutex> lk(tlock);
+      --tcount;
+      tcv.notify_all();
+    });
+
+    t.detach();
+  }
+
+  std::unique_lock<std::mutex> lk(tlock);
+  while (tcount > 0) {
+    tcv.wait(lk);
   }
 }
 
