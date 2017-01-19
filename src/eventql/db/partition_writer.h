@@ -98,6 +98,7 @@ public:
   bool needsPromptCommit();
   bool needsUrgentCommit();
 
+  bool compactionRunning();
   bool compact(bool force = false) override;
   bool needsCompaction() override;
   bool needsUrgentCompaction();

@@ -208,7 +208,15 @@ bool LSMPartitionWriter::needsCommit() {
 }
 
 bool LSMPartitionWriter::needsPromptCommit() {
-  return head_->getSnapshot()->head_arena->size() > kMaxArenaRecordsSoft;
+  if (head_->getSnapshot()->head_arena->size() < kMaxArenaRecordsSoft) {
+    return false;
+  }
+
+  if (compactionRunning()) {
+    return false;
+  }
+
+  return true;
 }
 
 bool LSMPartitionWriter::needsUrgentCommit() {
@@ -314,6 +322,15 @@ bool LSMPartitionWriter::commit() {
   }
 
   return commited;
+}
+
+bool LSMPartitionWriter::compactionRunning() {
+  ScopedLock<std::mutex> compact_lk(compaction_mutex_, std::defer_lock);
+  if (compact_lk.try_lock()) {
+    return false;
+  } else {
+    return true;
+  }
 }
 
 bool LSMPartitionWriter::compact(bool force /* = false */) {

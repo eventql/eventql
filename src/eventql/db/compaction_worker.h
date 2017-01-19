@@ -34,6 +34,8 @@ namespace eventql {
 class CompactionWorker {
 public:
 
+  static const size_t kImmediateCompactionMaxThreads = 8;
+
   CompactionWorker(PartitionMap* pmap, size_t nthreads);
   ~CompactionWorker();
 
@@ -43,7 +45,9 @@ public:
 
 protected:
 
+  void startImmediateCompaction(RefPtr<Partition> partition);
   void enqueuePartitionWithLock(RefPtr<Partition> partition);
+  bool compactPartition(RefPtr<Partition> partition);
 
   void start();
   void stop();
@@ -52,6 +56,7 @@ protected:
   PartitionMap* pmap_;
   size_t nthreads_;
   Set<SHA1Hash> waitset_;
+  Set<SHA1Hash> immediate_set_;
   std::multiset<
       Pair<uint64_t, RefPtr<Partition>>,
       Function<bool (
