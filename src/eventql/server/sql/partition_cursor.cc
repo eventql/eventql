@@ -221,7 +221,7 @@ RemotePartitionCursor::RemotePartitionCursor(
     done_(false),
     timeout_(
         session->getDatabaseContext()->config->getInt(
-            "server.s2s_idle_timeout").get()),
+            "server.s2s_io_timeout").get()),
     client_(
         session->getDatabaseContext()->connection_pool,
         session->getDatabaseContext()->dns_cache,

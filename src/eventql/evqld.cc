@@ -234,8 +234,8 @@ int main(int argc, const char** argv) {
   evql_conf_set(conf, "server.noalloc", "false");
   evql_conf_set(conf, "server.c2s_io_timeout", "60000000");
   evql_conf_set(conf, "server.c2s_idle_timeout", "1800000000");
-  evql_conf_set(conf, "server.s2s_io_timeout", "1000000");
-  evql_conf_set(conf, "server.s2s_idle_timeout", "5000000");
+  evql_conf_set(conf, "server.s2s_io_timeout", "10000000");
+  evql_conf_set(conf, "server.s2s_idle_timeout", "30000000");
   evql_conf_set(conf, "server.s2s_pool_max_connections_per_host", "16");
   evql_conf_set(conf, "server.s2s_pool_max_connections", "256");
   evql_conf_set(conf, "server.s2s_pool_linger_timeout", "2000000");
