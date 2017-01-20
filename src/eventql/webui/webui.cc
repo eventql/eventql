@@ -41,14 +41,6 @@ void WebUIServlet::handleHTTPRequest(
   http::HTTPResponse res;
   res.populateFromRequest(req);
 
-  if (uri.path() == "/ui") {
-    res.setStatus(http::kStatusOK);
-    res.addHeader("Content-Type", "text/html; charset=utf-8");
-    res.addBody(getPreludeHTML());
-    res_stream->writeResponse(res);
-    return;
-  }
-
   if (StringUtil::beginsWith(uri.path(), "/ui/assets/app.html")) {
     res.setStatus(http::kStatusOK);
     res.addHeader("Content-Type", "text/html; charset=utf-8");
@@ -65,10 +57,11 @@ void WebUIServlet::handleHTTPRequest(
     return;
   }
 
-  res.setStatus(http::kStatusNotFound);
-  res.addHeader("Content-Type", "text/plain; charset=utf-8");
-  res.addBody("not found");
+  res.setStatus(http::kStatusOK);
+  res.addHeader("Content-Type", "text/html; charset=utf-8");
+  res.addBody(getPreludeHTML());
   res_stream->writeResponse(res);
+  return;
 }
 
 std::string WebUIServlet::getPreludeHTML() const {

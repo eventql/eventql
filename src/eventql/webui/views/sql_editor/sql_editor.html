@@ -1,0 +1,33 @@
+<template id="evql-sql-editor-tpl">
+  <div class="evql_sql_editor">
+
+    <section class="editor_title">
+      <button class="z-button primary" data-action="execute-query">
+        <i class="icon-play-circled"></i>
+        &nbsp;Execute
+      </button>
+    </section>
+
+    <div class="editor_viewport">
+      <div class="editor">
+        <div data-content='codeeditor'></div>
+
+        <div class="result">
+        </div>
+
+      </div>
+    </div>
+
+    <z-tooltip class="execute_hint" data-pointer='center' data-position='bottom'>
+      You can also press Ctrl+Enter
+    </z-tooltip>
+  </div>
+</template>
+
+<template id="zbase_sql_editor_error_msg_tpl">
+  <div class="message error">
+    <h3>Error</h3>
+    <p class="info"></p>
+  </div>
+</template>
+

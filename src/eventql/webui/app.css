@@ -210,3 +210,37 @@ template {
 .navbar .main_navi a.active {
   background: #367ebf;
 }
+
+table.evql_table {
+  font-size: 12px;
+  background: #fff;
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+table.evql_table th {
+  line-height: 1em;
+  box-shadow: 0 1px 2px rgba(0,0,0,.09);
+  vertical-align: middle;
+  border-bottom: 1px solid #e1e1e1;
+  text-align: left;
+  padding: .8em;
+  color: #333;
+  font-weight: 600;
+  background: -moz-linear-gradient(top,#ffffff 0%,#f9f9f9 100%);
+  background: -webkit-linear-gradient(top,#ffffff 0%,#f9f9f9 100%);
+  background: linear-gradient(to bottom,#ffffff 0%,#f9f9f9 100%);
+}
+
+table.evql_table tbody td {
+  color: #222;
+  padding: .7em .8em;
+  text-align: left;
+  border-top: 1px solid #d4d4d5;
+}
+
+table.evql_table tbody tr:first-child td {
+  border-top: none;
+}
+

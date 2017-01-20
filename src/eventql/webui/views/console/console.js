@@ -22,7 +22,7 @@
  * code of your own applications
  */
 
-EventQL.views["eventql.console"] = function(elem, params) {
+EventQL.SQLConsole = function(elem, params) {
   'use strict';
 
   var query_mgr = EventSourceHandler();
@@ -299,5 +299,7 @@ EventQL.views["eventql.console"] = function(elem, params) {
     console_elem.insertBefore(e, console_elem.firstChild);
     return console_elem.firstElementChild;
   }
+};
 
-}
+EventQL.views["eventql.console"] = EventQL.SQLConsole;
+

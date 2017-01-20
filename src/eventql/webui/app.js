@@ -21,8 +21,11 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+EventQL = this.EventQL || {};
+EventQL.config = EventQL.config || {};
+EventQL.views = (EventQL.views || {});
 
-this.EventQL = (function() {
+EventQL = (function() {
   'use strict';
 
   const VERSION = "v0.4.1";
@@ -164,14 +167,9 @@ this.EventQL = (function() {
 
   this["init"] = init;
   this.navigateTo = navigateTo;
-  this.navigateHome = navigateHome;
-  this.showLoader = showLoader;
-  this.hideLoader = hideLoader;
-  this.views = {};
-  this.util = {};
   this.api_stubs = api_stubs;
   this.version = VERSION;
   return this;
-}).apply(this.EventQL || {});
+}).apply(EventQL);
 
 
