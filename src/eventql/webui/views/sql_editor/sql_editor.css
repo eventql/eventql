@@ -3,68 +3,14 @@
   display: flex;
   flex-direction: column;
   flex: 1;
+  background: #f9f9f9;
 }
 
 .evql_sql_editor [data-content='codeeditor'] {
   height: 250px;
 }
 
-
-/** to review **/
-.evql_sql_editor table.z-table {
-  font-size: 13px;
-}
-
-.evql_sql_editor table.z-table thead th {
-  font-weight: 400;
-  color: #888;
-}
-
-.evql_sql_editor table.z-table tbody tr td {
-  line-height: 24px;
-}
-
-.evql_sql_editor table.z-table tbody tr a {
-  color: #888;
-}
-
-.evql_sql_editor table.z-table tbody tr td:first-child a {
-  font-weight: 400;
-  color: #000;
-}
-
-.evql_sql_editor .result table.z-table {
-  font-size: 12px;
-  background: #fff;
-}
-
-.evql_sql_editor .result .table_container {
-  overflow-x: auto;
-}
-
-.evql_sql_editor .result table.z-table tbody {
-  -moz-user-select: text;
-  -webkit-user-select: text;
-  -ms-user-select: text;
-}
-
-.evql_sql_editor .result table.z-table tr th {
-  background: -moz-linear-gradient(top,  #ffffff 0%, #f9f9f9 100%); /* FF3.6-15 */
-  background: -webkit-linear-gradient(top,  #ffffff 0%,#f9f9f9 100%); /* Chrome10-25,Safari5.1-6 */
-  background: linear-gradient(to bottom,  #ffffff 0%,#f9f9f9 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#f9f9f9',GradientType=0 ); /* IE6-9 */
-  color: #333;
-  font-weight: 500;
-}
-
-.evql_sql_editor .result table.z-table tr td {
-  line-height: 14px;
-  vertical-align: top;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 12px;
-  color: #222;
-}
-
+/** review **/ 
 .evql_sql_editor .message {
   display: block;
   position: relative;

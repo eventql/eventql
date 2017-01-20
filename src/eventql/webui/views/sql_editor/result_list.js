@@ -25,10 +25,44 @@
 EventQL.SQLEditor.ResultList = function(elem) {
   'use strict';
 
+  const CHART_COLUMN_NAME = "__chart";
+
   var settings = {};
 
   var on_csv_download = [];
   var on_settings_update = [];
+
+  this.render = function(results) {
+    DOMUtil.clearChildren(elem);
+    elem.setAttribute("data-result-count", results.length);
+
+    for (var i = 0; i < results.length; i++) {
+      if (results[i].columns.length == 0) {
+        continue;
+      }
+
+      var result_elem = document.createElement("div");
+      elem.appendChild(result_elem);
+
+      //render result chart
+      if (results[i].columns[0] == CHART_COLUMN_NAME) {
+        if (results[i].rows.length == 0) { //error: no svg returned
+          continue;
+        }
+
+        var chart_result = new EventQL.SQLEditor.Chart(result_elem);
+        chart_result.render(results[i].rows[0][0], i);
+
+      //render result table
+      } else {
+        var table_result = new EventQL.SQLEditor.Table(
+              result_elem,
+              settings[i]);
+          //table_result.onSettingsChange(updateResultSettingsByIndex);
+          table_result.render(results[i], i);
+      }
+    }
+  };
 
   this.onCSVDownload = function(fn) {
     on_csv_download.push(fn);
@@ -45,32 +79,6 @@ EventQL.SQLEditor.ResultList = function(elem) {
   this.setSettings = function(new_settings) {
     if (new_settings) {
       settings = new_settings;
-    }
-  };
-
-  this.render = function(results) {
-    DOMUtil.clearChildren(elem);
-    elem.setAttribute("data-result-count", results.length);
-
-    for (var i = 0; i < results.length; i++) {
-      var result_elem = document.createElement("div");
-      elem.appendChild(result_elem);
-
-      switch (results[i].type) {
-        case "chart":
-          var chart_result = new EventQl.SQLEditor.Chart(results[i], i);
-          chart_result.render(result_elem);
-          break;
-
-        case "table":
-          var table_result = new EventQL.SQLEditor.Table(
-              result_elem,
-              settings[i]);
-          //table_result.onSettingsChange(updateResultSettingsByIndex);
-          table_result.render(results[i], i);
-          break;
-
-      }
     }
   };
 

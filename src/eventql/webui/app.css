@@ -231,6 +231,7 @@ table.evql_table th {
   background: -moz-linear-gradient(top,#ffffff 0%,#f9f9f9 100%);
   background: -webkit-linear-gradient(top,#ffffff 0%,#f9f9f9 100%);
   background: linear-gradient(to bottom,#ffffff 0%,#f9f9f9 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#f9f9f9',GradientType=0 ); /* IE6-9 */
 }
 
 table.evql_table tbody td {
