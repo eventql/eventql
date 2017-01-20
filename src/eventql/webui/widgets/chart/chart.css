@@ -1,0 +1,43 @@
+.evql-chart {
+  background: #fff;
+}
+
+.evql-chart text {
+  font-family: "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-size: 18px;
+}
+
+.evql-chart .border {
+  stroke-width: 1px;
+  stroke: #545758;
+  opacity: 0.6;
+}
+
+.evql-chart .grid {
+  stroke-width: 1px;
+  stroke: #545758;
+  opacity: 0.1;
+}
+
+.evql-chart .axis.x text {
+  alignment-baseline: text-before-edge;
+  text-anchor: middle;
+}
+
+.evql-chart .axis.y text {
+  dominant-baseline: central;
+}
+
+.evql-chart .axis.y text.outside {
+  text-anchor: end;
+}
+
+.evql-chart .line {
+  fill: none;
+  stroke: #3c8bd4;
+  stroke-width: 2;
+}
+
+.evql-chart circle {
+  fill: #3c8bd4;
+}

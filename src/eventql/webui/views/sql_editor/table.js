@@ -34,7 +34,8 @@ EventQL.SQLEditor.Table = function(elem) {
     var tpl = TemplateUtil.getTemplate("evql-sql-editor-table-tpl");
     elem.appendChild(tpl);
 
-    renderTable(result);
+    //renderTable(result);
+    renderLineChart(result);
   };
 
   function renderTable(result) {
@@ -57,6 +58,22 @@ EventQL.SQLEditor.Table = function(elem) {
 
       tbody_elem.appendChild(tr_elem);
     });
+  }
+
+  function renderLineChart(result) {
+    var chart_elem = elem.querySelector(".chart_container");
+    var chart = new EventQL.ChartPlotter(elem, {
+      height: 300,
+      type: "line",
+      points: true,
+      timeseries: true //FIXME make this configurable
+    });
+
+    chart.render(result);
+  }
+
+  function renderBarChart(result) {
+
   }
 
 };
