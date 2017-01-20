@@ -45,7 +45,7 @@ EventQL.SQLEditor = function(elem, params) {
 
     path = new_path;
 
-    var query_param = URLUtil.getParamValue(params.path, "query");
+    var query_param = URLUtil.getParamValue(path, "query");
     executeQuery(query_param);
     return true;
   }
@@ -57,8 +57,7 @@ EventQL.SQLEditor = function(elem, params) {
   function initExecuteTooltip() {
     var tooltip = new EventQL.Tooltip(
         elem.querySelector("[data-control='execute_tooltip']"),
-        elem.querySelector("button[data-action='execute-query']"),
-        {});
+        elem.querySelector("button[data-action='execute-query']"));
   }
 
   function initCodeEditor() {
@@ -78,7 +77,7 @@ EventQL.SQLEditor = function(elem, params) {
       EventQL.navigateTo(URLUtil.addOrModifyParam(path, "query", editor.getValue()));
     });
 
-    var query_str_param = URLUtil.getParamValue(params.path, "query");
+    var query_str_param = URLUtil.getParamValue(path, "query");
     if (query_str_param) {
       editor.setValue(query_str_param);
       executeQuery(query_str_param);
@@ -86,7 +85,7 @@ EventQL.SQLEditor = function(elem, params) {
   }
 
   var executeQuery = function(query_str) {
-    //displayQueryProgress(); FIXME
+    displayQueryProgress();
 
     query_mgr.closeAll();
     var query = query_mgr.add(
@@ -110,7 +109,7 @@ EventQL.SQLEditor = function(elem, params) {
     });
 
     query.addEventListener('status', function(e) {
-      //displayQueryProgress(JSON.parse(e.data)); FIXME
+      displayQueryProgress(JSON.parse(e.data));
     });
   };
 
@@ -132,15 +131,15 @@ EventQL.SQLEditor = function(elem, params) {
   };
 
   var displayQueryProgress = function(progress) {
-    QueryProgressWidget.render(
-        elem.querySelector(".zbase_sql_editor_result_pane"),
+    var query_progress = new EventQL.QueryProgress(
+        elem.querySelector(".result"),
         progress);
   };
 
   var renderError = function(header) {
     var error_msg = new ZFE.ErrorMessage(elem, {
       header: header,
-      path: params.path
+      path: path
     });
     error_msg.render();
   };

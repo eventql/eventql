@@ -1,0 +1,48 @@
+.evql_query_progress {
+  padding: 100px 40px 0 40px;
+  margin: auto;
+  cursor: wait;
+  height: 100%;
+  min-height: 600px;
+}
+
+.evql_query_progress > h3 {
+  text-align: center;
+  font-size: 36px;
+  color: #333;
+  line-height: 42px;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.evql_query_progress h5 {
+  text-align: center;
+  font-size: 14px;
+  color:#545758;
+  line-height: 21px;
+  font-weight: 400;
+  margin-top: 0;
+  font-style: italic;
+  margin-bottom: 50px;
+}
+
+.evql_query_progress .progressbar .label {
+  margin-top: 17px;
+  font-weight: normal;
+  font-style: normal;
+  color:#545758;
+}
+
+.evql_query_progress .progressbar .bar {
+  background: #8E23AA;
+}
+
+.evql_query_progress .progressbar .evql_query_progress_bar {
+  background: rgba(255,255,255,.1);
+  border: 1px solid #c9d0d4;
+}
+
+.evql_query_progress .progressbar .progress{
+  font-weight: 500;
+  font-size: 14px;
+}

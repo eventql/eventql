@@ -20,6 +20,12 @@ widgets/chart/chart_plot.js
 widgets/chart/linear_domain.js
 widgets/tooltip/tooltip.css
 widgets/tooltip/tooltip.js
+widgets/query_progress/query_progress.css
+widgets/query_progress/query_progress.html
+widgets/query_progress/query_progress.js
+widgets/query_progress/progress_bar.css
+widgets/query_progress/progress_bar.html
+widgets/query_progress/progress_bar.js
 views/console/console.css
 views/console/console.html
 views/console/console.js
