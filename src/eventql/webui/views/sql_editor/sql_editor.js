@@ -32,6 +32,7 @@ EventQL.SQLEditor = function(elem, params) {
     var tpl = TemplateUtil.getTemplate("evql-sql-editor-tpl");
     elem.appendChild(tpl);
 
+    initExecuteTooltip();
     initCodeEditor();
   };
 
@@ -52,6 +53,13 @@ EventQL.SQLEditor = function(elem, params) {
   this.destroy = function() {
     query_mgr.closeAll();
   };
+
+  function initExecuteTooltip() {
+    var tooltip = new EventQL.Tooltip(
+        elem.querySelector("[data-control='execute_tooltip']"),
+        elem.querySelector("button[data-action='execute-query']"),
+        {});
+  }
 
   function initCodeEditor() {
     var editor_elem = elem.querySelector("[data-content='codeeditor']");

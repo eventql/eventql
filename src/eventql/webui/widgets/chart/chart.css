@@ -34,10 +34,10 @@
 
 .evql-chart .line {
   fill: none;
-  stroke: #3c8bd4;
+  stroke: #712093;
   stroke-width: 2;
 }
 
 .evql-chart circle {
-  fill: #3c8bd4;
+  fill: #712093;
 }

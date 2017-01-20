@@ -18,6 +18,8 @@ widgets/codeeditor/codemirror_sql.js
 widgets/chart/chart.css
 widgets/chart/chart_plot.js
 widgets/chart/linear_domain.js
+widgets/tooltip/tooltip.css
+widgets/tooltip/tooltip.js
 views/console/console.css
 views/console/console.html
 views/console/console.js
