@@ -26,23 +26,27 @@ EventQL.SQLEditor = function(elem, params) {
   'use strict';
 
   var query_mgr = EventSourceHandler();
+  var path = params.path;
 
   this.initialize = function() {
     var tpl = TemplateUtil.getTemplate("evql-sql-editor-tpl");
     elem.appendChild(tpl);
 
-
     initCodeEditor();
-
-    //FIXME check url
-    // execute query
-//    if (doc.content.sql_query.length > 0) {
-//      executeQuery(doc.content.sql_query);
-//    }
   };
 
   this.changePath = function(new_path, new_route) {
-    return false;
+    var allowed = ["query"];
+    var diff = URLUtil.comparePaths(path, new_path);
+    if (diff.path || ArrayUtil.setDifference(diff.params, allowed).length) {
+      return false;
+    }
+
+    path = new_path;
+
+    var query_param = URLUtil.getParamValue(params.path, "query");
+    executeQuery(query_param);
+    return true;
   }
 
   this.destroy = function() {
@@ -58,13 +62,19 @@ EventQL.SQLEditor = function(elem, params) {
     editor.render();
 
     editor.setExecuteCallback(function(query_str) {
-      executeQuery(query_str);
+      EventQL.navigateTo(URLUtil.addOrModifyParam(path, "query", query_str));
     });
 
     var execute_btn = elem.querySelector("button[data-action='execute-query']");
     DOMUtil.onClick(execute_btn, function() {
-      executeQuery(editor.getValue());
+      EventQL.navigateTo(URLUtil.addOrModifyParam(path, "query", editor.getValue()));
     });
+
+    var query_str_param = URLUtil.getParamValue(params.path, "query");
+    if (query_str_param) {
+      editor.setValue(query_str_param);
+      executeQuery(query_str_param);
+    }
   }
 
   var executeQuery = function(query_str) {
