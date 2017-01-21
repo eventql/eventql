@@ -51,6 +51,7 @@
 #include <eventql/sql/qtree/nodes/insert_json.h>
 #include <eventql/sql/qtree/nodes/describe_partitions.h>
 #include "eventql/sql/qtree/nodes/cluster_show_servers.h"
+#include <eventql/sql/qtree/nodes/set.h>
 #include <eventql/sql/table_schema.h>
 
 namespace csql {
@@ -142,6 +143,10 @@ RefPtr<QueryTreeNode> QueryPlanBuilder::build(
     return node;
   }
 
+  if ((node = buildSet(txn, ast)) != nullptr) {
+    return node;
+  }
+
   ast->debugPrint(2);
   RAISE(kRuntimeError, "can't figure out a query plan for this, sorry :(");
 }
@@ -167,6 +172,7 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
       case ASTNode::T_DROP_TABLE:
       case ASTNode::T_INSERT_INTO:
       case ASTNode::T_ALTER_TABLE:
+      case ASTNode::T_SET:
         nodes.emplace_back(build(txn, statements[i], tables));
         break;
 
@@ -2143,6 +2149,28 @@ QueryTreeNode* QueryPlanBuilder::buildAlterTable(
   }
 
   return new AlterTableNode(table_name->getToken()->getString(), operations);
+}
+
+QueryTreeNode* QueryPlanBuilder::buildSet(Transaction* txn, ASTNode* ast) {
+  if (!(*ast == ASTNode::T_SET) || ast->getChildren().size() < 2) {
+    return nullptr;
+  }
+
+  auto variable = ast->getChildren()[0];
+  if (variable->getType() != ASTNode::T_VARIABLE ||
+      variable->getToken() == nullptr) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  auto value = ast->getChildren()[1];
+  if (value->getType() != ASTNode::T_VALUE ||
+      value->getToken() == nullptr) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  return new SetNode(
+      variable->getToken()->getString(),
+      value->getToken()->getString());
 }
 
 }

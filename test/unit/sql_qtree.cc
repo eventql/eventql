@@ -43,6 +43,7 @@
 #include "eventql/sql/qtree/nodes/insert_json.h"
 #include "eventql/sql/qtree/nodes/describe_partitions.h"
 #include "eventql/sql/qtree/nodes/cluster_show_servers.h"
+#include "eventql/sql/qtree/nodes/set.h"
 #include "eventql/sql/CSTableScanProvider.h"
 #include "eventql/sql/backends/csv/CSVTableProvider.h"
 
@@ -999,5 +1000,25 @@ TEST_CASE(QTreeTest, TestClusterShowServers, [] () {
       txn->getTableProvider());
   RefPtr<ClusterShowServersNode> qtree =
       qtrees[0].asInstanceOf<ClusterShowServersNode>();
+});
+
+TEST_CASE(QTreeTest, TestSet, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  String query = "SET query_consistency_level = \"HIGH PERFORMANCE\";";
+  csql::Parser parser;
+  parser.parse(query.data(), query.size());
+
+  auto qtree_builder = runtime->queryPlanBuilder();
+  Vector<RefPtr<QueryTreeNode>> qtrees = qtree_builder->build(
+      txn.get(),
+      parser.getStatements(),
+      txn->getTableProvider());
+
+  RefPtr<SetNode> qtree =
+      qtrees[0].asInstanceOf<SetNode>();
+  EXPECT_EQ(qtree->getVariable(), "query_consistency_level");
+  EXPECT_EQ(qtree->getValue(), "HIGH PERFORMANCE");
 });
 

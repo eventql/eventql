@@ -228,6 +228,10 @@ public:
       Transaction* txn,
       ASTNode* ast);
 
+  QueryTreeNode* buildSet(
+      Transaction* txn,
+      ASTNode* ast);
+
   ValueExpressionNode* buildOperator(
       Transaction* txn,
       const std::string& name,

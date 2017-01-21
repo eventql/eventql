@@ -707,6 +707,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/qtree/nodes/describe_partitions.h \
     eventql/sql/qtree/nodes/cluster_show_servers.cc \
     eventql/sql/qtree/nodes/cluster_show_servers.h \
+    eventql/sql/qtree/nodes/set.cc \
+    eventql/sql/qtree/nodes/set.h \
     eventql/sql/qtree/qtree_coder.cc \
     eventql/sql/qtree/qtree_coder.h \
     eventql/sql/qtree/qtree_coder_impl.h \
