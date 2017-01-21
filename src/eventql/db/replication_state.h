@@ -68,5 +68,9 @@ void setReplicatedVersionFor(
     const SHA1Hash& replica_id,
     uint64_t version);
 
+void mergeReplicationState(
+    ReplicationState* state,
+    const ReplicationState* other);
+
 } // namespace tdsb
 
