@@ -677,6 +677,11 @@ next:
     goto next;
   }
 
+  if (token == "SET") {
+    token_list->emplace_back(Token::T_SET);
+    goto next;
+  }
+
   if (token == "XDOMAIN") {
     token_list->emplace_back(Token::T_XDOMAIN);
     goto next;

@@ -402,6 +402,15 @@ void ASTNode::debugPrint(int indent /* = 0 */) const {
     case T_ALTER_TABLE:
       printf("- T_ALTER_TABLE");
       break;
+    case T_SET:
+      printf("- T_SET");
+      break;
+    case T_VARIABLE:
+      printf("- T_VARIABLE");
+      break;
+    case T_VALUE:
+      printf("- T_VALUE");
+      break;
     case T_DRAW:
       printf("- T_DRAW");
       break;

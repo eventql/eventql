@@ -2,6 +2,7 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -332,6 +333,8 @@ ASTNode* Parser::statement() {
       return clusterStatement();
     case Token::T_USE:
       return useStatement();
+    case Token::T_SET:
+      return setStatement();
     default:
       break;
   }
@@ -941,6 +944,38 @@ ASTNode* Parser::useStatement() {
   }
 
   return use_database;
+}
+
+ASTNode* Parser::setStatement() {
+  consumeToken();
+  auto set_stmt = new ASTNode(ASTNode::T_SET);
+
+  auto variable = new ASTNode(ASTNode::T_VARIABLE);
+  variable->setToken(cur_token_);
+  set_stmt->appendChild(variable);
+  consumeToken();
+
+  expectAndConsume(Token::T_EQUAL);
+
+  switch (cur_token_->getType()) {
+    case Token::T_IDENTIFIER:
+    case Token::T_STRING:
+      break;
+
+    default:
+      assertExpectation(Token::T_IDENTIFIER);
+  }
+
+  auto value = new ASTNode(ASTNode::T_VALUE);
+  value->setToken(cur_token_);
+  set_stmt->appendChild(value);
+  consumeToken();
+
+  if (*cur_token_ == Token::T_SEMICOLON) {
+    consumeToken();
+  }
+
+  return set_stmt;
 }
 
 // FIXPAUL move this into sql extensions
