@@ -35,7 +35,7 @@ EventQL.SQLEditor.Table = function(elem) {
     elem.appendChild(tpl);
 
     //renderTable(result);
-    renderLineChart(result);
+    //renderLineChart(result);
   };
 
   function renderTable(result) {
