@@ -32,6 +32,12 @@
 
 namespace eventql {
 
+  ReturnCode writeConsistencyLevelFromString(
+      const std::string& str,
+      EVQL_CLEVEL_WRITE* clevel);
+
+  std::string writeConsistencyLevelToString(const EVQL_CLEVEL_WRITE& clevel);
+
 class Table : public RefCounted{
 public:
 

@@ -139,4 +139,41 @@ void Table::updateConfig(TableDefinition new_config) {
   schema_ = msg::MessageSchema::decode(config_.config().schema());
 }
 
+ReturnCode writeConsistencyLevelFromString(
+    const std::string& str,
+    EVQL_CLEVEL_WRITE* clevel) {
+  std::string level_str = str;
+  StringUtil::toUpper(&level_str);
+
+  if (level_str == "STRICT") {
+    *clevel = EVQL_CLEVEL_WRITE::EVQL_CLEVEL_WRITE_STRICT;
+    return ReturnCode::success();
+  } else if (level_str == "RELAXED") {
+    *clevel = EVQL_CLEVEL_WRITE::EVQL_CLEVEL_WRITE_RELAXED;
+    return ReturnCode::success();
+  } else if (level_str == "BEST_EFFORT") {
+    *clevel = EVQL_CLEVEL_WRITE::EVQL_CLEVEL_WRITE_BEST_EFFORT;
+    return ReturnCode::success();
+  } else {
+    return ReturnCode::error(
+        "eRuntimeError",
+        StringUtil::format(
+            "invalid write_consistency_level: $0",
+            level_str));
+  }
+}
+
+std::string writeConsistencyLevelToString(const EVQL_CLEVEL_WRITE& clevel) {
+  switch (clevel) {
+    case EVQL_CLEVEL_WRITE::EVQL_CLEVEL_WRITE_STRICT:
+      return "STRICT";
+
+    case EVQL_CLEVEL_WRITE::EVQL_CLEVEL_WRITE_RELAXED:
+      return "RELAXED";
+
+    case EVQL_CLEVEL_WRITE::EVQL_CLEVEL_WRITE_BEST_EFFORT:
+      return "BEST EFFORT";
+  }
+}
+
 }
