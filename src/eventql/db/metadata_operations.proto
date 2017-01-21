@@ -95,10 +95,10 @@ message PartitionFindRequest {
 
 message PartitionFindResponse {
   required bytes partition_id = 1;
-  repeated string servers_for_insert = 2;
   optional uint64 sequence_number = 3;
   optional bytes partition_keyrange_begin = 4;
   optional bytes partition_keyrange_end = 5;
+  repeated PartitionWriteTarget write_targets = 6;
 };
 
 message MetadataOperationEnvelope {

@@ -306,10 +306,19 @@ Status MetadataClient::findPartition(
   }
 
   for (const auto& s : partition->servers) {
-    response->add_servers_for_insert(s.server_id);
+    auto t = response->add_write_targets();
+    t->set_server_id(s.server_id);
+    t->set_partition_id(
+        partition->partition_id.data(),
+        partition->partition_id.size());
   }
+
   for (const auto& s : partition->servers_leaving) {
-    response->add_servers_for_insert(s.server_id);
+    auto t = response->add_write_targets();
+    t->set_server_id(s.server_id);
+    t->set_partition_id(
+        partition->partition_id.data(),
+        partition->partition_id.size());
   }
 
   cache_->store(request, *response);

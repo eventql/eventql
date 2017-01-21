@@ -44,6 +44,11 @@ message ReplicationTarget {
   optional string legacy_token = 7;
 };
 
+message PartitionWriteTarget {
+  required bytes partition_id = 1;
+  required string server_id = 2;
+};
+
 enum PartitionLifecycleState {
   PDISCOVERY_UNKNOWN = 0;
   PDISCOVERY_LOAD = 1;

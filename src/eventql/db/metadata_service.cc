@@ -261,10 +261,19 @@ Status MetadataService::findPartition(
   }
 
   for (const auto& s : partition->servers) {
-    response->add_servers_for_insert(s.server_id);
+    auto t = response->add_write_targets();
+    t->set_server_id(s.server_id);
+    t->set_partition_id(
+        partition->partition_id.data(),
+        partition->partition_id.size());
   }
+
   for (const auto& s : partition->servers_leaving) {
-    response->add_servers_for_insert(s.server_id);
+    auto t = response->add_write_targets();
+    t->set_server_id(s.server_id);
+    t->set_partition_id(
+        partition->partition_id.data(),
+        partition->partition_id.size());
   }
 
   cache_->store(request, *response);
@@ -354,7 +363,11 @@ Status MetadataService::createFinitePartition(
     response->set_partition_keyrange_end(op.end());
 
     for (const auto& s : new_servers) {
-      response->add_servers_for_insert(s);
+      auto t = response->add_write_targets();
+      t->set_server_id(s);
+      t->set_partition_id(
+          partition_id.data(),
+          partition_id.size());
     }
   } else {
     RefPtr<MetadataFile> file;
@@ -381,10 +394,18 @@ Status MetadataService::createFinitePartition(
     response->set_partition_keyrange_end(partition->end);
 
     for (const auto& s : partition->servers) {
-      response->add_servers_for_insert(s.server_id);
+      auto t = response->add_write_targets();
+      t->set_server_id(s.server_id);
+      t->set_partition_id(
+          partition->partition_id.data(),
+          partition->partition_id.size());
     }
     for (const auto& s : partition->servers_leaving) {
-      response->add_servers_for_insert(s.server_id);
+      auto t = response->add_write_targets();
+      t->set_server_id(s.server_id);
+      t->set_partition_id(
+          partition->partition_id.data(),
+          partition->partition_id.size());
     }
   }
 
@@ -457,7 +478,11 @@ Status MetadataService::createUserDefinedPartition(
     response->set_partition_keyrange_end(op.begin());
 
     for (const auto& s : new_servers) {
-      response->add_servers_for_insert(s);
+      auto t = response->add_write_targets();
+      t->set_server_id(s);
+      t->set_partition_id(
+          partition_id.data(),
+          partition_id.size());
     }
   } else {
     RefPtr<MetadataFile> file;
@@ -484,10 +509,19 @@ Status MetadataService::createUserDefinedPartition(
     response->set_partition_keyrange_end(partition->end);
 
     for (const auto& s : partition->servers) {
-      response->add_servers_for_insert(s.server_id);
+      auto t = response->add_write_targets();
+      t->set_server_id(s.server_id);
+      t->set_partition_id(
+          partition->partition_id.data(),
+          partition->partition_id.size());
+
     }
     for (const auto& s : partition->servers_leaving) {
-      response->add_servers_for_insert(s.server_id);
+      auto t = response->add_write_targets();
+      t->set_server_id(s.server_id);
+      t->set_partition_id(
+          partition->partition_id.data(),
+          partition->partition_id.size());
     }
   }
 

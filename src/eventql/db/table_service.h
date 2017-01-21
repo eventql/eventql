@@ -155,8 +155,7 @@ protected:
   ReturnCode insertRecords(
       const String& tsdb_namespace,
       const String& table_name,
-      const SHA1Hash& partition_key,
-      const Set<String>& servers,
+      const std::vector<PartitionWriteTarget>& servers,
       const ShreddedRecordList& records);
 
   ReturnCode insertRecordsLocal(

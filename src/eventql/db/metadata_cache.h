@@ -48,7 +48,7 @@ protected:
     std::string partition_id;
     std::string begin;
     std::string end;
-    std::vector<std::string> servers;
+    std::vector<PartitionWriteTarget> write_targets;
   };
 
   struct CachedPartitionMap {
