@@ -23,6 +23,7 @@
  */
 #include <algorithm>
 #include "eventql/db/metadata_client.h"
+#include "eventql/db/metadata_service.h"
 #include "eventql/db/metadata_store.h"
 #include "eventql/db/partition_discovery.h"
 #include "eventql/transport/native/client_tcp.h"
@@ -305,21 +306,7 @@ Status MetadataClient::findPartition(
     }
   }
 
-  for (const auto& s : partition->servers) {
-    auto t = response->add_write_targets();
-    t->set_server_id(s.server_id);
-    t->set_partition_id(
-        partition->partition_id.data(),
-        partition->partition_id.size());
-  }
-
-  for (const auto& s : partition->servers_leaving) {
-    auto t = response->add_write_targets();
-    t->set_server_id(s.server_id);
-    t->set_partition_id(
-        partition->partition_id.data(),
-        partition->partition_id.size());
-  }
+  getPartitionWriteTargets(&*partition, response);
 
   cache_->store(request, *response);
   return Status::success();

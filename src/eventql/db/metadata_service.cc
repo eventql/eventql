@@ -260,21 +260,7 @@ Status MetadataService::findPartition(
     }
   }
 
-  for (const auto& s : partition->servers) {
-    auto t = response->add_write_targets();
-    t->set_server_id(s.server_id);
-    t->set_partition_id(
-        partition->partition_id.data(),
-        partition->partition_id.size());
-  }
-
-  for (const auto& s : partition->servers_leaving) {
-    auto t = response->add_write_targets();
-    t->set_server_id(s.server_id);
-    t->set_partition_id(
-        partition->partition_id.data(),
-        partition->partition_id.size());
-  }
+  getPartitionWriteTargets(&*partition, response);
 
   cache_->store(request, *response);
   return Status::success();
@@ -400,12 +386,22 @@ Status MetadataService::createFinitePartition(
           partition->partition_id.data(),
           partition->partition_id.size());
     }
+
     for (const auto& s : partition->servers_leaving) {
       auto t = response->add_write_targets();
       t->set_server_id(s.server_id);
       t->set_partition_id(
           partition->partition_id.data(),
           partition->partition_id.size());
+    }
+
+    for (const auto& s : partition->servers_joining) {
+      auto t = response->add_write_targets();
+      t->set_server_id(s.server_id);
+      t->set_partition_id(
+          partition->partition_id.data(),
+          partition->partition_id.size());
+      t->set_strict_only(true);
     }
   }
 
@@ -516,6 +512,7 @@ Status MetadataService::createUserDefinedPartition(
           partition->partition_id.size());
 
     }
+
     for (const auto& s : partition->servers_leaving) {
       auto t = response->add_write_targets();
       t->set_server_id(s.server_id);
@@ -523,12 +520,49 @@ Status MetadataService::createUserDefinedPartition(
           partition->partition_id.data(),
           partition->partition_id.size());
     }
+
+    for (const auto& s : partition->servers_joining) {
+      auto t = response->add_write_targets();
+      t->set_server_id(s.server_id);
+      t->set_partition_id(
+          partition->partition_id.data(),
+          partition->partition_id.size());
+      t->set_strict_only(true);
+    }
   }
 
   cache_->store(request, *response);
   return Status::success();
 }
 
+void getPartitionWriteTargets(
+    const MetadataFile::PartitionMapEntry* partition,
+    PartitionFindResponse* response) {
+  for (const auto& s : partition->servers) {
+    auto t = response->add_write_targets();
+    t->set_server_id(s.server_id);
+    t->set_partition_id(
+        partition->partition_id.data(),
+        partition->partition_id.size());
+  }
+
+  for (const auto& s : partition->servers_leaving) {
+    auto t = response->add_write_targets();
+    t->set_server_id(s.server_id);
+    t->set_partition_id(
+        partition->partition_id.data(),
+        partition->partition_id.size());
+  }
+
+  for (const auto& s : partition->servers_joining) {
+    auto t = response->add_write_targets();
+    t->set_server_id(s.server_id);
+    t->set_partition_id(
+        partition->partition_id.data(),
+        partition->partition_id.size());
+    t->set_strict_only(true);
+  }
+}
 
 } // namespace eventql
 

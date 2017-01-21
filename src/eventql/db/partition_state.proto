@@ -47,6 +47,9 @@ message ReplicationTarget {
 message PartitionWriteTarget {
   required bytes partition_id = 1;
   required string server_id = 2;
+
+  // if true, write into this partition is only required for strict consistency
+  optional bool strict_only = 3;
 };
 
 enum PartitionLifecycleState {

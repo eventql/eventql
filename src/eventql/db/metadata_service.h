@@ -96,5 +96,9 @@ protected:
   std::map<std::string, std::unique_ptr<std::mutex>> lockmap_;
 };
 
+void getPartitionWriteTargets(
+    const MetadataFile::PartitionMapEntry* partition,
+    PartitionFindResponse* response);
+
 } // namespace eventql
 
