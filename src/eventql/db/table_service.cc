@@ -405,10 +405,73 @@ static Status removeColumn(
   return Status::success();
 }
 
+static Status setProperty(
+    TableDefinition* td,
+    std::pair<std::string, std::string> property) {
+  auto config = td->mutable_config();
+
+  if (property.first == "partition_split_threshold") {
+    if (StringUtil::isNumber(property.second)) {
+      try {
+        auto value = std::stoull(property.second);
+        config->set_override_partition_split_threshold(value);
+        return Status::success();
+
+      } catch (const std::exception& e) {
+        return Status(e);
+      }
+    } else {
+      return Status(
+          eRuntimeError,
+          StringUtil::format("can't convert $0 to uint64", property.second));
+    }
+  }
+
+  auto value = property.second;
+  StringUtil::toLower(&value);
+
+  if (property.first == "enable_async_split") {
+    if (value == "true") {
+      config->set_enable_async_split(true);
+      return Status::success();
+
+    } else if (value == "false") {
+      config->set_enable_async_split(false);
+      return Status::success();
+
+    } else {
+        return Status(
+            eRuntimeError,
+            StringUtil::format("can't convert $0 to bool", property.second));
+    }
+  }
+
+  if (property.first == "disable_replication") {
+    if (value == "true") {
+      config->set_disable_replication(true);
+      return Status::success();
+
+    } else if (value == "false") {
+      config->set_disable_replication(false);
+      return Status::success();
+
+    } else {
+        return Status(
+            eRuntimeError,
+            StringUtil::format("can't convert $0 to bool", property.second));
+    }
+  }
+
+  return Status(
+      eRuntimeError,
+      StringUtil::format("unknown property $0", property.first));
+}
+
 Status TableService::alterTable(
     const String& db_namespace,
     const String& table_name,
-    Vector<TableService::AlterTableOperation> operations) {
+    Vector<TableService::AlterTableOperation> operations,
+    const std::vector<std::pair<std::string, std::string>>& properties /* = {} */) {
   auto table = dbctx_->partition_map->findTable(db_namespace, table_name);
   if (table.isEmpty() || table.get()->config().deleted()) {
     return Status(eNotFoundError, "table not found");
@@ -428,6 +491,13 @@ Status TableService::alterTable(
       if (!rc.isSuccess()) {
         return rc;
       }
+    }
+  }
+
+  for (const auto& p : properties) {
+    auto rc = setProperty(&td, p);
+    if (!rc.isSuccess()) {
+      return rc;
     }
   }
 

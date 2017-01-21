@@ -39,6 +39,7 @@ public:
   static const size_t kRetries;
   static const size_t kRetryTimeoutMin;
   static const size_t kRetryTimeoutMax;
+  static const size_t kDefaultReplicationConcurrency;
 
   PartitionReplication(
       RefPtr<Partition> partition);
@@ -108,6 +109,11 @@ protected:
   Status fetchAndApplyMetadataTransaction(MetadataTransaction txn);
   Status finalizeSplit();
   Status finalizeJoin(const ReplicationTarget& target);
+
+  void replicateParallel(
+      std::vector<std::tuple<ReplicationTarget, uint64_t, ReturnCode>>* targets,
+      ReplicationInfo* replication_info,
+      size_t concurrency);
 
   ReturnCode replicateTo(
       const ReplicationTarget& replica,

@@ -37,6 +37,7 @@ class PartitionMap;
 class FileTracker;
 class ConfigDirectory;
 class ReplicationWorker;
+class CompactionWorker;
 class LSMTableIndexCache;
 class MetadataStore;
 class InternalAuth;
@@ -62,6 +63,7 @@ struct DatabaseContext {
   ConfigDirectory* config_directory;
   ServerAllocator* server_alloc;
   ReplicationWorker* replication_worker;
+  CompactionWorker* compaction_worker;
   LSMTableIndexCache* lsm_index_cache;
   MetadataStore* metadata_store;
   MetadataCache* metadata_cache;

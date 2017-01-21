@@ -43,7 +43,7 @@
 
 static const size_t EVQL_FRAME_MAX_SIZE = 1024 * 1024 * 256;
 static const size_t EVQL_FRAME_HEADER_SIZE = 8;
-static const size_t EVQL_CLIENT_DEFAULT_TIMEOUT_US = 1000 * 1000  * 5; // 5 seconds
+static const size_t EVQL_CLIENT_DEFAULT_TIMEOUT_US = 1000 * 1000  * 60; // 60 seconds
 static const size_t EVQL_CLIENT_DEFAULT_BATCH_SIZE = 1024;
 #define EVQL_CLIENT_INLINE_RBUF_SIZE 64
 #define EVQL_CLIENT_INLINE_CBUF_SIZE 1024

@@ -23,7 +23,9 @@
  */
 #include <iostream>
 #include <signal.h>
+#include "eventql/db/tablet_index.h"
 #include "eventql/util/stdtypes.h"
+#include "eventql/util/SHA1.h"
 #include "eventql/util/application.h"
 #include "eventql/util/cli/flagparser.h"
 #include "eventql/util/cli/CLI.h"
@@ -124,11 +126,38 @@ static int cstable_dump(std::vector<std::string> args) {
     size_t i = 0;
     for (size_t j = 0; i < cstable->numRecords(); ++j) {
       col_reader->readString(&rlevel, &dlevel, &data);
+
+      if (c.column_name == "__lsm_id") {
+        data = SHA1Hash(data.data(), data.size()).toString();
+      }
+
       iputs(">>  idx=$0/$1 rlvl=$2 dlvl=$3 data=($4) '$5'", i + 1, j + 1, rlevel, dlevel, data.size(), data);
       if (col_reader->nextRepetitionLevel() == 0) {
         ++i;
       }
     }
+  }
+
+  return 0;
+}
+
+static int cstable_index_lookup(std::vector<std::string> args) {
+  if (args.size() < 2) {
+    std::cerr
+        << "usage: cstable_tool index-lookup <file.cst> <sha1>"
+        << std::endl;
+
+    return 1;
+  }
+
+  std::unordered_map<SHA1Hash, uint64_t> idxmap;
+  idxmap[SHA1Hash::fromHexString(args[1])] = 0;
+
+  eventql::LSMTableIndex idx(args[0]);
+  idx.lookup(&idxmap);
+
+  for (const auto& k : idxmap) {
+    iputs("INDEXENT: $0 => $1", k.first, k.second);
   }
 
   return 0;
@@ -155,6 +184,10 @@ int main(int argc, const char** argv) {
 
   if (cmd == "dump-json") {
     return cstable_dump_json(args);
+  }
+
+  if (cmd == "index-lookup") {
+    return cstable_index_lookup(args);
   }
 
   std::cerr << "error: unknown command: " << cmd << std::endl;

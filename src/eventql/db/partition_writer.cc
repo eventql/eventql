@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <algorithm>
 #include <assert.h>
 #include <eventql/util/io/fileutil.h>
 #include <eventql/db/partition.h>
@@ -31,6 +32,8 @@
 #include <eventql/db/server_allocator.h>
 #include <eventql/db/metadata_operations.pb.h>
 #include <eventql/db/metadata_coordinator.h>
+#include <eventql/db/compaction_worker.h>
+#include <eventql/db/replication_state.h>
 #include <eventql/util/logging.h>
 #include <eventql/util/random.h>
 #include <eventql/util/wallclock.h>
@@ -67,12 +70,13 @@ LSMPartitionWriter::LSMPartitionWriter(
             partition_,
             dbctx->lsm_index_cache)),
     dbctx_(dbctx),
-    partition_split_threshold_(kDefaultPartitionSplitThresholdBytes) {
+    partition_split_threshold_bytes_(kDefaultPartitionSplitThresholdBytes),
+    partition_split_threshold_rows_(kDefaultPartitionSplitThresholdRows) {
   auto table = partition_->getTable();
   auto table_cfg = table->config();
 
   if (table_cfg.config().override_partition_split_threshold() > 0) {
-    partition_split_threshold_ =
+    partition_split_threshold_bytes_ =
         table_cfg.config().override_partition_split_threshold();
   }
 }
@@ -170,11 +174,15 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(
     abort();
   }
 
+  if (needsPromptCommit()) {
+    dbctx_->compaction_worker->enqueuePartition(partition_, true);
+  }
+
   if (needsUrgentCommit()) {
     logWarning(
         "evqld",
         "Partition $0/$1/$2 needs urgent commit -- overloaded or "
-        "kMaxArenaRecords too low?",
+        "kMaxArenaRecordsHard too low?",
         snap->state.tsdb_namespace(),
         snap->state.table_key(),
         snap->key.toString());
@@ -201,8 +209,20 @@ bool LSMPartitionWriter::needsCommit() {
   return head_->getSnapshot()->head_arena->size() > 0;
 }
 
+bool LSMPartitionWriter::needsPromptCommit() {
+  if (head_->getSnapshot()->head_arena->size() < kMaxArenaRecordsSoft) {
+    return false;
+  }
+
+  if (compactionRunning()) {
+    return false;
+  }
+
+  return true;
+}
+
 bool LSMPartitionWriter::needsUrgentCommit() {
-  return head_->getSnapshot()->head_arena->size() > kMaxArenaRecords;
+  return head_->getSnapshot()->head_arena->size() > kMaxArenaRecordsHard;
 }
 
 bool LSMPartitionWriter::needsCompaction() {
@@ -285,6 +305,7 @@ bool LSMPartitionWriter::commit() {
     tblref->set_first_sequence(snap->state.lsm_sequence() + 1);
     tblref->set_last_sequence(snap->state.lsm_sequence() + arena->size());
     tblref->set_size_bytes(FileUtil::size(filepath + ".cst"));
+    tblref->set_size_rows(arena->size());
     tblref->set_has_skiplist(true);
     snap->state.set_lsm_sequence(snap->state.lsm_sequence() + arena->size());
     snap->compacting_arena = nullptr;
@@ -303,6 +324,15 @@ bool LSMPartitionWriter::commit() {
   }
 
   return commited;
+}
+
+bool LSMPartitionWriter::compactionRunning() {
+  ScopedLock<std::mutex> compact_lk(compaction_mutex_, std::defer_lock);
+  if (compact_lk.try_lock()) {
+    return false;
+  } else {
+    return true;
+  }
 }
 
 bool LSMPartitionWriter::compact(bool force /* = false */) {
@@ -418,12 +448,16 @@ bool LSMPartitionWriter::needsSplit() const {
     return false;
   }
 
-  size_t size = 0;
+  size_t size_bytes = 0;
+  size_t size_rows = 0;
   for (const auto& tbl : snap->state.lsm_tables()) {
-    size += tbl.size_bytes();
+    size_bytes += tbl.size_bytes();
+    size_rows += tbl.size_rows();
   }
 
-  return size > partition_split_threshold_;
+  return
+      size_bytes > partition_split_threshold_bytes_ ||
+      size_rows > partition_split_threshold_rows_;
 }
 
 Status LSMPartitionWriter::split() {
@@ -563,7 +597,15 @@ ReplicationState LSMPartitionWriter::fetchReplicationState() const {
 void LSMPartitionWriter::commitReplicationState(const ReplicationState& state) {
   ScopedLock<std::mutex> write_lk(mutex_);
   auto snap = head_->getSnapshot()->clone();
+
+  // N.B. this method is currently not handling conflicts well. if two
+  // conflicting updates to the replication state are performed, some of those
+  // updates might be lost. this is not a correctness-problem but will lead to
+  // increased replication load (since some tasks will need to be redone when
+  // an update is lost). this should be fixed by merging replication states
+  // in a a commutative fashion (max() for each target)
   *snap->state.mutable_replication_state() = state;
+
   snap->writeToDisk();
   head_->setSnapshot(snap);
 }
@@ -583,6 +625,16 @@ Status LSMPartitionWriter::applyMetadataChange(
 
   if (snap->state.last_metadata_txnseq() >= discovery_info.txnseq()) {
     return Status(eConcurrentModificationError, "version conflict");
+  }
+
+  // if we're alreading unloading this partition, fast forward any new
+  // replication targets (since they can't be new joins but must be splits
+  // of the previous replication targets)
+  if (snap->state.lifecycle_state() == PDISCOVERY_UNLOAD) {
+    fastForwardReplicationState(
+        snap.get(),
+        snap->state.mutable_replication_state(),
+        discovery_info);
   }
 
   snap->state.set_last_metadata_txnid(discovery_info.txnid());
@@ -621,6 +673,55 @@ Status LSMPartitionWriter::applyMetadataChange(
   head_->setSnapshot(snap);
 
   return Status::success();
+}
+
+void LSMPartitionWriter::fastForwardReplicationState(
+    const PartitionSnapshot* snap,
+    ReplicationState* repl_state,
+    const PartitionDiscoveryResponse& discovery_info) {
+  /* find old low replication watermark */
+  std::map<std::string, std::vector<uint64_t>> old_repl_offsets;
+  for (const auto& t : snap->state.replication_targets()) {
+    auto replica_offset = replicatedOffsetFor(*repl_state, t);
+    old_repl_offsets[t.partition_id()].emplace_back(replica_offset);
+  }
+
+  uint64_t low_watermark = 0;
+  bool low_watermark_found = false;
+  for (auto& t : old_repl_offsets) {
+    uint64_t this_watermark = 0;
+    if (t.second.size() > 1) {
+      std::sort(t.second.begin(), t.second.end());
+      this_watermark = t.second[(t.second.size() - 1) / 2];
+    } else {
+      this_watermark = t.second[0];
+    }
+
+    if (!low_watermark_found || this_watermark < low_watermark) {
+      low_watermark = this_watermark;
+      low_watermark_found = true;
+    }
+  }
+
+  if (low_watermark == 0) {
+    return;
+  }
+
+  /* default new replication targets to old watermark */
+  logInfo(
+      "evqld",
+      "Fast-forwarding replication targets for partition $0/$1/$2 to $3",
+      snap->state.tsdb_namespace(),
+      snap->state.table_key(),
+      snap->key.toString(),
+      low_watermark);
+
+  for (const auto& t : discovery_info.replication_targets()) {
+    auto replica_offset = replicatedOffsetFor(*repl_state, t);
+    if (replica_offset == 0) {
+      setReplicatedOffsetFor(repl_state, t, low_watermark);
+    }
+  }
 }
 
 } // namespace tdsb

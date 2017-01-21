@@ -295,10 +295,19 @@ ReturnCode TCPAsyncClient::handleFrame(
     uint16_t flags,
     const char* payload,
     size_t payload_size) {
-  if (opcode == EVQL_OP_ERROR) {
-    ErrorFrame error;
-    error.parseFrom(payload, payload_size);
-    return ReturnCode::error("ERUNTIME", error.getError());
+  switch (opcode) {
+
+    case EVQL_OP_PING:
+    case EVQL_OP_HEARTBEAT: {
+      return ReturnCode::success();
+    }
+
+    case EVQL_OP_ERROR: {
+      ErrorFrame error;
+      error.parseFrom(payload, payload_size);
+      return ReturnCode::error("ERUNTIME", error.getError());
+    }
+
   }
 
   switch (connection->state) {
@@ -311,17 +320,14 @@ ReturnCode TCPAsyncClient::handleFrame(
         default:
           return ReturnCode::error("ERUNTIME", "unexpected opcode");
       }
-      break;
 
     case ConnectionState::QUERY:
       return handleResult(connection, opcode, flags, payload, payload_size);
 
     default:
-      break;
+      return ReturnCode::error("ERUNTIME", "unexpected opcode");
 
   }
-
-  return ReturnCode::error("ERUNTIME", "unexpected opcode");
 }
 
 void TCPAsyncClient::sendFrame(
@@ -610,45 +616,43 @@ ReturnCode TCPAsyncClient::performRead(Connection* connection) {
     }
   }
 
-  if (connection->read_buf.size() < 8) {
-    if (eof) {
-      return ReturnCode::error("EIO", "connection to server lost");
-    } else {
-      return ReturnCode::success(); // wait for more data
+  if (eof && connection->read_buf.size() < 8) {
+    return ReturnCode::error("EIO", "connection to server lost");
+  }
+
+  while (connection->read_buf.size() >= 8) {
+    auto frame_len = ntohl(*((uint32_t*) &connection->read_buf[4]));
+    auto frame_len_full = frame_len + 8;
+    if (connection->read_buf.size() < frame_len_full) {
+      if (eof) {
+        return ReturnCode::error("EIO", "connection to server lost");
+      } else {
+        break;
+      }
     }
-  }
 
-  auto frame_len = ntohl(*((uint32_t*) &connection->read_buf[4]));
-  auto frame_len_full = frame_len + 8;
-  if (connection->read_buf.size() < frame_len_full) {
-    if (eof) {
-      return ReturnCode::error("EIO", "connection to server lost");
-    } else {
-      return ReturnCode::success(); // wait for more data
+    auto rc = handleFrame(
+        connection,
+        ntohs(*((uint16_t*) &connection->read_buf[0])),
+        ntohs(*((uint16_t*) &connection->read_buf[2])),
+        connection->read_buf.data() + 8,
+        frame_len);
+
+    if (!rc.isSuccess()) {
+      return rc;
     }
-  }
 
-  auto rc = handleFrame(
-      connection,
-      ntohs(*((uint16_t*) &connection->read_buf[0])),
-      ntohs(*((uint16_t*) &connection->read_buf[2])),
-      connection->read_buf.data() + 8,
-      frame_len);
+    if (connection->read_buf.size() == frame_len_full) {
+      connection->read_buf.clear();
+    } else {
+      auto rem = connection->read_buf.size() - frame_len_full;
+      memmove(
+          &connection->read_buf[0],
+          &connection->read_buf[frame_len_full],
+          rem);
 
-  if (!rc.isSuccess()) {
-    return rc;
-  }
-
-  if (connection->read_buf.size() == frame_len_full) {
-    connection->read_buf.clear();
-  } else {
-    auto rem = connection->read_buf.size() - frame_len_full;
-    memmove(
-        &connection->read_buf[0],
-        &connection->read_buf[frame_len_full],
-        rem);
-
-    connection->read_buf.resize(rem);
+      connection->read_buf.resize(rem);
+    }
   }
 
   return ReturnCode::success();

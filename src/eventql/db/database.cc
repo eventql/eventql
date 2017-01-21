@@ -399,6 +399,7 @@ ReturnCode DatabaseImpl::start() {
     database_context_->partition_map = partition_map_.get();
     database_context_->file_tracker = file_tracker_.get();
     database_context_->replication_worker = replication_worker_.get();
+    database_context_->compaction_worker = compaction_worker_.get();
     database_context_->lsm_index_cache = server_cfg_->idx_cache.get();
     database_context_->metadata_store = metadata_store_.get();
     database_context_->metadata_cache = metadata_cache_.get();

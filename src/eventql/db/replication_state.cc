@@ -53,9 +53,37 @@ uint64_t replicatedOffsetFor(
   return offset;
 }
 
+uint64_t replicatedOffsetFor(
+    const ReplicationState& repl_state,
+    const PartitionDiscoveryReplicationTarget& target) {
+  return replicatedOffsetFor(
+      repl_state,
+      SHA1::compute(
+          StringUtil::format(
+              "$0~$1~$2",
+              target.server_id(),
+              target.partition_id(),
+              target.placement_id())));
+}
+
 void setReplicatedOffsetFor(
     ReplicationState* repl_state,
     const ReplicationTarget& target,
+    uint64_t replicated_offset) {
+  setReplicatedOffsetFor(
+      repl_state,
+      SHA1::compute(
+          StringUtil::format(
+              "$0~$1~$2",
+              target.server_id(),
+              target.partition_id(),
+              target.placement_id())),
+      replicated_offset);
+}
+
+void setReplicatedOffsetFor(
+    ReplicationState* repl_state,
+    const PartitionDiscoveryReplicationTarget& target,
     uint64_t replicated_offset) {
   setReplicatedOffsetFor(
       repl_state,

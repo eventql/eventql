@@ -89,11 +89,11 @@ void Session::setHeartbeatCallback(std::function<ReturnCode ()> cb) {
 ReturnCode Session::triggerHeartbeat() {
   auto now = MonotonicClock::now();
   if (now >= heartbeat_last_ + heartbeat_interval_) {
+    heartbeat_last_ = now;
+
     if (heartbeat_cb_) {
       return heartbeat_cb_();
     }
-
-    heartbeat_last_ = now;
   }
 
   return ReturnCode::success();

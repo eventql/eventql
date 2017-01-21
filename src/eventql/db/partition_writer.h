@@ -80,7 +80,9 @@ protected:
 class LSMPartitionWriter : public PartitionWriter {
 public:
   static const size_t kDefaultPartitionSplitThresholdBytes = 1024llu * 1024llu * 512llu;
-  static const size_t kMaxArenaRecords = 1024 * 1024;
+  static const size_t kDefaultPartitionSplitThresholdRows = 2000000llu;
+  static const size_t kMaxArenaRecordsSoft = 1024 * 128;
+  static const size_t kMaxArenaRecordsHard = 1024 * 1024 * 2;
   static const size_t kMaxLSMTables = 96;
 
   LSMPartitionWriter(
@@ -93,8 +95,10 @@ public:
 
   bool commit() override;
   bool needsCommit();
+  bool needsPromptCommit();
   bool needsUrgentCommit();
 
+  bool compactionRunning();
   bool compact(bool force = false) override;
   bool needsCompaction() override;
   bool needsUrgentCompaction();
@@ -110,10 +114,16 @@ public:
 
 protected:
 
+  void fastForwardReplicationState(
+      const PartitionSnapshot* snap,
+      ReplicationState* repl_state,
+      const PartitionDiscoveryResponse& discovery_info);
+
   RefPtr<Partition> partition_;
   RefPtr<CompactionStrategy> compaction_strategy_;
   DatabaseContext* dbctx_;
-  size_t partition_split_threshold_;
+  size_t partition_split_threshold_bytes_;
+  size_t partition_split_threshold_rows_;
   std::mutex commit_mutex_;
   std::mutex compaction_mutex_;
   std::mutex metadata_mutex_;

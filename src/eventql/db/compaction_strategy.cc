@@ -213,6 +213,7 @@ bool SimpleCompactionStrategy::compact(
   tbl_ref.set_first_sequence(input.begin()->first_sequence());
   tbl_ref.set_last_sequence(input.rbegin()->last_sequence());
   tbl_ref.set_size_bytes(FileUtil::size(cstable_filepath + ".cst"));
+  tbl_ref.set_size_rows(rows_written);
   tbl_ref.set_has_skiplist(false);
   output->emplace_back(tbl_ref);
 

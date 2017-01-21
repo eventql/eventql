@@ -61,12 +61,52 @@ CompactionWorker::~CompactionWorker() {
   stop();
 }
 
-void CompactionWorker::enqueuePartition(RefPtr<Partition> partition) {
-  std::unique_lock<std::mutex> lk(mutex_);
-  enqueuePartitionWithLock(partition);
+void CompactionWorker::enqueuePartition(
+    RefPtr<Partition> partition,
+    bool immediate /* = false */) {
+  if (immediate) {
+    startImmediateCompaction(partition);
+  } else {
+    std::unique_lock<std::mutex> lk(mutex_);
+    enqueuePartitionWithLock(partition);
+  }
 }
 
-void CompactionWorker::enqueuePartitionWithLock(RefPtr<Partition> partition) {
+void CompactionWorker::startImmediateCompaction(RefPtr<Partition> partition) {
+  auto uuid = partition->uuid();
+
+  {
+    std::unique_lock<std::mutex> lk(mutex_);
+    if (immediate_set_.count(uuid) > 0) {
+      return;
+    }
+
+    if (immediate_set_.size() > kImmediateCompactionMaxThreads) {
+      logWarning(
+          "evqld",
+          "maximum number of immediate compaction threads reached -- "
+          "kImmediateCompactionMaxThreads or num_compaction_threads too low?");
+
+      enqueuePartitionWithLock(partition);
+      return;
+    }
+
+    immediate_set_.emplace(uuid);
+  }
+
+  auto thread = std::thread([this, partition, uuid] {
+    Application::setCurrentThreadName("evqld-compaction-immediate");
+    compactPartition(partition);
+
+    std::unique_lock<std::mutex> lk(mutex_);
+    immediate_set_.erase(uuid);
+  });
+
+  thread.detach();
+}
+
+void CompactionWorker::enqueuePartitionWithLock(
+    RefPtr<Partition> partition) {
   auto interval = partition->getTable()->commitInterval();
 
   auto uuid = partition->uuid();
@@ -133,28 +173,7 @@ void CompactionWorker::work() {
     bool success = true;
     {
       lk.unlock();
-
-      try {
-        auto writer = partition->getWriter();
-        if (writer->compact()) {
-          auto change = mkRef(new PartitionChangeNotification());
-          change->partition = partition;
-          pmap_->publishPartitionChange(change);
-        }
-      } catch (const StandardException& e) {
-        auto snap = partition->getSnapshot();
-
-        logCritical(
-            "tsdb",
-            e,
-            "CompactionWorker error for partition $0/$1/$2",
-            snap->state.tsdb_namespace(),
-            snap->state.table_key(),
-            snap->key.toString());
-
-        success = false;
-      }
-
+      success = compactPartition(partition);
       lk.lock();
     }
 
@@ -171,6 +190,29 @@ void CompactionWorker::work() {
 
     evqld_stats()->compaction_queue_length.set(queue_.size());
   }
+}
+
+bool CompactionWorker::compactPartition(RefPtr<Partition> partition) try {
+  auto writer = partition->getWriter();
+  if (writer->compact()) {
+    auto change = mkRef(new PartitionChangeNotification());
+    change->partition = partition;
+    pmap_->publishPartitionChange(change);
+  }
+
+  return true;
+} catch (const StandardException& e) {
+  auto snap = partition->getSnapshot();
+
+  logCritical(
+      "tsdb",
+      e,
+      "CompactionWorker error for partition $0/$1/$2",
+      snap->state.tsdb_namespace(),
+      snap->state.table_key(),
+      snap->key.toString());
+
+  return false;
 }
 
 } // namespace eventql

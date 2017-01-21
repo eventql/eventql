@@ -44,6 +44,7 @@ const char PartitionReplication::kStateFileName[] = "_repl";
 const size_t PartitionReplication::kRetries = 10;
 const size_t PartitionReplication::kRetryTimeoutMin = kMicrosPerSecond / 2;
 const size_t PartitionReplication::kRetryTimeoutMax = kMicrosPerSecond * 10;
+const size_t PartitionReplication::kDefaultReplicationConcurrency = 6;
 
 PartitionReplication::PartitionReplication(
     RefPtr<Partition> partition) :
@@ -166,6 +167,15 @@ void LSMPartitionReplication::replicateToUnsafe(
     const ReplicationTarget& replica,
     uint64_t* replicated_offset,
     ReplicationInfo* replication_info) {
+  auto rinfo_ent = replication_info->addEntry();
+  rinfo_ent->setPartition(StringUtil::format(
+      "$0/$1/$2",
+      snap_->state.tsdb_namespace(),
+      snap_->state.table_key(),
+      snap_->key));
+
+  rinfo_ent->setTargetHost(replica.server_id());
+
   auto server_cfg = dbctx_->config_directory->getServerConfig(
       replica.server_id());
 
@@ -244,7 +254,7 @@ void LSMPartitionReplication::replicateToUnsafe(
       }
 
       records_sent += upload_batchsize - upload_nskipped;
-      replication_info->setTargetHostStatus(bytes_sent, records_sent);
+      rinfo_ent->setTargetHostStatus(bytes_sent, records_sent);
     }
 
     *replicated_offset = tbl.last_sequence();
@@ -292,12 +302,11 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
 
   // push all outstanding data to all replication targets
   auto head_offset = snap_->state.lsm_sequence();
-  bool dirty = false;
   bool success = true;
   HashMap<SHA1Hash, size_t> replicas_per_partition;
   Vector<ReplicationTarget> completed_joins;
 
-  // FIXME: replicate all targets in parallel
+  std::vector<std::tuple<ReplicationTarget, uint64_t, ReturnCode>> repl_targets;
   for (const auto& r : snap_->state.replication_targets()) {
     auto replica_offset = replicatedOffsetFor(repl_state, r);
     SHA1Hash target_partition_id(
@@ -323,17 +332,24 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
         head_offset,
         head_offset - replica_offset);
 
-    replication_info->setTargetHost(r.server_id());
+    repl_targets.emplace_back(r, replica_offset, ReturnCode::success());
+  }
 
-    auto rc = replicateTo(r, &replica_offset, replication_info);
-    setReplicatedOffsetFor(&repl_state, r, replica_offset);
-    dirty = true;
+  auto replication_concurrency = kDefaultReplicationConcurrency;
+  replicateParallel(&repl_targets, replication_info, replication_concurrency);
 
-    if (rc.isSuccess()) {
+  for (auto& r : repl_targets) {
+    SHA1Hash target_partition_id(
+        std::get<0>(r).partition_id().data(),
+        std::get<0>(r).partition_id().size());
+
+    setReplicatedOffsetFor(&repl_state, std::get<0>(r), std::get<1>(r));
+
+    if (std::get<2>(r).isSuccess()) {
       ++replicas_per_partition[target_partition_id];
 
-      if (r.is_joining()) {
-        completed_joins.emplace_back(r);
+      if (std::get<0>(r).is_joining()) {
+        completed_joins.emplace_back(std::get<0>(r));
       }
     } else {
       success = false;
@@ -344,13 +360,13 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
         snap_->state.tsdb_namespace(),
         snap_->state.table_key(),
         snap_->key.toString(),
-        r.server_id(),
-        rc.getMessage());
+        std::get<0>(r).server_id(),
+        std::get<2>(r).getMessage());
     }
   }
 
   // commit new replication state
-  if (dirty) {
+  if (!repl_targets.empty()) {
     auto& writer = dynamic_cast<LSMPartitionWriter&>(*partition_->getWriter());
     writer.commitReplicationState(repl_state);
   }
@@ -406,6 +422,49 @@ bool LSMPartitionReplication::replicate(ReplicationInfo* replication_info) {
   }
 
   return success;
+}
+
+void LSMPartitionReplication::replicateParallel(
+    std::vector<std::tuple<ReplicationTarget, uint64_t, ReturnCode>>* targets,
+    ReplicationInfo* rinfo,
+    size_t concurrency) {
+  if (concurrency < 2) {
+    for (auto& r : *targets) {
+      std::get<2>(r) = replicateTo(std::get<0>(r), &std::get<1>(r), rinfo);
+    }
+
+    return;
+  }
+
+  std::mutex tlock;
+  std::condition_variable tcv;
+  size_t tcount = 0;
+  for (size_t idx = 0; idx < targets->size(); ++idx) {
+    std::unique_lock<std::mutex> lk(tlock);
+    while (tcount >= concurrency) {
+      tcv.wait(lk);
+    }
+
+    ++tcount;
+
+    auto t = std::thread([this, idx, targets, &tcount, &tlock, &tcv, rinfo] {
+      std::get<2>((*targets)[idx]) = replicateTo(
+          std::get<0>((*targets)[idx]),
+          &std::get<1>((*targets)[idx]),
+          rinfo);
+
+      std::unique_lock<std::mutex> lk(tlock);
+      --tcount;
+      tcv.notify_all();
+    });
+
+    t.detach();
+  }
+
+  std::unique_lock<std::mutex> lk(tlock);
+  while (tcount > 0) {
+    tcv.wait(lk);
+  }
 }
 
 Status LSMPartitionReplication::fetchAndApplyMetadataTransaction() {

@@ -65,10 +65,6 @@ LSMTableIndex::~LSMTableIndex() {
 }
 
 bool LSMTableIndex::load(const String& filename) {
-  if (data_) {
-    return false;
-  }
-
   std::unique_lock<std::mutex> lk(load_mutex_);
   if (data_) {
     return false;

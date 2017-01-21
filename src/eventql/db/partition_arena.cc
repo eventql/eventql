@@ -72,6 +72,7 @@ Set<SHA1Hash> PartitionArena::insertRecords(
   }
 
   Set<SHA1Hash> inserted_ids;
+  size_t insert_count = 0;
   for (size_t i = 0; i < records.getNumRecords(); ++i) {
     if (skip_flags[i]) {
       continue;
@@ -100,6 +101,7 @@ Set<SHA1Hash> PartitionArena::insertRecords(
 
     RecordVersion rversion;
     inserted_ids.insert(record_id);
+    ++insert_count;
     rversion.version = record_version;
     rversion.position = num_records_++;
     record_versions_[record_id] = rversion;
@@ -144,7 +146,7 @@ Set<SHA1Hash> PartitionArena::insertRecords(
     }
 
     auto col_writer = cstable_writer_->getColumnWriter(col.column_name);
-    for (size_t i = 0; i < inserted_ids.size(); ++i) {
+    for (size_t i = 0; i < insert_count; ++i) {
       col_writer->writeNull(0, 0);
     }
   }
