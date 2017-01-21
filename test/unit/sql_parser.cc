@@ -1385,6 +1385,50 @@ TEST_CASE(ParserTest, TestAlterTableStatement, [] () {
   EXPECT_EQ(children[4]->getToken()->getString(), "version");
 });
 
+TEST_CASE(ParserTest, TestAlterTableSetPropertyStatement, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  auto parser = parseTestQuery(
+      R"(
+          ALTER TABLE evtbl
+            ADD COLUMN id STRING,
+            SET PROPERTY disable_split = true,
+            SET PROPERTY disable_replication = false;
+      )");
+
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  const auto& children = stmt->getChildren();
+  EXPECT_EQ(children.size(), 4);
+  EXPECT_EQ(*children[0], ASTNode::T_TABLE_NAME);
+  EXPECT_EQ(children[0]->getToken()->getString(), "evtbl");
+
+  EXPECT_EQ(*children[1], ASTNode::T_COLUMN);
+
+  EXPECT_EQ(*children[2], ASTNode::T_TABLE_PROPERTY);
+  EXPECT_EQ(children[2]->getChildren().size(), 2);
+  EXPECT(*children[2]->getChildren()[0] == ASTNode::T_TABLE_PROPERTY_KEY);
+  EXPECT_EQ(
+      children[2]->getChildren()[0]->getToken()->getString(),
+      "disable_split");
+  EXPECT(*children[2]->getChildren()[1] == ASTNode::T_TABLE_PROPERTY_VALUE);
+  EXPECT_EQ(
+      *children[2]->getChildren()[1]->getToken(),
+      Token::T_TRUE);
+
+  EXPECT_EQ(*children[3], ASTNode::T_TABLE_PROPERTY);
+  EXPECT_EQ(children[3]->getChildren().size(), 2);
+  EXPECT(*children[3]->getChildren()[0] == ASTNode::T_TABLE_PROPERTY_KEY);
+  EXPECT_EQ(
+      children[3]->getChildren()[0]->getToken()->getString(),
+      "disable_replication");
+  EXPECT(*children[3]->getChildren()[1] == ASTNode::T_TABLE_PROPERTY_VALUE);
+  EXPECT_EQ(
+      *children[3]->getChildren()[1]->getToken(),
+      Token::T_FALSE);
+});
+
 TEST_CASE(ParserTest, TestDescribePartitionsStatement, [] () {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();

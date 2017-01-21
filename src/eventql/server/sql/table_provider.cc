@@ -444,7 +444,8 @@ Status TSDBTableProvider::alterTable(const csql::AlterTableNode& alter_table) {
   return table_service_->alterTable(
       tsdb_namespace_,
       alter_table.getTableName(),
-      tbl_operations);
+      tbl_operations,
+      alter_table.getProperties());
 }
 
 Status TSDBTableProvider::dropTable(const String& table_name) {

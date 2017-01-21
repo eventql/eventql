@@ -79,7 +79,8 @@ public:
   Status alterTable(
       const String& db_namespace,
       const String& table_name,
-      Vector<AlterTableOperation> operations);
+      Vector<AlterTableOperation> operations,
+      const std::vector<std::pair<std::string, std::string>>& properties = {});
 
   Status dropTable(
       const String& db_namespace,

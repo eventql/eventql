@@ -602,6 +602,8 @@ ASTNode* Parser::tablePropertyDefinition() {
   switch (cur_token_->getType()) {
     case Token::T_STRING:
     case Token::T_NUMERIC:
+    case Token::T_TRUE:
+    case Token::T_FALSE:
       break;
 
     default:
@@ -827,6 +829,12 @@ ASTNode* Parser::alterStatement() {
         alter_table->appendChild(nestedColumnName());
         break;
       }
+
+      case Token::T_SET:
+        consumeToken();
+        expectAndConsume(Token::T_PROPERTY);
+        alter_table->appendChild(tablePropertyDefinition());
+        break;
 
       default:
         RAISEF(
