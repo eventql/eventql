@@ -45,6 +45,10 @@
 
 namespace eventql {
 
+Status setTableProperty(
+    TableConfig* config,
+    std::pair<std::string, std::string> property);
+
 TableService::TableService(DatabaseContext* dbctx) : dbctx_(dbctx) {}
 
 Status TableService::createDatabase(const String& db_name) {
@@ -187,6 +191,11 @@ Status TableService::createTable(
     if (p.first == "user_defined_partitions" && p.second == "true") {
       tblcfg->set_enable_user_defined_partitions(true);
       continue;
+    }
+
+    auto rc = setTableProperty(tblcfg, p);
+    if (!rc.isSuccess()) {
+      return rc;
     }
   }
 
@@ -405,10 +414,28 @@ static Status removeColumn(
   return Status::success();
 }
 
-static Status setProperty(
-    TableDefinition* td,
+Status setTableProperty(
+    TableConfig* config,
     std::pair<std::string, std::string> property) {
-  auto config = td->mutable_config();
+  if (property.first == "write_consistency_level") {
+    StringUtil::toUpper(&property.second);
+    if (property.second == "STRICT") {
+      config->set_default_write_consistency_level(EVQL_CLEVEL_WRITE_STRICT);
+      return Status::success();
+    } else if (property.second == "RELAXED") {
+      config->set_default_write_consistency_level(EVQL_CLEVEL_WRITE_RELAXED);
+      return Status::success();
+    } else if (property.second == "BEST_EFFORT") {
+      config->set_default_write_consistency_level(EVQL_CLEVEL_WRITE_BEST_EFFORT);
+      return Status::success();
+    } else {
+      return Status(
+          eRuntimeError,
+          StringUtil::format(
+              "invalid write_consistency_level: $0",
+              property.second));
+    }
+  }
 
   if (property.first == "partition_split_threshold") {
     if (StringUtil::isNumber(property.second)) {
@@ -427,10 +454,9 @@ static Status setProperty(
     }
   }
 
-  auto value = property.second;
-  StringUtil::toLower(&value);
-
   if (property.first == "enable_async_split") {
+    auto value = property.second;
+    StringUtil::toLower(&value);
     if (value == "true") {
       config->set_enable_async_split(true);
       return Status::success();
@@ -447,6 +473,8 @@ static Status setProperty(
   }
 
   if (property.first == "disable_replication") {
+    auto value = property.second;
+    StringUtil::toLower(&value);
     if (value == "true") {
       config->set_disable_replication(true);
       return Status::success();
@@ -495,7 +523,7 @@ Status TableService::alterTable(
   }
 
   for (const auto& p : properties) {
-    auto rc = setProperty(&td, p);
+    auto rc = setTableProperty(td.mutable_config(), p);
     if (!rc.isSuccess()) {
       return rc;
     }
