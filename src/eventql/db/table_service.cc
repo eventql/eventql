@@ -767,6 +767,8 @@ ReturnCode TableService::insertRecords(
     return ReturnCode::errorf("ENOTFOUND", "table not found: $0", table_name);
   }
 
+  auto ks = table.get()->getKeyspaceType();
+
   /* if no consistency level specified, set default level */
   if (consistency_level.isEmpty()) {
     consistency_level = Some(table.get()->getDefaultWriteConsistencyLevel());
@@ -871,6 +873,18 @@ ReturnCode TableService::insertRecords(
           case EVQL_CLEVEL_WRITE_BEST_EFFORT:
             continue;
         }
+      }
+
+      if (t.has_keyrange_begin() &&
+          t.keyrange_begin().size() > 0 &&
+          comparePartitionKeys(ks, partition_key, t.keyrange_begin()) < 0) {
+        continue;
+      }
+
+      if (t.has_keyrange_end() &&
+          t.keyrange_end().size() > 0 &&
+          comparePartitionKeys(ks, partition_key, t.keyrange_end()) >= 0) {
+        continue;
       }
 
       targets.emplace_back(t);

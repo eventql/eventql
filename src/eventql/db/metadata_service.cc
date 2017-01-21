@@ -544,6 +544,10 @@ void getPartitionWriteTargets(
     t->set_partition_id(
         partition->partition_id.data(),
         partition->partition_id.size());
+
+    if (partition->splitting) {
+      t->set_strict_only(true);
+    }
   }
 
   for (const auto& s : partition->servers_leaving) {
@@ -552,6 +556,10 @@ void getPartitionWriteTargets(
     t->set_partition_id(
         partition->partition_id.data(),
         partition->partition_id.size());
+
+    if (partition->splitting) {
+      t->set_strict_only(true);
+    }
   }
 
   for (const auto& s : partition->servers_joining) {
@@ -561,6 +569,26 @@ void getPartitionWriteTargets(
         partition->partition_id.data(),
         partition->partition_id.size());
     t->set_strict_only(true);
+  }
+
+  if (partition->splitting) {
+    for (const auto& s : partition->split_servers_low) {
+      auto t = response->add_write_targets();
+      t->set_server_id(s.server_id);
+      t->set_partition_id(
+          partition->split_partition_id_low.data(),
+          partition->split_partition_id_low.size());
+      t->set_keyrange_end(partition->split_point);
+    }
+
+    for (const auto& s : partition->split_servers_high) {
+      auto t = response->add_write_targets();
+      t->set_server_id(s.server_id);
+      t->set_partition_id(
+          partition->split_partition_id_high.data(),
+          partition->split_partition_id_high.size());
+      t->set_keyrange_begin(partition->split_point);
+    }
   }
 }
 

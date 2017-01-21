@@ -50,6 +50,9 @@ message PartitionWriteTarget {
 
   // if true, write into this partition is only required for strict consistency
   optional bool strict_only = 3;
+
+  optional bytes keyrange_begin = 4;
+  optional bytes keyrange_end = 5;
 };
 
 enum PartitionLifecycleState {
