@@ -348,6 +348,7 @@ Status TableImport::uploadBatch(
     const UploadBatch& batch) {
   /* insert */
   native_transport::InsertFrame i_frame;
+  i_frame.setConsistencyLevel(EVQL_CLEVEL_WRITE::EVQL_CLEVEL_WRITE_RELAXED);
   i_frame.setDatabase(database_);
   i_frame.setTable(table_);
   i_frame.setRecordEncoding(format_);

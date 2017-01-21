@@ -44,12 +44,14 @@ public:
   void setRecordEncoding(uint64_t encoding);
   void setRecordEncodingInfo(const std::string& str);
   void addRecord(const std::string& record);
+  void setConsistencyLevel(const EVQL_CLEVEL_WRITE clevel);
 
   const std::string& getDatabase() const;
   const std::string& getTable() const;
   uint64_t getRecordEncoding() const;
   const std::string& getRecordEncodingInfo() const;
   const std::vector<std::string>& getRecords() const;
+  EVQL_CLEVEL_WRITE getConsistencyLevel() const;
 
   ReturnCode parseFrom(InputStream* is);
   ReturnCode writeTo(OutputStream* os) const;
@@ -62,6 +64,7 @@ protected:
   uint64_t record_encoding_;
   std::string record_encoding_info_;
   std::vector<std::string> records_;
+  EVQL_CLEVEL_WRITE clevel_;
 };
 
 } // namespace native_transport

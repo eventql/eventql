@@ -49,6 +49,11 @@ void InsertFrame::addRecord(const std::string& record) {
   records_.emplace_back(record);
 }
 
+void InsertFrame::setConsistencyLevel(EVQL_CLEVEL_WRITE clevel) {
+  flags_ |= EVQL_INSERT_HAS_CLEVEL;
+  clevel_ = clevel;
+}
+
 const std::string& InsertFrame::getDatabase() const {
   return database_;
 }
@@ -69,6 +74,10 @@ const std::vector<std::string>& InsertFrame::getRecords() const {
   return records_;
 }
 
+EVQL_CLEVEL_WRITE InsertFrame::getConsistencyLevel() const {
+  return clevel_;
+}
+
 ReturnCode InsertFrame::parseFrom(InputStream* is) try {
   flags_ = is->readVarUInt();
   database_ = is->readLenencString();
@@ -81,6 +90,10 @@ ReturnCode InsertFrame::parseFrom(InputStream* is) try {
   auto records_count = is->readVarUInt();
   for (uint64_t i = 0; i < records_count; ++i) {
     records_.emplace_back(is->readLenencString());
+  }
+
+  if (flags_ & EVQL_INSERT_HAS_CLEVEL) {
+    clevel_ = static_cast<EVQL_CLEVEL_WRITE>(is->readVarUInt());
   }
 
   return ReturnCode::success();
@@ -100,6 +113,10 @@ ReturnCode InsertFrame::writeTo(OutputStream* os) const try {
   os->appendVarUInt(records_.size());
   for (const auto& r : records_) {
     os->appendLenencString(r);
+  }
+
+  if (flags_ & EVQL_INSERT_HAS_CLEVEL) {
+    os->appendVarUInt(static_cast<uint64_t>(clevel_));
   }
 
   return ReturnCode::success();

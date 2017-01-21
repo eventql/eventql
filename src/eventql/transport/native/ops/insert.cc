@@ -118,7 +118,8 @@ ReturnCode performOperation_INSERT_JSON(
       session->getEffectiveNamespace(),
       i_frame->getTable(),
       &*records.begin(),
-      &*records.end());
+      &*records.end(),
+      i_frame->getConsistencyLevel());
 }
 
 ReturnCode performOperation_INSERT_CSV(
