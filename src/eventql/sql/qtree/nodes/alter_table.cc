@@ -42,6 +42,16 @@ const Vector<AlterTableNode::AlterTableOperation>& AlterTableNode::getOperations
   return operations_;
 }
 
+const std::vector<AlterTableNode::Property>& AlterTableNode::getProperties(
+    ) const {
+  return properties_;
+}
+
+void AlterTableNode::setProperties(
+    std::vector<AlterTableNode::Property> properties) {
+  properties_ = properties;
+}
+
 RefPtr<QueryTreeNode> AlterTableNode::deepCopy() const {
   return new AlterTableNode(*this);
 }

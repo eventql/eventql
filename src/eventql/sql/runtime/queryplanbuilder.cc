@@ -1938,7 +1938,6 @@ QueryTreeNode* QueryPlanBuilder::buildCreateTable(
     node->setPrimaryKey(primary_key_columns);
   }
 
-  std::vector<std::pair<std::string, std::string>> properties;
   if (ast->getChildren().size() >= 3) {
     for (const auto& cld : ast->getChildren()[2]->getChildren()) {
       if (cld->getType() != ASTNode::T_TABLE_PROPERTY) {
@@ -1951,9 +1950,22 @@ QueryTreeNode* QueryPlanBuilder::buildCreateTable(
         RAISE(kRuntimeError, "corrupt AST");
       }
 
+      std::string value;
+      switch (cld->getChildren()[1]->getToken()->getType()) {
+        case Token::T_TRUE:
+          value = "true";
+          break;
+        case Token::T_FALSE:
+          value = "false";
+          break;
+        default:
+          value = cld->getChildren()[1]->getToken()->getString();
+          break;
+      }
+
       node->addProperty(
           cld->getChildren()[0]->getToken()->getString(),
-          cld->getChildren()[1]->getToken()->getString());
+          value);
     }
   }
 
@@ -2118,6 +2130,7 @@ static AlterTableNode::AlterTableOperation buildAlterTableOperation(
       return operation;
     }
 
+
     default:
       RAISE(kRuntimeError, "corrupt AST");
   }
@@ -2136,13 +2149,57 @@ QueryTreeNode* QueryPlanBuilder::buildAlterTable(
     RAISE(kRuntimeError, "corrupt AST");
   }
 
-  Vector<AlterTableNode::AlterTableOperation> operations;
+  std::vector<AlterTableNode::AlterTableOperation> operations;
+  std::vector<std::pair<std::string, std::string>> properties;
   auto child_nodes = ast->getChildren();
   for (size_t i = 1; i < child_nodes.size(); ++i) {
-    operations.emplace_back(buildAlterTableOperation(child_nodes[i]));
+    auto cld = child_nodes[i];
+    switch (cld->getType()) {
+      //set property
+      case ASTNode::T_TABLE_PROPERTY: {
+        if (cld->getChildren().size() != 2) {
+          RAISE(kRuntimeError, "corrupt AST");
+        }
+
+        std::pair<std::string, std::string> property;
+        if (cld->getChildren().size() != 2 ||
+            cld->getChildren()[0]->getType() != ASTNode::T_TABLE_PROPERTY_KEY ||
+            cld->getChildren()[1]->getType() != ASTNode::T_TABLE_PROPERTY_VALUE) {
+          RAISE(kRuntimeError, "corrupt AST");
+        }
+
+        std::string value;
+        switch (cld->getChildren()[1]->getToken()->getType()) {
+          case Token::T_TRUE:
+            value = "true";
+            break;
+          case Token::T_FALSE:
+            value = "false";
+            break;
+          default:
+            value = cld->getChildren()[1]->getToken()->getString();
+            break;
+        }
+
+        properties.emplace_back(
+            cld->getChildren()[0]->getToken()->getString(),
+            value);
+        break;
+      }
+
+      //build operation
+      default:
+        operations.emplace_back(buildAlterTableOperation(cld));
+        break;
+    }
   }
 
-  return new AlterTableNode(table_name->getToken()->getString(), operations);
+  auto node = new AlterTableNode(
+      table_name->getToken()->getString(),
+      operations);
+  node->setProperties(properties);
+
+  return node;
 }
 
 }

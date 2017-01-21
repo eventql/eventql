@@ -33,6 +33,8 @@ namespace csql {
 class AlterTableNode : public QueryTreeNode {
 public:
 
+  using Property = std::pair<std::string, std::string>;
+
   enum AlterTableOperationType {
     OP_ADD_COLUMN,
     OP_REMOVE_COLUMN
@@ -52,7 +54,11 @@ public:
   AlterTableNode(const AlterTableNode& node);
 
   const String& getTableName() const;
+
   const Vector<AlterTableOperation>& getOperations() const;
+
+  const std::vector<Property>& getProperties() const;
+  void setProperties(std::vector<Property> properties);
 
   RefPtr<QueryTreeNode> deepCopy() const;
   String toString() const;
@@ -60,6 +66,7 @@ public:
 protected:
   String table_name_;
   Vector<AlterTableOperation> operations_;
+  std::vector<Property> properties_;
 };
 
 } // namespace csql

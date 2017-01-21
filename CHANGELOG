@@ -6,6 +6,8 @@ EventQL v0.4.1 beta;
 
   * Added --format flag and CSV support to evqlctl-table-import
 
+  * Added the ALTER TABLE SET PROPERTY statement to update the table properties
+    enable_async_split, partition_split_threshold and disable_replication
 
 EventQL v0.4.0 (v0.4.0-rc0, git267e851) beta; 2016-12-20 13:43:47 +0000
 
