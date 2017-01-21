@@ -128,6 +128,11 @@ bool Table::hasUserDefinedPartitions() const {
   return config_.config().enable_user_defined_partitions();
 }
 
+EVQL_CLEVEL_WRITE Table::getDefaultWriteConsistencyLevel() const {
+  std::unique_lock<std::mutex> lk(mutex_);
+  return (EVQL_CLEVEL_WRITE) config_.config().default_write_consistency_level();
+}
+
 void Table::updateConfig(TableDefinition new_config) {
   std::unique_lock<std::mutex> lk(mutex_);
   config_ = new_config;

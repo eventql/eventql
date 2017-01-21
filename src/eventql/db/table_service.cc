@@ -671,7 +671,7 @@ ReturnCode TableService::insertRecords(
 
   /* if no consistency level specified, set default level */
   if (consistency_level.isEmpty()) {
-    consistency_level = Some(EVQL_CLEVEL_WRITE_STRICT);
+    consistency_level = Some(table.get()->getDefaultWriteConsistencyLevel());
   }
 
   /* group inserts into partitions */
