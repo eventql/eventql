@@ -1408,3 +1408,22 @@ TEST_CASE(ParserTest, TestDescribeServersStatement, [] () {
   EXPECT_EQ(*stmt, ASTNode::T_CLUSTER_SHOW_SERVERS);
 });
 
+TEST_CASE(ParserTest, TestSetVariableValueStatement, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+  auto parser = parseTestQuery("SET query_consistency_level = \"HIGH PERFORMANCE\";");
+
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT_EQ(*stmt, ASTNode::T_SET);
+  EXPECT_EQ(stmt->getChildren().size(), 2);
+  EXPECT_EQ(*stmt->getChildren()[0], ASTNode::T_VARIABLE);
+  EXPECT_EQ(
+      stmt->getChildren()[0]->getToken()->getString(),
+      "query_consistency_level");
+  EXPECT_EQ(*stmt->getChildren()[1], ASTNode::T_VALUE);
+  EXPECT_EQ(
+      stmt->getChildren()[1]->getToken()->getString(),
+      "HIGH PERFORMANCE");
+});
+

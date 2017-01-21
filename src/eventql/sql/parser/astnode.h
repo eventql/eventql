@@ -118,6 +118,9 @@ public:
     T_VALUE_LIST,
     T_JSON_STRING,
     T_ALTER_TABLE,
+    T_SET,
+    T_VARIABLE,
+    T_VALUE,
 
     T_DRAW,
     T_IMPORT,

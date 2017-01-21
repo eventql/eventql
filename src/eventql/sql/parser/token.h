@@ -107,6 +107,7 @@ public:
     T_ADD,
     T_DROP,
     T_COLUMN,
+    T_SET,
 
     T_JOIN,
     T_CROSS,
