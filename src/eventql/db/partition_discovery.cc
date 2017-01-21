@@ -137,7 +137,7 @@ Status PartitionDiscovery::discoverPartitionByKeyRange(
       if (s.server_id == request.requester_id()) {
         // if we are in the active server list return SERVE
         response->set_code(PDISCOVERY_SERVE);
-      } else {
+      } else if (!iter->splitting) {
         addReplicationTarget(response, file, iter, s, false);
       }
     }
@@ -147,7 +147,7 @@ Status PartitionDiscovery::discoverPartitionByKeyRange(
       if (s.server_id == request.requester_id()) {
         // if we are in the joining server list return LOAD
         response->set_code(PDISCOVERY_LOAD);
-      } else {
+      } else if (!iter->splitting) {
         addReplicationTarget(response, file, iter, s, true);
       }
     }
@@ -157,7 +157,7 @@ Status PartitionDiscovery::discoverPartitionByKeyRange(
       if (s.server_id == request.requester_id()) {
         // if we are in the leaving server list return SERVE
         response->set_code(PDISCOVERY_SERVE);
-      } else {
+      } else if (!iter->splitting) {
         addReplicationTarget(response, file, iter, s, false);
       }
     }
@@ -239,17 +239,18 @@ Status PartitionDiscovery::discoverPartitionByKeyRange(
 
     auto end = file->getPartitionMapRangeEnd(request.keyrange_end());
     for (; iter != end; ++iter) {
-      for (const auto& s : iter->servers) {
-        addReplicationTarget(response, file, iter, s, false);
-      }
-      for (const auto& s : iter->servers_joining) {
-        addReplicationTarget(response, file, iter, s, true);
-      }
-      for (const auto& s : iter->servers_leaving) {
-        addReplicationTarget(response, file, iter, s, false);
-      }
       if (iter->splitting) {
         addSplittingReplicationTargets(response, file, iter);
+      } else {
+        for (const auto& s : iter->servers) {
+          addReplicationTarget(response, file, iter, s, false);
+        }
+        for (const auto& s : iter->servers_joining) {
+          addReplicationTarget(response, file, iter, s, true);
+        }
+        for (const auto& s : iter->servers_leaving) {
+          addReplicationTarget(response, file, iter, s, false);
+        }
       }
     }
   }
