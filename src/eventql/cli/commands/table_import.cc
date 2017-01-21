@@ -108,6 +108,15 @@ Status TableImport::execute(
       "<num>");
 
   flags.defineFlag(
+      "batch_size",
+      ::cli::FlagParser::T_INTEGER,
+      false,
+      NULL,
+      NULL,
+      "batch size",
+      "<num>");
+
+  flags.defineFlag(
       "format",
       ::cli::FlagParser::T_STRING,
       false,
@@ -133,6 +142,9 @@ Status TableImport::execute(
   num_threads_ = flags.isSet("connections") ?
       flags.getInt("connections") :
       kDefaultNumThreads;
+  batch_size_ = flags.isSet("batch_size") ?
+      flags.getInt("batch_size") :
+      kDefaultBatchSize;
   threads_.resize(num_threads_);
   is_tty_ = ::isatty(STDERR_FILENO);
   timeout_ =  process_cfg_->getInt("client.timeout").get();
@@ -195,7 +207,7 @@ Status TableImport::run(InputStream* is) {
   std::string line;
   std::vector<std::string> batch;
   while (is->readLine(&line)) {
-    if (batch.size() > kDefaultBatchSize) {
+    if (batch.size() > batch_size_) {
       if (!enqueueBatch(std::move(batch))) {
         goto exit;
       }
