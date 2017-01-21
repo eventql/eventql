@@ -114,6 +114,11 @@ public:
 
 protected:
 
+  void fastForwardReplicationState(
+      const PartitionSnapshot* snap,
+      ReplicationState* repl_state,
+      const PartitionDiscoveryResponse& discovery_info);
+
   RefPtr<Partition> partition_;
   RefPtr<CompactionStrategy> compaction_strategy_;
   DatabaseContext* dbctx_;

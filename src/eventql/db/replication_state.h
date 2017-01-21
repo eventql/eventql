@@ -26,6 +26,7 @@
 #include <eventql/util/SHA1.h>
 #include <eventql/db/replication_state.pb.h>
 #include <eventql/db/partition_state.pb.h>
+#include <eventql/db/metadata_operations.pb.h>
 
 #include "eventql/eventql.h"
 
@@ -35,9 +36,18 @@ uint64_t replicatedOffsetFor(
     const ReplicationState& repl_state,
     const ReplicationTarget& target);
 
+uint64_t replicatedOffsetFor(
+    const ReplicationState& repl_state,
+    const PartitionDiscoveryReplicationTarget& target);
+
 void setReplicatedOffsetFor(
     ReplicationState* repl_state,
     const ReplicationTarget& target,
+    uint64_t replicated_offset);
+
+void setReplicatedOffsetFor(
+    ReplicationState* repl_state,
+    const PartitionDiscoveryReplicationTarget& target,
     uint64_t replicated_offset);
 
 uint64_t replicatedOffsetFor(
