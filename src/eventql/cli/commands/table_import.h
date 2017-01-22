@@ -113,6 +113,7 @@ protected:
   std::string csv_header_;
   uint64_t timeout_;
   std::mutex print_mutex_;
+  size_t batch_size_;
 };
 
 } // namespace cli

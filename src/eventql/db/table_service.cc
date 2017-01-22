@@ -766,7 +766,12 @@ ReturnCode TableService::insertRecords(
   }
 
   /* group inserts into partitions */
-  HashMap<std::string, ShreddedRecordListBuilder> records;
+  struct RecordsBatch {
+    ShreddedRecordListBuilder record_list;
+    std::vector<PartitionWriteTarget> targets;
+  };
+
+  HashMap<std::string, RecordsBatch> records;
   for (auto record = begin; record != end; ++record) {
     // calculate partition key
     auto partition_key_field_name = table.get()->getPartitionKey();
@@ -825,20 +830,6 @@ ReturnCode TableService::insertRecords(
         table.get()->getKeyspaceType(),
         partition_key_field.get());
 
-    auto& record_list_builder = records[partition_key];
-    try {
-      record_list_builder.addRecordFromProtobuf(
-          primary_key,
-          WallClock::unixMicros(),
-          *record);
-    } catch (const std::exception& e) {
-      return ReturnCode::exception(e);
-    }
-  }
-
-  for (auto& p : records) {
-    const auto& partition_key = p.first;
-
     /* lookup partition targets */
     PartitionFindResponse find_res;
     {
@@ -854,7 +845,7 @@ ReturnCode TableService::insertRecords(
       }
     }
 
-    std::vector<PartitionWriteTarget> targets;
+    std::map<std::string, std::vector<PartitionWriteTarget>> targets;
     for (const auto& t : find_res.write_targets()) {
       if (t.strict_only()) {
         switch (consistency_level.get()) {
@@ -878,16 +869,35 @@ ReturnCode TableService::insertRecords(
         continue;
       }
 
-      targets.emplace_back(t);
+      targets[t.partition_id()].emplace_back(t);
     }
 
-    /* perform insert into all targets */
+    for (const auto& t : targets) {
+      auto iter = records.find(t.first);
+      if (iter == records.end()) {
+        iter = records.emplace(t.first, RecordsBatch{}).first;
+        iter->second.targets = t.second;
+      }
+
+      try {
+        iter->second.record_list.addRecordFromProtobuf(
+            primary_key,
+            WallClock::unixMicros(),
+            *record);
+      } catch (const std::exception& e) {
+        return ReturnCode::exception(e);
+      }
+    }
+  }
+
+  /* perform insert into all target partitions */
+  for (auto& p : records) {
     {
       auto rc = insertRecords(
           tsdb_namespace,
           table_name,
-          targets,
-          p.second.get(),
+          p.second.targets,
+          p.second.record_list.get(),
           consistency_level.get());
 
       if (!rc.isSuccess()) {

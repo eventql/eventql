@@ -974,7 +974,7 @@ void TCPConnectionPool::storeFD(
   std::set<int> close_fds;
   {
     std::unique_lock<std::mutex> lk(mutex_);
-    if (num_conns_ >= max_conns_) {
+    if (max_conns_ > 0 && num_conns_ >= max_conns_) {
       lk.unlock();
       close(fd);
       return;
@@ -982,7 +982,7 @@ void TCPConnectionPool::storeFD(
 
     auto& connlist = conns_[server];
     while (
-        connlist.size() >= max_conns_per_host_ ||
+        (max_conns_per_host_ > 0 && connlist.size() >= max_conns_per_host_) ||
         (!connlist.empty() && connlist.back().time < cutoff)) {
       close_fds.insert(connlist.back().fd);
       connlist.pop_back();

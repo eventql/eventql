@@ -36,7 +36,6 @@ namespace eventql {
 
 class PartitionWriter : public RefCounted {
 public:
-  static const size_t kDefaultMaxDatafileSize = 1024 * 1024 * 128;
 
   PartitionWriter(PartitionSnapshotRef* head);
 
