@@ -759,6 +759,22 @@ void APIServlet::insertIntoTable(
       RAISE(kRuntimeError, "missing field: database");
     }
 
+    auto clevel_param = json::objectGetString(
+        jrow,
+        jreq.end(),
+        "write_consistency_level");
+
+    Option<EVQL_CLEVEL_WRITE> clevel;
+    if (!clevel_param.isEmpty()) {
+      EVQL_CLEVEL_WRITE c;
+      auto rc = writeConsistencyLevelFromString(clevel_param.get(), &c);
+      if (rc.isSuccess()) {
+        clevel = c;
+      } else {
+        RAISE(kRuntimeError, rc.getMessage());
+      }
+    }
+
     auto tc = dbctx->table_service->tableConfig(insert_database, table.get());
     if (tc.isEmpty()) {
       res->setStatus(http::kStatusForbidden);
@@ -787,7 +803,8 @@ void APIServlet::insertIntoTable(
             insert_database,
             table.get(),
             data_parsed.begin(),
-            data_parsed.end());
+            data_parsed.end(),
+            clevel);
       } catch (const std::exception& e) {
         rc = ReturnCode::exception(e);
       }
@@ -796,7 +813,8 @@ void APIServlet::insertIntoTable(
           insert_database,
           table.get(),
           data,
-          data + data->size);
+          data + data->size,
+          clevel);
     }
 
     if (rc.isSuccess()) {
