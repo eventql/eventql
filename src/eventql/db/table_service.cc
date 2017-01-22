@@ -45,6 +45,10 @@
 
 namespace eventql {
 
+Status setTableProperty(
+    TableConfig* config,
+    std::pair<std::string, std::string> property);
+
 TableService::TableService(DatabaseContext* dbctx) : dbctx_(dbctx) {}
 
 Status TableService::createDatabase(const String& db_name) {
@@ -187,6 +191,11 @@ Status TableService::createTable(
     if (p.first == "user_defined_partitions" && p.second == "true") {
       tblcfg->set_enable_user_defined_partitions(true);
       continue;
+    }
+
+    auto rc = setTableProperty(tblcfg, p);
+    if (!rc.isSuccess()) {
+      return rc;
     }
   }
 
@@ -405,10 +414,28 @@ static Status removeColumn(
   return Status::success();
 }
 
-static Status setProperty(
-    TableDefinition* td,
+Status setTableProperty(
+    TableConfig* config,
     std::pair<std::string, std::string> property) {
-  auto config = td->mutable_config();
+  if (property.first == "write_consistency_level") {
+    StringUtil::toUpper(&property.second);
+    if (property.second == "STRICT") {
+      config->set_default_write_consistency_level(EVQL_CLEVEL_WRITE_STRICT);
+      return Status::success();
+    } else if (property.second == "RELAXED") {
+      config->set_default_write_consistency_level(EVQL_CLEVEL_WRITE_RELAXED);
+      return Status::success();
+    } else if (property.second == "BEST_EFFORT") {
+      config->set_default_write_consistency_level(EVQL_CLEVEL_WRITE_BEST_EFFORT);
+      return Status::success();
+    } else {
+      return Status(
+          eRuntimeError,
+          StringUtil::format(
+              "invalid write_consistency_level: $0",
+              property.second));
+    }
+  }
 
   if (property.first == "partition_split_threshold") {
     if (StringUtil::isNumber(property.second)) {
@@ -427,10 +454,9 @@ static Status setProperty(
     }
   }
 
-  auto value = property.second;
-  StringUtil::toLower(&value);
-
   if (property.first == "enable_async_split") {
+    auto value = property.second;
+    StringUtil::toLower(&value);
     if (value == "true") {
       config->set_enable_async_split(true);
       return Status::success();
@@ -447,6 +473,8 @@ static Status setProperty(
   }
 
   if (property.first == "disable_replication") {
+    auto value = property.second;
+    StringUtil::toLower(&value);
     if (value == "true") {
       config->set_disable_replication(true);
       return Status::success();
@@ -495,7 +523,7 @@ Status TableService::alterTable(
   }
 
   for (const auto& p : properties) {
-    auto rc = setProperty(&td, p);
+    auto rc = setTableProperty(td.mutable_config(), p);
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -659,6 +687,7 @@ ReturnCode TableService::insertRecord(
     const String& table_name,
     const json::JSONObject::const_iterator& data_begin,
     const json::JSONObject::const_iterator& data_end,
+    Option<EVQL_CLEVEL_WRITE> consistency_level /* = None<EVQL_CLEVEL_WRITE> */,
     uint64_t flags /* = 0 */) {
   auto table = dbctx_->partition_map->findTable(tsdb_namespace, table_name);
   if (table.isEmpty() || table.get()->config().deleted()) {
@@ -676,6 +705,7 @@ ReturnCode TableService::insertRecord(
       tsdb_namespace,
       table_name,
       record,
+      consistency_level,
       flags);
 }
 
@@ -684,6 +714,7 @@ ReturnCode TableService::insertRecords(
     const String& table_name,
     const json::JSONObject* begin,
     const json::JSONObject* end,
+    Option<EVQL_CLEVEL_WRITE> consistency_level /* = None<EVQL_CLEVEL_WRITE> */,
     uint64_t flags /* = 0 */) {
   auto table = dbctx_->partition_map->findTable(tsdb_namespace, table_name);
   if (table.isEmpty() || table.get()->config().deleted()) {
@@ -705,6 +736,7 @@ ReturnCode TableService::insertRecords(
       table_name,
       &*records.begin(),
       &*records.end(),
+      consistency_level,
       flags);
 }
 
@@ -712,12 +744,14 @@ ReturnCode TableService::insertRecord(
     const String& tsdb_namespace,
     const String& table_name,
     const msg::DynamicMessage& data,
+    Option<EVQL_CLEVEL_WRITE> consistency_level /* = None<EVQL_CLEVEL_WRITE> */,
     uint64_t flags /* = 0 */) {
   return insertRecords(
       tsdb_namespace,
       table_name,
       &data,
       &data + 1,
+      consistency_level,
       flags);
 }
 
@@ -726,15 +760,27 @@ ReturnCode TableService::insertRecords(
     const String& table_name,
     const msg::DynamicMessage* begin,
     const msg::DynamicMessage* end,
+    Option<EVQL_CLEVEL_WRITE> consistency_level /* = None<EVQL_CLEVEL_WRITE> */,
     uint64_t flags /* = 0 */) {
-  HashMap<SHA1Hash, ShreddedRecordListBuilder> records;
-  HashMap<SHA1Hash, Set<String>> servers;
-
   auto table = dbctx_->partition_map->findTable(tsdb_namespace, table_name);
   if (table.isEmpty() || table.get()->config().deleted()) {
     return ReturnCode::errorf("ENOTFOUND", "table not found: $0", table_name);
   }
 
+  auto ks = table.get()->getKeyspaceType();
+
+  /* if no consistency level specified, set default level */
+  if (consistency_level.isEmpty()) {
+    consistency_level = Some(table.get()->getDefaultWriteConsistencyLevel());
+  }
+
+  /* group inserts into partitions */
+  struct RecordsBatch {
+    ShreddedRecordListBuilder record_list;
+    std::vector<PartitionWriteTarget> targets;
+  };
+
+  HashMap<std::string, RecordsBatch> records;
   for (auto record = begin; record != end; ++record) {
     // calculate partition key
     auto partition_key_field_name = table.get()->getPartitionKey();
@@ -789,15 +835,17 @@ ReturnCode TableService::insertRecords(
 
     }
 
-    // lookup partition
+    auto partition_key = encodePartitionKey(
+        table.get()->getKeyspaceType(),
+        partition_key_field.get());
+
+    /* lookup partition targets */
     PartitionFindResponse find_res;
     {
       auto rc = dbctx_->metadata_client->findPartition(
           tsdb_namespace,
           table_name,
-          encodePartitionKey(
-              table.get()->getKeyspaceType(),
-              partition_key_field.get()),
+          partition_key,
           true, /* allow create */
           &find_res);
 
@@ -806,37 +854,64 @@ ReturnCode TableService::insertRecords(
       }
     }
 
-    SHA1Hash partition_id(
-        find_res.partition_id().data(),
-        find_res.partition_id().size());
+    std::map<std::string, std::vector<PartitionWriteTarget>> targets;
+    for (const auto& t : find_res.write_targets()) {
+      if (t.strict_only()) {
+        switch (consistency_level.get()) {
+          case EVQL_CLEVEL_WRITE_STRICT:
+            break;
+          case EVQL_CLEVEL_WRITE_RELAXED:
+          case EVQL_CLEVEL_WRITE_BEST_EFFORT:
+            continue;
+        }
+      }
 
-    Set<String> partition_servers(
-        find_res.servers_for_insert().begin(),
-        find_res.servers_for_insert().end());
+      if (t.has_keyrange_begin() &&
+          t.keyrange_begin().size() > 0 &&
+          comparePartitionKeys(ks, partition_key, t.keyrange_begin()) < 0) {
+        continue;
+      }
 
-    servers[partition_id] = partition_servers;
-    auto& record_list_builder = records[partition_id];
+      if (t.has_keyrange_end() &&
+          t.keyrange_end().size() > 0 &&
+          comparePartitionKeys(ks, partition_key, t.keyrange_end()) >= 0) {
+        continue;
+      }
 
-    try {
-      record_list_builder.addRecordFromProtobuf(
-          primary_key,
-          WallClock::unixMicros(),
-          *record);
-    } catch (const std::exception& e) {
-      return ReturnCode::exception(e);
+      targets[t.partition_id()].emplace_back(t);
+    }
+
+    for (const auto& t : targets) {
+      auto iter = records.find(t.first);
+      if (iter == records.end()) {
+        iter = records.emplace(t.first, RecordsBatch{}).first;
+        iter->second.targets = t.second;
+      }
+
+      try {
+        iter->second.record_list.addRecordFromProtobuf(
+            primary_key,
+            WallClock::unixMicros(),
+            *record);
+      } catch (const std::exception& e) {
+        return ReturnCode::exception(e);
+      }
     }
   }
 
+  /* perform insert into all target partitions */
   for (auto& p : records) {
-    auto rc = insertRecords(
-        tsdb_namespace,
-        table_name,
-        p.first,
-        servers[p.first],
-        p.second.get());
+    {
+      auto rc = insertRecords(
+          tsdb_namespace,
+          table_name,
+          p.second.targets,
+          p.second.record_list.get(),
+          consistency_level.get());
 
-    if (!rc.isSuccess()) {
-      return rc;
+      if (!rc.isSuccess()) {
+        return rc;
+      }
     }
   }
 
@@ -858,27 +933,29 @@ ReturnCode TableService::insertReplicatedRecords(
 ReturnCode TableService::insertRecords(
     const String& tsdb_namespace,
     const String& table_name,
-    const SHA1Hash& partition_key,
-    const Set<String>& servers,
-    const ShreddedRecordList& records) {
+    const std::vector<PartitionWriteTarget>& targets,
+    const ShreddedRecordList& records,
+    EVQL_CLEVEL_WRITE consistency_level) {
   size_t nconfirmations = 0;
 
   /* perform local inserts */
-  std::vector<std::string> remote_servers;
-  for (const auto& server : servers) {
-    if (server == dbctx_->config_directory->getServerID()) {
+  std::vector<PartitionWriteTarget> remote_targets;
+  for (const auto& t : targets) {
+    SHA1Hash partition_id(t.partition_id().data(), t.partition_id().size());
+
+    if (t.server_id() == dbctx_->config_directory->getServerID()) {
       logDebug(
           "evqld",
           "Inserting $0 records into evql://localhost/$1/$2/$3",
           records.getNumRecords(),
           tsdb_namespace,
           table_name,
-          partition_key.toString());
+          partition_id.toString());
 
       auto rc = insertRecordsLocal(
           tsdb_namespace,
           table_name,
-          partition_key,
+          partition_id,
           records);
 
       if (rc.isSuccess()) {
@@ -893,29 +970,17 @@ ReturnCode TableService::insertRecords(
           records.getNumRecords(),
           tsdb_namespace,
           table_name,
-          partition_key.toString(),
-          server);
+          partition_id.toString(),
+          t.server_id());
 
-      remote_servers.emplace_back(server);
+      remote_targets.emplace_back(t);
     }
   }
 
-  /* build rpc payload */
-  std::string rpc_payload;
-  {
-    std::string rpc_body;
-    auto rpc_body_os = StringOutputStream::fromString(&rpc_body);
-    records.encode(rpc_body_os.get());
-
-    native_transport::ReplInsertFrame i_frame;
-    i_frame.setDatabase(tsdb_namespace);
-    i_frame.setTable(table_name);
-    i_frame.setPartitionID(partition_key.toString());
-    i_frame.setBody(rpc_body);
-
-    auto rpc_payload_os = StringOutputStream::fromString(&rpc_payload);
-    i_frame.writeTo(rpc_payload_os.get());
-  }
+  /* build rpc body */
+  std::string rpc_body;
+  auto rpc_body_os = StringOutputStream::fromString(&rpc_body);
+  records.encode(rpc_body_os.get());
 
   /* execute rpcs */
   native_transport::TCPAsyncClient rpc_client(
@@ -923,7 +988,7 @@ ReturnCode TableService::insertRecords(
       dbctx_->config_directory,
       dbctx_->connection_pool,
       dbctx_->dns_cache,
-      remote_servers.size(), /* max_concurrent_tasks */
+      remote_targets.size(), /* max_concurrent_tasks */
       1,                     /* max_concurrent_tasks_per_host */
       true);                 /* tolerate failures */
 
@@ -943,8 +1008,24 @@ ReturnCode TableService::insertRecords(
     }
   });
 
-  for (const auto& s : remote_servers) {
-    rpc_client.addRPC(EVQL_OP_REPL_INSERT, 0, std::string(rpc_payload), { s });
+  for (const auto& t : remote_targets) {
+    SHA1Hash partition_id(t.partition_id().data(), t.partition_id().size());
+
+    native_transport::ReplInsertFrame i_frame;
+    i_frame.setDatabase(tsdb_namespace);
+    i_frame.setTable(table_name);
+    i_frame.setPartitionID(partition_id.toString());
+    i_frame.setBody(rpc_body);
+
+    std::string rpc_payload;
+    auto rpc_payload_os = StringOutputStream::fromString(&rpc_payload);
+    i_frame.writeTo(rpc_payload_os.get());
+
+    rpc_client.addRPC(
+        EVQL_OP_REPL_INSERT,
+        0,
+        std::move(rpc_payload),
+        { t.server_id() });
   }
 
   auto rc = rpc_client.execute();
@@ -953,10 +1034,26 @@ ReturnCode TableService::insertRecords(
   }
 
   /* check if at least N inserts were successful */
-  if (nconfirmations >= 1) { // FIXME min consistency level
+  size_t required_confirmations = 1;
+  switch (consistency_level) {
+    case EVQL_CLEVEL_WRITE_STRICT:
+    case EVQL_CLEVEL_WRITE_RELAXED:
+      required_confirmations = (targets.size() + 1) / 2;
+      break;
+    case EVQL_CLEVEL_WRITE_BEST_EFFORT:
+      required_confirmations = 1;
+      break;
+  }
+
+  if (nconfirmations >= required_confirmations) {
     return ReturnCode::success();
   } else {
-    return ReturnCode::error("ERUNTIME", "not enough live servers for insert");
+    return ReturnCode::error(
+        "ERUNTIME",
+        "couldn't perform enough replica writes for the requested consistency "
+        "level; only $0 out of $1 (required) writes succeeded",
+        nconfirmations,
+        required_confirmations);
   }
 }
 

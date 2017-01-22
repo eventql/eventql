@@ -51,6 +51,20 @@ extern "C" {
 #endif
 
 /**
+ * Consistency Levels
+ */
+enum EVQL_CLEVEL_WRITE {
+  EVQL_CLEVEL_WRITE_STRICT = 0,
+  EVQL_CLEVEL_WRITE_RELAXED = 1,
+  EVQL_CLEVEL_WRITE_BEST_EFFORT = 2
+};
+
+enum EVQL_CLEVEL_QUERY {
+  EVQL_CLEVEL_QUERY_STRICT = 0,
+  EVQL_CLEVEL_QUERY_RELAXED = 1
+};
+
+/**
  * Native Protocol enums
  */
 enum {

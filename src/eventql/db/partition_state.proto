@@ -44,6 +44,17 @@ message ReplicationTarget {
   optional string legacy_token = 7;
 };
 
+message PartitionWriteTarget {
+  required bytes partition_id = 1;
+  required string server_id = 2;
+
+  // if true, write into this partition is only required for strict consistency
+  optional bool strict_only = 3;
+
+  optional bytes keyrange_begin = 4;
+  optional bytes keyrange_end = 5;
+};
+
 enum PartitionLifecycleState {
   PDISCOVERY_UNKNOWN = 0;
   PDISCOVERY_LOAD = 1;

@@ -41,7 +41,7 @@ enum KeyspaceType {
   KEYSPACE_STRING = 2;
 };
 
-// next id: 19
+// next id: 21
 message TableConfig {
 
   /**
@@ -105,6 +105,9 @@ message TableConfig {
   optional uint64 finite_partition_size = 17;
 
   optional bool enable_user_defined_partitions = 19 [default = false];
+
+  // a EVQL_CLEVEL_WRITE value
+  optional uint64 default_write_consistency_level = 20 [default = 0];
 
 };
 

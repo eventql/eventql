@@ -156,5 +156,31 @@ void setReplicatedVersionFor(
   replica->set_version(version);
 }
 
+void mergeReplicationState(
+    ReplicationState* state,
+    const ReplicationState* other) {
+  if (other->dropped()) {
+    state->set_dropped(true);
+  }
+
+  std::map<std::string, uint64_t> new_offsets;
+  for (const auto& r : state->replicas()) {
+    new_offsets[r.replica_id()] = r.replicated_offset();
+  }
+
+  for (const auto& r : other->replicas()) {
+    new_offsets[r.replica_id()] = std::max(
+        new_offsets[r.replica_id()],
+        r.replicated_offset());
+  }
+
+  state->mutable_replicas()->Clear();
+  for (const auto& off : new_offsets) {
+    auto r = state->add_replicas();
+    r->set_replica_id(off.first);
+    r->set_replicated_offset(off.second);
+  }
+}
+
 } // namespace tdsb
 

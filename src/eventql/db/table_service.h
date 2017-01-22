@@ -100,6 +100,7 @@ public:
       const String& tsdb_namespace,
       const String& table_name,
       const msg::DynamicMessage& data,
+      Option<EVQL_CLEVEL_WRITE> consistency_level = None<EVQL_CLEVEL_WRITE>(),
       uint64_t flags = 0);
 
   // insert a batch of records
@@ -108,6 +109,7 @@ public:
       const String& table_name,
       const msg::DynamicMessage* begin,
       const msg::DynamicMessage* end,
+      Option<EVQL_CLEVEL_WRITE> consistency_level = None<EVQL_CLEVEL_WRITE>(),
       uint64_t flags = 0);
 
   // insert a single record from json
@@ -116,6 +118,7 @@ public:
       const String& table_name,
       const json::JSONObject::const_iterator& data_begin,
       const json::JSONObject::const_iterator& data_end,
+      Option<EVQL_CLEVEL_WRITE> consistency_level = None<EVQL_CLEVEL_WRITE>(),
       uint64_t flags = 0);
 
   // insert a batch of records from json
@@ -124,6 +127,7 @@ public:
       const String& table_name,
       const json::JSONObject* begin,
       const json::JSONObject* end,
+      Option<EVQL_CLEVEL_WRITE> consistency_level = None<EVQL_CLEVEL_WRITE>(),
       uint64_t flags = 0);
 
   // internal method, don't use
@@ -156,9 +160,9 @@ protected:
   ReturnCode insertRecords(
       const String& tsdb_namespace,
       const String& table_name,
-      const SHA1Hash& partition_key,
-      const Set<String>& servers,
-      const ShreddedRecordList& records);
+      const std::vector<PartitionWriteTarget>& servers,
+      const ShreddedRecordList& records,
+      EVQL_CLEVEL_WRITE consistency_level);
 
   ReturnCode insertRecordsLocal(
       const String& tsdb_namespace,

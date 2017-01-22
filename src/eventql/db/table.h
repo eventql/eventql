@@ -65,6 +65,8 @@ public:
 
   bool hasUserDefinedPartitions() const;
 
+  EVQL_CLEVEL_WRITE getDefaultWriteConsistencyLevel() const;
+
   void updateConfig(TableDefinition new_config);
 
 protected:

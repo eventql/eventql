@@ -260,12 +260,7 @@ Status MetadataService::findPartition(
     }
   }
 
-  for (const auto& s : partition->servers) {
-    response->add_servers_for_insert(s.server_id);
-  }
-  for (const auto& s : partition->servers_leaving) {
-    response->add_servers_for_insert(s.server_id);
-  }
+  getPartitionWriteTargets(&*partition, response);
 
   cache_->store(request, *response);
   return Status::success();
@@ -354,7 +349,11 @@ Status MetadataService::createFinitePartition(
     response->set_partition_keyrange_end(op.end());
 
     for (const auto& s : new_servers) {
-      response->add_servers_for_insert(s);
+      auto t = response->add_write_targets();
+      t->set_server_id(s);
+      t->set_partition_id(
+          partition_id.data(),
+          partition_id.size());
     }
   } else {
     RefPtr<MetadataFile> file;
@@ -381,10 +380,28 @@ Status MetadataService::createFinitePartition(
     response->set_partition_keyrange_end(partition->end);
 
     for (const auto& s : partition->servers) {
-      response->add_servers_for_insert(s.server_id);
+      auto t = response->add_write_targets();
+      t->set_server_id(s.server_id);
+      t->set_partition_id(
+          partition->partition_id.data(),
+          partition->partition_id.size());
     }
+
     for (const auto& s : partition->servers_leaving) {
-      response->add_servers_for_insert(s.server_id);
+      auto t = response->add_write_targets();
+      t->set_server_id(s.server_id);
+      t->set_partition_id(
+          partition->partition_id.data(),
+          partition->partition_id.size());
+    }
+
+    for (const auto& s : partition->servers_joining) {
+      auto t = response->add_write_targets();
+      t->set_server_id(s.server_id);
+      t->set_partition_id(
+          partition->partition_id.data(),
+          partition->partition_id.size());
+      t->set_strict_only(true);
     }
   }
 
@@ -457,7 +474,11 @@ Status MetadataService::createUserDefinedPartition(
     response->set_partition_keyrange_end(op.begin());
 
     for (const auto& s : new_servers) {
-      response->add_servers_for_insert(s);
+      auto t = response->add_write_targets();
+      t->set_server_id(s);
+      t->set_partition_id(
+          partition_id.data(),
+          partition_id.size());
     }
   } else {
     RefPtr<MetadataFile> file;
@@ -484,10 +505,29 @@ Status MetadataService::createUserDefinedPartition(
     response->set_partition_keyrange_end(partition->end);
 
     for (const auto& s : partition->servers) {
-      response->add_servers_for_insert(s.server_id);
+      auto t = response->add_write_targets();
+      t->set_server_id(s.server_id);
+      t->set_partition_id(
+          partition->partition_id.data(),
+          partition->partition_id.size());
+
     }
+
     for (const auto& s : partition->servers_leaving) {
-      response->add_servers_for_insert(s.server_id);
+      auto t = response->add_write_targets();
+      t->set_server_id(s.server_id);
+      t->set_partition_id(
+          partition->partition_id.data(),
+          partition->partition_id.size());
+    }
+
+    for (const auto& s : partition->servers_joining) {
+      auto t = response->add_write_targets();
+      t->set_server_id(s.server_id);
+      t->set_partition_id(
+          partition->partition_id.data(),
+          partition->partition_id.size());
+      t->set_strict_only(true);
     }
   }
 
@@ -495,6 +535,62 @@ Status MetadataService::createUserDefinedPartition(
   return Status::success();
 }
 
+void getPartitionWriteTargets(
+    const MetadataFile::PartitionMapEntry* partition,
+    PartitionFindResponse* response) {
+  for (const auto& s : partition->servers) {
+    auto t = response->add_write_targets();
+    t->set_server_id(s.server_id);
+    t->set_partition_id(
+        partition->partition_id.data(),
+        partition->partition_id.size());
+
+    if (partition->splitting) {
+      t->set_strict_only(true);
+    }
+  }
+
+  for (const auto& s : partition->servers_leaving) {
+    auto t = response->add_write_targets();
+    t->set_server_id(s.server_id);
+    t->set_partition_id(
+        partition->partition_id.data(),
+        partition->partition_id.size());
+
+    if (partition->splitting) {
+      t->set_strict_only(true);
+    }
+  }
+
+  for (const auto& s : partition->servers_joining) {
+    auto t = response->add_write_targets();
+    t->set_server_id(s.server_id);
+    t->set_partition_id(
+        partition->partition_id.data(),
+        partition->partition_id.size());
+    t->set_strict_only(true);
+  }
+
+  if (partition->splitting) {
+    for (const auto& s : partition->split_servers_low) {
+      auto t = response->add_write_targets();
+      t->set_server_id(s.server_id);
+      t->set_partition_id(
+          partition->split_partition_id_low.data(),
+          partition->split_partition_id_low.size());
+      t->set_keyrange_end(partition->split_point);
+    }
+
+    for (const auto& s : partition->split_servers_high) {
+      auto t = response->add_write_targets();
+      t->set_server_id(s.server_id);
+      t->set_partition_id(
+          partition->split_partition_id_high.data(),
+          partition->split_partition_id_high.size());
+      t->set_keyrange_begin(partition->split_point);
+    }
+  }
+}
 
 } // namespace eventql
 

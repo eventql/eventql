@@ -68,8 +68,8 @@ bool MetadataCache::get(
   response->set_partition_id(iter->partition_id);
   response->set_partition_keyrange_begin(iter->begin);
   response->set_partition_keyrange_end(iter->end);
-  for (const auto& s : iter->servers) {
-    response->add_servers_for_insert(s);
+  for (const auto& t : iter->write_targets) {
+    *response->add_write_targets() = t;
   }
 
   return true;
@@ -102,8 +102,8 @@ void MetadataCache::store(
   p.partition_id = response.partition_id();
   p.begin = response.partition_keyrange_begin();
   p.end = response.partition_keyrange_end();
-  for (const auto& s : response.servers_for_insert()) {
-    p.servers.push_back(s);
+  for (const auto& t : response.write_targets()) {
+    p.write_targets.push_back(t);
   }
 
   auto ks = request.keyspace();

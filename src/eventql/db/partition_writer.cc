@@ -597,15 +597,11 @@ ReplicationState LSMPartitionWriter::fetchReplicationState() const {
 void LSMPartitionWriter::commitReplicationState(const ReplicationState& state) {
   ScopedLock<std::mutex> write_lk(mutex_);
   auto snap = head_->getSnapshot()->clone();
-
-  // N.B. this method is currently not handling conflicts well. if two
-  // conflicting updates to the replication state are performed, some of those
-  // updates might be lost. this is not a correctness-problem but will lead to
-  // increased replication load (since some tasks will need to be redone when
-  // an update is lost). this should be fixed by merging replication states
-  // in a a commutative fashion (max() for each target)
-  *snap->state.mutable_replication_state() = state;
-
+  if (state.uuid() == snap->state.replication_state().uuid()) {
+    mergeReplicationState(snap->state.mutable_replication_state(), &state);
+  } else {
+    *snap->state.mutable_replication_state() = state;
+  }
   snap->writeToDisk();
   head_->setSnapshot(snap);
 }

@@ -284,7 +284,7 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
   </tr>
   <tr>
     <td><b>server.s2s_idle_timeout</b></td>
-    <td>30s</td>
+    <td>10s</td>
     <td>
       How long should the server wait for new data on an idle connection to
       another server. An idle connection is a connection where no data is
@@ -293,7 +293,7 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
   </tr>
   <tr>
     <td><b>server.s2s_pool_max_connections</b></td>
-    <td>256</td>
+    <td>unlimited</td>
     <td>
       Limit how many (internal) connections each server should keep in its
       connection pool. Set this value to zero to turn off connection pooling.
@@ -301,7 +301,7 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
   </tr>
   <tr>
     <td><b>server.s2s_pool_max_connections_per_host</b></td>
-    <td>16</td>
+    <td>unlimited</td>
     <td>
       Limit how many (internal) connections each server should keep in its
       connection pool per each distinct remote endpoint.
@@ -309,7 +309,7 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
   </tr>
   <tr>
     <td><b>server.s2s_pool_linger_timeout</b></td>
-    <td>2s</td>
+    <td>1s</td>
     <td>
       Controls after which time an idle connection is removed (and closed) from
       the connection pool. Unit is microseconds.
