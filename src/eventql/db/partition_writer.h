@@ -79,12 +79,12 @@ protected:
 
 class LSMPartitionWriter : public PartitionWriter {
 public:
-  static const size_t kDefaultPartitionSplitThresholdBytes = 1024llu * 1024llu * 512llu;
-  static const size_t kDefaultPartitionSplitThresholdRows = 2000000llu;
-  static const size_t kMaxArenaRecordsSoft = 1024 * 128;
-  static const size_t kMaxArenaRecordsHard = 1024 * 1024 * 2;
-  static const size_t kMaxLSMTables = 96;
-  static const size_t kSplitRetryInterval = 5 * kMicrosPerSecond;
+  static const size_t kDefaultPartitionSplitThresholdBytes;
+  static const size_t kDefaultPartitionSplitThresholdRows;
+  static const size_t kMaxArenaRecordsSoft;
+  static const size_t kMaxArenaRecordsHard;
+  static const size_t kMaxLSMTables;
+  static const size_t kSplitRetryInterval;
 
   LSMPartitionWriter(
       DatabaseContext* dbctx,

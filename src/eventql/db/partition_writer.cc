@@ -61,6 +61,13 @@ void PartitionWriter::freeze() {
   frozen_ = true;
 }
 
+const size_t LSMPartitionWriter::kDefaultPartitionSplitThresholdBytes = 1024llu * 1024llu * 512llu;
+const size_t LSMPartitionWriter::kDefaultPartitionSplitThresholdRows = 2000000llu;
+const size_t LSMPartitionWriter::kMaxArenaRecordsSoft = 1024 * 128;
+const size_t LSMPartitionWriter::kMaxArenaRecordsHard = 1024 * 1024 * 2;
+const size_t LSMPartitionWriter::kMaxLSMTables = 96;
+const size_t LSMPartitionWriter::kSplitRetryInterval = 5 * kMicrosPerSecond;
+
 LSMPartitionWriter::LSMPartitionWriter(
     DatabaseContext* dbctx,
     RefPtr<Partition> partition,
