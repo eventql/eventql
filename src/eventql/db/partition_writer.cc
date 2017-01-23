@@ -23,6 +23,7 @@
  */
 #include <algorithm>
 #include <assert.h>
+#include <unistd.h>
 #include <eventql/util/io/fileutil.h>
 #include <eventql/db/partition.h>
 #include <eventql/db/partition_writer.h>
@@ -32,6 +33,7 @@
 #include <eventql/db/server_allocator.h>
 #include <eventql/db/metadata_operations.pb.h>
 #include <eventql/db/metadata_coordinator.h>
+#include <eventql/db/metadata_client.h>
 #include <eventql/db/compaction_worker.h>
 #include <eventql/db/replication_state.h>
 #include <eventql/util/logging.h>
@@ -59,6 +61,13 @@ void PartitionWriter::freeze() {
   frozen_ = true;
 }
 
+const size_t LSMPartitionWriter::kDefaultPartitionSplitThresholdBytes = 1024llu * 1024llu * 512llu;
+const size_t LSMPartitionWriter::kDefaultPartitionSplitThresholdRows = 2000000llu;
+const size_t LSMPartitionWriter::kMaxArenaRecordsSoft = 1024 * 128;
+const size_t LSMPartitionWriter::kMaxArenaRecordsHard = 1024 * 1024 * 2;
+const size_t LSMPartitionWriter::kMaxLSMTables = 96;
+const size_t LSMPartitionWriter::kSplitRetryInterval = 5 * kMicrosPerSecond;
+
 LSMPartitionWriter::LSMPartitionWriter(
     DatabaseContext* dbctx,
     RefPtr<Partition> partition,
@@ -71,13 +80,25 @@ LSMPartitionWriter::LSMPartitionWriter(
             dbctx->lsm_index_cache)),
     dbctx_(dbctx),
     partition_split_threshold_bytes_(kDefaultPartitionSplitThresholdBytes),
-    partition_split_threshold_rows_(kDefaultPartitionSplitThresholdRows) {
+    partition_split_threshold_rows_(kDefaultPartitionSplitThresholdRows),
+    split_started_(false),
+    split_cancelled_(false) {
   auto table = partition_->getTable();
   auto table_cfg = table->config();
 
   if (table_cfg.config().override_partition_split_threshold() > 0) {
     partition_split_threshold_bytes_ =
         table_cfg.config().override_partition_split_threshold();
+  }
+}
+
+LSMPartitionWriter::~LSMPartitionWriter() {
+  ScopedLock<std::mutex> split_lk(split_mutex_);
+  if (split_started_) {
+    split_cancelled_ = true;
+    split_cv_.notify_all();
+    split_lk.unlock();
+    split_thread_.join();
   }
 }
 
@@ -440,12 +461,17 @@ bool LSMPartitionWriter::needsSplit() const {
   }
 
   auto snap = head_->getSnapshot();
-  if (snap->state.is_splitting()) {
+  if (snap->state.is_splitting() || split_started_) {
     return false;
   }
 
-  if (snap->state.lifecycle_state() != PDISCOVERY_SERVE) {
-    return false;
+  switch (snap->state.lifecycle_state()) {
+    case PDISCOVERY_LOAD:
+    case PDISCOVERY_SERVE:
+      break;
+    case PDISCOVERY_UNLOAD:
+    case PDISCOVERY_UNKNOWN:
+      return false;
   }
 
   size_t size_bytes = 0;
@@ -462,17 +488,13 @@ bool LSMPartitionWriter::needsSplit() const {
 
 Status LSMPartitionWriter::split() {
   ScopedLock<std::mutex> split_lk(split_mutex_, std::defer_lock);
-  if (!split_lk.try_lock()) {
+  if (!split_lk.try_lock() || split_started_) {
     return Status(eConcurrentModificationError, "split is already running");
   }
 
   auto snap = head_->getSnapshot();
   auto table = partition_->getTable();
   auto keyspace = table->getKeyspaceType();
-
-  if (snap->state.lifecycle_state() != PDISCOVERY_SERVE) {
-    return Status(eIllegalArgumentError, "can't split non-serving partition");
-  }
 
   String midpoint;
   {
@@ -505,6 +527,53 @@ Status LSMPartitionWriter::split() {
   logInfo(
       "evqld",
       "Splitting partition $0/$1/$2 at '$3'",
+      snap->state.tsdb_namespace(),
+      snap->state.table_key(),
+      snap->key.toString(),
+      midpoint);
+
+  split_started_ = true;
+  split_thread_ = std::thread([this, midpoint] {
+    while (!commitSplit(midpoint).isSuccess()) {
+      ScopedLock<std::mutex> lk(split_mutex_);
+      if (split_cancelled_) {
+        return;
+      }
+
+      split_cv_.wait_for(lk, std::chrono::microseconds(kSplitRetryInterval));
+      if (split_cancelled_) {
+        return;
+      }
+    }
+  });
+
+  return Status::success();
+}
+
+Status LSMPartitionWriter::commitSplit(const std::string& midpoint) {
+  auto snap = head_->getSnapshot();
+  auto table = partition_->getTable();
+  auto keyspace = table->getKeyspaceType();
+
+  if (snap->state.is_splitting()) {
+    return Status::success();
+  }
+
+  switch (snap->state.lifecycle_state()) {
+    case PDISCOVERY_LOAD:
+    case PDISCOVERY_SERVE:
+      break;
+    case PDISCOVERY_UNLOAD:
+    case PDISCOVERY_UNKNOWN:
+      return Status(eSuccess);
+  }
+
+  // FIXME make explicit discovery request and check if we're already splitting
+  // to work around local metadata update delay?
+
+  logInfo(
+      "evqld",
+      "Comitting partition split for $0/$1/$2 at '$3'",
       snap->state.tsdb_namespace(),
       snap->state.table_key(),
       snap->key.toString(),
@@ -564,6 +633,7 @@ Status LSMPartitionWriter::split() {
   auto table_config = dbctx_->config_directory->getTableConfig(
       snap->state.tsdb_namespace(),
       snap->state.table_key());
+
   MetadataOperation envelope(
       snap->state.tsdb_namespace(),
       snap->state.table_key(),

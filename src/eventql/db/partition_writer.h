@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #pragma once
+#include <thread>
 #include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
@@ -78,16 +79,19 @@ protected:
 
 class LSMPartitionWriter : public PartitionWriter {
 public:
-  static const size_t kDefaultPartitionSplitThresholdBytes = 1024llu * 1024llu * 512llu;
-  static const size_t kDefaultPartitionSplitThresholdRows = 2000000llu;
-  static const size_t kMaxArenaRecordsSoft = 1024 * 128;
-  static const size_t kMaxArenaRecordsHard = 1024 * 1024 * 2;
-  static const size_t kMaxLSMTables = 96;
+  static const size_t kDefaultPartitionSplitThresholdBytes;
+  static const size_t kDefaultPartitionSplitThresholdRows;
+  static const size_t kMaxArenaRecordsSoft;
+  static const size_t kMaxArenaRecordsHard;
+  static const size_t kMaxLSMTables;
+  static const size_t kSplitRetryInterval;
 
   LSMPartitionWriter(
       DatabaseContext* dbctx,
       RefPtr<Partition> partition,
       PartitionSnapshotRef* head);
+
+  ~LSMPartitionWriter();
 
   Set<SHA1Hash> insertRecords(
       const ShreddedRecordList& records) override;
@@ -104,6 +108,7 @@ public:
 
   bool needsSplit() const;
   Status split();
+  Status commitSplit(const std::string& midpoint);
 
   Status applyMetadataChange(
       const PartitionDiscoveryResponse& discovery_info) override;
@@ -123,10 +128,14 @@ protected:
   DatabaseContext* dbctx_;
   size_t partition_split_threshold_bytes_;
   size_t partition_split_threshold_rows_;
+  std::atomic<bool> split_started_;
   std::mutex commit_mutex_;
   std::mutex compaction_mutex_;
   std::mutex metadata_mutex_;
   std::mutex split_mutex_;
+  std::thread split_thread_;
+  std::atomic<bool> split_cancelled_;
+  std::condition_variable split_cv_;
 };
 
 } // namespace tdsb
