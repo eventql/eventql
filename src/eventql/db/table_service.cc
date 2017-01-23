@@ -1048,7 +1048,7 @@ ReturnCode TableService::insertRecords(
   if (nconfirmations >= required_confirmations) {
     return ReturnCode::success();
   } else {
-    return ReturnCode::error(
+    return ReturnCode::errorf(
         "ERUNTIME",
         "couldn't perform enough replica writes for the requested consistency "
         "level; only $0 out of $1 (required) writes succeeded",
