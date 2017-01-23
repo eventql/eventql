@@ -149,10 +149,21 @@ Status MetadataOperation::performSplitPartition(
       opdata.partition_id().size());
 
   bool success = false;
+  bool is_subsplit = false;
+  bool is_subsplit_low = false;
+  bool is_subsplit_high = false;
   auto pmap = input.getPartitionMap();
   auto iter = pmap.begin();
   for (; iter != pmap.end(); ++iter) {
-    if (iter->partition_id != partition_id) {
+    if (iter->partition_id == partition_id) {
+      /* fallthrough */
+    } else if (iter->splitting && iter->split_partition_id_low == partition_id) {
+      is_subsplit = true;
+      is_subsplit_low = true;
+    } else if (iter->splitting && iter->split_partition_id_high == partition_id) {
+      is_subsplit = true;
+      is_subsplit_high = true;
+    } else {
       continue;
     }
 
@@ -166,18 +177,8 @@ Status MetadataOperation::performSplitPartition(
       }
     }
 
-    if (iter->splitting) {
+    if (iter->splitting && !is_subsplit) {
       return Status(eIllegalStateError, "partition is already splitting");
-    }
-
-    if (!iter->begin.empty() &&
-        input.compareKeys(opdata.split_point(), iter->begin) < 0) {
-      return Status(eIllegalArgumentError, "split point is out of range");
-    }
-
-    if (!iter_end.empty() &&
-        input.compareKeys(opdata.split_point(), iter_end) >= 0) {
-      return Status(eIllegalArgumentError, "split point is out of range");
     }
 
     if (opdata.split_servers_low().size() == 0 ||
@@ -185,73 +186,17 @@ Status MetadataOperation::performSplitPartition(
       return Status(eIllegalArgumentError, "split server list can't be empty");
     }
 
-    if (opdata.finalize_immediately()) {
-      MetadataFile::PartitionMapEntry lower_split;
-      {
-        lower_split.begin = iter->begin;
-        lower_split.splitting = false;
-        lower_split.partition_id = SHA1Hash(
-            opdata.split_partition_id_low().data(),
-            opdata.split_partition_id_low().size());
-
-        if (input.hasFinitePartitions()) {
-          lower_split.end = opdata.split_point();
-        }
-
-        for (const auto& s : opdata.split_servers_low()) {
-          MetadataFile::PartitionPlacement p;
-          p.server_id = s;
-          p.placement_id = opdata.placement_id();
-          lower_split.servers.emplace_back(p);
-        }
-      }
-
-      MetadataFile::PartitionMapEntry higher_split;
-      {
-        higher_split.begin = opdata.split_point();
-        higher_split.splitting = false;
-        higher_split.partition_id = SHA1Hash(
-            opdata.split_partition_id_high().data(),
-            opdata.split_partition_id_high().size());
-
-        if (input.hasFinitePartitions()) {
-          higher_split.end = iter->end;
-        }
-
-        for (const auto& s : opdata.split_servers_high()) {
-          MetadataFile::PartitionPlacement p;
-          p.server_id = s;
-          p.placement_id = opdata.placement_id();
-          higher_split.servers.emplace_back(p);
-        }
-      }
-
-      iter = pmap.erase(iter);
-      iter = pmap.insert(iter, higher_split);
-      iter = pmap.insert(iter, lower_split);
+    auto rc = Status::success();
+    if (is_subsplit_low) {
+      rc = performSplitPartitionLow(opdata, input, &pmap, iter, iter_end);
+    } else if (is_subsplit_high) {
+      rc = performSplitPartitionHigh(opdata, input, &pmap, iter, iter_end);
     } else {
-      iter->splitting = true;
-      iter->split_point = opdata.split_point();
-      iter->split_partition_id_low = SHA1Hash(
-          opdata.split_partition_id_low().data(),
-          opdata.split_partition_id_low().size());
-      iter->split_partition_id_high = SHA1Hash(
-          opdata.split_partition_id_high().data(),
-          opdata.split_partition_id_high().size());
+      rc = performSplitPartitionUnary(opdata, input, &pmap, iter, iter_end);
+    }
 
-      for (const auto& s : opdata.split_servers_low()) {
-        MetadataFile::PartitionPlacement p;
-        p.server_id = s;
-        p.placement_id = opdata.placement_id();
-        iter->split_servers_low.emplace_back(p);
-      }
-
-      for (const auto& s : opdata.split_servers_high()) {
-        MetadataFile::PartitionPlacement p;
-        p.server_id = s;
-        p.placement_id = opdata.placement_id();
-        iter->split_servers_high.emplace_back(p);
-      }
+    if (!rc.isSuccess()) {
+      return rc;
     }
 
     success = true;
@@ -264,6 +209,244 @@ Status MetadataOperation::performSplitPartition(
   } else {
     return Status(eNotFoundError, "partition not found");
   }
+}
+
+Status MetadataOperation::performSplitPartitionUnary(
+    const SplitPartitionOperation& opdata,
+    const MetadataFile& input,
+    MetadataFile::PartitionMapType* pmap,
+    MetadataFile::PartitionMapMutableIter iter,
+    const std::string& iter_end) const {
+  if (!iter->begin.empty() &&
+      input.compareKeys(opdata.split_point(), iter->begin) < 0) {
+    return Status(eIllegalArgumentError, "split point is out of range");
+  }
+
+  if (!iter_end.empty() &&
+      input.compareKeys(opdata.split_point(), iter_end) >= 0) {
+    return Status(eIllegalArgumentError, "split point is out of range");
+  }
+
+  if (opdata.finalize_immediately()) {
+    MetadataFile::PartitionMapEntry lower_split;
+    {
+      lower_split.begin = iter->begin;
+      lower_split.splitting = false;
+      lower_split.partition_id = SHA1Hash(
+          opdata.split_partition_id_low().data(),
+          opdata.split_partition_id_low().size());
+
+      if (input.hasFinitePartitions()) {
+        lower_split.end = opdata.split_point();
+      }
+
+      for (const auto& s : opdata.split_servers_low()) {
+        MetadataFile::PartitionPlacement p;
+        p.server_id = s;
+        p.placement_id = opdata.placement_id();
+        lower_split.servers.emplace_back(p);
+      }
+    }
+
+    MetadataFile::PartitionMapEntry higher_split;
+    {
+      higher_split.begin = opdata.split_point();
+      higher_split.splitting = false;
+      higher_split.partition_id = SHA1Hash(
+          opdata.split_partition_id_high().data(),
+          opdata.split_partition_id_high().size());
+
+      if (input.hasFinitePartitions()) {
+        higher_split.end = iter->end;
+      }
+
+      for (const auto& s : opdata.split_servers_high()) {
+        MetadataFile::PartitionPlacement p;
+        p.server_id = s;
+        p.placement_id = opdata.placement_id();
+        higher_split.servers.emplace_back(p);
+      }
+    }
+
+    iter = pmap->erase(iter);
+    iter = pmap->insert(iter, higher_split);
+    iter = pmap->insert(iter, lower_split);
+  } else {
+    iter->splitting = true;
+    iter->split_point = opdata.split_point();
+    iter->split_partition_id_low = SHA1Hash(
+        opdata.split_partition_id_low().data(),
+        opdata.split_partition_id_low().size());
+    iter->split_partition_id_high = SHA1Hash(
+        opdata.split_partition_id_high().data(),
+        opdata.split_partition_id_high().size());
+
+    for (const auto& s : opdata.split_servers_low()) {
+      MetadataFile::PartitionPlacement p;
+      p.server_id = s;
+      p.placement_id = opdata.placement_id();
+      iter->split_servers_low.emplace_back(p);
+    }
+
+    for (const auto& s : opdata.split_servers_high()) {
+      MetadataFile::PartitionPlacement p;
+      p.server_id = s;
+      p.placement_id = opdata.placement_id();
+      iter->split_servers_high.emplace_back(p);
+    }
+  }
+
+  return Status::success();
+}
+
+Status MetadataOperation::performSplitPartitionLow(
+    const SplitPartitionOperation& opdata,
+    const MetadataFile& input,
+    MetadataFile::PartitionMapType* pmap,
+    MetadataFile::PartitionMapMutableIter iter,
+    const std::string& iter_end) const {
+  if (!iter->splitting) {
+    return Status(eIllegalStateError, "partition is not splitting");
+  }
+
+  if (!iter->begin.empty() &&
+      input.compareKeys(opdata.split_point(), iter->begin) < 0) {
+    return Status(eIllegalArgumentError, "split point is out of range");
+  }
+
+  if (!iter_end.empty() &&
+      input.compareKeys(opdata.split_point(), iter->split_point) >= 0) {
+    return Status(eIllegalArgumentError, "split point is out of range");
+  }
+
+  MetadataFile::PartitionMapEntry lower_split;
+  MetadataFile::PartitionMapEntry higher_split;
+
+  {
+    lower_split.partition_id = iter->split_partition_id_low;
+    lower_split.begin = iter->begin;
+    if (input.hasFinitePartitions()) {
+      lower_split.end = iter->split_point;
+    }
+    for (const auto& s : iter->split_servers_low) {
+      lower_split.servers.emplace_back(s);
+    }
+
+    lower_split.splitting = true;
+    lower_split.split_point = opdata.split_point();
+    lower_split.split_partition_id_low = SHA1Hash(
+        opdata.split_partition_id_low().data(),
+        opdata.split_partition_id_low().size());
+    lower_split.split_partition_id_high = SHA1Hash(
+        opdata.split_partition_id_high().data(),
+        opdata.split_partition_id_high().size());
+
+    for (const auto& s : opdata.split_servers_low()) {
+      MetadataFile::PartitionPlacement p;
+      p.server_id = s;
+      p.placement_id = opdata.placement_id();
+      lower_split.split_servers_low.emplace_back(p);
+    }
+
+    for (const auto& s : opdata.split_servers_high()) {
+      MetadataFile::PartitionPlacement p;
+      p.server_id = s;
+      p.placement_id = opdata.placement_id();
+      lower_split.split_servers_high.emplace_back(p);
+    }
+  }
+
+  {
+    higher_split.partition_id = iter->split_partition_id_high;
+    higher_split.begin = iter->split_point;
+    higher_split.splitting = false;
+    if (input.hasFinitePartitions()) {
+      higher_split.end = iter->end;
+    }
+    for (const auto& s : iter->split_servers_high) {
+      higher_split.servers.emplace_back(s);
+    }
+  }
+
+  iter = pmap->erase(iter);
+  iter = pmap->insert(iter, higher_split);
+  iter = pmap->insert(iter, lower_split);
+  return Status::success();
+}
+
+Status MetadataOperation::performSplitPartitionHigh(
+    const SplitPartitionOperation& opdata,
+    const MetadataFile& input,
+    MetadataFile::PartitionMapType* pmap,
+    MetadataFile::PartitionMapMutableIter iter,
+    const std::string& iter_end) const {
+  if (!iter->splitting) {
+    return Status(eIllegalStateError, "partition is not splitting");
+  }
+
+  if (!iter->begin.empty() &&
+      input.compareKeys(opdata.split_point(), iter->split_point) < 0) {
+    return Status(eIllegalArgumentError, "split point is out of range");
+  }
+
+  if (!iter_end.empty() &&
+      input.compareKeys(opdata.split_point(), iter_end) >= 0) {
+    return Status(eIllegalArgumentError, "split point is out of range");
+  }
+
+  MetadataFile::PartitionMapEntry lower_split;
+  MetadataFile::PartitionMapEntry higher_split;
+
+  {
+    lower_split.partition_id = iter->split_partition_id_low;
+    lower_split.splitting = false;
+    lower_split.begin = iter->begin;
+    if (input.hasFinitePartitions()) {
+      lower_split.end = iter->split_point;
+    }
+    for (const auto& s : iter->split_servers_low) {
+      lower_split.servers.emplace_back(s);
+    }
+  }
+
+  {
+    higher_split.partition_id = iter->split_partition_id_high;
+    higher_split.begin = iter->split_point;
+    if (input.hasFinitePartitions()) {
+      higher_split.end = iter->end;
+    }
+    for (const auto& s : iter->split_servers_high) {
+      higher_split.servers.emplace_back(s);
+    }
+
+    higher_split.splitting = true;
+    higher_split.split_point = opdata.split_point();
+    higher_split.split_partition_id_low = SHA1Hash(
+        opdata.split_partition_id_low().data(),
+        opdata.split_partition_id_low().size());
+    higher_split.split_partition_id_high = SHA1Hash(
+        opdata.split_partition_id_high().data(),
+        opdata.split_partition_id_high().size());
+
+    for (const auto& s : opdata.split_servers_low()) {
+      MetadataFile::PartitionPlacement p;
+      p.server_id = s;
+      p.placement_id = opdata.placement_id();
+      higher_split.split_servers_low.emplace_back(p);
+    }
+
+    for (const auto& s : opdata.split_servers_high()) {
+      MetadataFile::PartitionPlacement p;
+      p.server_id = s;
+      p.placement_id = opdata.placement_id();
+      higher_split.split_servers_high.emplace_back(p);
+    }
+  }
+
+  iter = pmap->erase(iter);
+  iter = pmap->insert(iter, higher_split);
+  iter = pmap->insert(iter, lower_split);
+  return Status::success();
 }
 
 Status MetadataOperation::performFinalizeSplit(
