@@ -690,7 +690,7 @@ Status LSMPartitionWriter::applyMetadataChange(
       discovery_info.DebugString());
 
   if (snap->state.last_metadata_txnseq() >= discovery_info.txnseq()) {
-    return Status(eConcurrentModificationError, "version conflict");
+    return Status::success();
   }
 
   // if we're alreading unloading this partition, fast forward any new
