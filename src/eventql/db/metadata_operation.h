@@ -66,6 +66,27 @@ protected:
       const MetadataFile& input,
       Vector<MetadataFile::PartitionMapEntry>* output) const;
 
+  Status performSplitPartitionUnary(
+      const SplitPartitionOperation& opdata,
+      const MetadataFile& input,
+      MetadataFile::PartitionMapType* pmap,
+      MetadataFile::PartitionMapMutableIter iter,
+      const std::string& iter_end) const;
+
+  Status performSplitPartitionLow(
+      const SplitPartitionOperation& opdata,
+      const MetadataFile& input,
+      MetadataFile::PartitionMapType* pmap,
+      MetadataFile::PartitionMapMutableIter iter,
+      const std::string& iter_end) const;
+
+  Status performSplitPartitionHigh(
+      const SplitPartitionOperation& opdata,
+      const MetadataFile& input,
+      MetadataFile::PartitionMapType* pmap,
+      MetadataFile::PartitionMapMutableIter iter,
+      const std::string& iter_end) const;
+
   Status performFinalizeSplit(
       const MetadataFile& input,
       Vector<MetadataFile::PartitionMapEntry>* output) const;

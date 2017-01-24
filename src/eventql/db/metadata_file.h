@@ -64,8 +64,11 @@ public:
     Vector<PartitionPlacement> split_servers_high;
   };
 
+  using PartitionMapType = Vector<PartitionMapEntry>;
   using PartitionMapIter =
       Vector<MetadataFile::PartitionMapEntry>::const_iterator;
+  using PartitionMapMutableIter =
+      Vector<MetadataFile::PartitionMapEntry>::iterator;
 
   MetadataFile();
   MetadataFile(
@@ -80,7 +83,7 @@ public:
 
   KeyspaceType getKeyspaceType() const;
 
-  const Vector<PartitionMapEntry>& getPartitionMap() const;
+  const PartitionMapType& getPartitionMap() const;
   PartitionMapIter getPartitionMapBegin() const;
   PartitionMapIter getPartitionMapEnd() const;
 
