@@ -41,3 +41,8 @@
 .evql-chart circle {
   fill: #712093;
 }
+
+.evql-chart rect.bar {
+  fill: #712093;
+}
+

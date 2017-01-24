@@ -88,7 +88,14 @@ EventQL.ChartPlotter = function(elem, params) {
     /* fit the y axis labels */
     y_label_width =
         7 * RENDER_SCALE_FACTOR *
-        Math.max.apply(null, y_labels.map(function(l) { return l.length; }));
+        Math.max.apply(null, y_labels.map(function(l) { return l.toString().length; }));
+
+    /* fit the y axis */
+    if (params.axis_y_position == "inside") {
+
+    } else {
+      canvas_margin_left = y_label_width;
+    }
   }
 
   function prepareXAxis(values) {
@@ -130,10 +137,18 @@ EventQL.ChartPlotter = function(elem, params) {
     drawXAxis(svg);
     drawYAxis(svg);
 
-    drawLine(x_values, y_values, svg);
+    switch (params.type) {
+      case "bar":
+        drawBars(x_values, y_values, svg);
+        break;
 
-    if (params.points) {
-      drawPoints(x_values, y_values, svg);
+      case "line":
+      default:
+        drawLine(x_values, y_values, svg);
+        if (params.points) {
+          drawPoints(x_values, y_values, svg);
+        }
+        break;
     }
 
     svg.svg += "</svg>"
@@ -223,15 +238,22 @@ EventQL.ChartPlotter = function(elem, params) {
           tick_y_screen,
           "grid");
 
-      if (i == y_ticks_count) {
+      if (params.axis_y_position == "inside" && (i == y_ticks_count)) {
         /* skip text */
-      } else {
+      } else if (params.axis_y_position == "inside") {
         var text_padding = 2 * RENDER_SCALE_FACTOR;
         c.drawText(
             canvas_margin_left + text_padding,
             tick_y_screen,
             y_labels[i],
             "inside");
+      } else {
+        var text_padding = 5 * RENDER_SCALE_FACTOR;
+        c.drawText(
+            canvas_margin_left - text_padding,
+            tick_y_screen,
+            y_labels[i],
+            "outside");
       }
     }
 
@@ -269,6 +291,22 @@ EventQL.ChartPlotter = function(elem, params) {
 
       c.drawPoint(x_screen, y_screen, point_size, "point");
     }
+  }
+
+  function drawBars(x_values, y_values, svg) {
+    var bar_padding = 20;
+    var bar_width = (width - (canvas_margin_left + canvas_margin_right) - (bar_padding * (y_values.length + 1))) / y_values.length;
+
+    for (var i = 0; i < y_values.length; i++) {
+      var y = y_domain.convertDomainToScreen(y_values[i]);
+      var bar_height = y * (height - (canvas_margin_bottom + canvas_margin_top)) + canvas_margin_bottom;
+      var y_screen = height - (y * (height - (canvas_margin_bottom + canvas_margin_top)) + canvas_margin_bottom);
+
+      var x_screen = canvas_margin_left + i * bar_width + (i + 1) * bar_padding;
+
+      svg.drawRect(x_screen, y_screen, bar_width, bar_height, "bar");
+    }
+
   }
 
 };
