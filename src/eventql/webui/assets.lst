@@ -18,6 +18,8 @@ widgets/codeeditor/codemirror_sql.js
 widgets/chart/chart.css
 widgets/chart/chart_plot.js
 widgets/chart/linear_domain.js
+widgets/chart/time_domain.js
+widgets/chart/categorical_domain.js
 widgets/tooltip/tooltip.css
 widgets/tooltip/tooltip.js
 widgets/query_progress/query_progress.css
@@ -36,6 +38,7 @@ views/sql_editor/result_list.js
 views/sql_editor/table.css
 views/sql_editor/table.html
 views/sql_editor/table.js
+views/sql_editor/chart_builder.js
 views/sql_editor/chart.css
 views/sql_editor/chart.html
 views/sql_editor/chart.js

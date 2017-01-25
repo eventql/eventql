@@ -37,3 +37,7 @@ ArrayUtil.setDifference = function(b, a) {
 
   return diff;
 }
+
+ArrayUtil.contains = function(array, value) {
+  return (array.indexOf(value) > -1);
+};

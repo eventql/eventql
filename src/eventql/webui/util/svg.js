@@ -84,6 +84,17 @@ EventQL.SVGHelper = function() {
         " />";
   };
 
+  this.drawRect = function(x, y, width, height, classes) {
+    this.svg +=
+        "<rect" +
+            xmlAttr("x", x) +
+            xmlAttr("y", y) +
+            xmlAttr("width", width) +
+            xmlAttr("height", height) +
+            xmlAttr("class", classes) +
+        " />";
+  };
+
   function xmlAttr(name, value) {
     return " " + name + "='" +  value + "'"; // FIXME WARNING: does not escape...
   }

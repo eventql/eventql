@@ -99,28 +99,29 @@ EventQL.ChartPlotter = function(elem, params) {
   }
 
   function prepareXAxis(values) {
-    x_ticks_count = 12;
-    x_domain = new EventQL.ChartPlotter.LinearDomain;
-    x_domain.findMinMax(values);
+    if (params.type == "bar") {
+      x_domain = new EventQL.ChartPlotter.CategoricalDomain;
+      values.forEach(function(value) {
+        x_domain.addCategory(value);
+      });
 
-    for (var i = 0; i <= x_ticks_count ; i++) {
-      var label = x_domain.convertScreenToDomain(i / x_ticks_count);
-      if (params.timeseries) {
-        label = Formatter.formatDate(label);
-      }
-
-      x_labels.push(label);
+    } else {
+      //FIXME check type
+      x_domain = new EventQL.ChartPlotter.TimeDomain;
+      x_domain.findMinMax(values);
     }
   }
 
   function prepareYAxis(values) {
     y_ticks_count = 5;
-    y_domain = new EventQL.ChartPlotter.LinearDomain;
+    y_domain = new EventQL.ChartPlotter.ContinuousDomain;
+    y_domain.setMin(0);
     y_domain.findMinMax(values);
 
     /* set up y axis labels */
     for (var i = 0; i <= y_ticks_count ; i++) {
-      y_labels.push(y_domain.convertScreenToDomain(1.0 - (i / y_ticks_count)));
+      var value = y_domain.convertScreenToDomain(1.0 - (i / y_ticks_count));
+      y_labels.push(Formatter.formatNumber(value));
     }
   }
 
@@ -200,11 +201,15 @@ EventQL.ChartPlotter = function(elem, params) {
   function drawXAxis(c) {
     c.svg += "<g class='axis x'>";
 
+    var labels = x_domain.getLabels();
+
     /** render tick/grid **/
     var text_padding = 6 * RENDER_SCALE_FACTOR;
-    for (var i = 1; i < x_ticks_count; i++) {
-      var tick_x_domain = (i / x_ticks_count);
-      var tick_x_screen = tick_x_domain * (width - (canvas_margin_left + canvas_margin_right)) + canvas_margin_left;
+    for (var i = 0; i < labels.length; i++) {
+      var label = labels[i];
+
+      var tick_x_screen = label[0] * (width - (canvas_margin_left + canvas_margin_right)) + canvas_margin_left;
+
 
       c.drawLine(
           tick_x_screen,
@@ -217,7 +222,7 @@ EventQL.ChartPlotter = function(elem, params) {
         c.drawText(
             tick_x_screen,
             (height - canvas_margin_bottom) + text_padding,
-            x_labels[i]);
+            label[1]);
     }
 
     c.svg += "</g>";
@@ -299,14 +304,13 @@ EventQL.ChartPlotter = function(elem, params) {
 
     for (var i = 0; i < y_values.length; i++) {
       var y = y_domain.convertDomainToScreen(y_values[i]);
-      var bar_height = y * (height - (canvas_margin_bottom + canvas_margin_top)) + canvas_margin_bottom;
+      var bar_height = y * (height - (canvas_margin_bottom + canvas_margin_top));
       var y_screen = height - (y * (height - (canvas_margin_bottom + canvas_margin_top)) + canvas_margin_bottom);
 
       var x_screen = canvas_margin_left + i * bar_width + (i + 1) * bar_padding;
 
       svg.drawRect(x_screen, y_screen, bar_width, bar_height, "bar");
     }
-
   }
 
 };

@@ -1,7 +1,6 @@
 /**
  * Copyright (c) 2017 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@eventql.io>
  *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
@@ -25,7 +24,7 @@
 
 EventQL.ChartPlotter = this.EventQL.ChartPlotter || {};
 
-EventQL.ChartPlotter.ContinuousDomain = function(opts) {
+EventQL.ChartPlotter.TimeDomain = function(opts) {
   'use strict';
 
   const DEFAULT_NUM_TICKS = 12;
@@ -39,11 +38,11 @@ EventQL.ChartPlotter.ContinuousDomain = function(opts) {
   }
 
   this.setMin = function(min_value) {
-    min = Math.min(min, min_value);
+    min = min_value;
   }
 
   this.setMax = function(max_value) {
-    max = Math.max(max, max_value);
+    max = max_value;
   }
 
   this.convertDomainToScreen = function(input_val) {
@@ -85,11 +84,13 @@ EventQL.ChartPlotter.ContinuousDomain = function(opts) {
 
     for (var i = 0; i < ticks.length; i++) {
       //TODO format
-      labels.push(ticks[i], this.convertScreenToDomain(ticks[i]));
+      var label = this.convertScreenToDomain(ticks[i]);
+      labels.push([ticks[i], Formatter.formatDate(label)]);
     }
 
     return labels;
   };
 
 };
+
 

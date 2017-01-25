@@ -22,28 +22,43 @@
  * code of your own applications
  */
 
-Formatter = this.Formatter || {};
+EventQL.ChartPlotter = this.EventQL.ChartPlotter || {};
 
-Formatter.DefaultTimeFormat = "%Y-%m-%d %H:%M:%S";
+EventQL.ChartPlotter.CategoricalDomain = function(opts) {
+  'use strict';
 
-Formatter.formatDate = function(timestamp, format) {
-  if (!format) {
-    format = Formatter.DefaultTimeFormat;
-  }
+  var categories = [];
 
-  var d = new Date(timestamp);
-  var formatted = format;
-  formatted = formatted.replace("%Y", d.getFullYear());
-  formatted = formatted.replace("%m", d.getMonth() + 1);
-  formatted = formatted.replace("%d", d.getDate());
-  formatted = formatted.replace("%H", d.getHours());
-  formatted = formatted.replace("%M", d.getMinutes());
-  formatted = formatted.replace("%S", d.getSeconds());
+  this.addCategory = function(category) {
+    if (!ArrayUtil.contains(categories, category)) {
+      categories.push(category);
+    }
+  };
 
-  return formatted;
-}
+  this.convertDomainToScreen = function(value) {
+    var index = categories.length - categories.indexOf(value);
 
-Formatter.formatNumber = function(num) {
-  //FIXME
-  return num.toFixed(1);
-}
+    if (index < 1) {
+      //throw new Error("can't scale value");
+    }
+
+    var cardinality = categories.length;
+    var scaled = (index - 0.5) / cardinality;
+    return scaled;
+  };
+
+  this.getLabels = function() {
+    var labels = [];
+
+    for (var i = 0; i < categories.length; i++) {
+      var point = this.convertDomainToScreen(categories[i]);
+      labels.push([point, categories[i]]);
+    }
+
+    return labels;
+  };
+
+};
+
+
+
