@@ -25,6 +25,8 @@
 EventQL.SQLConsole = function(elem, params) {
   'use strict';
 
+  const MAX_HISTORY_LENGTH = 100;
+
   var query_mgr = EventSourceHandler();
   var history = [];
 
@@ -36,7 +38,7 @@ EventQL.SQLConsole = function(elem, params) {
 
     initPrompt();
     displayBanner();
-    //fetchHistory();
+    fetchHistory();
   };
 
   this.destroy = function() {
@@ -61,7 +63,7 @@ EventQL.SQLConsole = function(elem, params) {
       }
 
       history_idx++;
-      prmpt.value = history[history.length - history_idx].content;
+      prmpt.value = history[history.length - history_idx];
       resize_input();
 
       var cursor_pos = prmpt.value.indexOf("\n");
@@ -81,7 +83,7 @@ EventQL.SQLConsole = function(elem, params) {
       if (history_idx == 0) {
         prmpt.value = "";
       } else {
-        prmpt.value = history[history.length - history_idx].content;
+        prmpt.value = history[history.length - history_idx];
       }
 
       resize_input();
@@ -96,17 +98,14 @@ EventQL.SQLConsole = function(elem, params) {
 
       executeQuery(query_sql);
 
-      if (history.length == 0 ||
-          history[history.length - 1].content != query_sql) {
-        history.push({
-          content: query_sql,
-          time: (new Date()).getTime()
-        });
+      if (history.length == 0 || history[history.length - 1] != query_sql) {
+        history.push(query_sql);
 
-       // params.app.api_stubs.workspace.appendToConsoleHistory({
-       //   project_id: params.project_id,
-       //   content: query_sql
-       // });
+        if (history.length >= MAX_HISTORY_LENGTH) {
+          history.shift();
+        }
+
+        localStorage.setItem("console_history", JSON.stringify(history));
       }
 
       history_idx = 0;
@@ -260,22 +259,10 @@ EventQL.SQLConsole = function(elem, params) {
   }
 
   var fetchHistory = function() {
-    params.app.api_stubs.workspace.fetchConsoleHistory({
-      project_id: params.project_id
-    }, function(r) {
-      if (r.success) {
-        history = r.result.history.reverse();
-      } else {
-        var errmsg = document.createElement("div");
-        var errmsg_p = document.createElement("p");
-        errmsg.appendChild(errmsg_p);
-        errmsg_p.innerHTML = "Unable to fetch history &mdash; old entries will not be available";
-        errmsg_p.classList.add("warn");
-        appendConsoleEntry(errmsg);
-      }
-
-      elem.querySelector(".loader").classList.add("hidden");
-    });
+    var local_history = localStorage.getItem("console_history");
+    if (local_history) {
+      history = JSON.parse(local_history);
+    }
   };
 
   var clearConsole = function() {

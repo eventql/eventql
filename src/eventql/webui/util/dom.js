@@ -69,5 +69,38 @@ DOMUtil.escapeXML = function(str) {
       .replace(/</g, "&lt;")
       .replace(/'/g, "&apos;")
       .replace(/"/g, "&quot;")
-}
+};
+
+DOMUtil.textareaGetCursor = function(elem) {
+  if ("selectionStart" in elem && document.activeElement == elem) {
+    return elem.selectionStart;
+  }
+
+  if (elem.createTextRange) {
+    var s = document.section.createRange();
+    s.moveStart ("character", -elem.value.length);
+    return s.text.split("\n").join("").length;
+  }
+
+  return -1;
+};
+
+DOMUtil.textareaSetCursor = function(elem, pos) {
+  if ("selectionStart" in elem) {
+    setTimeout(function() {
+      elem.selectionStart = pos;
+      elem.selectionEnd = pos;
+    }, 1);
+    return;
+  }
+
+  if (elem.createTextRange) {
+    var rng = elem.createTextRange();
+    rng.moveStart("character", pos);
+    rng.collapse();
+    rng.moveEnd("character", 0);
+    rng.select();
+    return;
+  }
+};
 
