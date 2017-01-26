@@ -36,7 +36,7 @@ EventQL.ChartPlotter.CategoricalDomain = function(opts) {
   };
 
   this.convertDomainToScreen = function(value) {
-    var index = categories.length - categories.indexOf(value);
+    var index = categories.indexOf(value) + 1;
 
     if (index < 1) {
       //throw new Error("can't scale value");
