@@ -9,6 +9,8 @@ util/url.js
 util/array.js
 util/svg.js
 util/format.js
+util/csv.js
+util/download.js
 widgets/codeeditor/codeeditor.css
 widgets/codeeditor/codeeditor.html
 widgets/codeeditor/codeeditor.js

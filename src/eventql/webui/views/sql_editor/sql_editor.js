@@ -145,9 +145,9 @@ EventQL.SQLEditor = function(elem, params) {
   };
 
   var downloadCSV = function(columns, rows) {
-    var csv = zCSVUtil.toCSV({}, columns, rows);
-    var name = doc.file_name ? doc.file_name + ".csv" : "sql_query.csv";
-    zDownload(csv, name, "text/csv");
+    var csv = CSVUtil.toCSV({}, columns, rows);
+    var name = "sql_query.csv";
+    Download(csv, name, "text/csv");
   };
 };
 
