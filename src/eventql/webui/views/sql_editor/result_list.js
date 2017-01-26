@@ -86,7 +86,11 @@ EventQL.SQLEditor.ResultList = function(elem, params) {
         case "bar":
         case "line":
           var chart_builder = new EventQL.SQLEditor.ChartBuilder(data_elem);
-          chart_builder.render(result, value);
+          try {
+            chart_builder.render(result, value);
+          } catch (e) {
+            renderError(data_elem);
+          }
           break;
       }
     }
@@ -109,6 +113,13 @@ EventQL.SQLEditor.ResultList = function(elem, params) {
 
     elem.appendChild(result_elem);
     result_elem.appendChild(data_elem);
+  }
+
+  function renderError(elem) {
+    var error_elem = document.createElement("div");
+    error_elem.classList.add("message", "error");
+    error_elem.innerHTML = "The chosen chart can't be drawn. Please try another chart type or select table to display the result.";
+    elem.appendChild(error_elem);
   }
 
 };
