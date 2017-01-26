@@ -39,10 +39,18 @@ EventQL.ChartPlotter.ContinuousDomain = function(opts) {
   }
 
   this.setMin = function(min_value) {
+    if (isNaN(min_value)) {
+      throw new Error();
+    }
+
     min = Math.min(min, min_value);
   }
 
   this.setMax = function(max_value) {
+    if (isNaN(max_value)) {
+      throw new Error();
+    }
+
     max = Math.max(max, max_value);
   }
 

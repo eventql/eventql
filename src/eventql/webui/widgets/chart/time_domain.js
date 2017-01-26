@@ -38,10 +38,18 @@ EventQL.ChartPlotter.TimeDomain = function(opts) {
   }
 
   this.setMin = function(min_value) {
+    if (isNaN(min_value)) {
+      throw new Error();
+    }
+
     min = min_value;
   }
 
   this.setMax = function(max_value) {
+    if (isNaN(max_value)) {
+      throw new Error();
+    }
+
     max = max_value;
   }
 
