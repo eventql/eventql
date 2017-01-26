@@ -25,6 +25,40 @@
   transform: translateY(-50%);
 }
 
+.evql_sql_editor .toolbar {
+  font-size: 12px;
+  height: 38px;
+  line-height: 38px;
+  border-bottom: 1px solid #eee;
+  padding: 0 20px 0 15px;
+  overflow: visible;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+  background: #f9f9f9;
+}
+
+.evql_sql_editor .toolbar .table_controls {
+  float: right;
+}
+
+.evql_sql_editor .toolbar .table_controls > div {
+  float: left;
+  margin-right: 20px;
+}
+
+.evql_sql_editor .result {
+  border-top: 1px solid #c9d0d4;
+}
+
+.evql_sql_editor .result .toolbar .table_controls.hidden,
+.evql_sql_editor .result .hidden .toolbar + div {
+  display: none;
+}
+
+
 /** review **/ 
 .evql_sql_editor .message {
   display: block;
@@ -57,6 +91,8 @@
 }
 
 
+
+
 /**
   * Editor
   */
@@ -81,10 +117,6 @@
   user-select: none;
 }
 
-.evql_sql_editor .result {
-  border-top: 1px solid #c9d0d4;
-}
-
 .evql_sql_editor .result table.z-table {
   border-bottom: 1px solid #c9d0d4;
 }
@@ -98,21 +130,6 @@
 .evql_sql_editor .evql_sql_chart {
   padding: 20px;
 }
-
-.evql_sql_editor .toolbar {
-  font-size: 12px;
-  height: 38px;
-  border-bottom: 1px solid #eee;
-  padding: 0 20px 0 15px;
-  overflow: visible;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  -o-user-select: none;
-  user-select: none;
-  background: #f9f9f9;
-}
-
 .evql_sql_editor z-modal.change_edit_state .z-modal-content h3 {
   font-size: 15px;
   font-weight: 400;

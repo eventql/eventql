@@ -105,10 +105,14 @@ EventQL.ChartPlotter = function(elem, params) {
         x_domain.addCategory(value);
       });
 
-    } else {
-      //FIXME check type
+    } else if (params.timeseries) {
       x_domain = new EventQL.ChartPlotter.TimeDomain;
       x_domain.findMinMax(values);
+
+    } else {
+      x_domain = new EventQL.ChartPlotter.ContinuousDomain;
+      x_domain.findMinMax(values);
+
     }
   }
 
@@ -144,12 +148,21 @@ EventQL.ChartPlotter = function(elem, params) {
         break;
 
       case "line":
-      default:
         drawLine(x_values, y_values, svg);
         if (params.points) {
           drawPoints(x_values, y_values, svg);
         }
         break;
+
+      case "area":
+        drawArea(x_values, y_values, svg);
+        if (params.points) {
+          drawPoints(x_values, y_values, svg);
+        }
+        break;
+
+      default:
+        throw new Error("can't draw chart with type ", params.type);
     }
 
     svg.svg += "</svg>"
@@ -263,9 +276,9 @@ EventQL.ChartPlotter = function(elem, params) {
     }
 
     c.svg += "</g>";
-   }
+  }
 
-  function drawLine(x_values, y_values, c, opts) {
+  function getLinePoints(x_values, y_values) {
     var points = [];
 
     for (var i = 0; i < x_values.length; i++) {
@@ -281,6 +294,17 @@ EventQL.ChartPlotter = function(elem, params) {
       }
     }
 
+    return points;
+  }
+
+  function drawArea(x_values, y_values, c) {
+    //FIXME
+    var points = getLinePoints(x_values, y_values);
+    c.drawPath(points, "area");
+  }
+
+  function drawLine(x_values, y_values, c) {
+    var points = getLinePoints(x_values, y_values);
     c.drawPath(points, "line");
   }
 

@@ -22,44 +22,31 @@
  * code of your own applications
  */
 
-EventQL.SQLEditor.ResultList = function(elem) {
+EventQL.SQLEditor.ResultList = function(elem, params) {
   'use strict';
 
   const CHART_COLUMN_NAME = "__chart";
 
-  var settings = {};
-
   var on_csv_download = [];
-  var on_settings_update = [];
 
   this.render = function(results) {
-    DOMUtil.clearChildren(elem);
-    elem.setAttribute("data-result-count", results.length);
-
     for (var i = 0; i < results.length; i++) {
       if (results[i].columns.length == 0) {
         continue;
       }
 
-      var result_elem = document.createElement("div");
-      elem.appendChild(result_elem);
-
-      //render result chart
+      /* render result chart */
       if (results[i].columns[0] == CHART_COLUMN_NAME) {
         if (results[i].rows.length == 0) { //error: no svg returned
           continue;
         }
 
-        var chart_result = new EventQL.SQLEditor.Chart(result_elem);
-        chart_result.render(results[i].rows[0][0], i);
+        renderChart(results[i].rows[0][0], i);
 
-      //render result table
+      /* render result table / chart builder */
       } else {
-        var table_result = new EventQL.SQLEditor.Table(
-              result_elem,
-              settings[i]);
-          //table_result.onSettingsChange(updateResultSettingsByIndex);
-          table_result.render(results[i], i);
+        renderTable(results[i], i);
+
       }
     }
   };
@@ -68,26 +55,61 @@ EventQL.SQLEditor.ResultList = function(elem) {
     on_csv_download.push(fn);
   };
 
-  this.onSettingsUpdate = function(fn) {
-    on_settings_update.push(fn);
-  };
+  function renderChart(svg, idx) {
+    var result_elem = document.createElement("div");
+    elem.appendChild(result_elem);
 
-  this.getSettings = function() {
-    return settings;
-  };
-
-  this.setSettings = function(new_settings) {
-    if (new_settings) {
-      settings = new_settings;
-    }
-  };
-
-  function updateResultSettingsByIndex(index, result_settings) {
-    settings[index] = result_settings;
-
-    on_settings_update.forEach(function(fn) {
-      fn();
+    var toolbar = new EventQL.SQLEditor.ResultToolbar(result_elem, {
+      enable_hide: true,
     });
+
+    toolbar.render(idx);
+
+    var chart_elem = document.createElement("div");
+    chart_elem.innerHTML = svg;
+    elem.appendChild(chart_elem);
   }
+
+  function renderTable(result, idx) {
+    var result_elem = document.createElement("div");
+    var data_elem = document.createElement("div");
+
+    function switchDataVisualization(value) {
+      DOMUtil.clearChildren(data_elem);
+
+      switch (value) {
+        case "table":
+          var table = new EventQL.SQLEditor.Table(data_elem);
+          table.render(result);
+          break;
+
+        case "bar":
+        case "line":
+          var chart_builder = new EventQL.SQLEditor.ChartBuilder(data_elem);
+          chart_builder.render(result, value);
+          break;
+      }
+    }
+
+    var toolbar = new EventQL.SQLEditor.ResultToolbar(result_elem, {
+      enable_hide: true,
+      has_controls: true
+    });
+
+    toolbar.onCSVDownload(function() {
+      on_csv_download.forEach(function(callback_fn) {
+        callback_fn(result);
+      });
+    });
+
+    toolbar.render(idx);
+    toolbar.onDataVisualizationChange(switchDataVisualization);
+
+    switchDataVisualization(toolbar.getDataVisualization());
+
+    elem.appendChild(result_elem);
+    result_elem.appendChild(data_elem);
+  }
+
 };
 

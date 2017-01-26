@@ -62,3 +62,12 @@ DOMUtil.escapeHTML = function(str) {
   return div.innerHTML;
 };
 
+DOMUtil.escapeXML = function(str) {
+  return str
+      .replace(/&/g, "&amp;")
+      .replace(/>/g, "&gt;")
+      .replace(/</g, "&lt;")
+      .replace(/'/g, "&apos;")
+      .replace(/"/g, "&quot;")
+}
+

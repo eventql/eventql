@@ -28,6 +28,9 @@ widgets/query_progress/query_progress.js
 widgets/query_progress/progress_bar.css
 widgets/query_progress/progress_bar.html
 widgets/query_progress/progress_bar.js
+widgets/dropdown/dropdown.html
+widgets/dropdown/dropdown.css
+widgets/dropdown/dropdown.js
 views/console/console.css
 views/console/console.html
 views/console/console.js
@@ -35,6 +38,8 @@ views/sql_editor/sql_editor.css
 views/sql_editor/sql_editor.html
 views/sql_editor/sql_editor.js
 views/sql_editor/result_list.js
+views/sql_editor/result_toolbar.html
+views/sql_editor/result_toolbar.js
 views/sql_editor/table.css
 views/sql_editor/table.html
 views/sql_editor/table.js

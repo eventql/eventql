@@ -85,7 +85,7 @@ EventQL.SQLEditor = function(elem, params) {
   }
 
   var executeQuery = function(query_str) {
-    displayQueryProgress();
+    renderQueryProgress();
 
     query_mgr.closeAll();
     var query = query_mgr.add(
@@ -95,26 +95,28 @@ EventQL.SQLEditor = function(elem, params) {
     query.addEventListener('result', function(e) {
       query_mgr.close("sql_query");
       var data = JSON.parse(e.data);
-      displayQueryResult(data.results);
+      renderQueryResult(data.results);
     });
 
     query.addEventListener('query_error', function(e) {
       query_mgr.close("sql_query");
-      displayQueryError(JSON.parse(e.data).error);
+      renderQueryError(JSON.parse(e.data).error);
     });
 
     query.addEventListener('error', function(e) {
       query_mgr.close("sql_query");
-      displayQueryError("Server Error");
+      renderQueryError("Server Error");
     });
 
     query.addEventListener('status', function(e) {
-      displayQueryProgress(JSON.parse(e.data));
+      renderQueryProgress(JSON.parse(e.data));
     });
   };
 
-  var displayQueryResult = function(result) {
+  var renderQueryResult = function(result) {
     var result_list_elem = elem.querySelector(".result");
+    DOMUtil.clearChildren(result_list_elem);
+
     var result_list = new EventQL.SQLEditor.ResultList(result_list_elem);
     result_list.render(result);
     result_list.onCSVDownload(function(result) {
@@ -122,15 +124,13 @@ EventQL.SQLEditor = function(elem, params) {
     });
   };
 
-  var displayQueryError = function(error) {
-    var error_msg = zTemplateUtil.getTemplate("zbase_sql_editor_error_msg_tpl");
+  var renderQueryError = function(error) {
+    var error_msg = TemplateUtil.getTemplate("evql-sql-editor-error-tpl");
     error_msg.querySelector(".info").innerHTML = error;
-    zDomUtil.replaceContent(
-        elem.querySelector(".zbase_sql_editor_result_pane"),
-        error_msg);
+    DOMUtil.replaceContent(elem.querySelector(".result"), error_msg);
   };
 
-  var displayQueryProgress = function(progress) {
+  var renderQueryProgress = function(progress) {
     var query_progress = new EventQL.QueryProgress(
         elem.querySelector(".result"),
         progress);

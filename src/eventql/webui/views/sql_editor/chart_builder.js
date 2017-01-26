@@ -22,32 +22,41 @@
  * code of your own applications
  */
 
-EventQL.SQLEditor.Table = function(elem) {
+EventQL.SQLEditor.ChartBuilder = function(elem) {
   'use strict';
 
-  this.render = function(result) {
-    var tpl = TemplateUtil.getTemplate("evql-sql-editor-table-tpl");
-    elem.appendChild(tpl);
+  this.render = function(result, type) {
+    var chart_elem = document.createElement("div");
+    chart_elem.classList.add("chart_container");
+    elem.appendChild(chart_elem);
 
-    var thead_elem = elem.querySelector("thead tr");
-    result.columns.forEach(function(col) {
-      var th_elem = document.createElement("th");
-      th_elem.innerHTML = DOMUtil.escapeHTML(col);
-      thead_elem.appendChild(th_elem);
-    });
+    var chart_cfg = {
+      height: 300
+    };
 
-    var tbody_elem = elem.querySelector("tbody");
-    result.rows.forEach(function(row) {
-      var tr_elem = document.createElement("tr");
+    switch (type) {
+      case "bar":
+        break;
 
-      row.forEach(function(cell) {
-        var td_elem = document.createElement("td");
-        td_elem.innerHTML = DOMUtil.escapeHTML(cell);
-        tr_elem.appendChild(td_elem);
-      });
+      case "line":
+        chart_cfg.timeseries = true; //FIXME make this configurable
+        chart_cfg.points = true;
+        break;
 
-      tbody_elem.appendChild(tr_elem);
-    });
+      case "area":
+        chart_cfg.timeseries = true; //FIXME make this configurable
+        break;
+
+      default:
+        console.log("ERROR unknown chart type", type);
+        return;
+    }
+
+    chart_cfg.type = type;
+
+    var chart = new EventQL.ChartPlotter(chart_elem, chart_cfg);
+    chart.render(result);
   };
+
 };
 

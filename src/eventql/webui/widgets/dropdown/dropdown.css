@@ -1,0 +1,53 @@
+.evql_dropdown {
+  font-size: 12px;
+  position: relative;
+  display: inline-block;
+}
+
+.evql_dropdown button {
+  cursor: pointer;
+  font-size: inherit;
+  background-color: transparent;
+  background-image: none;
+  box-shadow: none;
+  color: inherit;
+  border: none;
+  outline: none;
+  font-weight: 500;
+  white-space: nowrap;
+  padding: 0 5px;
+}
+
+.evql_dropdown ul {
+  position: absolute;
+  min-width: 100%;
+  margin: 0;
+  padding: 0;
+  z-index: 999;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  box-shadow: 0 2px 4px 0px rgba(0,0,0,.09);
+  list-style: none;
+  background: #fff;
+  display: none;
+}
+
+.evql_dropdown ul.active {
+  display: block;
+}
+
+.evql_dropdown ul li {
+  padding: 0 8px;
+  line-height: 32px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.evql_dropdown ul li:hover {
+  background: #e8f4ff;
+}
+
+.evql_dropdown ul li.active {
+  font-weight: 600;
+}
+
