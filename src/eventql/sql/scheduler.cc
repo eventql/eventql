@@ -253,6 +253,10 @@ ScopedPtr<TableExpression> DefaultScheduler::buildTableExpression(
     return mkScoped(new ShowTablesExpression(ctx));
   }
 
+  if (dynamic_cast<ShowDatabasesNode*>(node.get())) {
+    return mkScoped(new ShowDatabasesExpression(ctx));
+  }
+
   if (dynamic_cast<DescribeTableNode*>(node.get())) {
     return mkScoped(new DescribeTableStatement(
         ctx,

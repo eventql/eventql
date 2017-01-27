@@ -192,6 +192,10 @@ public:
       Transaction* txn,
       ASTNode* ast);
 
+  QueryTreeNode* buildShowDatabases(
+      Transaction* txn,
+      ASTNode* ast);
+
   QueryTreeNode* buildDescribeTable(
       Transaction* txn,
       ASTNode* ast);
