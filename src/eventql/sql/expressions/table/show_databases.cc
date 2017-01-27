@@ -32,14 +32,14 @@ ShowDatabasesExpression::ShowDatabasesExpression(
     counter_(0) {}
 
 ScopedPtr<ResultCursor> ShowDatabasesExpression::execute() {
-  //auto rc = txn_->getTableProvider()->listServers(
-  //    [this] (const eventql::ServerConfig& server) {
-  //  rows_.emplace_back(server);
-  //});
+  auto rc = txn_->getTableProvider()->listDatabases(
+      [this] (const eventql::NamespaceConfig& ns) {
+    rows_.emplace_back(ns.customer());
+  });
 
-  //if (!rc.isSuccess()) {
-  //  //FIXME handle error
-  //}
+  if (!rc.isSuccess()) {
+    //FIXME handle error
+  }
 
   return mkScoped(
       new DefaultResultCursor(
@@ -58,6 +58,9 @@ size_t ShowDatabasesExpression::getNumColumns() const {
 
 bool ShowDatabasesExpression::next(SValue* row, size_t row_len) {
   if (counter_ < rows_.size()) {
+    for (size_t i = 0; i < kNumColumns && i < row_len; ++i) {
+      row[i] = rows_[counter_];
+    }
 
     ++counter_;
     return true;

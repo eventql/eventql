@@ -44,7 +44,7 @@ protected:
   bool next(SValue* row, size_t row_len);
 
   Transaction* txn_;
-  Vector<eventql::ServerConfig> rows_;
+  Vector<SValue> rows_;
   size_t counter_;
 };
 
