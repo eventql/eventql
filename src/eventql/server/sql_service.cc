@@ -48,7 +48,6 @@ ScopedPtr<csql::Transaction> SQLService::startTransaction(Session* session) {
   txn->setHeartbeatCallback([session] { return session->triggerHeartbeat(); });
   txn->setTableProvider(
       new TSDBTableProvider(
-          session->getEffectiveNamespace(),
           pmap_,
           cdir_,
           table_service_,
