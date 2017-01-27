@@ -568,10 +568,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/backends/backend.h \
     eventql/sql/backends/csv/CSVInputStream.cc \
     eventql/sql/backends/csv/CSVInputStream.h \
-    eventql/sql/backends/csv/CSVTableProvider.cc \
-    eventql/sql/backends/csv/CSVTableProvider.h \
-    eventql/sql/backends/csv/CSVTableScan.cc \
-    eventql/sql/backends/csv/CSVTableScan.h \
     eventql/sql/backends/tableref.h \
     eventql/sql/defaults.cc \
     eventql/sql/defaults.h \
