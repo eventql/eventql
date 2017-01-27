@@ -1,12 +1,18 @@
-<template id="evql-sql-editor-table-tpl">
-  <div class="evql_sql_editor_table">
-    <div class="result_view">
-      <table class="evql_table">
-        <thead>
-          <tr></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+<template id="evql-sql-editor-result-table-chart-builder-tpl">
+  <div class="toolbar">
+    <label data-control="visibility">Result <span data-content="result_idx"></span></label>
+
+    <div class="table_controls">
+      <div>
+        <label>Display:</label>
+        <span data-control="visualization"></span>
+      </div>
+
+      <a class="link" data-control="download_csv">Download CSV</a>
     </div>
   </div>
+
+  <div class="result_view">
+  </div>
 </template>
+

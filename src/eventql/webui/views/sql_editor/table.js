@@ -22,21 +22,90 @@
  * code of your own applications
  */
 
-EventQL.SQLEditor.Table = function(elem) {
+EventQL.SQLEditor.ResultList.TableChartBuilder = function(elem, params) {
   'use strict';
 
+  var data_visualizations = [
+    {
+      key: "table",
+      title: "Table"
+    },
+    {
+      key: "line",
+      title: "Linechart"
+    },
+    {
+      key: "bar",
+      title: "Barchart"
+    }
+  ];
+
+  var on_csv_download = [];
+
+  this.onCSVDownload = function(fn) {
+    on_csv_download.push(fn);
+  };
+
   this.render = function(result) {
-    var tpl = TemplateUtil.getTemplate("evql-sql-editor-table-tpl");
+    var tpl = TemplateUtil.getTemplate(
+        "evql-sql-editor-result-table-chart-builder-tpl");
     elem.appendChild(tpl);
 
-    var thead_elem = elem.querySelector("thead tr");
+    initToolbar();
+
+    var data_visualization = getDataVisualizationValue();
+
+    var dropdown_elem = elem.querySelector("[data-control='visualization']");
+    var dropdown = new EventQL.Dropdown(dropdown_elem);
+    dropdown.setMenuItems(data_visualizations);
+    dropdown.setValue(data_visualization);
+    dropdown.onChange(function(value) {
+      updateDataVisualization(value, result);
+    });
+
+    updateDataVisualization(data_visualization, result);
+  };
+
+  function initToolbar() {
+    elem.querySelector("[data-content='result_idx']").innerHTML = params.idx + 1;
+
+    if (params.hidable) {
+      var visibility_ctrl = elem.querySelector("[data-control='visibility']");
+      visibility_ctrl.addEventListener("click", function(e) {
+        elem.classList.toggle("hidden");
+      }, false);
+    }
+
+    var download_csv_elem = elem.querySelector("[data-control='download_csv']");
+    download_csv_elem.addEventListener("click", function(e) {
+      on_csv_download.forEach(function(callback_fn) {
+        callback_fn();
+      });
+    }, false);
+  }
+
+  function updateDataVisualization(visualization, result) {
+    switch (visualization) {
+      case "table":
+        renderTable(result);
+        break;
+
+      case "bar":
+      case "line":
+        buildChart(result, visualization);
+        break;
+    }
+  }
+
+  function renderTable(result) {
+    var thead_elem = document.createElement("tr");
     result.columns.forEach(function(col) {
       var th_elem = document.createElement("th");
       th_elem.innerHTML = DOMUtil.escapeHTML(col);
       thead_elem.appendChild(th_elem);
     });
 
-    var tbody_elem = elem.querySelector("tbody");
+    var tbody_elem = document.createElement("tbody");
     result.rows.forEach(function(row) {
       var tr_elem = document.createElement("tr");
 
@@ -48,6 +117,74 @@ EventQL.SQLEditor.Table = function(elem) {
 
       tbody_elem.appendChild(tr_elem);
     });
-  };
+
+    var table = document.createElement("table");
+    table.classList.add("evql_table");
+    var thead = document.createElement("thead");
+    thead.appendChild(thead_elem);
+    table.appendChild(thead);
+    table.appendChild(tbody_elem);
+
+    DOMUtil.replaceContent(elem.querySelector(".result_view"), table);
+  }
+
+  function buildChart(result, chart_type) {
+
+    var chart_cfg = {
+      height: 300
+    };
+
+    switch (chart_type) {
+      case "bar":
+        break;
+
+      case "line":
+        chart_cfg.timeseries = true; //FIXME make this configurable
+        chart_cfg.points = true;
+        break;
+
+      case "area":
+        chart_cfg.timeseries = true; //FIXME make this configurable
+        break;
+
+      default:
+        console.log("ERROR unknown chart type", type);
+        return;
+    }
+
+    chart_cfg.type = chart_type;
+
+    var chart_elem = document.createElement("div")
+    chart_elem.classList.add("chart_container");
+    DOMUtil.replaceContent(elem.querySelector(".result_view"), chart_elem);
+
+    var chart = new EventQL.ChartPlotter(chart_elem, chart_cfg);
+
+    try {
+      chart.render(result);
+
+    /* render chart builder errror */
+    } catch (e) {
+      var error_elem = document.createElement("div");
+      error_elem.classList.add("message", "error");
+      error_elem.innerHTML = "The chosen chart can't be drawn. Please try another chart type or select table to display the result.";
+      chart_elem.appendChild(error_elem);
+    }
+  }
+
+  function getDataVisualizationValue() {
+    var default_value = data_visualizations[0].key;
+
+    if (params.data_visualization) {
+      for (var i = 0; i < data_visualizations.length; i++) {
+        if (data_visualizations[i].key == params.data_visualization) {
+          return params.data_visualization;
+        }
+      }
+    }
+
+    return default_value;
+  }
+
 };
 

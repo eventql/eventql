@@ -1,23 +1,24 @@
-- add area chart
-
 - [x] SQLEditor fix button css
 - [x] SQLEditor: Tooltip
 - [x] fix inital navbar css
-
-- [ ] SQLEditor: Chart Toolbar
-- [ ] SQLEditor: Table Toolbar
-
-- [ ] SQLEditor: download
-
+- [x] SQLEditor: Chart Toolbar
+- [x] SQLEditor: Table Toolbar
+- [x] SQLEditor: download
 - [x] SQLEditor: Query Progress
+- [x] ChartPlotter bar chart
+- [x] Console: save history in browser local storage
 
-- [ ] Console: save history in browser local storage
+- [ ] handle auth / database
+- [ ] SQLEditor: save chart type in url
+- [ ] ChartPlotter add area chart
+- [ ] SQLEditor: make x, y axes for generated chart selectable
+- [ ] fix font
+- [ ] fix favicon
 - [ ] Login
-
+- [ ] isDrawable
 
 - [ ] Table List: import
 
-- [ ] ChartPlotter bar chart
 - [ ] ChartPlotter: make it selectable if x_axis is timeseries or not
 - [ ] ChartPlotter: get timeserries time label format from timesries range
 

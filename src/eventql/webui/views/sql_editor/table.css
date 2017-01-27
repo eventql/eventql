@@ -1,4 +1,4 @@
-.evql_sql_editor .evql_sql_editor_table table.evql_table th:first-child,
-.evql_sql_editor .evql_sql_editor_table table.evql_table td:first-child {
+.evql_sql_editor .result table.evql_table th:first-child,
+.evql_sql_editor .result table.evql_table td:first-child {
   padding-left: 20px;
 }

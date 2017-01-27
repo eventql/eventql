@@ -22,41 +22,23 @@
  * code of your own applications
  */
 
-EventQL.SQLEditor.ChartBuilder = function(elem) {
+EventQL.SQLEditor.ResultList.Chart = function(elem, params) {
   'use strict';
 
-  this.render = function(result, type) {
-    var chart_elem = document.createElement("div");
-    chart_elem.classList.add("chart_container");
-    elem.appendChild(chart_elem);
+  this.render = function(svg) {
+    var tpl = TemplateUtil.getTemplate("evql-sql-editor-result-chart-tpl");
+    elem.appendChild(tpl);
 
-    var chart_cfg = {
-      height: 300
-    };
-
-    switch (type) {
-      case "bar":
-        break;
-
-      case "line":
-        chart_cfg.timeseries = true; //FIXME make this configurable
-        chart_cfg.points = true;
-        break;
-
-      case "area":
-        chart_cfg.timeseries = true; //FIXME make this configurable
-        break;
-
-      default:
-        console.log("ERROR unknown chart type", type);
-        return;
+    elem.querySelector("[data-content='result_idx']").innerHTML = params.idx + 1;
+    if (params.hidable) {
+      var visibility_ctrl = elem.querySelector("[data-control='visibility']");
+      visibility_ctrl.addEventListener("click", function(e) {
+        elem.classList.toggle("hidden");
+      }, false);
     }
 
-    chart_cfg.type = type;
-
-    var chart = new EventQL.ChartPlotter(chart_elem, chart_cfg);
-    chart.render(result);
-  };
+    var chart_elem = elem.querySelector(".chart_container");
+    chart_elem.innerHTML = svg;
+  }
 
 };
-

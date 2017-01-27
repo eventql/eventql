@@ -28,12 +28,26 @@ EventQL.SQLEditor.ResultList = function(elem, params) {
   const CHART_COLUMN_NAME = "__chart";
 
   var on_csv_download = [];
+  var on_params_change = [];
+
+  this.onCSVDownload = function(fn) {
+    on_csv_download.push(fn);
+  };
+
+  this.onParamsChange = function(fn) {
+    on_params_change.push(fn);
+  };
+
+  var is_hidable;
 
   this.render = function(results) {
+    is_hidable = results.length > 1;
+
     for (var i = 0; i < results.length; i++) {
       if (results[i].columns.length == 0) {
         continue;
       }
+
 
       /* render result chart */
       if (results[i].columns[0] == CHART_COLUMN_NAME) {
@@ -43,83 +57,43 @@ EventQL.SQLEditor.ResultList = function(elem, params) {
 
         renderChart(results[i].rows[0][0], i);
 
-      /* render result table / chart builder */
       } else {
         renderTable(results[i], i);
-
       }
     }
-  };
-
-  this.onCSVDownload = function(fn) {
-    on_csv_download.push(fn);
   };
 
   function renderChart(svg, idx) {
     var result_elem = document.createElement("div");
     elem.appendChild(result_elem);
 
-    var toolbar = new EventQL.SQLEditor.ResultToolbar(result_elem, {
-      enable_hide: true,
-    });
-
-    toolbar.render(idx);
-
-    var chart_elem = document.createElement("div");
-    chart_elem.innerHTML = svg;
-    elem.appendChild(chart_elem);
+    var chart_cfg = {
+      hidable: is_hidable,
+      idx: idx
+    };
+    var chart = new EventQL.SQLEditor.ResultList.Chart(result_elem, chart_cfg);
+    chart.render(svg);
   }
 
   function renderTable(result, idx) {
     var result_elem = document.createElement("div");
-    var data_elem = document.createElement("div");
+    elem.appendChild(result_elem);
 
-    function switchDataVisualization(value) {
-      DOMUtil.clearChildren(data_elem);
+    var table_chart_cfg = {
+      hidable: is_hidable,
+      idx: idx
+    };
 
-      switch (value) {
-        case "table":
-          var table = new EventQL.SQLEditor.Table(data_elem);
-          table.render(result);
-          break;
+    var table_chart = new EventQL.SQLEditor.ResultList.TableChartBuilder(
+        result_elem,
+        table_chart_cfg);
+    table_chart.render(result);
 
-        case "bar":
-        case "line":
-          var chart_builder = new EventQL.SQLEditor.ChartBuilder(data_elem);
-          try {
-            chart_builder.render(result, value);
-          } catch (e) {
-            renderError(data_elem);
-          }
-          break;
-      }
-    }
-
-    var toolbar = new EventQL.SQLEditor.ResultToolbar(result_elem, {
-      enable_hide: true,
-      has_controls: true
-    });
-
-    toolbar.onCSVDownload(function() {
+    table_chart.onCSVDownload(function() {
       on_csv_download.forEach(function(callback_fn) {
         callback_fn(result);
       });
     });
-
-    toolbar.render(idx);
-    toolbar.onDataVisualizationChange(switchDataVisualization);
-
-    switchDataVisualization(toolbar.getDataVisualization());
-
-    elem.appendChild(result_elem);
-    result_elem.appendChild(data_elem);
-  }
-
-  function renderError(elem) {
-    var error_elem = document.createElement("div");
-    error_elem.classList.add("message", "error");
-    error_elem.innerHTML = "The chosen chart can't be drawn. Please try another chart type or select table to display the result.";
-    elem.appendChild(error_elem);
   }
 
 };

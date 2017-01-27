@@ -40,9 +40,9 @@ views/sql_editor/sql_editor.css
 views/sql_editor/sql_editor.html
 views/sql_editor/sql_editor.js
 views/sql_editor/result_list.js
-views/sql_editor/result_toolbar.html
-views/sql_editor/result_toolbar.js
 views/sql_editor/table.css
 views/sql_editor/table.html
 views/sql_editor/table.js
-views/sql_editor/chart_builder.js
+views/sql_editor/chart.html
+views/sql_editor/chart.js
+
