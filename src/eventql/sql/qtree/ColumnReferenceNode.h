@@ -55,6 +55,8 @@ public:
 
   String toSQL() const override;
 
+  SType getReturnType() const override;
+
   static void encode(
       QueryTreeCoder* coder,
       const ColumnReferenceNode& node,
