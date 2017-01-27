@@ -65,6 +65,8 @@ public:
 
   size_t getNumComputedColumns() const override;
 
+  SType getColumnType(size_t idx) const override;
+
   static void encode(
       QueryTreeCoder* coder,
       const GroupByNode& node,

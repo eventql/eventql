@@ -79,6 +79,8 @@ public:
 
   size_t getNumComputedColumns() const override;
 
+  SType getColumnType(size_t idx) const override;
+
   size_t getInputColumnIndex(
       const String& column_name,
       bool allow_add = false);
