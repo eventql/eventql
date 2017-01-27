@@ -37,6 +37,14 @@
 
 namespace csql {
 
+enum class SType {
+  UINT64,
+  INT64,
+  FLOAT64,
+  BOOL,
+  STRING
+};
+
 class SValue {
 public:
   typedef std::string StringType;

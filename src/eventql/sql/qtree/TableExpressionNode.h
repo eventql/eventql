@@ -26,7 +26,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/option.h>
 #include <eventql/sql/qtree/QueryTreeNode.h>
-
+#include <eventql/sql/svalue.h>
 #include "eventql/eventql.h"
 
 namespace csql {
@@ -100,6 +100,10 @@ public:
       const String& column_name,
       bool allow_add = false) = 0;
 
+  /**
+   * Returns the type of one of the computed columsn
+   */
+  virtual SType getColumnType(size_t idx) const = 0;
 
 };
 
