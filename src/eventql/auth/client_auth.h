@@ -49,10 +49,6 @@ public:
     return Status(eRuntimeError, "interactive auth not supported");
   }
 
-  virtual Status changeNamespace(
-      Session* session,
-      const String& ns) = 0;
-
 };
 
 } // namespace eventql

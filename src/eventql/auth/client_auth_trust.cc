@@ -38,13 +38,5 @@ Status TrustClientAuth::authenticateNonInteractive(
   }
 }
 
-Status TrustClientAuth::changeNamespace(
-    Session* session,
-    const String& ns) {
-  session->setEffectiveNamespace(ns);
-  session->setDisplayNamespace(ns);
-  return Status::success();
-}
-
 } // namespace eventql
 

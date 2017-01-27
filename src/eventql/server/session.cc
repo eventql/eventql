@@ -50,6 +50,14 @@ void Session::setUserID(const String& user_id) {
   user_id_ = user_id;
 }
 
+Status Session::changeNamespace(const std::string& ns) {
+  //FIXME check ACLs
+  setEffectiveNamespace(ns);
+  setDisplayNamespace(ns);
+
+  return Status::success();
+}
+
 String Session::getEffectiveNamespace() const {
   std::unique_lock<std::mutex> lk(mutex_);
   return effective_namespace_;

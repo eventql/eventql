@@ -72,7 +72,7 @@ ReturnCode performOperation_QUERY(
 
   /* switch database */
   if (q_flags & EVQL_QUERY_SWITCHDB) {
-    auto rc = dbctx->client_auth->changeNamespace(session, q_database);
+    auto rc = session->changeNamespace(q_database);
     if (!rc.isSuccess()) {
       return conn->sendErrorFrame(rc.message());
     }

@@ -374,9 +374,7 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeUseDatabase(
               use_database->getDatabaseName()));
   }
 
-  auto rc = dbctx->client_auth->changeNamespace(
-      session,
-      use_database->getDatabaseName());
+  auto rc = session->changeNamespace(use_database->getDatabaseName());
   if (!rc.isSuccess()) {
     RAISE(kRuntimeError, rc.message());
   }

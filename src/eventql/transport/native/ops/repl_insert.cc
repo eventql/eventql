@@ -63,9 +63,7 @@ ReturnCode performOperation_REPL_INSERT(
 
   /* switch database */
   {
-    auto rc = dbctx->client_auth->changeNamespace(
-        session,
-        i_frame.getDatabase());
+    auto rc = session->changeNamespace(i_frame.getDatabase());
 
     if (!rc.isSuccess()) {
       return conn->sendErrorFrame(rc.message());

@@ -61,7 +61,7 @@ ReturnCode performOperation_QUERY_PARTIALAGGR(
 
   /* switch database */
   {
-    auto rc = dbctx->client_auth->changeNamespace(session, frame.getDatabase());
+    auto rc = session->changeNamespace(frame.getDatabase());
     if (!rc.isSuccess()) {
       return conn->sendErrorFrame(rc.message());
     }

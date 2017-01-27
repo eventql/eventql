@@ -341,7 +341,7 @@ void MapReduceAPIServlet::executeMapReduceScript(
   const auto& params = uri.queryParams();
   String database;
   if (URI::getParam(params, "database", &database) && !database.empty()) {
-    auto rc = dbctx->client_auth->changeNamespace(session, database);
+    auto rc = session->changeNamespace(database);
     if (!rc.isSuccess()) {
       http::HTTPResponse res;
       res.populateFromRequest(req_stream->request());

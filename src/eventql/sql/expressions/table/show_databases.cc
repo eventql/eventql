@@ -32,14 +32,14 @@ ShowDatabasesExpression::ShowDatabasesExpression(
     counter_(0) {}
 
 ScopedPtr<ResultCursor> ShowDatabasesExpression::execute() {
-  auto rc = txn_->getTableProvider()->listServers(
-      [this] (const eventql::ServerConfig& server) {
-    rows_.emplace_back(server);
-  });
+  //auto rc = txn_->getTableProvider()->listServers(
+  //    [this] (const eventql::ServerConfig& server) {
+  //  rows_.emplace_back(server);
+  //});
 
-  if (!rc.isSuccess()) {
-    //FIXME handle error
-  }
+  //if (!rc.isSuccess()) {
+  //  //FIXME handle error
+  //}
 
   return mkScoped(
       new DefaultResultCursor(

@@ -66,9 +66,7 @@ ReturnCode performOperation_QUERY_REMOTE(
 
   /* switch database */
   {
-    auto rc = dbctx->client_auth->changeNamespace(
-        session,
-        q_frame.getDatabase());
+    auto rc = session->changeNamespace(q_frame.getDatabase());
     if (!rc.isSuccess()) {
       return conn->sendErrorFrame(rc.message());
     }
