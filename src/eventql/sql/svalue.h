@@ -37,12 +37,14 @@
 
 namespace csql {
 
-enum class SType {
+enum class SType : uint8_t {
+  NIL,
   UINT64,
   INT64,
   FLOAT64,
   BOOL,
-  STRING
+  STRING,
+  TIMESTAMP64
 };
 
 class SValue {
@@ -56,6 +58,10 @@ public:
   static SValue newNull();
   static SValue newString(const String& value);
   static SValue newString(const char* value);
+  static SValue newUInt64(uint64_t value);
+  static SValue newUInt64(const String& value);
+  static SValue newInt64(uint64_t value);
+  static SValue newInt64(const String& value);
   static SValue newInteger(IntegerType value);
   static SValue newInteger(const String& value);
   static SValue newFloat(FloatType value);
@@ -65,7 +71,7 @@ public:
   static SValue newTimestamp(TimeType value);
   static SValue newTimestamp(const String& value);
 
-  static const char* getTypeName(sql_type type);
+  static const char* getTypeName(SType type);
   const char* getTypeName() const;
 
   explicit SValue();
@@ -82,7 +88,7 @@ public:
   explicit SValue(BoolType bool_value);
   explicit SValue(TimeType time_value);
 
-  sql_type getType() const;
+  SType getType() const;
   bool isString() const;
   bool isNumeric() const;
   bool isInteger() const;
@@ -122,7 +128,7 @@ public:
 
 protected:
   struct {
-    sql_type type;
+    SType type;
     union {
       int64_t t_integer;
       double t_float;

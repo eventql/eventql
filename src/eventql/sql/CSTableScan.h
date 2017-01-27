@@ -57,7 +57,7 @@ public:
   size_t rowsScanned() const;
 
   void setFilter(Function<bool ()> filter_fn);
-  void setColumnType(String column, sql_type type);
+  void setColumnType(String column, SType type);
 
 protected:
 
@@ -65,10 +65,10 @@ protected:
   bool next(SValue* out, int out_len);
 
   struct ColumnRef {
-    ColumnRef(RefPtr<cstable::ColumnReader> r, size_t i, sql_type t);
+    ColumnRef(RefPtr<cstable::ColumnReader> r, size_t i, SType t);
     RefPtr<cstable::ColumnReader> reader;
     size_t index;
-    sql_type type;
+    SType type;
   };
 
   struct ExpressionRef {

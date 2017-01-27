@@ -33,7 +33,7 @@ namespace expressions {
  */
 void countExprAcc(sql_txn* ctx, void* scratchpad, int argc, SValue* argv) {
   switch(argv->getType()) {
-    case SQL_NULL:
+    case SType::NIL:
       return;
 
     default:
@@ -79,7 +79,7 @@ const AggregateFunction kCountExpr {
  * SUM() expression
  */
 struct sum_expr_scratchpad {
-  sql_type type;
+  SType type;
   double val;
 };
 
@@ -95,17 +95,17 @@ void sumExprAcc(sql_txn* ctx, void* scratchpad, int argc, SValue* argv) {
   }
 
   switch(val->getType()) {
-    case SQL_NULL:
+    case SType::NIL:
       return;
 
-    case SQL_INTEGER:
-      data->type = SQL_INTEGER;
+    case SType::INT64:
+      data->type = SType::INT64;
       data->val += val->getInteger();
       return;
 
-    case SQL_FLOAT:
+    case SType::FLOAT64:
     default:
-      data->type = SQL_FLOAT;
+      data->type = SType::FLOAT64;
       data->val += val->getFloat();
       return;
   }
@@ -115,11 +115,11 @@ void sumExprGet(sql_txn* ctx, void* scratchpad, SValue* out) {
   auto data = (sum_expr_scratchpad*) scratchpad;
 
   switch(data->type) {
-    case SQL_INTEGER:
+    case SType::INT64:
       *out = SValue(SValue::IntegerType(data->val));
       return;
 
-    case SQL_FLOAT:
+    case SType::FLOAT64:
       *out = SValue(SValue::FloatType(data->val));
       return;
 
@@ -137,11 +137,11 @@ void sumExprMerge(sql_txn* ctx, void* scratchpad, const void* other) {
   auto this_data = (sum_expr_scratchpad*) scratchpad;
   auto other_data = (const sum_expr_scratchpad*) other;
 
-  if (this_data->type == SQL_INTEGER &&
-      other_data->type == SQL_INTEGER) {
-    this_data->type = SQL_INTEGER;
+  if (this_data->type == SType::INT64 &&
+      other_data->type == SType::INT64) {
+    this_data->type = SType::INT64;
   } else {
-    this_data->type = SQL_FLOAT;
+    this_data->type = SType::FLOAT64;
   }
 
   this_data->val += other_data->val;
@@ -149,13 +149,13 @@ void sumExprMerge(sql_txn* ctx, void* scratchpad, const void* other) {
 
 void sumExprSave(sql_txn* ctx, void* scratchpad, OutputStream* os) {
   auto data = (sum_expr_scratchpad*) scratchpad;
-  os->appendVarUInt(data->type);
+  os->appendVarUInt((uint8_t) data->type);
   os->appendDouble(data->val);
 }
 
 void sumExprLoad(sql_txn* ctx, void* scratchpad, InputStream* is) {
   auto data = (sum_expr_scratchpad*) scratchpad;
-  data->type = (sql_type) is->readVarUInt();
+  data->type = (SType) is->readVarUInt();
   data->val = is->readDouble();
 }
 
@@ -191,7 +191,7 @@ const AggregateFunction kSumExpr {
 //  }
 //
 //  switch(val->getType()) {
-//    case SQL_NULL:
+//    case SType::NIL:
 //      return;
 //
 //    default:
@@ -262,7 +262,7 @@ void maxExprAcc(sql_txn* ctx, void* scratchpad, int argc, SValue* argv) {
   auto data = (max_expr_scratchpad*) scratchpad;
 
   switch(argv->getType()) {
-    case SQL_NULL:
+    case SType::NIL:
       return;
 
     default: {
@@ -333,7 +333,7 @@ void minExprAcc(sql_txn* ctx, void* scratchpad, int argc, SValue* argv) {
   auto data = (min_expr_scratchpad*) scratchpad;
 
   switch(argv->getType()) {
-    case SQL_NULL:
+    case SType::NIL:
       return;
 
     default: {

@@ -69,7 +69,7 @@ bool DescribeTableStatement::next(SValue* row, size_t row_len) {
       case 3:
         row[2] = col.is_nullable ? SValue::newString("YES") : SValue::newString("NO"); //Null
       case 2:
-        row[1] = SValue::newString(col.type); //Type
+        //row[1] = SValue::newString(col.type); //Type FIXME
       case 1:
         row[0] = SValue::newString(col.column_name); //Field
       case 0:

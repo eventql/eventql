@@ -48,11 +48,11 @@ static void checkArgs(const char* symbol, int argc, int argc_expected) {
 
 static int64_t parseTimestamp(SValue* arg) {
   switch (arg->getType()) {
-    case SQL_TIMESTAMP:
+    case SType::TIMESTAMP64:
       return arg->getInteger();
-    case SQL_INTEGER:
+    case SType::INT64:
       return arg->getInteger() * kMicrosPerSecond;
-    case SQL_FLOAT:
+    case SType::FLOAT64:
       return arg->getFloat() * kMicrosPerSecond;
     default: {
       if (arg->isConvertibleToNumeric()) {
@@ -139,7 +139,7 @@ void fromTimestamp(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   checkArgs("FROM_TIMESTAMP", argc, 1);
 
   switch (argv->getType()) {
-    case SQL_TIMESTAMP:
+    case SType::TIMESTAMP64:
       *out = *argv;
       break;
     default:
@@ -831,11 +831,11 @@ void timeAtExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
 
   uint64_t ts;
   switch (argv->getType()) {
-    case SQL_TIMESTAMP:
+    case SType::TIMESTAMP64:
       *out = *argv;
       return;
-    case SQL_INTEGER:
-    case SQL_FLOAT:
+    case SType::INT64:
+    case SType::FLOAT64:
       ts = parseTimestamp(argv);
     default: {
       if (argv->isConvertibleToNumeric()) {

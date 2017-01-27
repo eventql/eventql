@@ -22,6 +22,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/sql/svalue.h"
 #include "eventql/server/sql/partition_cursor.h"
 #include "eventql/transport/native/frames/error.h"
 #include "eventql/transport/native/frames/query_remote.h"
@@ -172,22 +173,22 @@ bool PartitionCursor::openNextTable() {
   for (const auto& col : table_->schema()->columns()) {
     switch (col.second.type) {
       case msg::FieldType::BOOLEAN:
-        cur_scan_->setColumnType(col.first, SQL_BOOL);
+        cur_scan_->setColumnType(col.first, csql::SType::BOOL);
         break;
       case msg::FieldType::UINT32:
-        cur_scan_->setColumnType(col.first, SQL_INTEGER);
+        cur_scan_->setColumnType(col.first, csql::SType::INT64);
         break;
       case msg::FieldType::UINT64:
-        cur_scan_->setColumnType(col.first, SQL_INTEGER);
+        cur_scan_->setColumnType(col.first, csql::SType::INT64);
         break;
       case msg::FieldType::STRING:
-        cur_scan_->setColumnType(col.first, SQL_STRING);
+        cur_scan_->setColumnType(col.first, csql::SType::STRING);
         break;
       case msg::FieldType::DOUBLE:
-        cur_scan_->setColumnType(col.first, SQL_FLOAT);
+        cur_scan_->setColumnType(col.first, csql::SType::FLOAT64);
         break;
       case msg::FieldType::DATETIME:
-        cur_scan_->setColumnType(col.first, SQL_TIMESTAMP);
+        cur_scan_->setColumnType(col.first, csql::SType::TIMESTAMP64);
         break;
       case msg::FieldType::OBJECT:
         break;
@@ -387,22 +388,22 @@ bool StaticPartitionCursor::next(csql::SValue* row, int row_len) {
     //for (const auto& col : table_->schema()->columns()) {
     //  switch (col.second.type) {
     //    case msg::FieldType::BOOLEAN:
-    //      cur_scan_->setColumnType(col.first, SQL_BOOL);
+    //      cur_scan_->setColumnType(col.first, csql::SType::BOOL);
     //      break;
     //    case msg::FieldType::UINT32:
-    //      cur_scan_->setColumnType(col.first, SQL_INTEGER);
+    //      cur_scan_->setColumnType(col.first, csql::SType::INT64);
     //      break;
     //    case msg::FieldType::UINT64:
-    //      cur_scan_->setColumnType(col.first, SQL_INTEGER);
+    //      cur_scan_->setColumnType(col.first, csql::SType::INT64);
     //      break;
     //    case msg::FieldType::STRING:
-    //      cur_scan_->setColumnType(col.first, SQL_STRING);
+    //      cur_scan_->setColumnType(col.first, csql::SType::STRING);
     //      break;
     //    case msg::FieldType::DOUBLE:
-    //      cur_scan_->setColumnType(col.first, SQL_FLOAT);
+    //      cur_scan_->setColumnType(col.first, csql::SType::FLOAT64);
     //      break;
     //    case msg::FieldType::DATETIME:
-    //      cur_scan_->setColumnType(col.first, SQL_TIMESTAMP);
+    //      cur_scan_->setColumnType(col.first, csql::SType::TIMESTAMP64);
     //      break;
     //  }
     //}

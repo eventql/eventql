@@ -41,7 +41,7 @@ void addExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   SValue* lhs = argv;
   SValue* rhs = argv + 1;
 
-  if (lhs->getType() == SQL_NULL || rhs->getType() == SQL_NULL) {
+  if (lhs->getType() == SType::NIL || rhs->getType() == SType::NIL) {
     *out = SValue();
     return;
   }
@@ -54,7 +54,7 @@ void addExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   SValue lhs_num = lhs->toNumeric();
   SValue rhs_num = rhs->toNumeric();
 
-  if (lhs_num.getType() == SQL_INTEGER && rhs_num.getType() == SQL_INTEGER) {
+  if (lhs_num.getType() == SType::INT64 && rhs_num.getType() == SType::INT64) {
     *out = SValue((int64_t) (lhs_num.getInteger() + rhs_num.getInteger()));
   } else {
     *out = SValue((double) (lhs_num.getFloat() + rhs_num.getFloat()));
@@ -71,7 +71,7 @@ void subExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   SValue* lhs = argv;
   SValue* rhs = argv + 1;
 
-  if (lhs->getType() == SQL_NULL || rhs->getType() == SQL_NULL) {
+  if (lhs->getType() == SType::NIL || rhs->getType() == SType::NIL) {
     *out = SValue();
     return;
   }
@@ -85,7 +85,7 @@ void subExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   SValue lhs_num = lhs->toNumeric();
   SValue rhs_num = rhs->toNumeric();
 
-  if (lhs_num.getType() == SQL_INTEGER && rhs_num.getType() == SQL_INTEGER) {
+  if (lhs_num.getType() == SType::INT64 && rhs_num.getType() == SType::INT64) {
     *out = SValue((int64_t) (lhs_num.getInteger() - rhs_num.getInteger()));
   } else {
     *out = SValue((double) (lhs_num.getFloat() - rhs_num.getFloat()));
@@ -102,7 +102,7 @@ void mulExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   SValue* lhs = argv;
   SValue* rhs = argv + 1;
 
-  if (lhs->getType() == SQL_NULL || rhs->getType() == SQL_NULL) {
+  if (lhs->getType() == SType::NIL || rhs->getType() == SType::NIL) {
     *out = SValue();
     return;
   }
@@ -116,7 +116,7 @@ void mulExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   SValue lhs_num = lhs->toNumeric();
   SValue rhs_num = rhs->toNumeric();
 
-  if (lhs_num.getType() == SQL_INTEGER && rhs_num.getType() == SQL_INTEGER) {
+  if (lhs_num.getType() == SType::INT64 && rhs_num.getType() == SType::INT64) {
     *out = SValue((int64_t) (lhs_num.getInteger() * rhs_num.getInteger()));
   } else {
     *out = SValue((double) (lhs_num.getFloat() * rhs_num.getFloat()));
@@ -133,7 +133,7 @@ void divExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   SValue* lhs = argv;
   SValue* rhs = argv + 1;
 
-  if (lhs->getType() == SQL_NULL || rhs->getType() == SQL_NULL) {
+  if (lhs->getType() == SType::NIL || rhs->getType() == SType::NIL) {
     *out = SValue();
     return;
   }
@@ -160,7 +160,7 @@ void modExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   SValue* lhs = argv;
   SValue* rhs = argv + 1;
 
-  if (lhs->getType() == SQL_NULL || rhs->getType() == SQL_NULL) {
+  if (lhs->getType() == SType::NIL || rhs->getType() == SType::NIL) {
     *out = SValue();
     return;
   }
@@ -174,7 +174,7 @@ void modExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   SValue lhs_num = lhs->toNumeric();
   SValue rhs_num = rhs->toNumeric();
 
-  if (lhs_num.getType() == SQL_INTEGER && rhs_num.getType() == SQL_INTEGER) {
+  if (lhs_num.getType() == SType::INT64 && rhs_num.getType() == SType::INT64) {
     *out = SValue((int64_t) (lhs_num.getInteger() % rhs_num.getInteger()));
   } else {
     *out = SValue((double) fmod(lhs_num.getFloat(), rhs_num.getFloat()));
@@ -191,7 +191,7 @@ void powExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   SValue* lhs = argv;
   SValue* rhs = argv + 1;
 
-  if (lhs->getType() == SQL_NULL || rhs->getType() == SQL_NULL) {
+  if (lhs->getType() == SType::NIL || rhs->getType() == SType::NIL) {
     *out = SValue();
     return;
   }
@@ -205,7 +205,7 @@ void powExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   SValue lhs_num = lhs->toNumeric();
   SValue rhs_num = rhs->toNumeric();
 
-  if (lhs_num.getType() == SQL_INTEGER && rhs_num.getType() == SQL_INTEGER) {
+  if (lhs_num.getType() == SType::INT64 && rhs_num.getType() == SType::INT64) {
     *out = SValue((int64_t) pow(lhs_num.getInteger(), rhs_num.getInteger()));
   } else {
     *out = SValue((double) pow(lhs_num.getFloat(), rhs_num.getFloat()));
@@ -237,11 +237,11 @@ void truncateExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
     case 1: {
       SValue* val = argv;
       switch(val->getType()) {
-        case SQL_INTEGER:
-        case SQL_FLOAT:
+        case SType::INT64:
+        case SType::FLOAT64:
           *out = SValue(SValue::IntegerType(val->getFloat()));
           return;
-        case SQL_NULL:
+        case SType::NIL:
           *out = SValue();
           return;
         default:

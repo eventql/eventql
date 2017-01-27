@@ -27,6 +27,7 @@
 #include <eventql/util/SHA1.h>
 #include <eventql/server/sql/table_provider.h>
 #include <eventql/db/table_service.h>
+#include <eventql/sql/svalue.h>
 #include <eventql/sql/CSTableScan.h>
 #include <eventql/sql/qtree/QueryTreeUtil.h>
 #include <eventql/util/json/json.h>
@@ -62,12 +63,12 @@ KeyRange TSDBTableProvider::findKeyRange(
     String val;
     try {
       switch (c.value.getType()) {
-        case SQL_STRING:
-        case SQL_INTEGER:
-        case SQL_FLOAT:
+        case csql::SType::STRING:
+        case csql::SType::INT64:
+        case csql::SType::FLOAT64:
           val = encodePartitionKey(keyspace, c.value.getString());
           break;
-        case SQL_TIMESTAMP:
+        case csql::SType::TIMESTAMP64:
           val = encodePartitionKey(keyspace, c.value.toInteger().getString());
           break;
         default:
@@ -560,7 +561,30 @@ csql::TableInfo TSDBTableProvider::tableInfoForTable(
   for (const auto& col : schema->columns()) {
     csql::ColumnInfo ci;
     ci.column_name = col.first;
-    ci.type = col.second.typeName();
+    switch (col.second.type) {
+      case msg::FieldType::BOOLEAN:
+        ci.type = csql::SType::BOOL;
+        break;
+      case msg::FieldType::UINT32:
+        ci.type = csql::SType::UINT64;
+        break;
+      case msg::FieldType::UINT64:
+        ci.type = csql::SType::UINT64;
+        break;
+      case msg::FieldType::STRING:
+        ci.type = csql::SType::STRING;
+        break;
+      case msg::FieldType::DOUBLE:
+        ci.type = csql::SType::FLOAT64;
+        break;
+      case msg::FieldType::DATETIME:
+        ci.type = csql::SType::TIMESTAMP64;
+        break;
+      case msg::FieldType::OBJECT:
+        break;
+      }
+
+
     ci.type_size = col.second.typeSize();
     ci.is_nullable = col.second.optional;
     ci.is_primary_key = std::find(
@@ -605,12 +629,12 @@ RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
 
     std::string c_val;
     switch (c.value.getType()) {
-      case SQL_STRING:
-      case SQL_INTEGER:
-      case SQL_FLOAT:
+      case csql::SType::STRING:
+      case csql::SType::INT64:
+      case csql::SType::FLOAT64:
         c_val = encodePartitionKey(pkeyspace, c.value.getString());
         break;
-      case SQL_TIMESTAMP:
+      case csql::SType::TIMESTAMP64:
         c_val = encodePartitionKey(pkeyspace, c.value.toInteger().getString());
         break;
       default:

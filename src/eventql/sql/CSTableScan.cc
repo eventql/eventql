@@ -123,23 +123,25 @@ void CSTableScan::open() {
 
     auto reader = cstable_->getColumnReader(col);
 
-    sql_type type;
+    SType type;
     switch (reader->type()) {
       case cstable::ColumnType::STRING:
-        type = SQL_STRING;
+        type = SType::STRING;
         break;
       case cstable::ColumnType::SIGNED_INT:
+        type = SType::INT64;
+        break;
       case cstable::ColumnType::UNSIGNED_INT:
-        type = SQL_INTEGER;
+        type = SType::UINT64;
         break;
       case cstable::ColumnType::FLOAT:
-        type = SQL_FLOAT;
+        type = SType::FLOAT64;
         break;
       case cstable::ColumnType::BOOLEAN:
-        type = SQL_BOOL;
+        type = SType::BOOL;
         break;
       case cstable::ColumnType::DATETIME:
-        type = SQL_TIMESTAMP;
+        type = SType::TIMESTAMP64;
         break;
       case cstable::ColumnType::SUBRECORD:
         RAISE(kIllegalStateError);
@@ -220,22 +222,25 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
               cur_buf_[col.second.index] = SValue();
             } else {
               switch (col.second.type) {
-                case SQL_NULL:
+                case SType::NIL:
                   cur_buf_[col.second.index] = SValue::newNull();
                   break;
-                case SQL_STRING:
+                case SType::STRING:
                   cur_buf_[col.second.index] = SValue::newString(v);
                   break;
-                case SQL_FLOAT:
+                case SType::FLOAT64:
                   cur_buf_[col.second.index] = SValue::newFloat(v);
                   break;
-                case SQL_INTEGER:
-                  cur_buf_[col.second.index] = SValue::newInteger(v);
+                case SType::INT64:
+                  cur_buf_[col.second.index] = SValue::newInt64(v);
                   break;
-                case SQL_BOOL:
+                case SType::UINT64:
+                  cur_buf_[col.second.index] = SValue::newUInt64(v);
+                  break;
+                case SType::BOOL:
                   cur_buf_[col.second.index] = SValue::newBool(v);
                   break;
-                case SQL_TIMESTAMP:
+                case SType::TIMESTAMP64:
                   cur_buf_[col.second.index] = SValue::newTimestamp(v);
                   break;
               }
@@ -252,22 +257,25 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
               cur_buf_[col.second.index] = SValue();
             } else {
               switch (col.second.type) {
-                case SQL_NULL:
+                case SType::NIL:
                   cur_buf_[col.second.index] = SValue::newNull();
                   break;
-                case SQL_STRING:
+                case SType::STRING:
                   cur_buf_[col.second.index] = SValue::newInteger(v).toString();
                   break;
-                case SQL_FLOAT:
+                case SType::FLOAT64:
                   cur_buf_[col.second.index] = SValue::newFloat(v);
                   break;
-                case SQL_INTEGER:
-                  cur_buf_[col.second.index] = SValue::newInteger(v);
+                case SType::INT64:
+                  cur_buf_[col.second.index] = SValue::newInt64(v);
                   break;
-                case SQL_BOOL:
+                case SType::UINT64:
+                  cur_buf_[col.second.index] = SValue::newUInt64(v);
+                  break;
+                case SType::BOOL:
                   cur_buf_[col.second.index] = SValue::newBool(v);
                   break;
-                case SQL_TIMESTAMP:
+                case SType::TIMESTAMP64:
                   cur_buf_[col.second.index] = SValue::newTimestamp(v);
                   break;
               }
@@ -284,22 +292,25 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
               cur_buf_[col.second.index] = SValue();
             } else {
               switch (col.second.type) {
-                case SQL_NULL:
+                case SType::NIL:
                   cur_buf_[col.second.index] = SValue::newNull();
                   break;
-                case SQL_STRING:
+                case SType::STRING:
                   cur_buf_[col.second.index] = SValue::newInteger(v).toString();
                   break;
-                case SQL_FLOAT:
+                case SType::FLOAT64:
                   cur_buf_[col.second.index] = SValue::newFloat(v);
                   break;
-                case SQL_INTEGER:
-                  cur_buf_[col.second.index] = SValue::newInteger(v);
+                case SType::INT64:
+                  cur_buf_[col.second.index] = SValue::newInt64(v);
                   break;
-                case SQL_BOOL:
+                case SType::UINT64:
+                  cur_buf_[col.second.index] = SValue::newUInt64(v);
+                  break;
+                case SType::BOOL:
                   cur_buf_[col.second.index] = SValue::newBool(v);
                   break;
-                case SQL_TIMESTAMP:
+                case SType::TIMESTAMP64:
                   cur_buf_[col.second.index] = SValue::newTimestamp(v);
                   break;
               }
@@ -316,22 +327,25 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
               cur_buf_[col.second.index] = SValue(SValue::BoolType(false));
             } else {
               switch (col.second.type) {
-                case SQL_NULL:
+                case SType::NIL:
                   cur_buf_[col.second.index] = SValue::newNull();
                   break;
-                case SQL_STRING:
+                case SType::STRING:
                   cur_buf_[col.second.index] = SValue::newBool(v).toString();
                   break;
-                case SQL_FLOAT:
+                case SType::FLOAT64:
                   cur_buf_[col.second.index] = SValue::newFloat(v);
                   break;
-                case SQL_INTEGER:
-                  cur_buf_[col.second.index] = SValue::newInteger(v);
+                case SType::INT64:
+                  cur_buf_[col.second.index] = SValue::newInt64(v);
                   break;
-                case SQL_BOOL:
+                case SType::UINT64:
+                  cur_buf_[col.second.index] = SValue::newUInt64(v);
+                  break;
+                case SType::BOOL:
                   cur_buf_[col.second.index] = SValue::newBool(v);
                   break;
-                case SQL_TIMESTAMP:
+                case SType::TIMESTAMP64:
                   cur_buf_[col.second.index] = SValue::newTimestamp(v);
                   break;
               }
@@ -348,22 +362,25 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
               cur_buf_[col.second.index] = SValue();
             } else {
               switch (col.second.type) {
-                case SQL_NULL:
+                case SType::NIL:
                   cur_buf_[col.second.index] = SValue::newNull();
                   break;
-                case SQL_STRING:
+                case SType::STRING:
                   cur_buf_[col.second.index] = SValue::newFloat(v).toString();
                   break;
-                case SQL_FLOAT:
+                case SType::FLOAT64:
                   cur_buf_[col.second.index] = SValue::newFloat(v);
                   break;
-                case SQL_INTEGER:
-                  cur_buf_[col.second.index] = SValue::newInteger(v);
+                case SType::INT64:
+                  cur_buf_[col.second.index] = SValue::newInt64(v);
                   break;
-                case SQL_BOOL:
+                case SType::UINT64:
+                  cur_buf_[col.second.index] = SValue::newUInt64(v);
+                  break;
+                case SType::BOOL:
                   cur_buf_[col.second.index] = SValue::newBool(v);
                   break;
-                case SQL_TIMESTAMP:
+                case SType::TIMESTAMP64:
                   cur_buf_[col.second.index] = SValue::newTimestamp(v);
                   break;
               }
@@ -380,19 +397,22 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
               cur_buf_[col.second.index] = SValue();
             } else {
               switch (col.second.type) {
-                case SQL_NULL:
+                case SType::NIL:
                   cur_buf_[col.second.index] = SValue::newNull();
                   break;
-                case SQL_STRING:
+                case SType::STRING:
                   cur_buf_[col.second.index] = SValue::newTimestamp(v).toString();
                   break;
-                case SQL_FLOAT:
+                case SType::FLOAT64:
                   cur_buf_[col.second.index] = SValue::newTimestamp(v).toFloat();
                   break;
-                case SQL_INTEGER:
+                case SType::INT64:
                   cur_buf_[col.second.index] = SValue::newTimestamp(v).toInteger();
                   break;
-                case SQL_TIMESTAMP:
+                case SType::UINT64:
+                  cur_buf_[col.second.index] = SValue::newTimestamp(v).toInteger();
+                  break;
+                case SType::TIMESTAMP64:
                   cur_buf_[col.second.index] = SValue::newTimestamp(v);
                   break;
                 default:
@@ -626,7 +646,7 @@ void CSTableScan::setFilter(Function<bool ()> filter_fn) {
   filter_fn_ = filter_fn;
 }
 
-void CSTableScan::setColumnType(String column, sql_type type) {
+void CSTableScan::setColumnType(String column, SType type) {
   const auto& col = columns_.find(column);
   if (col == columns_.end()) {
     return;
@@ -638,7 +658,7 @@ void CSTableScan::setColumnType(String column, sql_type type) {
 CSTableScan::ColumnRef::ColumnRef(
     RefPtr<cstable::ColumnReader> r,
     size_t i,
-    sql_type t) :
+    SType t) :
     reader(r),
     index(i),
     type(t) {}
