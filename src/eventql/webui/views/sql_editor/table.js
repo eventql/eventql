@@ -41,9 +41,14 @@ EventQL.SQLEditor.ResultList.TableChartBuilder = function(elem, params) {
   ];
 
   var on_csv_download = [];
+  var on_param_change = [];
 
   this.onCSVDownload = function(fn) {
     on_csv_download.push(fn);
+  };
+
+  this.onParamChange = function(fn) {
+    on_param_change.push(fn);
   };
 
   this.render = function(result) {
@@ -59,8 +64,12 @@ EventQL.SQLEditor.ResultList.TableChartBuilder = function(elem, params) {
     var dropdown = new EventQL.Dropdown(dropdown_elem);
     dropdown.setMenuItems(data_visualizations);
     dropdown.setValue(data_visualization);
+
     dropdown.onChange(function(value) {
       updateDataVisualization(value, result);
+      on_param_change.forEach(function(callback_fn) {
+        callback_fn({visualization: value});
+      });
     });
 
     updateDataVisualization(data_visualization, result);

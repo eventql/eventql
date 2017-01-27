@@ -39,6 +39,7 @@ EventQL.SQLEditor = function(elem, params) {
   this.changePath = function(new_path, new_route) {
     var allowed = ["query"];
     var diff = URLUtil.comparePaths(path, new_path);
+    console.log(diff);
     if (diff.path || ArrayUtil.setDifference(diff.params, allowed).length) {
       return false;
     }
@@ -117,10 +118,24 @@ EventQL.SQLEditor = function(elem, params) {
     var result_list_elem = elem.querySelector(".result");
     DOMUtil.clearChildren(result_list_elem);
 
-    var result_list = new EventQL.SQLEditor.ResultList(result_list_elem);
+    var result_list_params = {};
+    var view_param = URLUtil.getParamValue(path, "view")
+    if (view_param) {
+      result_list_params.view = view_param;
+    }
+
+    var result_list = new EventQL.SQLEditor.ResultList(
+        result_list_elem,
+        result_list_params);
     result_list.render(result);
+
     result_list.onCSVDownload(function(result) {
       downloadCSV(result.columns, result.rows);
+    });
+
+    result_list.onViewParamChange(function(value) {
+      console.log(value);
+      EventQL.navigateTo(URLUtil.addOrModifyParam(path, "view", value));
     });
   };
 

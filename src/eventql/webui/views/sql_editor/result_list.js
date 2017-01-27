@@ -27,15 +27,16 @@ EventQL.SQLEditor.ResultList = function(elem, params) {
 
   const CHART_COLUMN_NAME = "__chart";
 
+  var view_param = params.view ? params.view : {};
   var on_csv_download = [];
-  var on_params_change = [];
+  var on_view_param_change = [];
 
   this.onCSVDownload = function(fn) {
     on_csv_download.push(fn);
   };
 
-  this.onParamsChange = function(fn) {
-    on_params_change.push(fn);
+  this.onViewParamChange = function(fn) {
+    on_view_param_change.push(fn);
   };
 
   var is_hidable;
@@ -84,6 +85,8 @@ EventQL.SQLEditor.ResultList = function(elem, params) {
       idx: idx
     };
 
+    console.log(view_param);
+
     var table_chart = new EventQL.SQLEditor.ResultList.TableChartBuilder(
         result_elem,
         table_chart_cfg);
@@ -92,6 +95,13 @@ EventQL.SQLEditor.ResultList = function(elem, params) {
     table_chart.onCSVDownload(function() {
       on_csv_download.forEach(function(callback_fn) {
         callback_fn(result);
+      });
+    });
+
+    table_chart.onParamChange(function(new_param) {
+      view_param[idx] = new_param;
+      on_view_param_change.forEach(function(callback_fn) {
+        callback_fn(JSON.stringify(view_param));
       });
     });
   }
