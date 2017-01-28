@@ -44,6 +44,16 @@ bool ScanConstraint::operator!=(const ScanConstraint& other) const {
 
 SequentialScanNode::SequentialScanNode(
     const TableInfo& table_info,
+    RefPtr<TableProvider> table_provider) :
+    table_name_(table_info.table_name),
+    aggr_strategy_(AggregationStrategy::NO_AGGREGATION) {
+  for (const auto& col : table_info.columns) {
+    table_columns_.emplace_back(col.column_name, col.type);
+  }
+}
+
+SequentialScanNode::SequentialScanNode(
+    const TableInfo& table_info,
     RefPtr<TableProvider> table_provider,
     Vector<RefPtr<SelectListNode>> select_list,
     Option<RefPtr<ValueExpressionNode>> where_expr) :
@@ -61,7 +71,6 @@ SequentialScanNode::SequentialScanNode(
     Option<RefPtr<ValueExpressionNode>> where_expr,
     AggregationStrategy aggr_strategy) :
     table_name_(table_info.table_name),
-    table_provider_(table_provider),
     select_list_(select_list),
     where_expr_(where_expr),
     aggr_strategy_(aggr_strategy) {
@@ -131,6 +140,11 @@ void SequentialScanNode::setTableAlias(const String& table_alias) {
 
 Vector<RefPtr<SelectListNode>> SequentialScanNode::selectList() const {
   return select_list_;
+}
+
+void SequentialScanNode::addSelectList(RefPtr<SelectListNode> sl) {
+  output_columns_.emplace_back(sl->columnName());
+  select_list_.emplace_back(sl);
 }
 
 Vector<String> SequentialScanNode::selectedColumns() const {

@@ -180,7 +180,6 @@ protected:
   String table_name_;
   String table_alias_;
   Vector<std::pair<std::string, SType>> table_columns_;
-  RefPtr<TableProvider> table_provider_;
   Vector<RefPtr<SelectListNode>> select_list_;
   Vector<String> output_columns_;
   Vector<std::pair<std::string, SType>> input_columns_;
