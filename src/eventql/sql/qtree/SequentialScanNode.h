@@ -99,6 +99,10 @@ public:
 
   SequentialScanNode(
       const TableInfo& table_info,
+      RefPtr<TableProvider> table_provider);
+
+  SequentialScanNode(
+      const TableInfo& table_info,
       RefPtr<TableProvider> table_provider,
       Vector<RefPtr<SelectListNode>> select_list,
       Option<RefPtr<ValueExpressionNode>> where_expr);
@@ -118,6 +122,8 @@ public:
   void setTableAlias(const String& table_alias);
 
   Vector<RefPtr<SelectListNode>> selectList() const;
+  void addSelectList(RefPtr<SelectListNode> sl);
+
   Set<String> selectedColumns() const;
 
   Vector<String> getResultColumns() const override;
@@ -134,6 +140,16 @@ public:
   size_t getNumComputedColumns() const override;
 
   SType getColumnType(size_t idx) const override;
+
+  size_t getInputColumnIndex(
+      const String& column_name,
+      bool allow_add = false);
+
+  SType getInputColumnType(size_t idx) const;
+
+  std::pair<size_t, SType> getInputColumnInfo(
+      const String& column_name,
+      bool allow_add = false);
 
   Option<RefPtr<ValueExpressionNode>> whereExpression() const;
   void setWhereExpression(RefPtr<ValueExpressionNode> e);

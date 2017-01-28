@@ -1341,150 +1341,167 @@ QueryTreeNode* QueryPlanBuilder::buildSubqueryTableReference(
   return subqnode;
 }
 
-//QueryTreeNode* QueryPlanBuilder::buildSeqscanTableReference(
-//    Transaction* txn,
-//    ASTNode* table_ref,
-//    ASTNode* select_list,
-//    ASTNode* where_clause,
-//    RefPtr<TableProvider> tables,
-//    bool in_join) {
-//  if (!(*table_ref == ASTNode::T_FROM)) {
-//    return nullptr;
-//  }
-//
-//  if (table_ref->getChildren().size() < 1) {
-//    return nullptr;
-//  }
-//
-//  /* get table reference */
-//  auto tbl_name = table_ref->getChildren()[0];
-//  if (!(*tbl_name == ASTNode::T_TABLE_NAME)) {
-//    return nullptr;
-//  }
-//
-//  auto tbl_name_token = tbl_name->getToken();
-//  if (!(tbl_name_token != nullptr)) {
-//    RAISE(kRuntimeError, "corrupt AST");
-//  }
-//
-//  auto table_name = tbl_name_token->getString();
-//
-//  /* get table alias */
-//  String table_alias;
-//  if (table_ref->getChildren().size() > 1 &&
-//      table_ref->getChildren()[1]->getType() == ASTNode::T_TABLE_ALIAS) {
-//    table_alias = table_ref->getChildren()[1]->getToken()->getString();
-//  }
-//
-//  auto table = tables->describe(table_name);
-//  if (table.isEmpty()) {
-//    RAISEF(kRuntimeError, "table not found: '$0'", table_name);
-//  }
-//
-//  /* get where expression */
-//  Option<RefPtr<ValueExpressionNode>> where_expr;
-//  if (where_clause) {
-//    if (!(*where_clause == ASTNode::T_WHERE)) {
-//      return nullptr;
-//    }
-//
-//    if (where_clause->getChildren().size() != 1) {
-//      RAISE(kRuntimeError, "corrupt AST");
-//    }
-//
-//    auto e = where_clause->getChildren()[0];
-//
-//    if (e == nullptr) {
-//      RAISE(kRuntimeError, "corrupt AST");
-//    }
-//
-//    if (hasAggregationExpression(e)) {
-//      RAISE(
-//          kRuntimeError,
-//          "where expressions can only contain pure functions\n");
-//    }
-//
-//    auto pred = RefPtr<ValueExpressionNode>(buildValueExpression(txn, e));
-//
-//    if (in_join) {
-//      Set<String> valid_columns;
-//      for (const auto& col : table.get().columns) {
-//        valid_columns.insert(col.column_name);
-//        valid_columns.insert(table_name + "." + col.column_name);
-//        if (!table_alias.empty()) {
-//          valid_columns.insert(table_alias + "." + col.column_name);
-//        }
-//      }
-//
-//      auto rc = QueryTreeUtil::prunePredicateExpression(
-//          pred,
-//          valid_columns,
-//          &pred);
-//
-//      if (!rc.isSuccess()) {
-//        RAISE(kRuntimeError, rc.getMessage());
-//      }
-//    }
-//
-//    // FIXME skip if literal true expression
-//    where_expr = Some(pred);
-//  }
-//
-//  bool has_aggregation = false;
-//  bool has_aggregation_within_record = false;
-//
-//  /* select list  */
-//  Vector<RefPtr<SelectListNode>> select_list_expressions;
-//  for (const auto& select_expr : select_list->getChildren()) {
-//    if (*select_expr == ASTNode::T_ALL) {
-//      for (const auto& col : table.get().columns) {
-//        auto sl = new SelectListNode(
-//            new ColumnReferenceNode(col.column_name, col.type));
-//        sl->setAlias(col.column_name);
-//        select_list_expressions.emplace_back(sl);
-//      }
-//    } else {
-//      if (hasAggregationExpression(select_expr)) {
-//        has_aggregation = true;
-//      }
-//
-//      if (hasAggregationWithinRecord(select_expr)) {
-//        has_aggregation_within_record = true;
-//      }
-//
-//      select_list_expressions.emplace_back(buildSelectList(txn, select_expr));
-//    }
-//  }
-//
-//  if (has_aggregation && has_aggregation_within_record) {
-//    RAISE(
-//        kRuntimeError,
-//        "invalid use of aggregation WITHIN RECORD functions");
-//  }
-//
-//
-//  /* aggregation type */
-//  auto seqscan = new SequentialScanNode(
-//      table.get(),
-//      tables,
-//      select_list_expressions,
-//      where_expr);
-//
-//  if (!table_alias.empty()) {
-//    seqscan->setTableAlias(table_alias);
-//  }
-//
-//  if (has_aggregation) {
-//    seqscan->setAggregationStrategy(AggregationStrategy::AGGREGATE_ALL);
-//  }
-//
-//  if (has_aggregation_within_record) {
-//    seqscan->setAggregationStrategy(AggregationStrategy::AGGREGATE_WITHIN_RECORD_FLAT);
-//  }
-//
-//  seqscan->normalizeColumnNames();
-//  return seqscan;
-//}
+QueryTreeNode* QueryPlanBuilder::buildSeqscanTableReference(
+    Transaction* txn,
+    ASTNode* table_ref,
+    ASTNode* select_list,
+    ASTNode* where_clause,
+    RefPtr<TableProvider> tables,
+    bool in_join) {
+  if (!(*table_ref == ASTNode::T_FROM)) {
+    return nullptr;
+  }
+
+  if (table_ref->getChildren().size() < 1) {
+    return nullptr;
+  }
+
+  /* get table reference */
+  auto tbl_name = table_ref->getChildren()[0];
+  if (!(*tbl_name == ASTNode::T_TABLE_NAME)) {
+    return nullptr;
+  }
+
+  auto tbl_name_token = tbl_name->getToken();
+  if (!(tbl_name_token != nullptr)) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  auto table_name = tbl_name_token->getString();
+
+  /* get table alias */
+  String table_alias;
+  if (table_ref->getChildren().size() > 1 &&
+      table_ref->getChildren()[1]->getType() == ASTNode::T_TABLE_ALIAS) {
+    table_alias = table_ref->getChildren()[1]->getToken()->getString();
+  }
+
+  auto table = tables->describe(table_name);
+  if (table.isEmpty()) {
+    RAISEF(kRuntimeError, "table not found: '$0'", table_name);
+  }
+
+  /* build ndoe */
+  auto seqscan = mkRef(new SequentialScanNode(table.get(), tables));
+  if (!table_alias.empty()) {
+    seqscan->setTableAlias(table_alias);
+  }
+
+  /* get where expression */
+  if (where_clause) {
+    if (!(*where_clause == ASTNode::T_WHERE)) {
+      return nullptr;
+    }
+
+    if (where_clause->getChildren().size() != 1) {
+      RAISE(kRuntimeError, "corrupt AST");
+    }
+
+    auto e = where_clause->getChildren()[0];
+
+    if (e == nullptr) {
+      RAISE(kRuntimeError, "corrupt AST");
+    }
+
+    if (hasAggregationExpression(e)) {
+      RAISE(
+          kRuntimeError,
+          "where expressions can only contain pure functions\n");
+    }
+
+    auto pred = RefPtr<ValueExpressionNode>(
+        buildValueExpression(
+            txn,
+            e,
+            std::bind(
+                &SequentialScanNode::getInputColumnInfo,
+                seqscan.get(),
+                std::placeholders::_1,
+                true),
+            std::bind(
+                &SequentialScanNode::getInputColumnType,
+                seqscan.get(),
+                std::placeholders::_1)));
+
+    if (in_join) {
+      Set<String> valid_columns;
+      for (const auto& col : table.get().columns) {
+        valid_columns.insert(col.column_name);
+        valid_columns.insert(table_name + "." + col.column_name);
+        if (!table_alias.empty()) {
+          valid_columns.insert(table_alias + "." + col.column_name);
+        }
+      }
+
+      auto rc = QueryTreeUtil::prunePredicateExpression(
+          pred,
+          valid_columns,
+          &pred);
+
+      if (!rc.isSuccess()) {
+        RAISE(kRuntimeError, rc.getMessage());
+      }
+    }
+
+    // FIXME skip if literal true expression
+    seqscan->setWhereExpression(pred);
+  }
+
+  bool has_aggregation = false;
+  bool has_aggregation_within_record = false;
+
+  /* select list  */
+  Vector<RefPtr<SelectListNode>> select_list_expressions;
+  for (const auto& select_expr : select_list->getChildren()) {
+    if (*select_expr == ASTNode::T_ALL) {
+      for (const auto& col : table.get().columns) {
+        auto sl = new SelectListNode(
+            new ColumnReferenceNode(col.column_name, col.type));
+        sl->setAlias(col.column_name);
+        seqscan->addSelectList(sl);
+      }
+    } else {
+      if (hasAggregationExpression(select_expr)) {
+        has_aggregation = true;
+      }
+
+      if (hasAggregationWithinRecord(select_expr)) {
+        has_aggregation_within_record = true;
+      }
+
+      seqscan->addSelectList(
+          buildSelectList(
+              txn,
+              select_expr,
+              std::bind(
+                  &SequentialScanNode::getInputColumnInfo,
+                  seqscan.get(),
+                  std::placeholders::_1,
+                  true),
+              std::bind(
+                  &SequentialScanNode::getInputColumnType,
+                  seqscan.get(),
+                  std::placeholders::_1)));
+    }
+  }
+
+  if (has_aggregation && has_aggregation_within_record) {
+    RAISE(
+        kRuntimeError,
+        "invalid use of aggregation WITHIN RECORD functions");
+  }
+
+  if (has_aggregation) {
+    seqscan->setAggregationStrategy(AggregationStrategy::AGGREGATE_ALL);
+  }
+
+  if (has_aggregation_within_record) {
+    seqscan->setAggregationStrategy(AggregationStrategy::AGGREGATE_WITHIN_RECORD_FLAT);
+  }
+
+  seqscan->normalizeColumnNames();
+  return seqscan.release();
+}
 
 RefPtr<ValueExpressionNode> QueryPlanBuilder::buildValueExpression(
     Transaction* txn,
