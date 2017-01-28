@@ -98,17 +98,37 @@ bool QueryTreeUtil::isConstantExpression(
   return true;
 }
 
-RefPtr<ValueExpressionNode> QueryTreeUtil::prunePredicateExpression(
+ReturnCode QueryTreeUtil::prunePredicateExpression(
     RefPtr<ValueExpressionNode> expr,
-    const Set<String>& column_whitelist) {
+    const Set<String>& column_whitelist,
+    RefPtr<ValueExpressionNode>* out) {
   auto call_expr = dynamic_cast<CallExpressionNode*>(expr.get());
   if (call_expr && call_expr->symbol() == "logical_and") {
-    return new CallExpressionNode(
-        "logical_and",
-        Vector<RefPtr<ValueExpressionNode>> {
-          prunePredicateExpression(call_expr->arguments()[0], column_whitelist),
-          prunePredicateExpression(call_expr->arguments()[1], column_whitelist),
-        });
+    Vector<RefPtr<ValueExpressionNode>> call_args(2);
+
+    {
+      auto rc = prunePredicateExpression(
+          call_expr->arguments()[0],
+          column_whitelist,
+          &call_args[0]);
+
+      if (rc.isSuccess()) {
+        return rc;
+      }
+    }
+
+    {
+      auto rc = prunePredicateExpression(
+          call_expr->arguments()[1],
+          column_whitelist,
+          &call_args[1]);
+
+      if (rc.isSuccess()) {
+        return rc;
+      }
+    }
+
+    return CallExpressionNode::newNode("logical_and", call_args, out);
   }
 
   bool is_invalid = false;
@@ -120,19 +140,44 @@ RefPtr<ValueExpressionNode> QueryTreeUtil::prunePredicateExpression(
   });
 
   if (is_invalid) {
-    return new LiteralExpressionNode(SValue(SValue::BoolType(true)));
+    *out = RefPtr<ValueExpressionNode>(
+        new LiteralExpressionNode(SValue(SValue::BoolType(true))));
   } else {
-    return expr;
+    *out = expr;
   }
+
+  return ReturnCode::success();
 }
 
-RefPtr<ValueExpressionNode> QueryTreeUtil::removeConstraintFromPredicate(
+ReturnCode QueryTreeUtil::removeConstraintFromPredicate(
     RefPtr<ValueExpressionNode> expr,
-    const ScanConstraint& constraint) {
+    const ScanConstraint& constraint,
+    RefPtr<ValueExpressionNode>* out) {
   auto call_expr = dynamic_cast<CallExpressionNode*>(expr.get());
   if (call_expr && call_expr->symbol() == "logical_and") {
-    auto arg_left = removeConstraintFromPredicate(call_expr->arguments()[0], constraint);
-    auto arg_right = removeConstraintFromPredicate(call_expr->arguments()[1], constraint);
+    RefPtr<ValueExpressionNode> arg_left;
+    {
+      auto rc = removeConstraintFromPredicate(
+          call_expr->arguments()[0],
+          constraint,
+          &arg_left);
+
+      if (!rc.isSuccess()) {
+        return rc;
+      }
+    }
+
+    RefPtr<ValueExpressionNode> arg_right;
+    {
+      auto rc = removeConstraintFromPredicate(
+          call_expr->arguments()[1],
+          constraint,
+          &arg_right);
+
+      if (!rc.isSuccess()) {
+        return rc;
+      }
+    }
 
     auto arg_left_is_true =
         dynamic_cast<LiteralExpressionNode*>(arg_left.get()) &&
@@ -145,24 +190,32 @@ RefPtr<ValueExpressionNode> QueryTreeUtil::removeConstraintFromPredicate(
         dynamic_cast<LiteralExpressionNode*>(arg_right.get())->value().getBool();
 
     if (arg_left_is_true && arg_right_is_true) {
-      return new LiteralExpressionNode(SValue(SValue::BoolType(true)));
+      *out = RefPtr<ValueExpressionNode>(
+          new LiteralExpressionNode(SValue(SValue::BoolType(true))));
+      return ReturnCode::success();
     } else if (arg_left_is_true) {
-      return arg_right;
+      *out = arg_right;
+      return ReturnCode::success();
     } else if (arg_right_is_true) {
-      return arg_left;
+      *out = arg_left;
+      return ReturnCode::success();
     } else {
-      return new CallExpressionNode(
+      return CallExpressionNode::newNode(
           "logical_and",
-          Vector<RefPtr<ValueExpressionNode>> { arg_left, arg_right });
+          Vector<RefPtr<ValueExpressionNode>> { arg_left, arg_right },
+          out);
     }
   }
 
   auto e_constraint = findConstraint(expr);
   if (!e_constraint.isEmpty() && e_constraint.get() == constraint) {
-    return new LiteralExpressionNode(SValue(SValue::BoolType(true)));
+    *out = RefPtr<ValueExpressionNode>(
+        new LiteralExpressionNode(SValue(SValue::BoolType(true))));
   } else {
-    return expr;
+    *out = expr;
   }
+
+  return ReturnCode::success();
 }
 
 void QueryTreeUtil::findConstraints(

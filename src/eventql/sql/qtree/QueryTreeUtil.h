@@ -79,9 +79,10 @@ public:
    * the original expression did. However, it is guaranteed that all inputs
    * that match the original expression will still match the pruned expression.
    */
-  static RefPtr<ValueExpressionNode> prunePredicateExpression(
+  static ReturnCode prunePredicateExpression(
       RefPtr<ValueExpressionNode> expr,
-      const Set<String>& column_whitelist);
+      const Set<String>& column_whitelist,
+      RefPtr<ValueExpressionNode>* out);
 
   /**
    * Removes the provided scan constraint from the provided predicate
@@ -92,9 +93,10 @@ public:
    * the original expression did. However, it is guaranteed that all inputs
    * that match the original expression will still match the pruned expression.
    */
-  static RefPtr<ValueExpressionNode> removeConstraintFromPredicate(
+  static ReturnCode removeConstraintFromPredicate(
       RefPtr<ValueExpressionNode> expr,
-      const ScanConstraint& constraint);
+      const ScanConstraint& constraint,
+      RefPtr<ValueExpressionNode>* out);
 
   /**
    * Extracts all constraints from the provided predicate expression
