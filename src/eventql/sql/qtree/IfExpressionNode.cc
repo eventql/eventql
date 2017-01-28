@@ -28,6 +28,35 @@
 
 namespace csql {
 
+ReturnCode IfExpressionNode::newNode(
+    RefPtr<ValueExpressionNode> conditional_expr,
+    RefPtr<ValueExpressionNode> true_branch_expr,
+    RefPtr<ValueExpressionNode> false_branch_expr,
+  RefPtr<ValueExpressionNode>* node) {
+  if (conditional_expr->getReturnType() != SType::BOOL) {
+    return ReturnCode::error(
+        "EARG",
+        "conditional of if statment must return bool");
+  }
+
+  if (true_branch_expr->getReturnType() != false_branch_expr->getReturnType()) {
+    return ReturnCode::error(
+        "EARG",
+        "if statement branches return different types");
+  }
+
+  auto return_type = true_branch_expr->getReturnType();
+
+  *node = RefPtr<ValueExpressionNode>(
+      new IfExpressionNode(
+          return_type,
+          conditional_expr,
+          true_branch_expr,
+          false_branch_expr));
+
+  return ReturnCode::success();
+}
+
 IfExpressionNode::IfExpressionNode(
     SType return_type,
     RefPtr<ValueExpressionNode> conditional_expr,
