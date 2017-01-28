@@ -441,6 +441,15 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(
   auto child_sl = new ASTNode(ASTNode::T_SELECT_LIST);
   buildGroupBySelectList(select_list, child_sl);
 
+  /* copy ast for child and swap out select lists*/
+  auto child_ast = ast->deepCopy();
+  child_ast->removeChildrenByType(ASTNode::T_GROUP_BY);
+  child_ast->removeChildByIndex(0);
+  child_ast->appendChild(child_sl, 0);
+
+  auto subtree = build(txn, child_ast, tables);
+  auto subtree_tbl = subtree.asInstanceOf<TableExpressionNode>();
+
   /* search for a group by clause */
   Vector<RefPtr<ValueExpressionNode>> group_expressions;
   for (const auto& child : ast->getChildren()) {
@@ -454,18 +463,21 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(
         RAISE(kRuntimeError, "GROUP clause can only contain pure functions");
       }
 
-      group_expressions.emplace_back(buildValueExpression(txn, e));
+      group_expressions.emplace_back(
+          buildValueExpression(
+              txn,
+              e,
+              std::bind(
+                  &TableExpressionNode::getComputedColumnInfo,
+                  subtree_tbl.get(),
+                  std::placeholders::_1,
+                  true),
+              std::bind(
+                  &TableExpressionNode::getColumnType,
+                  subtree_tbl.get(),
+                  std::placeholders::_1)));
     }
   }
-
-  /* copy ast for child and swap out select lists*/
-  auto child_ast = ast->deepCopy();
-  child_ast->removeChildrenByType(ASTNode::T_GROUP_BY);
-  child_ast->removeChildByIndex(0);
-  child_ast->appendChild(child_sl, 0);
-
-  auto subtree = build(txn, child_ast, tables);
-  auto subtree_tbl = subtree.asInstanceOf<TableExpressionNode>();
 
   /* select list  */
   Vector<RefPtr<SelectListNode>> select_list_expressions;
@@ -479,29 +491,21 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(
         select_list_expressions.emplace_back(sl);
       }
     } else {
-      auto sl = buildSelectList(txn, select_expr);
+      auto sl = buildSelectList(
+          txn,
+          select_expr,
+          std::bind(
+              &TableExpressionNode::getComputedColumnInfo,
+              subtree_tbl.get(),
+              std::placeholders::_1,
+              false),
+          std::bind(
+              &TableExpressionNode::getColumnType,
+              subtree_tbl.get(),
+              std::placeholders::_1));
+
       select_list_expressions.emplace_back(sl);
     }
-  }
-
-  for (auto& sl : select_list_expressions) {
-    QueryTreeUtil::resolveColumns(
-        sl->expression(),
-        std::bind(
-            &TableExpressionNode::getComputedColumnIndex,
-            subtree_tbl.get(),
-            std::placeholders::_1,
-            false));
-  }
-
-  for (auto& e : group_expressions) {
-    QueryTreeUtil::resolveColumns(
-        e,
-        std::bind(
-            &TableExpressionNode::getComputedColumnIndex,
-            subtree_tbl.get(),
-            std::placeholders::_1,
-            true));
   }
 
   return new GroupByNode(
@@ -678,14 +682,19 @@ QueryTreeNode* QueryPlanBuilder::buildOrderByClause(
 
       /* create the sort spec */
       OrderByNode::SortSpec sort_spec;
-      sort_spec.expr = buildValueExpression(txn, sort->getChildren()[0]);
-      QueryTreeUtil::resolveColumns(
-          sort_spec.expr, 
+      sort_spec.expr = buildValueExpression(
+          txn,
+          sort->getChildren()[0],
           std::bind(
-              &TableExpressionNode::getComputedColumnIndex,
+              &TableExpressionNode::getComputedColumnInfo,
               subtree_tbl.get(),
               std::placeholders::_1,
-              true));
+              true),
+          std::bind(
+              &TableExpressionNode::getColumnType,
+              subtree_tbl.get(),
+              std::placeholders::_1));
+
       sort_spec.descending = sort_descending;
       sort_specs.emplace_back(sort_spec);
     }
@@ -825,7 +834,12 @@ QueryTreeNode* QueryPlanBuilder::buildSelectExpression(
           "a SELECT without any tables can only contain pure functions");
     }
 
-    select_list_expressions.emplace_back(buildSelectList(txn, select_expr));
+    select_list_expressions.emplace_back(
+        buildSelectList(
+            txn,
+            select_expr,
+            kEmptyColumnResolver,
+            kEmptyColumnTypeResolver));
   }
 
   return new SelectExpressionNode(select_list_expressions);
@@ -934,290 +948,290 @@ QueryTreeNode* QueryPlanBuilder::buildTableReference(
   }
 }
 
-QueryTreeNode* QueryPlanBuilder::buildJoinTableReference(
-    Transaction* txn,
-    ASTNode* table_ref,
-    ASTNode* select_list,
-    ASTNode* where_clause,
-    RefPtr<TableProvider> tables,
-    bool in_join) {
-  if (table_ref->getChildren().size() < 2) {
-    return nullptr;
-  }
-
-  JoinType join_type;
-  bool natural_join = false;
-  bool reverse = false;
-
-  switch (table_ref->getType()) {
-    case ASTNode::T_NATURAL_INNER_JOIN:
-      natural_join = true;
-      /* fallthrough */
-    case ASTNode::T_INNER_JOIN:
-      join_type = JoinType::INNER;
-      break;
-    case ASTNode::T_NATURAL_LEFT_JOIN:
-      natural_join = true;
-      /* fallthrough */
-    case ASTNode::T_LEFT_JOIN:
-      join_type = JoinType::OUTER;
-      break;
-    case ASTNode::T_NATURAL_RIGHT_JOIN:
-      natural_join = true;
-      /* fallthrough */
-    case ASTNode::T_RIGHT_JOIN:
-      reverse = true;
-      join_type = JoinType::OUTER;
-      break;
-    default:
-      RAISE(kRuntimeError, "invalid JOIN type");
-  }
-
-  Option<RefPtr<ValueExpressionNode>> where_expr;
-  if (!in_join && where_clause) {
-    if (!(*where_clause == ASTNode::T_WHERE)) {
-      return nullptr;
-    }
-
-    if (where_clause->getChildren().size() != 1) {
-      RAISE(kRuntimeError, "corrupt AST");
-    }
-
-    auto e = where_clause->getChildren()[0];
-    if (e == nullptr) {
-      RAISE(kRuntimeError, "corrupt AST");
-    }
-
-    if (hasAggregationExpression(e)) {
-      RAISE(
-          kRuntimeError,
-          "where expressions can only contain pure functions\n");
-    }
-
-    where_expr = Some(RefPtr<ValueExpressionNode>(buildValueExpression(txn, e)));
-  }
-
-  auto child_sl = mkScoped(new ASTNode(ASTNode::T_SELECT_LIST));
-
-  auto base_table = mkRef(buildTableReference(
-      txn,
-      table_ref->getChildren()[0],
-      child_sl.get(),
-      where_clause,
-      tables,
-      true));
-
-  auto joined_table = mkRef(buildTableReference(
-      txn,
-      table_ref->getChildren()[1],
-      child_sl.get(),
-      where_clause,
-      tables,
-      true));
-
-  Vector<QualifiedColumn> all_columns;
-  Option<RefPtr<ValueExpressionNode>> join_cond;
-
-  if (natural_join) {
-    RefPtr<TableExpressionNode> primary_table;
-    RefPtr<TableExpressionNode> secondary_table;
-    if (reverse) {
-      primary_table = joined_table.asInstanceOf<TableExpressionNode>();
-      secondary_table = base_table.asInstanceOf<TableExpressionNode>();
-    } else {
-      primary_table = base_table.asInstanceOf<TableExpressionNode>();
-      secondary_table = joined_table.asInstanceOf<TableExpressionNode>();
-    }
-
-    HashMap<String, std::vector<std::pair<std::string, SType>>> common_columns;
-    {
-      Set<String> tmp_column_set;
-      for (const auto& col : secondary_table->getAvailableColumns()) {
-        tmp_column_set.insert(col.short_name);
-      }
-
-      for (const auto& col : primary_table->getAvailableColumns()) {
-        if (tmp_column_set.count(col.short_name) > 0) {
-          all_columns.emplace_back(col);
-          common_columns.emplace(col.short_name, std::vector<std::pair<std::string, SType>>{});
-          tmp_column_set.erase(col.short_name);
-        }
-      }
-    }
-
-    for (const auto& col :
-            base_table.asInstanceOf<TableExpressionNode>()->getAvailableColumns()) {
-      if (common_columns.count(col.short_name) == 0) {
-        all_columns.emplace_back(col);
-      } else {
-        common_columns[col.short_name].emplace_back(col.qualified_name, col.type);
-      }
-    }
-
-    for (const auto& col :
-            joined_table.asInstanceOf<TableExpressionNode>()->getAvailableColumns()) {
-      if (common_columns.count(col.short_name) == 0) {
-        all_columns.emplace_back(col);
-      } else {
-        common_columns[col.short_name].emplace_back(col.qualified_name, col.type);
-      }
-    }
-
-    RefPtr<ValueExpressionNode> pred;
-    for (const auto& c : common_columns) {
-      for (size_t i1 = 0; i1 < c.second.size(); ++i1) {
-        for (size_t i2 = 0; i2 < c.second.size(); ++i2) {
-          if (i1 == i2) {
-            continue;
-          }
-
-          RefPtr<ValueExpressionNode> cpred;
-          {
-            auto rc = csql::CallExpressionNode::newNode(
-                "eq",
-                Vector<RefPtr<csql::ValueExpressionNode>>{
-                  new csql::ColumnReferenceNode(c.second[i1].first, c.second[i1].second),
-                  new csql::ColumnReferenceNode(c.second[i2].first, c.second[i2].second)
-                },
-                &cpred);
-
-            if (!rc.isSuccess()) {
-              RAISE(kRuntimeError, rc.getMessage());
-            }
-          }
-
-          if (pred.get() == nullptr) {
-            pred = cpred;
-          } else {
-            auto rc = csql::CallExpressionNode::newNode(
-                "logical_and",
-                Vector<RefPtr<csql::ValueExpressionNode>>{ pred, cpred },
-                &pred);
-
-            if (!rc.isSuccess()) {
-              RAISE(kRuntimeError, rc.getMessage());
-            }
-          }
-        }
-      }
-    }
-
-    if (pred.get() != nullptr) {
-      join_cond = pred;
-    }
-  } else {
-    for (const auto& col :
-            base_table.asInstanceOf<TableExpressionNode>()->getAvailableColumns()) {
-      all_columns.emplace_back(col);
-    }
-
-    for (const auto& col :
-            joined_table.asInstanceOf<TableExpressionNode>()->getAvailableColumns()) {
-      all_columns.emplace_back(col);
-    }
-
-    if (table_ref->getChildren().size() > 2) {
-      auto cond_ast = table_ref->getChildren()[2];
-
-      switch (cond_ast->getType()) {
-        case ASTNode::T_JOIN_CONDITION: {
-          if (cond_ast->getChildren().size() != 1) {
-            RAISE(kRuntimeError, "corrupt AST");
-          }
-
-          auto e = cond_ast->getChildren()[0];
-          if (e == nullptr) {
-            RAISE(kRuntimeError, "corrupt AST");
-          }
-
-          if (hasAggregationExpression(e)) {
-            RAISE(
-                kRuntimeError,
-                "JOIN conditions can only contain pure functions\n");
-          }
-
-          join_cond = buildValueExpression(txn, e);
-          break;
-        }
-
-        case ASTNode::T_JOIN_COLUMNLIST: {
-          RAISE(kNotYetImplementedError);
-        }
-
-        default:
-          RAISE(kRuntimeError, "corrupt AST");
-      }
-    }
-  }
-
-  Vector<RefPtr<SelectListNode>> select_list_expressions;
-  for (const auto& select_expr : select_list->getChildren()) {
-    if (hasAggregationWithinRecord(select_expr)) {
-      RAISE(
-          kRuntimeError,
-          "WITHIN RECORD can't be used together with JOIN in the same SELECT"
-          " statement. consider moving the WITHIN RECORD expression into a"
-          " subquery");
-    }
-
-    if (*select_expr == ASTNode::T_ALL) {
-      for (const auto& col : all_columns) {
-        auto sl = new SelectListNode(
-            new ColumnReferenceNode(col.qualified_name, col.type));
-        sl->setAlias(col.short_name);
-        select_list_expressions.emplace_back(sl);
-      }
-    } else {
-      select_list_expressions.emplace_back(buildSelectList(txn, select_expr));
-    }
-  }
-
-  if (join_cond.isEmpty() && join_type == JoinType::INNER) {
-    join_type = JoinType::CARTESIAN;
-  }
-
-  auto join_node = mkScoped(new JoinNode(
-      join_type,
-      reverse ? joined_table : base_table,
-      reverse ? base_table : joined_table,
-      select_list_expressions,
-      where_expr,
-      join_cond));
-
-  for (auto& sl : join_node->selectList()) {
-    QueryTreeUtil::resolveColumns(
-        sl->expression(),
-        std::bind(
-            &JoinNode::getInputColumnIndex,
-            join_node.get(),
-            std::placeholders::_1,
-            false));
-  }
-
-  auto jce = join_node->joinCondition();
-  if (!jce.isEmpty()) {
-    QueryTreeUtil::resolveColumns(
-        jce.get(),
-        std::bind(
-            &JoinNode::getInputColumnIndex,
-            join_node.get(),
-            std::placeholders::_1,
-            true));
-  }
-
-  auto we = join_node->whereExpression();
-  if (!we.isEmpty()) {
-    QueryTreeUtil::resolveColumns(
-        we.get(),
-        std::bind(
-            &JoinNode::getInputColumnIndex,
-            join_node.get(),
-            std::placeholders::_1,
-            true));
-  }
-
-  return join_node.release();
-}
+//QueryTreeNode* QueryPlanBuilder::buildJoinTableReference(
+//    Transaction* txn,
+//    ASTNode* table_ref,
+//    ASTNode* select_list,
+//    ASTNode* where_clause,
+//    RefPtr<TableProvider> tables,
+//    bool in_join) {
+//  if (table_ref->getChildren().size() < 2) {
+//    return nullptr;
+//  }
+//
+//  JoinType join_type;
+//  bool natural_join = false;
+//  bool reverse = false;
+//
+//  switch (table_ref->getType()) {
+//    case ASTNode::T_NATURAL_INNER_JOIN:
+//      natural_join = true;
+//      /* fallthrough */
+//    case ASTNode::T_INNER_JOIN:
+//      join_type = JoinType::INNER;
+//      break;
+//    case ASTNode::T_NATURAL_LEFT_JOIN:
+//      natural_join = true;
+//      /* fallthrough */
+//    case ASTNode::T_LEFT_JOIN:
+//      join_type = JoinType::OUTER;
+//      break;
+//    case ASTNode::T_NATURAL_RIGHT_JOIN:
+//      natural_join = true;
+//      /* fallthrough */
+//    case ASTNode::T_RIGHT_JOIN:
+//      reverse = true;
+//      join_type = JoinType::OUTER;
+//      break;
+//    default:
+//      RAISE(kRuntimeError, "invalid JOIN type");
+//  }
+//
+//  Option<RefPtr<ValueExpressionNode>> where_expr;
+//  if (!in_join && where_clause) {
+//    if (!(*where_clause == ASTNode::T_WHERE)) {
+//      return nullptr;
+//    }
+//
+//    if (where_clause->getChildren().size() != 1) {
+//      RAISE(kRuntimeError, "corrupt AST");
+//    }
+//
+//    auto e = where_clause->getChildren()[0];
+//    if (e == nullptr) {
+//      RAISE(kRuntimeError, "corrupt AST");
+//    }
+//
+//    if (hasAggregationExpression(e)) {
+//      RAISE(
+//          kRuntimeError,
+//          "where expressions can only contain pure functions\n");
+//    }
+//
+//    where_expr = Some(RefPtr<ValueExpressionNode>(buildValueExpression(txn, e)));
+//  }
+//
+//  auto child_sl = mkScoped(new ASTNode(ASTNode::T_SELECT_LIST));
+//
+//  auto base_table = mkRef(buildTableReference(
+//      txn,
+//      table_ref->getChildren()[0],
+//      child_sl.get(),
+//      where_clause,
+//      tables,
+//      true));
+//
+//  auto joined_table = mkRef(buildTableReference(
+//      txn,
+//      table_ref->getChildren()[1],
+//      child_sl.get(),
+//      where_clause,
+//      tables,
+//      true));
+//
+//  Vector<QualifiedColumn> all_columns;
+//  Option<RefPtr<ValueExpressionNode>> join_cond;
+//
+//  if (natural_join) {
+//    RefPtr<TableExpressionNode> primary_table;
+//    RefPtr<TableExpressionNode> secondary_table;
+//    if (reverse) {
+//      primary_table = joined_table.asInstanceOf<TableExpressionNode>();
+//      secondary_table = base_table.asInstanceOf<TableExpressionNode>();
+//    } else {
+//      primary_table = base_table.asInstanceOf<TableExpressionNode>();
+//      secondary_table = joined_table.asInstanceOf<TableExpressionNode>();
+//    }
+//
+//    HashMap<String, std::vector<std::pair<std::string, SType>>> common_columns;
+//    {
+//      Set<String> tmp_column_set;
+//      for (const auto& col : secondary_table->getAvailableColumns()) {
+//        tmp_column_set.insert(col.short_name);
+//      }
+//
+//      for (const auto& col : primary_table->getAvailableColumns()) {
+//        if (tmp_column_set.count(col.short_name) > 0) {
+//          all_columns.emplace_back(col);
+//          common_columns.emplace(col.short_name, std::vector<std::pair<std::string, SType>>{});
+//          tmp_column_set.erase(col.short_name);
+//        }
+//      }
+//    }
+//
+//    for (const auto& col :
+//            base_table.asInstanceOf<TableExpressionNode>()->getAvailableColumns()) {
+//      if (common_columns.count(col.short_name) == 0) {
+//        all_columns.emplace_back(col);
+//      } else {
+//        common_columns[col.short_name].emplace_back(col.qualified_name, col.type);
+//      }
+//    }
+//
+//    for (const auto& col :
+//            joined_table.asInstanceOf<TableExpressionNode>()->getAvailableColumns()) {
+//      if (common_columns.count(col.short_name) == 0) {
+//        all_columns.emplace_back(col);
+//      } else {
+//        common_columns[col.short_name].emplace_back(col.qualified_name, col.type);
+//      }
+//    }
+//
+//    RefPtr<ValueExpressionNode> pred;
+//    for (const auto& c : common_columns) {
+//      for (size_t i1 = 0; i1 < c.second.size(); ++i1) {
+//        for (size_t i2 = 0; i2 < c.second.size(); ++i2) {
+//          if (i1 == i2) {
+//            continue;
+//          }
+//
+//          RefPtr<ValueExpressionNode> cpred;
+//          {
+//            auto rc = csql::CallExpressionNode::newNode(
+//                "eq",
+//                Vector<RefPtr<csql::ValueExpressionNode>>{
+//                  new csql::ColumnReferenceNode(c.second[i1].first, c.second[i1].second),
+//                  new csql::ColumnReferenceNode(c.second[i2].first, c.second[i2].second)
+//                },
+//                &cpred);
+//
+//            if (!rc.isSuccess()) {
+//              RAISE(kRuntimeError, rc.getMessage());
+//            }
+//          }
+//
+//          if (pred.get() == nullptr) {
+//            pred = cpred;
+//          } else {
+//            auto rc = csql::CallExpressionNode::newNode(
+//                "logical_and",
+//                Vector<RefPtr<csql::ValueExpressionNode>>{ pred, cpred },
+//                &pred);
+//
+//            if (!rc.isSuccess()) {
+//              RAISE(kRuntimeError, rc.getMessage());
+//            }
+//          }
+//        }
+//      }
+//    }
+//
+//    if (pred.get() != nullptr) {
+//      join_cond = pred;
+//    }
+//  } else {
+//    for (const auto& col :
+//            base_table.asInstanceOf<TableExpressionNode>()->getAvailableColumns()) {
+//      all_columns.emplace_back(col);
+//    }
+//
+//    for (const auto& col :
+//            joined_table.asInstanceOf<TableExpressionNode>()->getAvailableColumns()) {
+//      all_columns.emplace_back(col);
+//    }
+//
+//    if (table_ref->getChildren().size() > 2) {
+//      auto cond_ast = table_ref->getChildren()[2];
+//
+//      switch (cond_ast->getType()) {
+//        case ASTNode::T_JOIN_CONDITION: {
+//          if (cond_ast->getChildren().size() != 1) {
+//            RAISE(kRuntimeError, "corrupt AST");
+//          }
+//
+//          auto e = cond_ast->getChildren()[0];
+//          if (e == nullptr) {
+//            RAISE(kRuntimeError, "corrupt AST");
+//          }
+//
+//          if (hasAggregationExpression(e)) {
+//            RAISE(
+//                kRuntimeError,
+//                "JOIN conditions can only contain pure functions\n");
+//          }
+//
+//          join_cond = buildValueExpression(txn, e);
+//          break;
+//        }
+//
+//        case ASTNode::T_JOIN_COLUMNLIST: {
+//          RAISE(kNotYetImplementedError);
+//        }
+//
+//        default:
+//          RAISE(kRuntimeError, "corrupt AST");
+//      }
+//    }
+//  }
+//
+//  Vector<RefPtr<SelectListNode>> select_list_expressions;
+//  for (const auto& select_expr : select_list->getChildren()) {
+//    if (hasAggregationWithinRecord(select_expr)) {
+//      RAISE(
+//          kRuntimeError,
+//          "WITHIN RECORD can't be used together with JOIN in the same SELECT"
+//          " statement. consider moving the WITHIN RECORD expression into a"
+//          " subquery");
+//    }
+//
+//    if (*select_expr == ASTNode::T_ALL) {
+//      for (const auto& col : all_columns) {
+//        auto sl = new SelectListNode(
+//            new ColumnReferenceNode(col.qualified_name, col.type));
+//        sl->setAlias(col.short_name);
+//        select_list_expressions.emplace_back(sl);
+//      }
+//    } else {
+//      select_list_expressions.emplace_back(buildSelectList(txn, select_expr));
+//    }
+//  }
+//
+//  if (join_cond.isEmpty() && join_type == JoinType::INNER) {
+//    join_type = JoinType::CARTESIAN;
+//  }
+//
+//  auto join_node = mkScoped(new JoinNode(
+//      join_type,
+//      reverse ? joined_table : base_table,
+//      reverse ? base_table : joined_table,
+//      select_list_expressions,
+//      where_expr,
+//      join_cond));
+//
+//  for (auto& sl : join_node->selectList()) {
+//    QueryTreeUtil::resolveColumns(
+//        sl->expression(),
+//        std::bind(
+//            &JoinNode::getInputColumnIndex,
+//            join_node.get(),
+//            std::placeholders::_1,
+//            false));
+//  }
+//
+//  auto jce = join_node->joinCondition();
+//  if (!jce.isEmpty()) {
+//    QueryTreeUtil::resolveColumns(
+//        jce.get(),
+//        std::bind(
+//            &JoinNode::getInputColumnIndex,
+//            join_node.get(),
+//            std::placeholders::_1,
+//            true));
+//  }
+//
+//  auto we = join_node->whereExpression();
+//  if (!we.isEmpty()) {
+//    QueryTreeUtil::resolveColumns(
+//        we.get(),
+//        std::bind(
+//            &JoinNode::getInputColumnIndex,
+//            join_node.get(),
+//            std::placeholders::_1,
+//            true));
+//  }
+//
+//  return join_node.release();
+//}
 
 QueryTreeNode* QueryPlanBuilder::buildSubqueryTableReference(
     Transaction* txn,
@@ -1257,8 +1271,13 @@ QueryTreeNode* QueryPlanBuilder::buildSubqueryTableReference(
       }
     }
 
-    return subquery_tbl->getComputedColumnIndex(col);
+    return subquery_tbl->getComputedColumnInfo(col);
   };
+
+  auto type_resolver = std::bind(
+      &TableExpressionNode::getColumnType,
+      subquery_tbl.get(),
+      std::placeholders::_1);
 
   Vector<RefPtr<SelectListNode>> select_list_expressions;
   for (const auto& select_expr : select_list->getChildren()) {
@@ -1271,12 +1290,10 @@ QueryTreeNode* QueryPlanBuilder::buildSubqueryTableReference(
                     subquery_tbl->getComputedColumnIndex(col))));
 
         sl->setAlias(col);
-        QueryTreeUtil::resolveColumns(sl->expression(), resolver);
         select_list_expressions.emplace_back(sl);
       }
     } else {
-      auto sl = buildSelectList(txn, select_expr);
-      QueryTreeUtil::resolveColumns(sl->expression(), resolver);
+      auto sl = buildSelectList(txn, select_expr, resolver, type_resolver);
       select_list_expressions.emplace_back(sl);
     }
   }
@@ -1304,8 +1321,7 @@ QueryTreeNode* QueryPlanBuilder::buildSubqueryTableReference(
           "where expressions can only contain pure functions\n");
     }
 
-    where_expr = Some(RefPtr<ValueExpressionNode>(buildValueExpression(txn, e)));
-    QueryTreeUtil::resolveColumns(where_expr.get(), resolver);
+    where_expr = Some(RefPtr<ValueExpressionNode>(buildValueExpression(txn, e, resolver, type_resolver)));
   }
 
   auto subqnode = new SubqueryNode(
@@ -1317,155 +1333,157 @@ QueryTreeNode* QueryPlanBuilder::buildSubqueryTableReference(
   return subqnode;
 }
 
-QueryTreeNode* QueryPlanBuilder::buildSeqscanTableReference(
-    Transaction* txn,
-    ASTNode* table_ref,
-    ASTNode* select_list,
-    ASTNode* where_clause,
-    RefPtr<TableProvider> tables,
-    bool in_join) {
-  if (!(*table_ref == ASTNode::T_FROM)) {
-    return nullptr;
-  }
-
-  if (table_ref->getChildren().size() < 1) {
-    return nullptr;
-  }
-
-  /* get table reference */
-  auto tbl_name = table_ref->getChildren()[0];
-  if (!(*tbl_name == ASTNode::T_TABLE_NAME)) {
-    return nullptr;
-  }
-
-  auto tbl_name_token = tbl_name->getToken();
-  if (!(tbl_name_token != nullptr)) {
-    RAISE(kRuntimeError, "corrupt AST");
-  }
-
-  auto table_name = tbl_name_token->getString();
-
-  /* get table alias */
-  String table_alias;
-  if (table_ref->getChildren().size() > 1 &&
-      table_ref->getChildren()[1]->getType() == ASTNode::T_TABLE_ALIAS) {
-    table_alias = table_ref->getChildren()[1]->getToken()->getString();
-  }
-
-  auto table = tables->describe(table_name);
-  if (table.isEmpty()) {
-    RAISEF(kRuntimeError, "table not found: '$0'", table_name);
-  }
-
-  /* get where expression */
-  Option<RefPtr<ValueExpressionNode>> where_expr;
-  if (where_clause) {
-    if (!(*where_clause == ASTNode::T_WHERE)) {
-      return nullptr;
-    }
-
-    if (where_clause->getChildren().size() != 1) {
-      RAISE(kRuntimeError, "corrupt AST");
-    }
-
-    auto e = where_clause->getChildren()[0];
-
-    if (e == nullptr) {
-      RAISE(kRuntimeError, "corrupt AST");
-    }
-
-    if (hasAggregationExpression(e)) {
-      RAISE(
-          kRuntimeError,
-          "where expressions can only contain pure functions\n");
-    }
-
-    auto pred = RefPtr<ValueExpressionNode>(buildValueExpression(txn, e));
-
-    if (in_join) {
-      Set<String> valid_columns;
-      for (const auto& col : table.get().columns) {
-        valid_columns.insert(col.column_name);
-        valid_columns.insert(table_name + "." + col.column_name);
-        if (!table_alias.empty()) {
-          valid_columns.insert(table_alias + "." + col.column_name);
-        }
-      }
-
-      auto rc = QueryTreeUtil::prunePredicateExpression(
-          pred,
-          valid_columns,
-          &pred);
-
-      if (!rc.isSuccess()) {
-        RAISE(kRuntimeError, rc.getMessage());
-      }
-    }
-
-    // FIXME skip if literal true expression
-    where_expr = Some(pred);
-  }
-
-  bool has_aggregation = false;
-  bool has_aggregation_within_record = false;
-
-  /* select list  */
-  Vector<RefPtr<SelectListNode>> select_list_expressions;
-  for (const auto& select_expr : select_list->getChildren()) {
-    if (*select_expr == ASTNode::T_ALL) {
-      for (const auto& col : table.get().columns) {
-        auto sl = new SelectListNode(
-            new ColumnReferenceNode(col.column_name, col.type));
-        sl->setAlias(col.column_name);
-        select_list_expressions.emplace_back(sl);
-      }
-    } else {
-      if (hasAggregationExpression(select_expr)) {
-        has_aggregation = true;
-      }
-
-      if (hasAggregationWithinRecord(select_expr)) {
-        has_aggregation_within_record = true;
-      }
-
-      select_list_expressions.emplace_back(buildSelectList(txn, select_expr));
-    }
-  }
-
-  if (has_aggregation && has_aggregation_within_record) {
-    RAISE(
-        kRuntimeError,
-        "invalid use of aggregation WITHIN RECORD functions");
-  }
-
-
-  /* aggregation type */
-  auto seqscan = new SequentialScanNode(
-      table.get(),
-      tables,
-      select_list_expressions,
-      where_expr);
-
-  if (!table_alias.empty()) {
-    seqscan->setTableAlias(table_alias);
-  }
-
-  if (has_aggregation) {
-    seqscan->setAggregationStrategy(AggregationStrategy::AGGREGATE_ALL);
-  }
-
-  if (has_aggregation_within_record) {
-    seqscan->setAggregationStrategy(AggregationStrategy::AGGREGATE_WITHIN_RECORD_FLAT);
-  }
-
-  seqscan->normalizeColumnNames();
-  return seqscan;
-}
+//QueryTreeNode* QueryPlanBuilder::buildSeqscanTableReference(
+//    Transaction* txn,
+//    ASTNode* table_ref,
+//    ASTNode* select_list,
+//    ASTNode* where_clause,
+//    RefPtr<TableProvider> tables,
+//    bool in_join) {
+//  if (!(*table_ref == ASTNode::T_FROM)) {
+//    return nullptr;
+//  }
+//
+//  if (table_ref->getChildren().size() < 1) {
+//    return nullptr;
+//  }
+//
+//  /* get table reference */
+//  auto tbl_name = table_ref->getChildren()[0];
+//  if (!(*tbl_name == ASTNode::T_TABLE_NAME)) {
+//    return nullptr;
+//  }
+//
+//  auto tbl_name_token = tbl_name->getToken();
+//  if (!(tbl_name_token != nullptr)) {
+//    RAISE(kRuntimeError, "corrupt AST");
+//  }
+//
+//  auto table_name = tbl_name_token->getString();
+//
+//  /* get table alias */
+//  String table_alias;
+//  if (table_ref->getChildren().size() > 1 &&
+//      table_ref->getChildren()[1]->getType() == ASTNode::T_TABLE_ALIAS) {
+//    table_alias = table_ref->getChildren()[1]->getToken()->getString();
+//  }
+//
+//  auto table = tables->describe(table_name);
+//  if (table.isEmpty()) {
+//    RAISEF(kRuntimeError, "table not found: '$0'", table_name);
+//  }
+//
+//  /* get where expression */
+//  Option<RefPtr<ValueExpressionNode>> where_expr;
+//  if (where_clause) {
+//    if (!(*where_clause == ASTNode::T_WHERE)) {
+//      return nullptr;
+//    }
+//
+//    if (where_clause->getChildren().size() != 1) {
+//      RAISE(kRuntimeError, "corrupt AST");
+//    }
+//
+//    auto e = where_clause->getChildren()[0];
+//
+//    if (e == nullptr) {
+//      RAISE(kRuntimeError, "corrupt AST");
+//    }
+//
+//    if (hasAggregationExpression(e)) {
+//      RAISE(
+//          kRuntimeError,
+//          "where expressions can only contain pure functions\n");
+//    }
+//
+//    auto pred = RefPtr<ValueExpressionNode>(buildValueExpression(txn, e));
+//
+//    if (in_join) {
+//      Set<String> valid_columns;
+//      for (const auto& col : table.get().columns) {
+//        valid_columns.insert(col.column_name);
+//        valid_columns.insert(table_name + "." + col.column_name);
+//        if (!table_alias.empty()) {
+//          valid_columns.insert(table_alias + "." + col.column_name);
+//        }
+//      }
+//
+//      auto rc = QueryTreeUtil::prunePredicateExpression(
+//          pred,
+//          valid_columns,
+//          &pred);
+//
+//      if (!rc.isSuccess()) {
+//        RAISE(kRuntimeError, rc.getMessage());
+//      }
+//    }
+//
+//    // FIXME skip if literal true expression
+//    where_expr = Some(pred);
+//  }
+//
+//  bool has_aggregation = false;
+//  bool has_aggregation_within_record = false;
+//
+//  /* select list  */
+//  Vector<RefPtr<SelectListNode>> select_list_expressions;
+//  for (const auto& select_expr : select_list->getChildren()) {
+//    if (*select_expr == ASTNode::T_ALL) {
+//      for (const auto& col : table.get().columns) {
+//        auto sl = new SelectListNode(
+//            new ColumnReferenceNode(col.column_name, col.type));
+//        sl->setAlias(col.column_name);
+//        select_list_expressions.emplace_back(sl);
+//      }
+//    } else {
+//      if (hasAggregationExpression(select_expr)) {
+//        has_aggregation = true;
+//      }
+//
+//      if (hasAggregationWithinRecord(select_expr)) {
+//        has_aggregation_within_record = true;
+//      }
+//
+//      select_list_expressions.emplace_back(buildSelectList(txn, select_expr));
+//    }
+//  }
+//
+//  if (has_aggregation && has_aggregation_within_record) {
+//    RAISE(
+//        kRuntimeError,
+//        "invalid use of aggregation WITHIN RECORD functions");
+//  }
+//
+//
+//  /* aggregation type */
+//  auto seqscan = new SequentialScanNode(
+//      table.get(),
+//      tables,
+//      select_list_expressions,
+//      where_expr);
+//
+//  if (!table_alias.empty()) {
+//    seqscan->setTableAlias(table_alias);
+//  }
+//
+//  if (has_aggregation) {
+//    seqscan->setAggregationStrategy(AggregationStrategy::AGGREGATE_ALL);
+//  }
+//
+//  if (has_aggregation_within_record) {
+//    seqscan->setAggregationStrategy(AggregationStrategy::AGGREGATE_WITHIN_RECORD_FLAT);
+//  }
+//
+//  seqscan->normalizeColumnNames();
+//  return seqscan;
+//}
 
 RefPtr<ValueExpressionNode> QueryPlanBuilder::buildValueExpression(
     Transaction* txn,
-    ASTNode* ast) {
-  auto valexpr = buildUnoptimizedValueExpression(txn, ast);
+    ASTNode* ast,
+    ColumnResolver resolver,
+    ColumnTypeResolver type_resolver) {
+  auto valexpr = buildUnoptimizedValueExpression(txn, ast, resolver, type_resolver);
 
   if (opts_.enable_constant_folding) {
     valexpr = QueryTreeUtil::foldConstants(txn, valexpr);
@@ -1476,7 +1494,9 @@ RefPtr<ValueExpressionNode> QueryPlanBuilder::buildValueExpression(
 
 RefPtr<ValueExpressionNode> QueryPlanBuilder::buildUnoptimizedValueExpression(
     Transaction* txn,
-    ASTNode* ast) {
+    ASTNode* ast,
+    ColumnResolver resolver,
+    ColumnTypeResolver type_resolver) {
   if (ast == nullptr) {
     RAISE(kNullPointerError, "can't build nullptr");
   }
@@ -1484,55 +1504,55 @@ RefPtr<ValueExpressionNode> QueryPlanBuilder::buildUnoptimizedValueExpression(
   switch (ast->getType()) {
 
     case ASTNode::T_EQ_EXPR:
-      return buildOperator(txn, "eq", ast);
+      return buildOperator(txn, "eq", ast, resolver, type_resolver);
 
     case ASTNode::T_NEQ_EXPR:
-      return buildOperator(txn, "neq", ast);
+      return buildOperator(txn, "neq", ast, resolver, type_resolver);
 
     case ASTNode::T_AND_EXPR:
-      return buildOperator(txn, "logical_and", ast);
+      return buildOperator(txn, "logical_and", ast, resolver, type_resolver);
 
     case ASTNode::T_OR_EXPR:
-      return buildOperator(txn, "logical_or", ast);
+      return buildOperator(txn, "logical_or", ast, resolver, type_resolver);
 
     case ASTNode::T_NEGATE_EXPR:
-      return buildOperator(txn, "neg", ast);
+      return buildOperator(txn, "neg", ast, resolver, type_resolver);
 
     case ASTNode::T_LT_EXPR:
-      return buildOperator(txn, "lt", ast);
+      return buildOperator(txn, "lt", ast, resolver, type_resolver);
 
     case ASTNode::T_LTE_EXPR:
-      return buildOperator(txn, "lte", ast);
+      return buildOperator(txn, "lte", ast, resolver, type_resolver);
 
     case ASTNode::T_GT_EXPR:
-      return buildOperator(txn, "gt", ast);
+      return buildOperator(txn, "gt", ast, resolver, type_resolver);
 
     case ASTNode::T_GTE_EXPR:
-      return buildOperator(txn, "gte", ast);
+      return buildOperator(txn, "gte", ast, resolver, type_resolver);
 
     case ASTNode::T_ADD_EXPR:
-      return buildOperator(txn, "add", ast);
+      return buildOperator(txn, "add", ast, resolver, type_resolver);
 
     case ASTNode::T_SUB_EXPR:
-      return buildOperator(txn, "sub", ast);
+      return buildOperator(txn, "sub", ast, resolver, type_resolver);
 
     case ASTNode::T_MUL_EXPR:
-      return buildOperator(txn, "mul", ast);
+      return buildOperator(txn, "mul", ast, resolver, type_resolver);
 
     case ASTNode::T_DIV_EXPR:
-      return buildOperator(txn, "div", ast);
+      return buildOperator(txn, "div", ast, resolver, type_resolver);
 
     case ASTNode::T_MOD_EXPR:
-      return buildOperator(txn, "mod", ast);
+      return buildOperator(txn, "mod", ast, resolver, type_resolver);
 
     case ASTNode::T_POW_EXPR:
-      return buildOperator(txn, "pow", ast);
+      return buildOperator(txn, "pow", ast, resolver, type_resolver);
 
     case ASTNode::T_REGEX_EXPR:
-      return buildRegex(txn, ast);
+      return buildRegex(txn, ast, resolver, type_resolver);
 
     case ASTNode::T_LIKE_EXPR:
-      return buildLike(txn, ast);
+      return buildLike(txn, ast, resolver, type_resolver);
 
     case ASTNode::T_LITERAL:
       return buildLiteral(txn, ast);
@@ -1541,21 +1561,21 @@ RefPtr<ValueExpressionNode> QueryPlanBuilder::buildUnoptimizedValueExpression(
       return new LiteralExpressionNode(SValue("void"));
 
     case ASTNode::T_IF_EXPR:
-      return buildIfStatement(txn, ast);
+      return buildIfStatement(txn, ast, resolver, type_resolver);
 
     case ASTNode::T_RESOLVED_COLUMN:
     case ASTNode::T_COLUMN_NAME:
-      return buildColumnReference(txn, ast);
+      return buildColumnReference(txn, ast, resolver);
 
     case ASTNode::T_COLUMN_INDEX:
-      return buildColumnIndex(txn, ast);
+      return buildColumnIndex(txn, ast, type_resolver);
 
     case ASTNode::T_TABLE_NAME:
-      return buildColumnReference(txn, ast->getChildren()[0]);
+      return buildColumnReference(txn, ast->getChildren()[0], resolver);
 
     case ASTNode::T_METHOD_CALL:
     case ASTNode::T_METHOD_CALL_WITHIN_RECORD:
-      return buildMethodCall(txn, ast);
+      return buildMethodCall(txn, ast, resolver, type_resolver);
 
     default:
       ast->debugPrint();
@@ -1606,10 +1626,12 @@ ValueExpressionNode* QueryPlanBuilder::buildLiteral(
 ValueExpressionNode* QueryPlanBuilder::buildOperator(
     Transaction* txn,
     const std::string& name,
-    ASTNode* ast) {
+    ASTNode* ast,
+    ColumnResolver resolver,
+    ColumnTypeResolver type_resolver) {
   Vector<RefPtr<ValueExpressionNode>> args;
   for (auto e : ast->getChildren()) {
-    args.emplace_back(buildValueExpression(txn, e));
+    args.emplace_back(buildValueExpression(txn, e, resolver, type_resolver));
   }
 
   RefPtr<ValueExpressionNode> node;
@@ -1624,7 +1646,9 @@ ValueExpressionNode* QueryPlanBuilder::buildOperator(
 
 ValueExpressionNode* QueryPlanBuilder::buildMethodCall(
     Transaction* txn,
-    ASTNode* ast) {
+    ASTNode* ast,
+    ColumnResolver resolver,
+    ColumnTypeResolver type_resolver) {
   if (ast->getToken() == nullptr ||
       ast->getToken()->getType() != Token::T_IDENTIFIER) {
     RAISE(kRuntimeError, "corrupt AST");
@@ -1634,7 +1658,7 @@ ValueExpressionNode* QueryPlanBuilder::buildMethodCall(
 
   Vector<RefPtr<ValueExpressionNode>> args;
   for (auto e : ast->getChildren()) {
-    args.emplace_back(buildValueExpression(txn, e));
+    args.emplace_back(buildValueExpression(txn, e, resolver, type_resolver));
   }
 
   RefPtr<ValueExpressionNode> node;
@@ -1649,10 +1673,12 @@ ValueExpressionNode* QueryPlanBuilder::buildMethodCall(
 
 ValueExpressionNode* QueryPlanBuilder::buildIfStatement(
     Transaction* txn,
-    ASTNode* ast) {
+    ASTNode* ast,
+    ColumnResolver resolver,
+    ColumnTypeResolver type_resolver) {
   Vector<RefPtr<ValueExpressionNode>> args;
   for (auto e : ast->getChildren()) {
-    args.emplace_back(buildValueExpression(txn, e));
+    args.emplace_back(buildValueExpression(txn, e, resolver, type_resolver));
   }
 
   if (args.size() != 3) {
@@ -1671,7 +1697,8 @@ ValueExpressionNode* QueryPlanBuilder::buildIfStatement(
 
 ValueExpressionNode* QueryPlanBuilder::buildColumnReference(
     Transaction* txn,
-    ASTNode* ast) {
+    ASTNode* ast,
+    ColumnResolver resolver) {
   String column_name;
 
   for (
@@ -1688,14 +1715,20 @@ ValueExpressionNode* QueryPlanBuilder::buildColumnReference(
     }
   }
 
-  auto colref = new ColumnReferenceNode(column_name);
-  colref->setColumnIndex(ast->getID());
+  auto colinfo = resolver(column_name);
+  if (colinfo.first == size_t(-1)) {
+    RAISEF(kRuntimeError, "column(s) not found: '$0'", column_name);
+  }
+
+  auto colref = new ColumnReferenceNode(column_name, colinfo.second);
+  colref->setColumnIndex(colinfo.first);
   return colref;
 }
 
 ValueExpressionNode* QueryPlanBuilder::buildColumnIndex(
     Transaction* txn,
-    ASTNode* ast) {
+    ASTNode* ast,
+    ColumnTypeResolver type_resolver) {
   if (ast->getChildren().size() != 1) {
     RAISE(kRuntimeError, "internal error: invalid column index reference");
   }
@@ -1705,12 +1738,16 @@ ValueExpressionNode* QueryPlanBuilder::buildColumnIndex(
     RAISE(kRuntimeError, "internal error: invalid column index reference");
   }
 
-  return new ColumnReferenceNode(token->getInteger());
+  return new ColumnReferenceNode(
+      token->getInteger(),
+      type_resolver(token->getInteger()));
 }
 
 ValueExpressionNode* QueryPlanBuilder::buildRegex(
     Transaction* txn,
-    ASTNode* ast) {
+    ASTNode* ast,
+    ColumnResolver resolver,
+    ColumnTypeResolver type_resolver) {
   const auto& args = ast->getChildren();
   if (args.size() != 2) {
     RAISE(kRuntimeError, "internal error: corrupt ast");
@@ -1725,14 +1762,16 @@ ValueExpressionNode* QueryPlanBuilder::buildRegex(
   }
 
   auto pattern = args[1]->getToken()->getString();
-  auto subject = buildValueExpression(txn, args[0]);
+  auto subject = buildValueExpression(txn, args[0], resolver, type_resolver);
 
   return new RegexExpressionNode(subject, pattern);
 }
 
 ValueExpressionNode* QueryPlanBuilder::buildLike(
     Transaction* txn,
-    ASTNode* ast) {
+    ASTNode* ast,
+    ColumnResolver resolver,
+    ColumnTypeResolver type_resolver) {
   const auto& args = ast->getChildren();
   if (args.size() != 2) {
     RAISE(kRuntimeError, "internal error: corrupt ast");
@@ -1747,20 +1786,22 @@ ValueExpressionNode* QueryPlanBuilder::buildLike(
   }
 
   auto pattern = args[1]->getToken()->getString();
-  auto subject = buildValueExpression(txn, args[0]);
+  auto subject = buildValueExpression(txn, args[0], resolver, type_resolver);
 
   return new LikeExpressionNode(subject, pattern);
 }
 
 SelectListNode* QueryPlanBuilder::buildSelectList(
     Transaction* txn,
-    ASTNode* ast) {
+    ASTNode* ast,
+    ColumnResolver resolver,
+    ColumnTypeResolver type_resolver) {
   if (ast->getChildren().size() == 0) {
     RAISE(kRuntimeError, "internal error: corrupt ast");
   }
 
   auto slnode = new SelectListNode(
-      buildValueExpression(txn, ast->getChildren()[0]));
+      buildValueExpression(txn, ast->getChildren()[0], resolver, type_resolver));
 
   /* .. AS alias */
   if (ast->getType() == ASTNode::T_DERIVED_COLUMN &&
@@ -2101,7 +2142,12 @@ QueryTreeNode* QueryPlanBuilder::buildInsertInto(
   for (size_t i = 0; i < values.size(); ++i) {
     InsertIntoNode::InsertValueSpec spec;
     spec.type = InsertIntoNode::InsertValueType::SCALAR;
-    spec.expr = buildValueExpression(txn, values[i]);
+    spec.expr = buildValueExpression(
+        txn,
+        values[i],
+        kEmptyColumnResolver,
+        kEmptyColumnTypeResolver);
+
     if (columns.size() > i &&
         columns[i]->getType() == ASTNode::T_COLUMN_NAME &&
         columns[i]->getToken() != nullptr) {

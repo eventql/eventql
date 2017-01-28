@@ -106,6 +106,10 @@ public:
       const String& column_name,
       bool allow_add = false) = 0;
 
+  std::pair<size_t, SType> getComputedColumnInfo(
+      const String& column_name,
+      bool allow_add = false);
+
   /**
    * Returns the type of one of the computed columsn
    */
