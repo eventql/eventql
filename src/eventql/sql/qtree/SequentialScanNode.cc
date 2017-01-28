@@ -21,13 +21,12 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/eventql.h"
 #include <eventql/sql/qtree/SequentialScanNode.h>
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
 #include <eventql/sql/qtree/CallExpressionNode.h>
 #include <eventql/sql/qtree/LiteralExpressionNode.h>
 #include <eventql/sql/qtree/QueryTreeUtil.h>
-
-#include "eventql/eventql.h"
 
 namespace csql {
 
@@ -90,7 +89,9 @@ SequentialScanNode::SequentialScanNode(
 SequentialScanNode::SequentialScanNode(
     const SequentialScanNode& other) :
     table_name_(other.table_name_),
+    table_columns_(other.table_columns_),
     output_columns_(other.output_columns_),
+    input_columns_(other.input_columns_),
     aggr_strategy_(other.aggr_strategy_),
     constraints_(other.constraints_) {
   for (const auto& e : other.select_list_) {

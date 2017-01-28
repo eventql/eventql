@@ -1588,11 +1588,11 @@ RefPtr<ValueExpressionNode> QueryPlanBuilder::buildUnoptimizedValueExpression(
     case ASTNode::T_IF_EXPR:
       return buildIfStatement(txn, ast, resolver, type_resolver);
 
-    case ASTNode::T_RESOLVED_COLUMN:
     case ASTNode::T_COLUMN_NAME:
       return buildColumnReference(txn, ast, resolver);
 
     case ASTNode::T_COLUMN_INDEX:
+    case ASTNode::T_RESOLVED_COLUMN:
       return buildColumnIndex(txn, ast, type_resolver);
 
     case ASTNode::T_TABLE_NAME:
@@ -1740,6 +1740,8 @@ ValueExpressionNode* QueryPlanBuilder::buildColumnReference(
     }
   }
 
+  assert(!column_name.empty());
+
   auto colinfo = resolver(column_name);
   if (colinfo.first == size_t(-1)) {
     RAISEF(kRuntimeError, "column(s) not found: '$0'", column_name);
@@ -1754,6 +1756,12 @@ ValueExpressionNode* QueryPlanBuilder::buildColumnIndex(
     Transaction* txn,
     ASTNode* ast,
     ColumnTypeResolver type_resolver) {
+  if (*ast == ASTNode::T_RESOLVED_COLUMN) {
+    return new ColumnReferenceNode(
+        ast->getID(),
+        type_resolver(ast->getID()));
+  }
+
   if (ast->getChildren().size() != 1) {
     RAISE(kRuntimeError, "internal error: invalid column index reference");
   }

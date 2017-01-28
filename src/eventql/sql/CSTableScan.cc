@@ -21,14 +21,13 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/eventql.h"
 #include <eventql/sql/CSTableScan.h>
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
 #include <eventql/sql/runtime/defaultruntime.h>
 #include <eventql/sql/runtime/compiler.h>
 #include <eventql/util/ieee754.h>
 #include <eventql/util/logging.h>
-
-#include "eventql/eventql.h"
 
 namespace csql {
 
@@ -50,7 +49,7 @@ CSTableScan::CSTableScan(
     cur_fetch_level_(0),
     cur_filter_pred_(true),
     cur_pos_(0) {
-  column_names_ = stmt_->getResultColumns();
+  column_names_ = stmt_->selectedColumns();
   execution_context_->incrementNumTasks();
 }
 
@@ -74,7 +73,7 @@ CSTableScan::CSTableScan(
     cur_fetch_level_(0),
     cur_filter_pred_(true),
     cur_pos_(0) {
-  column_names_ = stmt_->getResultColumns();
+  column_names_ = stmt_->selectedColumns();
   execution_context_->incrementNumTasks();
 }
 
@@ -106,7 +105,7 @@ void CSTableScan::open() {
     cstable_ = cstable::CSTableReader::openFile(cstable_filename_);
   }
 
-  for (const auto& col : stmt_->selectedColumns()) {
+  for (const auto& col : column_names_) {
     if (!cstable_->hasColumn(col)) {
       continue;
     }
