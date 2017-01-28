@@ -22,9 +22,9 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/sql/qtree/SelectExpressionNode.h>
-
+#include <assert.h>
 #include "eventql/eventql.h"
+#include <eventql/sql/qtree/SelectExpressionNode.h>
 
 namespace csql {
 
@@ -73,6 +73,11 @@ size_t SelectExpressionNode::getComputedColumnIndex(
 
 size_t SelectExpressionNode::getNumComputedColumns() const {
   return select_list_.size();
+}
+
+SType SelectExpressionNode::getColumnType(size_t idx) const {
+  assert(idx < select_list_.size());
+  return select_list_[idx]->expression()->getReturnType();
 }
 
 RefPtr<QueryTreeNode> SelectExpressionNode::deepCopy() const {

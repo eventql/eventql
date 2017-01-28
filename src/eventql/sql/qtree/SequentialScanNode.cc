@@ -248,6 +248,11 @@ size_t SequentialScanNode::getNumComputedColumns() const {
   return select_list_.size();
 }
 
+SType SequentialScanNode::getColumnType(size_t idx) const {
+  assert(idx < select_list_.size());
+  return select_list_[idx]->expression()->getReturnType();
+}
+
 AggregationStrategy SequentialScanNode::aggregationStrategy() const {
   return aggr_strategy_;
 }
