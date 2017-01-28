@@ -146,7 +146,7 @@ size_t JoinNode::getComputedColumnIndex(
     return select_list_.size() - 1;
   }
 
-  return -1; // FIXME
+  return -1;
 }
 
 size_t JoinNode::getNumComputedColumns() const {

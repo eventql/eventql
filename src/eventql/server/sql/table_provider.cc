@@ -132,32 +132,6 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
     return None<ScopedPtr<csql::TableExpression>>();
   }
 
-  {
-    auto table_schema = table.get()->schema();
-    Set<String> table_schema_columns;
-    for (const auto& c : table_schema->columns()) {
-      table_schema_columns.insert(c.first);
-    }
-
-    auto check_columns = [&table_schema_columns] (
-        const RefPtr<csql::ColumnReferenceNode>& col) {
-      auto colname = col->columnName();
-      if (table_schema_columns.count(colname) == 0) {
-        RAISEF(kNotFoundError, "column(s) not found: $0", colname);
-      }
-    };
-
-    for (const auto& e : seqscan->selectList()) {
-      csql::QueryTreeUtil::findColumns(e->expression(), check_columns);
-    }
-
-    if (!seqscan->whereExpression().isEmpty()) {
-      csql::QueryTreeUtil::findColumns(
-          seqscan->whereExpression().get().get(),
-          check_columns);
-    }
-  }
-
   Vector<TableScan::PartitionLocation> partitions;
   if (table_ref.partition_key.isEmpty()) {
     auto keyrange = findKeyRange(

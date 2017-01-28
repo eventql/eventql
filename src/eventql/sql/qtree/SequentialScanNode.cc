@@ -133,24 +133,11 @@ Vector<RefPtr<SelectListNode>> SequentialScanNode::selectList() const {
   return select_list_;
 }
 
-void SequentialScanNode::findSelectedColumnNames(
-    RefPtr<ValueExpressionNode> expr,
-    Set<String>* columns) const {
-  auto colname = dynamic_cast<ColumnReferenceNode*>(expr.get());
-  if (colname) {
-    columns->emplace(normalizeColumnName(colname->fieldName()));
-  }
+Vector<String> SequentialScanNode::selectedColumns() const {
+  Vector<String> columns;
 
-  for (const auto& a : expr->arguments()) {
-    findSelectedColumnNames(a, columns);
-  }
-}
-
-Set<String> SequentialScanNode::selectedColumns() const {
-  Set<String> columns;
-
-  for (const auto& sl : select_list_) {
-    findSelectedColumnNames(sl->expression(), &columns);
+  for (const auto& c : input_columns_) {
+    columns.push_back(c.first);
   }
 
   return columns;
@@ -223,24 +210,16 @@ size_t SequentialScanNode::getComputedColumnIndex(
     }
   }
 
-  bool found = false;
-  SType found_type = SType::NIL;
-  for (const auto& c : table_columns_) {
-    if (c.first == col) {
-      found = true;
-      found_type = c.second;
-      break;
-    }
+  auto input_idx = getInputColumnIndex(col);
+  if (input_idx != size_t(-1)) {
+    auto slnode = new SelectListNode(
+        new ColumnReferenceNode(input_idx, getInputColumnType(input_idx)));
+    slnode->setAlias(column_name);
+    select_list_.emplace_back(slnode);
+    return select_list_.size() - 1;
   }
 
-  if (!found) {
-    return -1;
-  }
-
-  auto slnode = new SelectListNode(new ColumnReferenceNode(col, found_type));
-  slnode->setAlias(col);
-  select_list_.emplace_back(slnode);
-  return select_list_.size() - 1;
+  return -1;
 }
 
 size_t SequentialScanNode::getNumComputedColumns() const {
@@ -250,6 +229,51 @@ size_t SequentialScanNode::getNumComputedColumns() const {
 SType SequentialScanNode::getColumnType(size_t idx) const {
   assert(idx < select_list_.size());
   return select_list_[idx]->expression()->getReturnType();
+}
+
+size_t SequentialScanNode::getInputColumnIndex(
+    const String& column_name,
+    bool allow_add /* = false */) {
+  for (size_t i = 0; i < input_columns_.size(); ++i) {
+    if (input_columns_[i].first == column_name) {
+      return i;
+    }
+  }
+
+  if (!allow_add) {
+    return -1;
+  }
+
+  for (const auto& c : table_columns_) {
+    if (c.first == column_name) {
+      input_columns_.emplace_back(column_name, c.second);
+      return input_columns_.size() - 1;
+    }
+  }
+
+  return -1;
+}
+
+SType SequentialScanNode::getInputColumnType(size_t idx) const {
+  if (idx >= input_columns_.size()) {
+    RAISEF(
+        kRuntimeError,
+        "invalid column index: '$0'",
+        idx);
+  }
+
+  return input_columns_[idx].second;
+}
+
+std::pair<size_t, SType> SequentialScanNode::getInputColumnInfo(
+    const String& column_name,
+    bool allow_add) {
+  auto idx = getInputColumnIndex(column_name, allow_add);
+  if (idx == size_t(-1)) {
+    return std::make_pair(idx, SType::NIL);
+  } else {
+    return std::make_pair(idx, getInputColumnType(idx));
+  }
 }
 
 AggregationStrategy SequentialScanNode::aggregationStrategy() const {
@@ -333,6 +357,12 @@ void SequentialScanNode::encode(
     os->appendLenencString(oc);
   }
 
+  os->appendVarUInt(node.input_columns_.size());
+  for (const auto& ic : node.input_columns_) {
+    os->appendLenencString(ic.first);
+    os->appendVarUInt((uint8_t) ic.second);
+  }
+
   os->appendVarUInt(node.constraints_.size());
   for (const auto& sc : node.constraints_) {
     os->appendLenencString(sc.column_name);
@@ -375,6 +405,13 @@ RefPtr<QueryTreeNode> SequentialScanNode::decode(
   auto num_output_columns = is->readVarUInt();
   for (auto i = 0; i < num_output_columns; ++i) {
     node->output_columns_.emplace_back(is->readLenencString());
+  }
+
+  auto num_input_columns = is->readVarUInt();
+  for (auto i = 0; i < num_input_columns; ++i) {
+    auto cname = is->readLenencString();
+    auto ctype = (SType) is->readVarUInt();
+    node->input_columns_.emplace_back(cname, ctype);
   }
 
   auto num_constraints = is->readVarUInt();

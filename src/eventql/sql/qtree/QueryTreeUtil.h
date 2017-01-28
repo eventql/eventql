@@ -38,17 +38,6 @@ class QueryTreeUtil {
 public:
 
   /**
-   * Walks the provided value expression and calls the provided resolver
-   * function for each unresolved column name. The resolver must return a column
-   * index for each column name
-   *
-   * This method will modify the provided expression in place
-   */
-  static void resolveColumns(
-      RefPtr<ValueExpressionNode> expr,
-      Function<size_t (const String&)> resolver);
-
-  /**
    * Walks the provided value expression and calls the provided function for
    * each column reference
    *

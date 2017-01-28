@@ -106,17 +106,7 @@ void CSTableScan::open() {
     cstable_ = cstable::CSTableReader::openFile(cstable_filename_);
   }
 
-  Set<String> column_names;
-  for (const auto& slnode : stmt_->selectList()) {
-    findColumns(slnode->expression(), &column_names);
-  }
-
-  auto where_expr = stmt_->whereExpression();
-  if (!where_expr.isEmpty()) {
-    findColumns(where_expr.get(), &column_names);
-  }
-
-  for (const auto& col : column_names) {
+  for (const auto& col : stmt_->selectedColumns()) {
     if (!cstable_->hasColumn(col)) {
       continue;
     }
@@ -151,8 +141,6 @@ void CSTableScan::open() {
   }
 
   for (const auto& slnode : stmt_->selectList()) {
-    resolveColumns(slnode->expression());
-
     select_list_.emplace_back(
         txn_,
         findMaxRepetitionLevel(slnode->expression()),
@@ -160,8 +148,8 @@ void CSTableScan::open() {
         &scratch_);
   }
 
+  auto where_expr = stmt_->whereExpression();
   if (!where_expr.isEmpty()) {
-    resolveColumns(where_expr.get());
     where_expr_ = runtime->buildValueExpression(txn_, where_expr.get());
   }
 }
@@ -572,23 +560,6 @@ void CSTableScan::findColumns(
 
   for (const auto& e : expr->arguments()) {
     findColumns(e, column_names);
-  }
-}
-
-void CSTableScan::resolveColumns(RefPtr<ValueExpressionNode> expr) const {
-  auto fieldref = dynamic_cast<ColumnReferenceNode*>(expr.get());
-  if (fieldref != nullptr) {
-    auto colname = fieldref->fieldName();
-    auto col = columns_.find(colname);
-    if (col == columns_.end()) {
-      fieldref->setColumnIndex(0);
-    } else {
-      fieldref->setColumnIndex(col->second.index);
-    }
-  }
-
-  for (const auto& e : expr->arguments()) {
-    resolveColumns(e);
   }
 }
 

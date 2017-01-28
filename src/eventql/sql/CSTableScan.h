@@ -94,8 +94,6 @@ protected:
       RefPtr<ValueExpressionNode> expr,
       Set<String>* column_names) const;
 
-  void resolveColumns(RefPtr<ValueExpressionNode> expr) const;
-
   uint64_t findMaxRepetitionLevel(RefPtr<ValueExpressionNode> expr) const;
 
   void fetch();

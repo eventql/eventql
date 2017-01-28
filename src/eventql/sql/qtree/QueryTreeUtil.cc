@@ -30,24 +30,6 @@
 
 namespace csql {
 
-void QueryTreeUtil::resolveColumns(
-    RefPtr<ValueExpressionNode> expr,
-    Function<size_t (const String&)> resolver) {
-  auto colref = dynamic_cast<ColumnReferenceNode*>(expr.get());
-  if (colref && !colref->fieldName().empty()) {
-    auto idx = resolver(colref->fieldName());
-    if (idx == size_t(-1)) {
-      RAISEF(kRuntimeError, "column(s) not found: '$0'", colref->fieldName());
-    }
-
-    colref->setColumnIndex(idx);
-  }
-
-  for (auto& arg : expr->arguments()) {
-    resolveColumns(arg, resolver);
-  }
-}
-
 void QueryTreeUtil::findColumns(
     RefPtr<ValueExpressionNode> expr,
     Function<void (const RefPtr<ColumnReferenceNode>&)> fn) {

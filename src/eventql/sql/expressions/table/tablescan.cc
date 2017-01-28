@@ -41,25 +41,11 @@ TableScan::TableScan(
   auto qbuilder = txn->getCompiler();
 
   for (const auto& slnode : stmt->selectList()) {
-    QueryTreeUtil::resolveColumns(
-        slnode->expression(),
-        std::bind(
-            &TableIterator::findColumn,
-            iter_.get(),
-            std::placeholders::_1));
-
     select_exprs_.emplace_back(
         qbuilder->buildValueExpression(txn, slnode->expression()));
   }
 
   if (!stmt->whereExpression().isEmpty()) {
-    QueryTreeUtil::resolveColumns(
-        stmt->whereExpression().get(),
-        std::bind(
-            &TableIterator::findColumn,
-            iter_.get(),
-            std::placeholders::_1));
-
     where_expr_ = std::move(Option<ValueExpression>(
         qbuilder->buildValueExpression(txn, stmt->whereExpression().get())));
   }
