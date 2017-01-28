@@ -55,6 +55,12 @@
 
 namespace csql {
 
+const QueryPlanBuilder::ColumnResolver QueryPlanBuilder::kEmptyColumnResolver =
+    [] (const std::string& c) { return std::make_pair(size_t(-1), SType::NIL); };
+
+const QueryPlanBuilder::ColumnTypeResolver QueryPlanBuilder::kEmptyColumnTypeResolver =
+    [] (size_t idx) -> SType { RAISE(kRuntimeError, "invald column index"); };
+
 QueryPlanBuilder::QueryPlanBuilder(
     QueryPlanBuilderOptions opts,
     SymbolTable* symbol_table) :

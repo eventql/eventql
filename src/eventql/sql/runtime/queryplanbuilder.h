@@ -47,10 +47,10 @@ class QueryPlanBuilder : public RefCounted {
 public:
 
   using ColumnResolver = Function<std::pair<size_t, SType> (const String&)>;
-  static ColumnResolver kEmptyColumnResolver;
+  static const ColumnResolver kEmptyColumnResolver;
 
   using ColumnTypeResolver = Function<SType (size_t)>;
-  static ColumnTypeResolver kEmptyColumnTypeResolver;
+  static const ColumnTypeResolver kEmptyColumnTypeResolver;
 
   QueryPlanBuilder(
       QueryPlanBuilderOptions opts,
