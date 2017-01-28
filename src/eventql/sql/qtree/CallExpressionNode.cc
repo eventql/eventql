@@ -28,6 +28,20 @@
 
 namespace csql {
 
+ReturnCode CallExpressionNode::newNode(
+    const String& method_name,
+    Vector<RefPtr<ValueExpressionNode>> arguments,
+    RefPtr<ValueExpressionNode>* node) {
+
+  *node = RefPtr<ValueExpressionNode>(
+      new CallExpressionNode(
+          method_name,
+          SType::NIL, // FIXME,
+          arguments));
+
+  return ReturnCode::success();
+}
+
 CallExpressionNode::CallExpressionNode(
     const String& symbol,
     SType return_type,
