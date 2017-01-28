@@ -24,6 +24,7 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
+#include <eventql/util/return_code.h>
 #include <eventql/sql/qtree/ValueExpressionNode.h>
 #include <eventql/sql/qtree/qtree_coder.h>
 
@@ -34,10 +35,11 @@ namespace csql {
 class IfExpressionNode : public ValueExpressionNode {
 public:
 
-  IfExpressionNode(
+  static ReturnCode newNode(
       RefPtr<ValueExpressionNode> conditional_expr,
       RefPtr<ValueExpressionNode> true_branch_expr,
-      RefPtr<ValueExpressionNode> false_branch_expr);
+      RefPtr<ValueExpressionNode> false_branch_expr,
+      RefPtr<IfExpressionNode>* node);
 
   Vector<RefPtr<ValueExpressionNode>> arguments() const override;
 
@@ -61,6 +63,14 @@ public:
       InputStream* is);
 
 protected:
+
+  IfExpressionNode(
+      SType return_type,
+      RefPtr<ValueExpressionNode> conditional_expr,
+      RefPtr<ValueExpressionNode> true_branch_expr,
+      RefPtr<ValueExpressionNode> false_branch_expr);
+
+  SType return_type_;
   RefPtr<ValueExpressionNode> conditional_expr_;
   RefPtr<ValueExpressionNode> true_branch_expr_;
   RefPtr<ValueExpressionNode> false_branch_expr_;

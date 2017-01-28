@@ -24,6 +24,7 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
+#include <eventql/util/return_code.h>
 #include <eventql/sql/qtree/ValueExpressionNode.h>
 #include <eventql/sql/qtree/qtree_coder.h>
 
@@ -34,9 +35,10 @@ namespace csql {
 class CallExpressionNode : public ValueExpressionNode {
 public:
 
-  CallExpressionNode(
-      const String& symbol,
-      Vector<RefPtr<ValueExpressionNode>> arguments);
+  static ReturnCode newNode (
+      const String& method_name,
+      Vector<RefPtr<ValueExpressionNode>> arguments,
+      RefPtr<ValueExpressionNode>* node);
 
   Vector<RefPtr<ValueExpressionNode>> arguments() const override;
 
@@ -58,7 +60,14 @@ public:
       InputStream* is);
 
 protected:
+
+  CallExpressionNode(
+      const String& symbol,
+      SType return_type,
+      Vector<RefPtr<ValueExpressionNode>> arguments);
+
   String symbol_;
+  SType return_type_;
   Vector<RefPtr<ValueExpressionNode>> arguments_;
 };
 

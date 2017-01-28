@@ -29,9 +29,11 @@
 namespace csql {
 
 IfExpressionNode::IfExpressionNode(
+    SType return_type,
     RefPtr<ValueExpressionNode> conditional_expr,
     RefPtr<ValueExpressionNode> true_branch_expr,
     RefPtr<ValueExpressionNode> false_branch_expr) :
+    return_type_(return_type),
     conditional_expr_(conditional_expr),
     true_branch_expr_(true_branch_expr),
     false_branch_expr_(false_branch_expr) {}
@@ -58,6 +60,7 @@ RefPtr<ValueExpressionNode> IfExpressionNode::falseBranch() const {
 
 RefPtr<QueryTreeNode> IfExpressionNode::deepCopy() const {
   return new IfExpressionNode(
+      return_type_,
       conditional_expr_->deepCopyAs<ValueExpressionNode>(),
       true_branch_expr_->deepCopyAs<ValueExpressionNode>(),
       false_branch_expr_->deepCopyAs<ValueExpressionNode>());
@@ -71,10 +74,16 @@ String IfExpressionNode::toSQL() const {
       false_branch_expr_->toSQL());
 }
 
+SType IfExpressionNode::getReturnType() const {
+  return return_type_;
+}
+
+
 void IfExpressionNode::encode(
     QueryTreeCoder* coder,
     const IfExpressionNode& node,
     OutputStream* os) {
+  os->appendVarUInt((uint8_t) node.getReturnType());
   coder->encode(node.conditional_expr_.get(), os);
   coder->encode(node.true_branch_expr_.get(), os);
   coder->encode(node.false_branch_expr_.get(), os);
@@ -83,11 +92,13 @@ void IfExpressionNode::encode(
 RefPtr<QueryTreeNode> IfExpressionNode::decode (
     QueryTreeCoder* coder,
     InputStream* is) {
+  auto return_type = (SType) is->readVarUInt();;
   auto conditional_expr = coder->decode(is).asInstanceOf<ValueExpressionNode>();
   auto true_branch_expr = coder->decode(is).asInstanceOf<ValueExpressionNode>();
   auto false_branch_expr = coder->decode(is).asInstanceOf<ValueExpressionNode>();
 
   return new IfExpressionNode(
+      return_type,
       conditional_expr,
       true_branch_expr,
       false_branch_expr);

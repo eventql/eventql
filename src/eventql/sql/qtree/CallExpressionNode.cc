@@ -30,8 +30,10 @@ namespace csql {
 
 CallExpressionNode::CallExpressionNode(
     const String& symbol,
+    SType return_type,
     Vector<RefPtr<ValueExpressionNode>> arguments) :
     symbol_(symbol),
+    return_type_(return_type),
     arguments_(arguments) {}
 
 Vector<RefPtr<ValueExpressionNode>> CallExpressionNode::arguments() const {
@@ -48,7 +50,7 @@ RefPtr<QueryTreeNode> CallExpressionNode::deepCopy() const {
     args.emplace_back(arg->deepCopyAs<ValueExpressionNode>());
   }
 
-  return new CallExpressionNode(symbol_, args);
+  return new CallExpressionNode(symbol_, return_type_, args);
 }
 
 String CallExpressionNode::toSQL() const {
@@ -63,11 +65,16 @@ String CallExpressionNode::toSQL() const {
       StringUtil::join(args_sql, ","));
 }
 
+SType CallExpressionNode::getReturnType() const {
+  return return_type_;
+}
+
 void CallExpressionNode::encode(
     QueryTreeCoder* coder,
     const CallExpressionNode& node,
     OutputStream* os) {
   os->appendLenencString(node.symbol());
+  os->appendVarUInt((uint8_t) node.getReturnType());
   os->appendVarUInt(node.arguments_.size());
   for (auto arg : node.arguments_) {
     coder->encode(arg.get(), os);
@@ -78,6 +85,7 @@ RefPtr<QueryTreeNode> CallExpressionNode::decode (
     QueryTreeCoder* coder,
     InputStream* is) {
   auto symbol = is->readLenencString();
+  auto return_type = (SType) is->readVarUInt();;
 
   Vector<RefPtr<ValueExpressionNode>> arguments;
   auto num_arguments = is->readVarUInt();
@@ -85,7 +93,7 @@ RefPtr<QueryTreeNode> CallExpressionNode::decode (
     arguments.emplace_back(coder->decode(is).asInstanceOf<ValueExpressionNode>());
   }
 
-  return new CallExpressionNode(symbol, arguments);
+  return new CallExpressionNode(symbol, return_type, arguments);
 }
 
 } // namespace csql
