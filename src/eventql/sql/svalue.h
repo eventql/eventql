@@ -128,7 +128,7 @@ protected:
   struct {
     SType type;
     union {
-      int64_t t_integer;
+      int64_t t_int64;
       uint64_t t_uint64;
       double t_float;
       bool t_bool;

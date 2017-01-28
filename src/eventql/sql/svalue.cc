@@ -65,7 +65,7 @@ SValue SValue::newUInt64(uint64_t value) {
 SValue SValue::newInt64(int64_t value) {
   SValue v;
   v.data_.type = SType::INT64;
-  v.data_.u.t_integer = value;
+  v.data_.u.t_int64 = value;
   return v;
 }
 
@@ -132,7 +132,7 @@ SValue::SValue(
 
 SValue::SValue(SValue::IntegerType integer_value) {
   data_.type = SType::INT64;
-  data_.u.t_integer = integer_value;
+  data_.u.t_int64 = integer_value;
 }
 
 SValue::SValue(SValue::FloatType float_value) {
@@ -275,7 +275,10 @@ SValue::IntegerType SValue::getInteger() const {
   switch (data_.type) {
 
     case SType::INT64:
-      return data_.u.t_integer;
+      return data_.u.t_int64;
+
+    case SType::UINT64:
+      return data_.u.t_uint64;
 
     case SType::TIMESTAMP64:
       return data_.u.t_timestamp;
@@ -320,7 +323,10 @@ SValue::FloatType SValue::getFloat() const {
   switch (data_.type) {
 
     case SType::INT64:
-      return data_.u.t_integer;
+      return data_.u.t_int64;
+
+    case SType::UINT64:
+      return data_.u.t_uint64;
 
     case SType::TIMESTAMP64:
       return data_.u.t_timestamp;
@@ -373,6 +379,7 @@ SValue::BoolType SValue::getBool() const {
   switch (data_.type) {
 
     case SType::INT64:
+    case SType::UINT64:
       return getInteger() > 0;
 
     case SType::FLOAT64:
@@ -444,7 +451,8 @@ std::string SValue::getString() const {
 
   switch (data_.type) {
 
-    case SType::INT64: {
+    case SType::INT64:
+    case SType::UINT64: {
       len = snprintf(buf, sizeof(buf), "%" PRId64, getInteger());
       str = buf;
       break;
@@ -491,7 +499,8 @@ std::string SValue::getString() const {
 String SValue::toSQL() const {
   switch (data_.type) {
 
-    case SType::INT64: {
+    case SType::INT64:
+    case SType::UINT64: {
       return getString();
     }
 
@@ -526,6 +535,7 @@ const char* SValue::getTypeName(SType type) {
     case SType::FLOAT64:
       return "Float";
     case SType::INT64:
+    case SType::UINT64:
       return "Integer";
     case SType::BOOL:
       return "Boolean";
@@ -543,6 +553,7 @@ const char* SValue::getTypeName() const {
 template <> bool SValue::isConvertibleTo<SValue::IntegerType>() const {
   switch (data_.type) {
     case SType::INT64:
+    case SType::UINT64:
     case SType::TIMESTAMP64:
       return true;
     default:
@@ -574,6 +585,7 @@ template <> bool SValue::isConvertibleTo<SValue::FloatType>() const {
   switch (data_.type) {
     case SType::FLOAT64:
     case SType::INT64:
+    case SType::UINT64:
     case SType::TIMESTAMP64:
       return true;
     default:
@@ -657,7 +669,7 @@ bool SValue::isFloat() const {
 }
 
 bool SValue::isInteger() const {
-  return data_.type == SType::INT64;
+  return data_.type == SType::INT64 || data_.type == SType::UINT64;
 }
 
 bool SValue::isBool() const {
@@ -672,6 +684,7 @@ bool SValue::isNumeric() const {
   switch (data_.type) {
     case SType::FLOAT64:
     case SType::INT64:
+    case SType::UINT64:
       return true;
     default:
       return false;
@@ -693,6 +706,7 @@ bool SValue::isConvertibleToBool() const {
     case SType::STRING:
     case SType::FLOAT64:
     case SType::INT64:
+    case SType::UINT64:
     case SType::BOOL:
     case SType::NIL:
       return true;
@@ -712,10 +726,10 @@ void SValue::encode(OutputStream* os) const {
       os->appendDouble(data_.u.t_float);
       return;
     case SType::INT64:
-      os->appendUInt64(data_.u.t_integer);
+      os->appendUInt64(data_.u.t_int64); // FIXME
       return;
     case SType::UINT64:
-      os->appendUInt64(data_.u.t_integer);
+      os->appendUInt64(data_.u.t_uint64);
       return;
     case SType::BOOL:
       os->appendUInt8(data_.u.t_bool ? 1 : 0);
@@ -739,7 +753,7 @@ void SValue::decode(InputStream* is) {
       *this = SValue(SValue::FloatType(is->readDouble()));
       return;
     case SType::INT64:
-      *this = SValue::newInt64(is->readUInt64());
+      *this = SValue::newInt64(is->readUInt64()); // FIXME
       return;
     case SType::UINT64:
       *this = SValue::newUInt64(is->readUInt64());
