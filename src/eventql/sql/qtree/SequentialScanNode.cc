@@ -170,10 +170,7 @@ Vector<QualifiedColumn> SequentialScanNode::getAvailableColumns() const {
 
   Vector<QualifiedColumn> cols;
   for (const auto& c : table_columns_) {
-    QualifiedColumn qc;
-    qc.short_name = c.first;
-    qc.qualified_name = qualifier + c.first;
-    cols.emplace_back(qc);
+    cols.emplace_back(qualifier + c.first, c.first, c.second);
   }
 
   return cols;

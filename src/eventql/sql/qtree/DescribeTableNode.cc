@@ -59,10 +59,7 @@ Vector<QualifiedColumn> DescribeTableNode::getAvailableColumns() const {
   Vector<QualifiedColumn> cols;
 
   for (const auto& c : getResultColumns()) {
-    QualifiedColumn  qc;
-    qc.short_name = c;
-    qc.qualified_name = c;
-    cols.emplace_back(qc);
+    cols.emplace_back(c, c, SType::STRING);
   }
 
   return cols;

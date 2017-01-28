@@ -49,11 +49,10 @@ Vector<QualifiedColumn> SelectExpressionNode::getAvailableColumns() const {
   String qualifier;
 
   Vector<QualifiedColumn> cols;
-  for (const auto& c : column_names_) {
-    QualifiedColumn qc;
-    qc.short_name = c;
-    qc.qualified_name = qualifier + c;
-    cols.emplace_back(qc);
+  for (const auto& sl : select_list_) {
+    auto cname = sl->columnName();
+    auto ctype = sl->expression()->getReturnType();
+    cols.emplace_back(qualifier + cname, cname, ctype);
   }
 
   return cols;

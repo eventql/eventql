@@ -55,12 +55,7 @@ Vector<String> ChartStatementNode::getResultColumns() const {
 }
 
 Vector<QualifiedColumn> ChartStatementNode::getAvailableColumns() const {
-  return {
-    {
-      .qualified_name = kColumnName,
-      .short_name = kColumnName
-    }
-  };
+  return {{ kColumnName, kColumnName, SType::STRING }};
 }
 
 size_t ChartStatementNode::getComputedColumnIndex(

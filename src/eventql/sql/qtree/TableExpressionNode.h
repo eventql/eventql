@@ -33,8 +33,14 @@ namespace csql {
 class Transaction;
 
 struct QualifiedColumn {
-  String qualified_name;
-  String short_name;
+  QualifiedColumn(
+      const std::string& _qualified_name,
+      const std::string& _short_name,
+      SType _type);
+
+  const String qualified_name;
+  const String short_name;
+  const SType type;
 };
 
 /**

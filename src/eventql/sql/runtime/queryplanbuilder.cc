@@ -472,7 +472,9 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(
   for (const auto& select_expr : select_list->getChildren()) {
     if (*select_expr == ASTNode::T_ALL) {
       for (const auto& col : subtree_tbl->getAvailableColumns()) {
-        auto sl = new SelectListNode(new ColumnReferenceNode(col.qualified_name));
+        auto sl = new SelectListNode(
+            new ColumnReferenceNode(col.qualified_name, col.type));
+
         sl->setAlias(col.short_name);
         select_list_expressions.emplace_back(sl);
       }
@@ -1027,7 +1029,7 @@ QueryTreeNode* QueryPlanBuilder::buildJoinTableReference(
       secondary_table = joined_table.asInstanceOf<TableExpressionNode>();
     }
 
-    HashMap<String, Vector<String>> common_columns;
+    HashMap<String, std::vector<std::pair<std::string, SType>>> common_columns;
     {
       Set<String> tmp_column_set;
       for (const auto& col : secondary_table->getAvailableColumns()) {
@@ -1037,7 +1039,7 @@ QueryTreeNode* QueryPlanBuilder::buildJoinTableReference(
       for (const auto& col : primary_table->getAvailableColumns()) {
         if (tmp_column_set.count(col.short_name) > 0) {
           all_columns.emplace_back(col);
-          common_columns.emplace(col.short_name, Vector<String>{});
+          common_columns.emplace(col.short_name, std::vector<std::pair<std::string, SType>>{});
           tmp_column_set.erase(col.short_name);
         }
       }
@@ -1048,7 +1050,7 @@ QueryTreeNode* QueryPlanBuilder::buildJoinTableReference(
       if (common_columns.count(col.short_name) == 0) {
         all_columns.emplace_back(col);
       } else {
-        common_columns[col.short_name].push_back(col.qualified_name);
+        common_columns[col.short_name].emplace_back(col.qualified_name, col.type);
       }
     }
 
@@ -1057,7 +1059,7 @@ QueryTreeNode* QueryPlanBuilder::buildJoinTableReference(
       if (common_columns.count(col.short_name) == 0) {
         all_columns.emplace_back(col);
       } else {
-        common_columns[col.short_name].push_back(col.qualified_name);
+        common_columns[col.short_name].emplace_back(col.qualified_name, col.type);
       }
     }
 
@@ -1074,8 +1076,8 @@ QueryTreeNode* QueryPlanBuilder::buildJoinTableReference(
             auto rc = csql::CallExpressionNode::newNode(
                 "eq",
                 Vector<RefPtr<csql::ValueExpressionNode>>{
-                  new csql::ColumnReferenceNode(c.second[i1]),
-                  new csql::ColumnReferenceNode(c.second[i2])
+                  new csql::ColumnReferenceNode(c.second[i1].first, c.second[i1].second),
+                  new csql::ColumnReferenceNode(c.second[i2].first, c.second[i2].second)
                 },
                 &cpred);
 
@@ -1160,7 +1162,8 @@ QueryTreeNode* QueryPlanBuilder::buildJoinTableReference(
 
     if (*select_expr == ASTNode::T_ALL) {
       for (const auto& col : all_columns) {
-        auto sl = new SelectListNode(new ColumnReferenceNode(col.qualified_name));
+        auto sl = new SelectListNode(
+            new ColumnReferenceNode(col.qualified_name, col.type));
         sl->setAlias(col.short_name);
         select_list_expressions.emplace_back(sl);
       }
@@ -1261,7 +1264,12 @@ QueryTreeNode* QueryPlanBuilder::buildSubqueryTableReference(
   for (const auto& select_expr : select_list->getChildren()) {
     if (*select_expr == ASTNode::T_ALL) {
       for (const auto& col : subquery_tbl->getResultColumns()) {
-        auto sl = new SelectListNode(new ColumnReferenceNode(col));
+        auto sl = new SelectListNode(
+            new ColumnReferenceNode(
+                col,
+                subquery_tbl->getColumnType(
+                    subquery_tbl->getComputedColumnIndex(col))));
+
         sl->setAlias(col);
         QueryTreeUtil::resolveColumns(sl->expression(), resolver);
         select_list_expressions.emplace_back(sl);
@@ -1406,7 +1414,8 @@ QueryTreeNode* QueryPlanBuilder::buildSeqscanTableReference(
   for (const auto& select_expr : select_list->getChildren()) {
     if (*select_expr == ASTNode::T_ALL) {
       for (const auto& col : table.get().columns) {
-        auto sl = new SelectListNode(new ColumnReferenceNode(col.column_name));
+        auto sl = new SelectListNode(
+            new ColumnReferenceNode(col.column_name, col.type));
         sl->setAlias(col.column_name);
         select_list_expressions.emplace_back(sl);
       }

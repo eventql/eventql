@@ -86,13 +86,13 @@ Vector<QualifiedColumn> SubqueryNode::getAvailableColumns() const {
     qualifier = alias_ + ".";
   }
 
+  auto stbl = subquery_.asInstanceOf<TableExpressionNode>();
   Vector<QualifiedColumn> cols;
-  for (const auto& c :
-        subquery_.asInstanceOf<TableExpressionNode>()->getResultColumns()) {
-    QualifiedColumn qc;
-    qc.short_name = c;
-    qc.qualified_name = qualifier + c;
-    cols.emplace_back(qc);
+  for (const auto& c : stbl->getResultColumns()) {
+    cols.emplace_back(
+        qualifier + c,
+        c,
+        stbl->getColumnType(stbl->getComputedColumnIndex(c)));
   }
 
   return cols;
