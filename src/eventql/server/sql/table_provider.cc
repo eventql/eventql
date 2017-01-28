@@ -667,7 +667,10 @@ RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
 
     }
 
-    expr = csql::QueryTreeUtil::removeConstraintFromPredicate(expr, c);
+    auto rc = csql::QueryTreeUtil::removeConstraintFromPredicate(expr, c, &expr);
+    if (!rc.isSuccess()) {
+      RAISE(kRuntimeError, rc.getMessage());
+    }
   }
 
   return expr;
