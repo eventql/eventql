@@ -22,6 +22,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <assert.h>
 #include <eventql/sql/qtree/SubqueryNode.h>
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
 
@@ -131,6 +132,11 @@ size_t SubqueryNode::getNumComputedColumns() const {
   return select_list_.size();
 }
 
+SType SubqueryNode::getColumnType(size_t idx) const {
+  assert(idx < select_list_.size());
+  return select_list_[idx]->expression()->getReturnType();
+}
+
 Option<RefPtr<ValueExpressionNode>> SubqueryNode::whereExpression() const {
   return where_expr_;
 }
@@ -192,6 +198,5 @@ RefPtr<QueryTreeNode> SubqueryNode::decode (
 
   return new SubqueryNode(subquery, select_list, where_expr);
 }
-
 
 } // namespace csql

@@ -132,6 +132,11 @@ size_t JoinNode::getNumComputedColumns() const {
   return select_list_.size();
 }
 
+SType JoinNode::getColumnType(size_t idx) const {
+  assert(idx < select_list_.size());
+  return select_list_[idx]->expression()->getReturnType();
+}
+
 size_t JoinNode::getInputColumnIndex(
     const String& column_name,
     bool allow_add /* = false */) {

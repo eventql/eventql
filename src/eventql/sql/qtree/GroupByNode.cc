@@ -22,6 +22,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <assert.h>
 #include <eventql/sql/qtree/GroupByNode.h>
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
 
@@ -100,6 +101,11 @@ size_t GroupByNode::getComputedColumnIndex(
 
 size_t GroupByNode::getNumComputedColumns() const {
   return select_list_.size();
+}
+
+SType GroupByNode::getColumnType(size_t idx) const {
+  assert(idx < select_list_.size());
+  return select_list_[idx]->expression()->getReturnType();
 }
 
 Vector<RefPtr<ValueExpressionNode>> GroupByNode::groupExpressions() const {
