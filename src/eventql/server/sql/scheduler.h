@@ -79,10 +79,6 @@ protected:
       csql::Transaction* txn,
       RefPtr<csql::QueryTreeNode> qtree);
 
-  // rewrite tbl.lastXXX to tbl WHERE time > x and time < x
-  void rewriteTableTimeSuffix(
-      RefPtr<csql::QueryTreeNode> node);
-
   ProcessConfig* config_;
   PartitionMap* pmap_;
   ConfigDirectory* cdir_;
