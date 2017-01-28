@@ -33,6 +33,17 @@ namespace csql {
 JoinNode::JoinNode(
     JoinType join_type,
     RefPtr<QueryTreeNode> base_table,
+    RefPtr<QueryTreeNode> joined_table) :
+    join_type_(join_type),
+    base_table_(base_table),
+    joined_table_(joined_table) {
+  addChild(&base_table_);
+  addChild(&joined_table_);
+}
+
+JoinNode::JoinNode(
+    JoinType join_type,
+    RefPtr<QueryTreeNode> base_table,
     RefPtr<QueryTreeNode> joined_table,
     Vector<RefPtr<SelectListNode>> select_list,
     Option<RefPtr<ValueExpressionNode>> where_expr,

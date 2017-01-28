@@ -53,6 +53,11 @@ public:
   JoinNode(
       JoinType join_type,
       RefPtr<QueryTreeNode> base_table,
+      RefPtr<QueryTreeNode> joined_table);
+
+  JoinNode(
+      JoinType join_type,
+      RefPtr<QueryTreeNode> base_table,
       RefPtr<QueryTreeNode> joined_table,
       Vector<RefPtr<SelectListNode>> select_list,
       Option<RefPtr<ValueExpressionNode>> where_expr,
@@ -61,11 +66,13 @@ public:
   JoinNode(const JoinNode& other);
 
   JoinType joinType() const;
+  void setJoinType(JoinType type);
 
   RefPtr<QueryTreeNode> baseTable() const;
   RefPtr<QueryTreeNode> joinedTable() const;
 
   Vector<RefPtr<SelectListNode>> selectList() const;
+  void addSelectList(RefPtr<SelectListNode> sl);
 
   Vector<String> getResultColumns() const override;
 
@@ -87,8 +94,15 @@ public:
 
   SType getInputColumnType(size_t idx) const;
 
+  std::pair<size_t, SType> getInputColumnInfo(
+      const String& column_name,
+      bool allow_add = false);
+
   Option<RefPtr<ValueExpressionNode>> whereExpression() const;
+  void setWhereExpression(RefPtr<ValueExpressionNode> expr);
+
   Option<RefPtr<ValueExpressionNode>> joinCondition() const;
+  void setJoinCondition(RefPtr<ValueExpressionNode> expr);
 
   RefPtr<QueryTreeNode> deepCopy() const override;
 

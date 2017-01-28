@@ -954,290 +954,292 @@ QueryTreeNode* QueryPlanBuilder::buildTableReference(
   }
 }
 
-//QueryTreeNode* QueryPlanBuilder::buildJoinTableReference(
-//    Transaction* txn,
-//    ASTNode* table_ref,
-//    ASTNode* select_list,
-//    ASTNode* where_clause,
-//    RefPtr<TableProvider> tables,
-//    bool in_join) {
-//  if (table_ref->getChildren().size() < 2) {
-//    return nullptr;
-//  }
-//
-//  JoinType join_type;
-//  bool natural_join = false;
-//  bool reverse = false;
-//
-//  switch (table_ref->getType()) {
-//    case ASTNode::T_NATURAL_INNER_JOIN:
-//      natural_join = true;
-//      /* fallthrough */
-//    case ASTNode::T_INNER_JOIN:
-//      join_type = JoinType::INNER;
-//      break;
-//    case ASTNode::T_NATURAL_LEFT_JOIN:
-//      natural_join = true;
-//      /* fallthrough */
-//    case ASTNode::T_LEFT_JOIN:
-//      join_type = JoinType::OUTER;
-//      break;
-//    case ASTNode::T_NATURAL_RIGHT_JOIN:
-//      natural_join = true;
-//      /* fallthrough */
-//    case ASTNode::T_RIGHT_JOIN:
-//      reverse = true;
-//      join_type = JoinType::OUTER;
-//      break;
-//    default:
-//      RAISE(kRuntimeError, "invalid JOIN type");
-//  }
-//
-//  Option<RefPtr<ValueExpressionNode>> where_expr;
-//  if (!in_join && where_clause) {
-//    if (!(*where_clause == ASTNode::T_WHERE)) {
-//      return nullptr;
-//    }
-//
-//    if (where_clause->getChildren().size() != 1) {
-//      RAISE(kRuntimeError, "corrupt AST");
-//    }
-//
-//    auto e = where_clause->getChildren()[0];
-//    if (e == nullptr) {
-//      RAISE(kRuntimeError, "corrupt AST");
-//    }
-//
-//    if (hasAggregationExpression(e)) {
-//      RAISE(
-//          kRuntimeError,
-//          "where expressions can only contain pure functions\n");
-//    }
-//
-//    where_expr = Some(RefPtr<ValueExpressionNode>(buildValueExpression(txn, e)));
-//  }
-//
-//  auto child_sl = mkScoped(new ASTNode(ASTNode::T_SELECT_LIST));
-//
-//  auto base_table = mkRef(buildTableReference(
-//      txn,
-//      table_ref->getChildren()[0],
-//      child_sl.get(),
-//      where_clause,
-//      tables,
-//      true));
-//
-//  auto joined_table = mkRef(buildTableReference(
-//      txn,
-//      table_ref->getChildren()[1],
-//      child_sl.get(),
-//      where_clause,
-//      tables,
-//      true));
-//
-//  Vector<QualifiedColumn> all_columns;
-//  Option<RefPtr<ValueExpressionNode>> join_cond;
-//
-//  if (natural_join) {
-//    RefPtr<TableExpressionNode> primary_table;
-//    RefPtr<TableExpressionNode> secondary_table;
-//    if (reverse) {
-//      primary_table = joined_table.asInstanceOf<TableExpressionNode>();
-//      secondary_table = base_table.asInstanceOf<TableExpressionNode>();
-//    } else {
-//      primary_table = base_table.asInstanceOf<TableExpressionNode>();
-//      secondary_table = joined_table.asInstanceOf<TableExpressionNode>();
-//    }
-//
-//    HashMap<String, std::vector<std::pair<std::string, SType>>> common_columns;
-//    {
-//      Set<String> tmp_column_set;
-//      for (const auto& col : secondary_table->getAvailableColumns()) {
-//        tmp_column_set.insert(col.short_name);
-//      }
-//
-//      for (const auto& col : primary_table->getAvailableColumns()) {
-//        if (tmp_column_set.count(col.short_name) > 0) {
-//          all_columns.emplace_back(col);
-//          common_columns.emplace(col.short_name, std::vector<std::pair<std::string, SType>>{});
-//          tmp_column_set.erase(col.short_name);
-//        }
-//      }
-//    }
-//
-//    for (const auto& col :
-//            base_table.asInstanceOf<TableExpressionNode>()->getAvailableColumns()) {
-//      if (common_columns.count(col.short_name) == 0) {
-//        all_columns.emplace_back(col);
-//      } else {
-//        common_columns[col.short_name].emplace_back(col.qualified_name, col.type);
-//      }
-//    }
-//
-//    for (const auto& col :
-//            joined_table.asInstanceOf<TableExpressionNode>()->getAvailableColumns()) {
-//      if (common_columns.count(col.short_name) == 0) {
-//        all_columns.emplace_back(col);
-//      } else {
-//        common_columns[col.short_name].emplace_back(col.qualified_name, col.type);
-//      }
-//    }
-//
-//    RefPtr<ValueExpressionNode> pred;
-//    for (const auto& c : common_columns) {
-//      for (size_t i1 = 0; i1 < c.second.size(); ++i1) {
-//        for (size_t i2 = 0; i2 < c.second.size(); ++i2) {
-//          if (i1 == i2) {
-//            continue;
-//          }
-//
-//          RefPtr<ValueExpressionNode> cpred;
-//          {
-//            auto rc = csql::CallExpressionNode::newNode(
-//                "eq",
-//                Vector<RefPtr<csql::ValueExpressionNode>>{
-//                  new csql::ColumnReferenceNode(c.second[i1].first, c.second[i1].second),
-//                  new csql::ColumnReferenceNode(c.second[i2].first, c.second[i2].second)
-//                },
-//                &cpred);
-//
-//            if (!rc.isSuccess()) {
-//              RAISE(kRuntimeError, rc.getMessage());
-//            }
-//          }
-//
-//          if (pred.get() == nullptr) {
-//            pred = cpred;
-//          } else {
-//            auto rc = csql::CallExpressionNode::newNode(
-//                "logical_and",
-//                Vector<RefPtr<csql::ValueExpressionNode>>{ pred, cpred },
-//                &pred);
-//
-//            if (!rc.isSuccess()) {
-//              RAISE(kRuntimeError, rc.getMessage());
-//            }
-//          }
-//        }
-//      }
-//    }
-//
-//    if (pred.get() != nullptr) {
-//      join_cond = pred;
-//    }
-//  } else {
-//    for (const auto& col :
-//            base_table.asInstanceOf<TableExpressionNode>()->getAvailableColumns()) {
-//      all_columns.emplace_back(col);
-//    }
-//
-//    for (const auto& col :
-//            joined_table.asInstanceOf<TableExpressionNode>()->getAvailableColumns()) {
-//      all_columns.emplace_back(col);
-//    }
-//
-//    if (table_ref->getChildren().size() > 2) {
-//      auto cond_ast = table_ref->getChildren()[2];
-//
-//      switch (cond_ast->getType()) {
-//        case ASTNode::T_JOIN_CONDITION: {
-//          if (cond_ast->getChildren().size() != 1) {
-//            RAISE(kRuntimeError, "corrupt AST");
-//          }
-//
-//          auto e = cond_ast->getChildren()[0];
-//          if (e == nullptr) {
-//            RAISE(kRuntimeError, "corrupt AST");
-//          }
-//
-//          if (hasAggregationExpression(e)) {
-//            RAISE(
-//                kRuntimeError,
-//                "JOIN conditions can only contain pure functions\n");
-//          }
-//
-//          join_cond = buildValueExpression(txn, e);
-//          break;
-//        }
-//
-//        case ASTNode::T_JOIN_COLUMNLIST: {
-//          RAISE(kNotYetImplementedError);
-//        }
-//
-//        default:
-//          RAISE(kRuntimeError, "corrupt AST");
-//      }
-//    }
-//  }
-//
-//  Vector<RefPtr<SelectListNode>> select_list_expressions;
-//  for (const auto& select_expr : select_list->getChildren()) {
-//    if (hasAggregationWithinRecord(select_expr)) {
-//      RAISE(
-//          kRuntimeError,
-//          "WITHIN RECORD can't be used together with JOIN in the same SELECT"
-//          " statement. consider moving the WITHIN RECORD expression into a"
-//          " subquery");
-//    }
-//
-//    if (*select_expr == ASTNode::T_ALL) {
-//      for (const auto& col : all_columns) {
-//        auto sl = new SelectListNode(
-//            new ColumnReferenceNode(col.qualified_name, col.type));
-//        sl->setAlias(col.short_name);
-//        select_list_expressions.emplace_back(sl);
-//      }
-//    } else {
-//      select_list_expressions.emplace_back(buildSelectList(txn, select_expr));
-//    }
-//  }
-//
-//  if (join_cond.isEmpty() && join_type == JoinType::INNER) {
-//    join_type = JoinType::CARTESIAN;
-//  }
-//
-//  auto join_node = mkScoped(new JoinNode(
-//      join_type,
-//      reverse ? joined_table : base_table,
-//      reverse ? base_table : joined_table,
-//      select_list_expressions,
-//      where_expr,
-//      join_cond));
-//
-//  for (auto& sl : join_node->selectList()) {
-//    QueryTreeUtil::resolveColumns(
-//        sl->expression(),
-//        std::bind(
-//            &JoinNode::getInputColumnIndex,
-//            join_node.get(),
-//            std::placeholders::_1,
-//            false));
-//  }
-//
-//  auto jce = join_node->joinCondition();
-//  if (!jce.isEmpty()) {
-//    QueryTreeUtil::resolveColumns(
-//        jce.get(),
-//        std::bind(
-//            &JoinNode::getInputColumnIndex,
-//            join_node.get(),
-//            std::placeholders::_1,
-//            true));
-//  }
-//
-//  auto we = join_node->whereExpression();
-//  if (!we.isEmpty()) {
-//    QueryTreeUtil::resolveColumns(
-//        we.get(),
-//        std::bind(
-//            &JoinNode::getInputColumnIndex,
-//            join_node.get(),
-//            std::placeholders::_1,
-//            true));
-//  }
-//
-//  return join_node.release();
-//}
+QueryTreeNode* QueryPlanBuilder::buildJoinTableReference(
+    Transaction* txn,
+    ASTNode* table_ref,
+    ASTNode* select_list,
+    ASTNode* where_clause,
+    RefPtr<TableProvider> tables,
+    bool in_join) {
+  if (table_ref->getChildren().size() < 2) {
+    return nullptr;
+  }
+
+  JoinType join_type;
+  bool natural_join = false;
+  bool reverse = false;
+
+  switch (table_ref->getType()) {
+    case ASTNode::T_NATURAL_INNER_JOIN:
+      natural_join = true;
+      /* fallthrough */
+    case ASTNode::T_INNER_JOIN:
+      join_type = JoinType::INNER;
+      break;
+    case ASTNode::T_NATURAL_LEFT_JOIN:
+      natural_join = true;
+      /* fallthrough */
+    case ASTNode::T_LEFT_JOIN:
+      join_type = JoinType::OUTER;
+      break;
+    case ASTNode::T_NATURAL_RIGHT_JOIN:
+      natural_join = true;
+      /* fallthrough */
+    case ASTNode::T_RIGHT_JOIN:
+      reverse = true;
+      join_type = JoinType::OUTER;
+      break;
+    default:
+      RAISE(kRuntimeError, "invalid JOIN type");
+  }
+
+  auto empty_sl = mkScoped(new ASTNode(ASTNode::T_SELECT_LIST));
+
+  auto base_table = mkRef(
+      buildTableReference(
+          txn,
+          table_ref->getChildren()[0],
+          empty_sl.get(),
+          where_clause,
+          tables,
+          true));
+
+  auto joined_table = mkRef(
+      buildTableReference(
+          txn,
+          table_ref->getChildren()[1],
+          empty_sl.get(),
+          where_clause,
+          tables,
+          true));
+
+  auto join_node = mkScoped(new JoinNode(
+      join_type,
+      reverse ? joined_table : base_table,
+      reverse ? base_table : joined_table));
+
+  if (!in_join && where_clause) {
+    if (!(*where_clause == ASTNode::T_WHERE)) {
+      return nullptr;
+    }
+
+    if (where_clause->getChildren().size() != 1) {
+      RAISE(kRuntimeError, "corrupt AST");
+    }
+
+    auto e = where_clause->getChildren()[0];
+    if (e == nullptr) {
+      RAISE(kRuntimeError, "corrupt AST");
+    }
+
+    if (hasAggregationExpression(e)) {
+      RAISE(
+          kRuntimeError,
+          "where expressions can only contain pure functions\n");
+    }
+
+    join_node->setWhereExpression(
+        buildValueExpression(
+            txn,
+            e,
+            std::bind(
+                &JoinNode::getInputColumnInfo,
+                join_node.get(),
+                std::placeholders::_1,
+                true),
+            std::bind(
+                &JoinNode::getInputColumnType,
+                join_node.get(),
+                std::placeholders::_1)));
+  }
+
+  Vector<QualifiedColumn> all_columns;
+
+  if (natural_join) {
+    RefPtr<TableExpressionNode> primary_table;
+    RefPtr<TableExpressionNode> secondary_table;
+    if (reverse) {
+      primary_table = joined_table.asInstanceOf<TableExpressionNode>();
+      secondary_table = base_table.asInstanceOf<TableExpressionNode>();
+    } else {
+      primary_table = base_table.asInstanceOf<TableExpressionNode>();
+      secondary_table = joined_table.asInstanceOf<TableExpressionNode>();
+    }
+
+    HashMap<String, std::vector<std::pair<std::string, SType>>> common_columns;
+    {
+      Set<String> tmp_column_set;
+      for (const auto& col : secondary_table->getAvailableColumns()) {
+        tmp_column_set.insert(col.short_name);
+      }
+
+      for (const auto& col : primary_table->getAvailableColumns()) {
+        if (tmp_column_set.count(col.short_name) > 0) {
+          all_columns.emplace_back(col);
+          common_columns.emplace(col.short_name, std::vector<std::pair<std::string, SType>>{});
+          tmp_column_set.erase(col.short_name);
+        }
+      }
+    }
+
+    for (const auto& col :
+            base_table.asInstanceOf<TableExpressionNode>()->getAvailableColumns()) {
+      if (common_columns.count(col.short_name) == 0) {
+        all_columns.emplace_back(col);
+      } else {
+        common_columns[col.short_name].emplace_back(col.qualified_name, col.type);
+      }
+    }
+
+    for (const auto& col :
+            joined_table.asInstanceOf<TableExpressionNode>()->getAvailableColumns()) {
+      if (common_columns.count(col.short_name) == 0) {
+        all_columns.emplace_back(col);
+      } else {
+        common_columns[col.short_name].emplace_back(col.qualified_name, col.type);
+      }
+    }
+
+    RefPtr<ValueExpressionNode> pred;
+    for (const auto& c : common_columns) {
+      for (size_t i1 = 0; i1 < c.second.size(); ++i1) {
+        for (size_t i2 = 0; i2 < c.second.size(); ++i2) {
+          if (i1 == i2) {
+            continue;
+          }
+
+          RefPtr<ValueExpressionNode> cpred;
+          {
+            auto rc = csql::CallExpressionNode::newNode(
+                "eq",
+                Vector<RefPtr<csql::ValueExpressionNode>>{
+                  new csql::ColumnReferenceNode(c.second[i1].first, c.second[i1].second),
+                  new csql::ColumnReferenceNode(c.second[i2].first, c.second[i2].second)
+                },
+                &cpred);
+
+            if (!rc.isSuccess()) {
+              RAISE(kRuntimeError, rc.getMessage());
+            }
+          }
+
+          if (pred.get() == nullptr) {
+            pred = cpred;
+          } else {
+            auto rc = csql::CallExpressionNode::newNode(
+                "logical_and",
+                Vector<RefPtr<csql::ValueExpressionNode>>{ pred, cpred },
+                &pred);
+
+            if (!rc.isSuccess()) {
+              RAISE(kRuntimeError, rc.getMessage());
+            }
+          }
+        }
+      }
+    }
+
+    if (pred.get() != nullptr) {
+      join_node->setJoinCondition(pred);
+    }
+  } else {
+    for (const auto& col :
+            base_table.asInstanceOf<TableExpressionNode>()->getAvailableColumns()) {
+      all_columns.emplace_back(col);
+    }
+
+    for (const auto& col :
+            joined_table.asInstanceOf<TableExpressionNode>()->getAvailableColumns()) {
+      all_columns.emplace_back(col);
+    }
+
+    if (table_ref->getChildren().size() > 2) {
+      auto cond_ast = table_ref->getChildren()[2];
+
+      switch (cond_ast->getType()) {
+        case ASTNode::T_JOIN_CONDITION: {
+          if (cond_ast->getChildren().size() != 1) {
+            RAISE(kRuntimeError, "corrupt AST");
+          }
+
+          auto e = cond_ast->getChildren()[0];
+          if (e == nullptr) {
+            RAISE(kRuntimeError, "corrupt AST");
+          }
+
+          if (hasAggregationExpression(e)) {
+            RAISE(
+                kRuntimeError,
+                "JOIN conditions can only contain pure functions\n");
+          }
+
+          join_node->setJoinCondition(
+              buildValueExpression(
+                  txn,
+                  e,
+                  std::bind(
+                      &JoinNode::getInputColumnInfo,
+                      join_node.get(),
+                      std::placeholders::_1,
+                      true),
+                  std::bind(
+                      &JoinNode::getInputColumnType,
+                      join_node.get(),
+                      std::placeholders::_1)));
+
+          break;
+        }
+
+        case ASTNode::T_JOIN_COLUMNLIST: {
+          RAISE(kNotYetImplementedError);
+        }
+
+        default:
+          RAISE(kRuntimeError, "corrupt AST");
+      }
+    }
+  }
+
+  for (const auto& select_expr : select_list->getChildren()) {
+    if (hasAggregationWithinRecord(select_expr)) {
+      RAISE(
+          kRuntimeError,
+          "WITHIN RECORD can't be used together with JOIN in the same SELECT"
+          " statement. consider moving the WITHIN RECORD expression into a"
+          " subquery");
+    }
+
+    if (*select_expr == ASTNode::T_ALL) {
+      for (const auto& col : all_columns) {
+        auto sl = new SelectListNode(
+            new ColumnReferenceNode(col.qualified_name, col.type));
+        sl->setAlias(col.short_name);
+        join_node->addSelectList(sl);
+      }
+    } else {
+      join_node->addSelectList(
+          buildSelectList(
+              txn,
+              select_expr,
+              std::bind(
+                  &JoinNode::getInputColumnInfo,
+                  join_node.get(),
+                  std::placeholders::_1,
+                  false),
+              std::bind(
+                  &JoinNode::getInputColumnType,
+                  join_node.get(),
+                  std::placeholders::_1)));
+    }
+  }
+
+  if (join_node->joinCondition().isEmpty() &&
+      join_node->joinType() == JoinType::INNER) {
+    join_node->setJoinType(JoinType::CARTESIAN);
+  }
+
+  return join_node.release();
+}
 
 QueryTreeNode* QueryPlanBuilder::buildSubqueryTableReference(
     Transaction* txn,
