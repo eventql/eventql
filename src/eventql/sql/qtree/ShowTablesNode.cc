@@ -66,6 +66,10 @@ size_t ShowTablesNode::getNumComputedColumns() const {
   return 2;
 }
 
+SType ShowTablesNode::getColumnType(size_t idx) const {
+  return SType::STRING;
+}
+
 String ShowTablesNode::toString() const {
   return "(show-tables)";
 }

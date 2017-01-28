@@ -78,6 +78,10 @@ size_t DescribeTableNode::getNumComputedColumns() const {
   return 4;
 }
 
+SType DescribeTableNode::getColumnType(size_t idx) const {
+  return SType::STRING;
+}
+
 String DescribeTableNode::toString() const {
   return StringUtil::format("(describe-table $0)", table_name_);;
 }

@@ -73,6 +73,10 @@ String ClusterShowServersNode::toString() const {
   return "(describe-servers)";
 }
 
+SType ClusterShowServersNode::getColumnType(size_t idx) const {
+  return SType::STRING;
+}
+
 void ClusterShowServersNode::encode(
     QueryTreeCoder* coder,
     const ClusterShowServersNode& node,

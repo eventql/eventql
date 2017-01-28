@@ -74,6 +74,10 @@ size_t DescribePartitionsNode::getNumComputedColumns() const {
   return 4;
 }
 
+SType DescribePartitionsNode::getColumnType(size_t idx) const {
+  return SType::STRING;
+}
+
 String DescribePartitionsNode::toString() const {
   return StringUtil::format("(describe-partitions $0)", table_name_);;
 }

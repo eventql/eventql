@@ -78,6 +78,10 @@ size_t ChartStatementNode::getNumComputedColumns() const {
   return 1;
 }
 
+SType ChartStatementNode::getColumnType(size_t idx) const {
+  return SType::STRING;
+}
+
 RefPtr<QueryTreeNode> ChartStatementNode::deepCopy() const {
   return new ChartStatementNode(*this);
 }
