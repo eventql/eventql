@@ -98,6 +98,10 @@ String ColumnReferenceNode::toSQL() const {
   return "`" + column_name_ + "`";
 }
 
+SType ColumnReferenceNode::getReturnType() const {
+  return type_;
+}
+
 void ColumnReferenceNode::encode(
     QueryTreeCoder* coder,
     const ColumnReferenceNode& node,
