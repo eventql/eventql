@@ -37,4 +37,16 @@ QualifiedColumn::QualifiedColumn(
     short_name(_short_name),
     type(_type) {}
 
+std::pair<size_t, SType> TableExpressionNode::getComputedColumnInfo(
+    const String& column_name,
+    bool allow_add) {
+  auto idx = getComputedColumnIndex(column_name, allow_add);
+  if (idx == size_t(-1)) {
+    return std::make_pair(idx, SType::NIL);
+  } else {
+    return std::make_pair(idx, getColumnType(idx));
+  }
+}
+
+
 } // namespace csql
