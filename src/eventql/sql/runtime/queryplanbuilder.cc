@@ -1069,21 +1069,32 @@ QueryTreeNode* QueryPlanBuilder::buildJoinTableReference(
             continue;
           }
 
-          auto cpred = mkRef<ValueExpressionNode>(
-              new csql::CallExpressionNode(
-                  "eq",
-                  Vector<RefPtr<csql::ValueExpressionNode>>{
-                    new csql::ColumnReferenceNode(c.second[i1]),
-                    new csql::ColumnReferenceNode(c.second[i2])
-                  }));
+          RefPtr<ValueExpressionNode> cpred;
+          {
+            auto rc = csql::CallExpressionNode::newNode(
+                "eq",
+                Vector<RefPtr<csql::ValueExpressionNode>>{
+                  new csql::ColumnReferenceNode(c.second[i1]),
+                  new csql::ColumnReferenceNode(c.second[i2])
+                },
+                &cpred);
+
+            if (!rc.isSuccess()) {
+              RAISE(kRuntimeError, rc.getMessage());
+            }
+          }
 
           if (pred.get() == nullptr) {
             pred = cpred;
           } else {
-            pred = mkRef<ValueExpressionNode>(
-                new csql::CallExpressionNode(
-                    "logical_and",
-                    Vector<RefPtr<csql::ValueExpressionNode>>{ pred, cpred }));
+            auto rc = csql::CallExpressionNode::newNode(
+                "logical_and",
+                Vector<RefPtr<csql::ValueExpressionNode>>{ pred, cpred },
+                &pred);
+
+            if (!rc.isSuccess()) {
+              RAISE(kRuntimeError, rc.getMessage());
+            }
           }
         }
       }
@@ -1373,7 +1384,14 @@ QueryTreeNode* QueryPlanBuilder::buildSeqscanTableReference(
         }
       }
 
-      pred = QueryTreeUtil::prunePredicateExpression(pred, valid_columns);
+      auto rc = QueryTreeUtil::prunePredicateExpression(
+          pred,
+          valid_columns,
+          &pred);
+
+      if (!rc.isSuccess()) {
+        RAISE(kRuntimeError, rc.getMessage());
+      }
     }
 
     // FIXME skip if literal true expression
@@ -1585,7 +1603,14 @@ ValueExpressionNode* QueryPlanBuilder::buildOperator(
     args.emplace_back(buildValueExpression(txn, e));
   }
 
-  return new CallExpressionNode(name, args);
+  RefPtr<ValueExpressionNode> node;
+  auto rc = CallExpressionNode::newNode(name, args, &node);
+
+  if (!rc.isSuccess()) {
+    RAISE(kRuntimeError, rc.getMessage());
+  }
+
+  return node.release();
 }
 
 ValueExpressionNode* QueryPlanBuilder::buildMethodCall(
@@ -1603,7 +1628,14 @@ ValueExpressionNode* QueryPlanBuilder::buildMethodCall(
     args.emplace_back(buildValueExpression(txn, e));
   }
 
-  return new CallExpressionNode(symbol, args);
+  RefPtr<ValueExpressionNode> node;
+  auto rc = CallExpressionNode::newNode(symbol, args, &node);
+
+  if (!rc.isSuccess()) {
+    RAISE(kRuntimeError, rc.getMessage());
+  }
+
+  return node.release();
 }
 
 ValueExpressionNode* QueryPlanBuilder::buildIfStatement(
@@ -1618,7 +1650,14 @@ ValueExpressionNode* QueryPlanBuilder::buildIfStatement(
     RAISE(kRuntimeError, "if statement must have exactly 3 arguments");
   }
 
-  return new IfExpressionNode(args[0], args[1], args[2]);
+  RefPtr<ValueExpressionNode> node;
+  auto rc = IfExpressionNode::newNode(args[0], args[1], args[2], &node);
+
+  if (!rc.isSuccess()) {
+    RAISE(kRuntimeError, rc.getMessage());
+  }
+
+  return node.release();
 }
 
 ValueExpressionNode* QueryPlanBuilder::buildColumnReference(

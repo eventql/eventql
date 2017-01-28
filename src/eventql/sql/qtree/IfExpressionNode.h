@@ -39,7 +39,7 @@ public:
       RefPtr<ValueExpressionNode> conditional_expr,
       RefPtr<ValueExpressionNode> true_branch_expr,
       RefPtr<ValueExpressionNode> false_branch_expr,
-      RefPtr<IfExpressionNode>* node);
+      RefPtr<ValueExpressionNode>* node);
 
   Vector<RefPtr<ValueExpressionNode>> arguments() const override;
 
