@@ -119,7 +119,8 @@ size_t JoinNode::getComputedColumnIndex(
 
   auto input_idx = getInputColumnIndex(column_name);
   if (input_idx != size_t(-1)) {
-    auto slnode = new SelectListNode(new ColumnReferenceNode(input_idx));
+    auto slnode = new SelectListNode(
+        new ColumnReferenceNode(input_idx, getInputColumnType(input_idx)));
     slnode->setAlias(column_name);
     select_list_.emplace_back(slnode);
     return select_list_.size() - 1;

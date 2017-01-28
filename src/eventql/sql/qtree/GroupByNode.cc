@@ -90,7 +90,11 @@ size_t GroupByNode::getComputedColumnIndex(
       ->getComputedColumnIndex(column_name, allow_add);
 
   if (child_idx != size_t(-1)) {
-    auto slnode = new SelectListNode(new ColumnReferenceNode(child_idx));
+    auto slnode = new SelectListNode(
+        new ColumnReferenceNode(
+            child_idx,
+            table_.asInstanceOf<TableExpressionNode>()->getColumnType(child_idx)));
+
     slnode->setAlias(column_name);
     select_list_.emplace_back(slnode);
     return select_list_.size() - 1;

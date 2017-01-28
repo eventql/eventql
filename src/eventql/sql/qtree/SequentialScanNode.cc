@@ -70,7 +70,7 @@ SequentialScanNode::SequentialScanNode(
   }
 
   for (const auto& col : table_info.columns) {
-    table_columns_.emplace_back(col.column_name);
+    table_columns_.emplace_back(col.column_name, col.type);
   }
 
   if (!where_expr_.isEmpty()) {
@@ -171,8 +171,8 @@ Vector<QualifiedColumn> SequentialScanNode::getAvailableColumns() const {
   Vector<QualifiedColumn> cols;
   for (const auto& c : table_columns_) {
     QualifiedColumn qc;
-    qc.short_name = c;
-    qc.qualified_name = qualifier + c;
+    qc.short_name = c.first;
+    qc.qualified_name = qualifier + c.first;
     cols.emplace_back(qc);
   }
 
@@ -227,9 +227,11 @@ size_t SequentialScanNode::getComputedColumnIndex(
   }
 
   bool found = false;
+  SType found_type = SType::NIL;
   for (const auto& c : table_columns_) {
-    if (c == col) {
+    if (c.first == col) {
       found = true;
+      found_type = c.second;
       break;
     }
   }
@@ -238,7 +240,7 @@ size_t SequentialScanNode::getComputedColumnIndex(
     return -1;
   }
 
-  auto slnode = new SelectListNode(new ColumnReferenceNode(col));
+  auto slnode = new SelectListNode(new ColumnReferenceNode(col, found_type));
   slnode->setAlias(col);
   select_list_.emplace_back(slnode);
   return select_list_.size() - 1;

@@ -119,7 +119,11 @@ size_t SubqueryNode::getComputedColumnIndex(
       ->getComputedColumnIndex(col, false);
 
   if (child_idx != size_t(-1)) {
-    auto slnode = new SelectListNode(new ColumnReferenceNode(child_idx));
+    auto slnode = new SelectListNode(
+        new ColumnReferenceNode(
+            child_idx,
+            subquery_.asInstanceOf<TableExpressionNode>()->getColumnType(child_idx)));
+
     slnode->setAlias(col);
     select_list_.emplace_back(slnode);
     return select_list_.size() - 1;

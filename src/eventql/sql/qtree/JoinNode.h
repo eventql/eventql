@@ -85,6 +85,8 @@ public:
       const String& column_name,
       bool allow_add = false);
 
+  SType getInputColumnType(size_t idx) const;
+
   Option<RefPtr<ValueExpressionNode>> whereExpression() const;
   Option<RefPtr<ValueExpressionNode>> joinCondition() const;
 
