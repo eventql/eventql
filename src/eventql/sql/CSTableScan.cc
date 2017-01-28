@@ -228,21 +228,8 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
                 case SType::STRING:
                   cur_buf_[col.second.index] = SValue::newString(v);
                   break;
-                case SType::FLOAT64:
-                  cur_buf_[col.second.index] = SValue::newFloat(v);
-                  break;
-                case SType::INT64:
-                  cur_buf_[col.second.index] = SValue::newInt64(v);
-                  break;
-                case SType::UINT64:
-                  cur_buf_[col.second.index] = SValue::newUInt64(v);
-                  break;
-                case SType::BOOL:
-                  cur_buf_[col.second.index] = SValue::newBool(v);
-                  break;
-                case SType::TIMESTAMP64:
-                  cur_buf_[col.second.index] = SValue::newTimestamp(v);
-                  break;
+                default:
+                  assert(false); // type error
               }
             }
 

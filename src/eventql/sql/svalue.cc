@@ -55,6 +55,20 @@ SValue SValue::newInteger(const String& value) {
   return SValue(value).toInteger();
 }
 
+SValue SValue::newUInt64(uint64_t value) {
+  SValue v;
+  v.data_.type = SType::UINT64;
+  v.data_.u.t_uint64 = value;
+  return v;
+}
+
+SValue SValue::newInt64(int64_t value) {
+  SValue v;
+  v.data_.type = SType::INT64;
+  v.data_.u.t_integer = value;
+  return v;
+}
+
 SValue SValue::newFloat(FloatType value) {
   return SValue(value);
 }

@@ -59,9 +59,7 @@ public:
   static SValue newString(const String& value);
   static SValue newString(const char* value);
   static SValue newUInt64(uint64_t value);
-  static SValue newUInt64(const String& value);
-  static SValue newInt64(uint64_t value);
-  static SValue newInt64(const String& value);
+  static SValue newInt64(int64_t value);
   static SValue newInteger(IntegerType value);
   static SValue newInteger(const String& value);
   static SValue newFloat(FloatType value);
@@ -131,6 +129,7 @@ protected:
     SType type;
     union {
       int64_t t_integer;
+      uint64_t t_uint64;
       double t_float;
       bool t_bool;
       uint64_t t_timestamp;
