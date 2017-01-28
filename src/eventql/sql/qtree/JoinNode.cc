@@ -87,6 +87,10 @@ JoinType JoinNode::joinType() const {
   return join_type_;
 }
 
+void JoinNode::setJoinType(JoinType type) {
+  join_type_ = type;
+}
+
 RefPtr<QueryTreeNode> JoinNode::baseTable() const {
   return base_table_;
 }
@@ -97,6 +101,11 @@ RefPtr<QueryTreeNode> JoinNode::joinedTable() const {
 
 Vector<RefPtr<SelectListNode>> JoinNode::selectList() const {
   return select_list_;
+}
+
+void JoinNode::addSelectList(RefPtr<SelectListNode> sl) {
+  column_names_.emplace_back(sl->columnName());
+  select_list_.emplace_back(sl);
 }
 
 Vector<String> JoinNode::getResultColumns() const {
@@ -196,12 +205,52 @@ size_t JoinNode::getInputColumnIndex(
   return -1;
 }
 
+SType JoinNode::getInputColumnType(size_t idx) const {
+  if (idx >= input_map_.size()) {
+    RAISEF(
+        kRuntimeError,
+        "invalid column index: '$0'",
+        idx);
+  }
+
+  switch (input_map_[idx].table_idx) {
+    case 0:
+      return base_table_.asInstanceOf<TableExpressionNode>()->getColumnType(
+          input_map_[idx].column_idx);
+    case 1:
+      return joined_table_.asInstanceOf<TableExpressionNode>()->getColumnType(
+          input_map_[idx].column_idx);
+    default:
+      return SType::NIL;
+  }
+}
+
+std::pair<size_t, SType> JoinNode::getInputColumnInfo(
+    const String& column_name,
+    bool allow_add) {
+  auto idx = getInputColumnIndex(column_name, allow_add);
+  if (idx == size_t(-1)) {
+    return std::make_pair(idx, SType::NIL);
+  } else {
+    return std::make_pair(idx, getInputColumnType(idx));
+  }
+}
+
+
 Option<RefPtr<ValueExpressionNode>> JoinNode::whereExpression() const {
   return where_expr_;
 }
 
+void JoinNode::setWhereExpression(RefPtr<ValueExpressionNode> expr) {
+  where_expr_ = Some(expr);
+}
+
 Option<RefPtr<ValueExpressionNode>> JoinNode::joinCondition() const {
   return join_cond_;
+}
+
+void JoinNode::setJoinCondition(RefPtr<ValueExpressionNode> expr) {
+  join_cond_ = Some(expr);
 }
 
 RefPtr<QueryTreeNode> JoinNode::deepCopy() const {
