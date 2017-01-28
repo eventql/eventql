@@ -29,4 +29,12 @@
 
 namespace csql {
 
+QualifiedColumn::QualifiedColumn(
+    const std::string& _qualified_name,
+    const std::string& _short_name,
+    SType _type) :
+    qualified_name(_qualified_name),
+    short_name(_short_name),
+    type(_type) {}
+
 } // namespace csql
