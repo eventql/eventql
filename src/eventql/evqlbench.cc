@@ -29,16 +29,7 @@
 #include "eventql/util/thread/eventloop.h"
 #include "eventql/util/cli/flagparser.h"
 #include <eventql/config/process_config.h>
-#include <eventql/cli/commands/cluster_add_server.h>
-#include <eventql/cli/commands/cluster_create.h>
-#include <eventql/cli/commands/cluster_status.h>
-#include <eventql/cli/commands/cluster_list.h>
-#include <eventql/cli/commands/cluster_remove_server.h>
-#include <eventql/cli/commands/database_create.h>
-#include <eventql/cli/commands/table_split.h>
-#include <eventql/cli/commands/table_split_finalize.h>
-#include <eventql/cli/commands/table_config_set.h>
-#include <eventql/cli/commands/table_import.h>
+#include <eventql/cli/benchmarks/local_sql.h>
 
 using namespace eventql;
 
@@ -77,6 +68,7 @@ int main(int argc, const char** argv) {
 
   /* init commands */
   List<eventql::cli::CLICommand*> commands;
+  commands.emplace_back(new eventql::cli::LocalSQLBenchmark());
 
   /* print help/version and exit */
   bool print_help = flags.isSet("help");
