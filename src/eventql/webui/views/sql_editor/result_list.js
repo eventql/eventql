@@ -27,7 +27,7 @@ EventQL.SQLEditor.ResultList = function(elem, params) {
 
   const CHART_COLUMN_NAME = "__chart";
 
-  var view_param = params.view ? params.view : {};
+  var view_param = params.view ? JSON.parse(params.view) : {};
   var on_csv_download = [];
   var on_view_param_change = [];
 
@@ -85,7 +85,9 @@ EventQL.SQLEditor.ResultList = function(elem, params) {
       idx: idx
     };
 
-    console.log(view_param);
+    if (view_param[idx]) {
+      table_chart_cfg.view = view_param[idx];
+    }
 
     var table_chart = new EventQL.SQLEditor.ResultList.TableChartBuilder(
         result_elem,

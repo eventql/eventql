@@ -39,7 +39,11 @@ EventQL.SQLEditor = function(elem, params) {
   this.changePath = function(new_path, new_route) {
     var allowed = ["query"];
     var diff = URLUtil.comparePaths(path, new_path);
-    console.log(diff);
+
+    if (ArrayUtil.setDifference(diff.params, ["view"]).length == 0) {
+      return true;
+    }
+
     if (diff.path || ArrayUtil.setDifference(diff.params, allowed).length) {
       return false;
     }
@@ -134,7 +138,6 @@ EventQL.SQLEditor = function(elem, params) {
     });
 
     result_list.onViewParamChange(function(value) {
-      console.log(value);
       EventQL.navigateTo(URLUtil.addOrModifyParam(path, "view", value));
     });
   };

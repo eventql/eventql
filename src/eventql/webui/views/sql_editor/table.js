@@ -184,10 +184,10 @@ EventQL.SQLEditor.ResultList.TableChartBuilder = function(elem, params) {
   function getDataVisualizationValue() {
     var default_value = data_visualizations[0].key;
 
-    if (params.data_visualization) {
+    if (params.view && params.view.visualization) {
       for (var i = 0; i < data_visualizations.length; i++) {
-        if (data_visualizations[i].key == params.data_visualization) {
-          return params.data_visualization;
+        if (data_visualizations[i].key == params.view.visualization) {
+          return params.view.visualization;
         }
       }
     }
