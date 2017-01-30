@@ -44,16 +44,12 @@ public:
   };
 
   struct Instruction {
-    Instruction() : vtable{ .t_pure = nullptr } {}
     kInstructionType type;
     void* arg0;
     size_t argn;
     Instruction* next;
     Instruction* child;
-    union {
-      PureFunction t_pure;
-      AggregateFunction t_aggregate;
-    } vtable;
+    SFunction::VTable vtable;
   };
 
   struct Program {

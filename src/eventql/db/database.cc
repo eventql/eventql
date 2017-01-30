@@ -367,7 +367,7 @@ ReturnCode DatabaseImpl::start() {
                 internal_auth_.get()))));
 
     sql_->setCacheDir(cache_dir);
-    sql_->symbols()->registerFunction("version", &evqlVersionExpr);
+    sql_->symbols()->registerFunction("version", evqlVersionExpr);
     sql_->setQueryCache(sql_query_cache_.get());
   }
 

@@ -156,7 +156,7 @@ void VM::mergeInstance(
     const Instance* src) {
   switch (e->type) {
     case X_CALL_AGGREGATE:
-      e->vtable.t_aggregate.merge(
+      e->vtable.merge(
           Transaction::get(ctx),
           (char *) dst->scratch + (size_t) e->arg0,
           (char *) src->scratch + (size_t) e->arg0);
@@ -178,8 +178,8 @@ void VM::initInstance(
     Instance* instance) {
   switch (e->type) {
     case X_CALL_AGGREGATE:
-      if (e->vtable.t_aggregate.init) {
-        e->vtable.t_aggregate.init(
+      if (e->vtable.init) {
+        e->vtable.init(
             Transaction::get(ctx),
             (char *) instance->scratch + (size_t) e->arg0);
       }
@@ -201,8 +201,8 @@ void VM::freeInstance(
     Instance* instance) {
   switch (e->type) {
     case X_CALL_AGGREGATE:
-      if (e->vtable.t_aggregate.free) {
-        e->vtable.t_aggregate.free(
+      if (e->vtable.free) {
+        e->vtable.free(
             Transaction::get(ctx),
             (char *) instance->scratch + (size_t) e->arg0);
       }
@@ -224,7 +224,7 @@ void VM::resetInstance(
     Instance* instance) {
   switch (e->type) {
     case X_CALL_AGGREGATE:
-      e->vtable.t_aggregate.reset(
+      e->vtable.reset(
           Transaction::get(ctx),
           (char *) instance->scratch + (size_t) e->arg0);
       break;
@@ -323,7 +323,7 @@ void VM::evaluate(
             evaluate(ctx, program, instance, cur, argc, argv, stackp++);
           }
 
-          expr->vtable.t_pure.call(Transaction::get(ctx), stackn, stackv, out);
+          expr->vtable.call(Transaction::get(ctx), stackn, stackv, out);
         } catch (...) {
           for (int i = 0; i < stackn; ++i) {
             (stackv + i)->~SValue();
@@ -336,7 +336,7 @@ void VM::evaluate(
           (stackv + i)->~SValue();
         }
       } else {
-        expr->vtable.t_pure.call(Transaction::get(ctx), 0, nullptr, out);
+        expr->vtable.call(Transaction::get(ctx), 0, nullptr, out);
       }
 
       return;
@@ -350,7 +350,7 @@ void VM::evaluate(
       }
 
       auto scratch = (char *) instance->scratch + (size_t) expr->arg0;
-      expr->vtable.t_aggregate.get(Transaction::get(ctx), scratch, out);
+      expr->vtable.get(Transaction::get(ctx), scratch, out);
       return;
     }
 
@@ -431,7 +431,7 @@ void VM::accumulate(
       }
 
       auto scratch = (char *) instance->scratch + (size_t) expr->arg0;
-      expr->vtable.t_aggregate.accumulate(
+      expr->vtable.accumulate(
           Transaction::get(ctx),
           scratch,
           stackn,
@@ -482,7 +482,7 @@ void VM::saveInstance(
     OutputStream* os) {
   switch (e->type) {
     case X_CALL_AGGREGATE:
-      e->vtable.t_aggregate.savestate(
+      e->vtable.savestate(
           Transaction::get(ctx),
           (char *) instance->scratch + (size_t) e->arg0,
           os);
@@ -505,7 +505,7 @@ void VM::loadInstance(
     InputStream* os) {
   switch (e->type) {
     case X_CALL_AGGREGATE:
-      e->vtable.t_aggregate.loadstate(
+      e->vtable.loadstate(
           Transaction::get(ctx),
           (char *) instance->scratch + (size_t) e->arg0,
           os);

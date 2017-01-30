@@ -650,8 +650,14 @@ RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
   return expr;
 }
 
-void evqlVersionExpr(sql_txn* ctx, int argc, csql::SValue* argv, csql::SValue* out) {
+void evql_version(sql_txn* ctx, int argc, csql::SValue* argv, csql::SValue* out) {
   *out = csql::SValue::newString("EventQL " + eventql::kVersionString);
 }
+
+const csql::SFunction evqlVersionExpr(
+    csql::FN_PURE,
+    {},
+    csql::SType::STRING,
+    &evql_version);
 
 } // namespace csql

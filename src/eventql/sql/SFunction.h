@@ -38,45 +38,38 @@ enum kFunctionType {
   FN_AGGREGATE
 };
 
-/**
- * A pure/stateless expression that returns a single return value
- */
-struct PureFunction {
-  PureFunction();
-  PureFunction(
-      void (*_call)(sql_txn* ctx, int argc, SValue* in, SValue* out),
-      bool _has_side_effects = false);
-  void (*call)(sql_txn* ctx, int argc, SValue* in, SValue* out);
-  bool has_side_effects;
-};
-
-/**
- * An aggregate expression that returns a single return value
- */
-struct AggregateFunction {
-  size_t scratch_size;
-  void (*accumulate)(sql_txn*, void* scratch, int argc, SValue* in);
-  void (*get)(sql_txn*, void* scratch, SValue* out);
-  void (*reset)(sql_txn*, void* scratch);
-  void (*init)(sql_txn*, void* scratch);
-  void (*free)(sql_txn*, void* scratch);
-  void (*merge)(sql_txn*, void* scratch, const void* other);
-  void (*savestate)(sql_txn*, void* scratch, OutputStream* os);
-  void (*loadstate)(sql_txn*, void* scratch, InputStream* is);
+struct SFunctionReturn {
+  void* data;
+  size_t size;
+  void* context; // userdata
+  void (*resize)(SFunctionReturn* self, size_t new_size);
 };
 
 struct SFunction {
-  SFunction();
-  SFunction(PureFunction fn);
-  SFunction(AggregateFunction fn);
 
-  bool isAggregate() const;
-  bool hasSideEffects() const;
+  SFunction(
+      kFunctionType _type,
+      std::vector<SType> _arg_types,
+      SType _return_type,
+      void (*_call)(sql_txn* ctx, int argc, SValue* in, SValue* out),
+      bool _has_side_effects = false);
 
   kFunctionType type;
-  union {
-    PureFunction t_pure;
-    AggregateFunction t_aggregate;
+  std::vector<SType> arg_types;
+  SType return_type;
+  bool has_side_effects;
+  size_t scratch_size;
+
+  struct VTable {
+    void (*call)(sql_txn* ctx, int argc, SValue* in, SValue* out);
+    void (*accumulate)(sql_txn*, void* scratch, int argc, SValue* in);
+    void (*get)(sql_txn*, void* scratch, SValue* out);
+    void (*reset)(sql_txn*, void* scratch);
+    void (*init)(sql_txn*, void* scratch);
+    void (*free)(sql_txn*, void* scratch);
+    void (*merge)(sql_txn*, void* scratch, const void* other);
+    void (*savestate)(sql_txn*, void* scratch, OutputStream* os);
+    void (*loadstate)(sql_txn*, void* scratch, InputStream* is);
   } vtable;
 };
 

@@ -151,7 +151,7 @@ VM::Instruction* Compiler::compileMethodCall(
     size_t* dynamic_storage_size,
     ScratchMemory* static_storage,
    SymbolTable* symbol_table) {
-  auto symbol = symbol_table->lookup(node->symbol());
+  auto fun = node->getFunction();
   const auto& args = node->arguments();
 
   auto op = static_storage->construct<VM::Instruction>();
@@ -160,16 +160,16 @@ VM::Instruction* Compiler::compileMethodCall(
   op->child = nullptr;
   op->next  = nullptr;
 
-  switch (symbol.type) {
+  switch (fun->type) {
     case FN_PURE:
       op->type = VM::X_CALL_PURE;
-      op->vtable.t_pure = symbol.vtable.t_pure;
+      op->vtable = fun->vtable;
       break;
     case FN_AGGREGATE:
       op->type = VM::X_CALL_AGGREGATE;
       op->arg0 = (void *) *dynamic_storage_size;
-      op->vtable.t_aggregate = symbol.vtable.t_aggregate;
-      *dynamic_storage_size += symbol.vtable.t_aggregate.scratch_size;
+      op->vtable = fun->vtable;
+      *dynamic_storage_size += fun->scratch_size;
       break;
   }
 

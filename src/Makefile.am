@@ -571,22 +571,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/backends/tableref.h \
     eventql/sql/defaults.cc \
     eventql/sql/defaults.h \
-    eventql/sql/expressions/aggregate.cc \
-    eventql/sql/expressions/aggregate.h \
     eventql/sql/expressions/boolean.cc \
     eventql/sql/expressions/boolean.h \
-    eventql/sql/expressions/conversion.cc \
-    eventql/sql/expressions/conversion.h \
-    eventql/sql/expressions/datetime.cc \
-    eventql/sql/expressions/datetime.h \
-    eventql/sql/expressions/internal.cc \
-    eventql/sql/expressions/internal.h \
-    eventql/sql/expressions/math.cc \
-    eventql/sql/expressions/math.h \
-    eventql/sql/expressions/miscellaneous.cc \
-    eventql/sql/expressions/miscellaneous.h \
-    eventql/sql/expressions/string.cc \
-    eventql/sql/expressions/string.h \
     eventql/sql/expressions/table/describe_table.cc \
     eventql/sql/expressions/table/describe_table.h \
     eventql/sql/expressions/table/describe_partitions.cc \

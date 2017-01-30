@@ -27,43 +27,18 @@
 
 namespace csql {
 
-PureFunction::PureFunction() : call(nullptr), has_side_effects(false) {}
-
-PureFunction::PureFunction(
+SFunction::SFunction(
+    kFunctionType _type,
+    std::vector<SType> _arg_types,
+    SType _return_type,
     void (*_call)(sql_txn* ctx, int argc, SValue* in, SValue* out),
-    bool _has_side_effects) :
-    call(_call),
-    has_side_effects(_has_side_effects) {}
-
-SFunction::SFunction() :
-    type(FN_PURE),
-    vtable{ .t_pure = nullptr } {}
-
-SFunction::SFunction(
-    PureFunction fn) :
-    type(FN_PURE),
-    vtable{ .t_pure = fn } {}
-
-SFunction::SFunction(
-    AggregateFunction fn) :
-    type(FN_AGGREGATE),
-    vtable{ .t_aggregate = fn } {}
-
-bool SFunction::isAggregate() const {
-  switch (type) {
-    case FN_PURE: return false;
-    case FN_AGGREGATE: return true;
-  }
+    bool _has_side_effects /* = false */) :
+    type(_type),
+    arg_types(_arg_types),
+    return_type(_return_type),
+    has_side_effects(_has_side_effects) {
+  vtable.call = _call;
 }
 
-bool SFunction::hasSideEffects() const {
-  switch (type) {
-    case FN_AGGREGATE:
-      return false;
-    case FN_PURE:
-      return vtable.t_pure.has_side_effects;
-  }
-}
+} // namespace csql
 
-
-}

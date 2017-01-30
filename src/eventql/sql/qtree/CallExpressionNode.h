@@ -27,6 +27,7 @@
 #include <eventql/util/return_code.h>
 #include <eventql/sql/qtree/ValueExpressionNode.h>
 #include <eventql/sql/qtree/qtree_coder.h>
+#include <eventql/sql/SFunction.h>
 
 #include "eventql/eventql.h"
 
@@ -58,6 +59,8 @@ public:
   static RefPtr<QueryTreeNode> decode (
       QueryTreeCoder* coder,
       InputStream* is);
+
+  const SFunction* getFunction() const;
 
 protected:
 
