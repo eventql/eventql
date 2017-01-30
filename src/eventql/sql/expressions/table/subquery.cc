@@ -22,6 +22,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <assert.h>
 #include <eventql/sql/expressions/table/subquery.h>
 #include <eventql/sql/runtime/vm.h>
 
@@ -52,6 +53,11 @@ ReturnCode SubqueryExpression::execute() {
 
 size_t SubqueryExpression::getColumnCount() const {
   return select_exprs_.size();
+}
+
+SType SubqueryExpression::getColumnType(size_t idx) const {
+  assert(idx < select_exprs_.size());
+  return select_exprs_[idx].getReturnType();
 }
 
 bool SubqueryExpression::next(SValue* row, size_t row_len) {
