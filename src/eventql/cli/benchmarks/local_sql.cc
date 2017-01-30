@@ -38,8 +38,9 @@ LocalSQLBenchmark::LocalSQLBenchmark() :
     verbose_(false),
     num_requests_(-1),
     request_counter_(0),
-    total_rows_(0),
-    total_runtime_us_(0.0) {}
+    total_runtime_us_(0),
+    min_runtime_us_(-1),
+    max_runtime_us_(0) {}
 
 Status LocalSQLBenchmark::execute(
     const std::vector<std::string>& argv,
@@ -115,8 +116,11 @@ Status LocalSQLBenchmark::execute(
   }
 
   std::cout
-      << "Total: took " << total_runtime_us_ << "ms" << "; "
-      << total_rows_ << " rows returned" << std::endl;
+      << "Total: took " << total_runtime_us_ / 1000.0f << "ms" << "; "
+      << "min: " << min_runtime_us_ / 1000.0f << "ms" << "; "
+      << "max: " << max_runtime_us_ / 1000.0f << "ms" << "; "
+      << "mean: " << (total_runtime_us_ / 1000.0f) / double(num_requests_) << "ms" << "; "
+      << std::endl;
 
   return Status::success();
 }
@@ -140,25 +144,31 @@ ReturnCode LocalSQLBenchmark::runQuery(
 
   auto t1 = WallClock::unixMicros();
   auto num_rows = result.getNumRows();
-  auto runtime_us = (t1-t0) / 1000.0f;
+  auto runtime_us = t1 - t0;
 
-  total_rows_ += num_rows;
   total_runtime_us_ += runtime_us;
+  if (runtime_us < min_runtime_us_) {
+    min_runtime_us_ = runtime_us;
+  }
+
+  if (runtime_us > max_runtime_us_) {
+    max_runtime_us_ = runtime_us;
+  }
 
   if (verbose_) {
     result.debugPrint();
 
     std::cout
-        << "took " << runtime_us << "ms" << "; "
+        << "took " << runtime_us / 1000.0f << "ms" << "; "
         << num_rows << " rows returned" << std::endl;
 
-  } else if (fmod(++request_counter_, num_requests_ / double(kDefaultNumPrints)) == 0) {
+  } else if (
+      fmod(++request_counter_, num_requests_ / double(kDefaultNumPrints)) == 0) {
     std::cout
       << request_counter_ << "/"
       << num_requests_ << " requests"
       << std::endl;
   }
-
 
   return ReturnCode::success();
 }
