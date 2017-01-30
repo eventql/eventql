@@ -2,6 +2,7 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -24,6 +25,7 @@
 #include <iostream>
 #include <eventql/cli/benchmarks/local_sql.h>
 #include <eventql/util/cli/flagparser.h>
+#include <eventql/util/wallclock.h>
 
 namespace eventql {
 namespace cli {
@@ -31,15 +33,76 @@ namespace cli {
 const String LocalSQLBenchmark::kName_ = "local-sql";
 const String LocalSQLBenchmark::kDescription_ = "Benchmark the SQL engine";
 
+LocalSQLBenchmark::LocalSQLBenchmark() : verbose_(false) {}
+
 Status LocalSQLBenchmark::execute(
     const std::vector<std::string>& argv,
     FileInputStream* stdin_is,
     OutputStream* stdout_os,
     OutputStream* stderr_os) {
+  ::cli::FlagParser flags;
 
-  std::cout << "here be dragons" << std::endl;
+  flags.defineFlag(
+      "query",
+      ::cli::FlagParser::T_STRING,
+      true,
+      NULL,
+      NULL,
+      "str",
+      "<str>");
+
+  flags.defineFlag(
+      "verbose",
+      ::cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "flag",
+      "<flag>");
+
+  flags.parseArgv(argv);
+  query_ = flags.getString("query");
+  if (flags.isSet("verbose")) {
+    verbose_ = true;
+  }
+
+  auto runtime = csql::Runtime::getDefaultRuntime();
+
+  for (;;) {
+    auto rc = runQuery(runtime.get());
+
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
 
   return Status::success();
+}
+
+
+ReturnCode LocalSQLBenchmark::runQuery(csql::Runtime* runtime) const {
+  auto t0 = WallClock::unixMicros();
+  auto txn = runtime->newTransaction();
+
+  csql::ResultList result;
+  try {
+    auto qplan = runtime->buildQueryPlan(txn.get(), query_);
+    qplan->execute(0, &result);
+  } catch (const std::exception& e) {
+    return ReturnCode::error("ERUNTIME", e.what());
+  }
+
+  auto t1 = WallClock::unixMicros();
+
+  if (verbose_) {
+    result.debugPrint();
+  }
+
+  std::cout
+      << "took " << (t1-t0) / 1000.0f << "ms" << "; "
+      << result.getNumRows() << " rows returned" << std::endl;
+
+  return ReturnCode::success();
 }
 
 const String& LocalSQLBenchmark::getName() const {
@@ -64,5 +127,4 @@ void LocalSQLBenchmark::printHelp(OutputStream* stdout_os) const {
 
 } // namespace cli
 } // namespace eventql
-
 

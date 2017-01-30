@@ -1047,26 +1047,8 @@ evqlbench_SOURCES = \
     eventql/cli/commands/cli_command.cc \
     eventql/cli/cli_config.cc \
     eventql/cli/cli_config.h \
-    eventql/cli/commands/cluster_add_server.h \
-    eventql/cli/commands/cluster_add_server.cc \
-    eventql/cli/commands/cluster_create.h \
-    eventql/cli/commands/cluster_create.cc \
-    eventql/cli/commands/cluster_status.h \
-    eventql/cli/commands/cluster_status.cc \
-    eventql/cli/commands/cluster_remove_server.h \
-    eventql/cli/commands/cluster_remove_server.cc \
-    eventql/cli/commands/cluster_list.h \
-    eventql/cli/commands/cluster_list.cc \
-    eventql/cli/commands/database_create.h \
-    eventql/cli/commands/database_create.cc \
-    eventql/cli/commands/table_config_set.h \
-    eventql/cli/commands/table_config_set.cc \
-    eventql/cli/commands/table_split.h \
-    eventql/cli/commands/table_split.cc \
-    eventql/cli/commands/table_split_finalize.h \
-    eventql/cli/commands/table_split_finalize.cc \
-    eventql/cli/commands/table_import.h \
-    eventql/cli/commands/table_import.cc \
+    eventql/cli/benchmarks/local_sql.h \
+    eventql/cli/benchmarks/local_sql.cc \
     eventql/evqlbench.cc
 
 evqlbench_LDADD = \

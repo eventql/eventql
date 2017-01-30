@@ -2,6 +2,7 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -25,6 +26,7 @@
 #include <eventql/eventql.h>
 #include "eventql/cli/commands/cli_command.h"
 #include "eventql/config/process_config.h"
+#include "eventql/sql/runtime/defaultruntime.h"
 
 namespace eventql {
 namespace cli {
@@ -34,6 +36,8 @@ public:
 
   static const std::string kName_;
   static const std::string kDescription_;
+
+  LocalSQLBenchmark();
 
   Status execute(
       const std::vector<std::string>& argv,
@@ -45,12 +49,14 @@ public:
   const String& getDescription() const override;
   void printHelp(OutputStream* stdout_os) const override;
 
+protected:
+
+  ReturnCode runQuery(csql::Runtime* runtime) const;
+
+  bool verbose_;
+  std::string query_;
 };
 
 } // namespace cli
 } // namespace eventql
-
-
-
-
 
