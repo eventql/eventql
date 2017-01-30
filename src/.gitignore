@@ -1,6 +1,7 @@
 *.dSYM
 test_evql_*
 evql
+evqlbench
 evqld
 evqlctl
 evqlslap

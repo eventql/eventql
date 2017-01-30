@@ -29,16 +29,7 @@
 #include "eventql/util/thread/eventloop.h"
 #include "eventql/util/cli/flagparser.h"
 #include <eventql/config/process_config.h>
-#include <eventql/cli/commands/cluster_add_server.h>
-#include <eventql/cli/commands/cluster_create.h>
-#include <eventql/cli/commands/cluster_status.h>
-#include <eventql/cli/commands/cluster_list.h>
-#include <eventql/cli/commands/cluster_remove_server.h>
-#include <eventql/cli/commands/database_create.h>
-#include <eventql/cli/commands/table_split.h>
-#include <eventql/cli/commands/table_split_finalize.h>
-#include <eventql/cli/commands/table_config_set.h>
-#include <eventql/cli/commands/table_import.h>
+#include <eventql/cli/benchmarks/local_sql.h>
 
 using namespace eventql;
 
@@ -65,24 +56,6 @@ int main(int argc, const char** argv) {
       "print version",
       "<switch>");
 
-  flags.defineFlag(
-      "config",
-      ::cli::FlagParser::T_STRING,
-      false,
-      "c",
-      NULL,
-      "path to config file",
-      "<config_file>");
-
-  flags.defineFlag(
-      "config_set",
-      ::cli::FlagParser::T_STRING,
-      false,
-      "C",
-      NULL,
-      "set config option",
-      "<key>=<val>");
-
   flags.parseArgv(argc, argv);
   auto stdin_is = FileInputStream::getStdin();
   auto stdout_os = OutputStream::getStdout();
@@ -90,50 +63,12 @@ int main(int argc, const char** argv) {
   Vector<String> cmd_argv = flags.getArgv();
 
   Application::init();
-  Application::logToStderr("evqlctl");
+  Application::logToStderr("evqlbench");
   signal(SIGPIPE, SIG_DFL);
-
-  /* load config */
-  ProcessConfigBuilder config_builder;
-  config_builder.setClientDefaults();
-
-  if (flags.isSet("config")) {
-    auto rc = config_builder.loadFile(flags.getString("config"));
-    if (!rc.isSuccess()) {
-      stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
-      return 1;
-    }
-  } else {
-    config_builder.loadDefaultConfigFile("evqlctl");
-  }
-
-  for (const auto& opt : flags.getStrings("config_set")) {
-    auto opt_key_end = opt.find("=");
-    if (opt_key_end == String::npos) {
-      stderr_os->write(
-          StringUtil::format("ERROR: invalid config option: $0\n", opt));
-      return 1;
-    }
-
-    config_builder.setProperty(
-        opt.substr(0, opt_key_end),
-        opt.substr(opt_key_end + 1));
-  }
-
-  auto process_config = config_builder.getConfig();
 
   /* init commands */
   List<eventql::cli::CLICommand*> commands;
-  commands.emplace_back(new eventql::cli::ClusterAddServer(process_config));
-  commands.emplace_back(new eventql::cli::ClusterCreate(process_config));
-  commands.emplace_back(new eventql::cli::ClusterRemoveServer(process_config));
-  commands.emplace_back(new eventql::cli::ClusterStatus(process_config));
-  commands.emplace_back(new eventql::cli::ClusterList(process_config));
-  commands.emplace_back(new eventql::cli::DatabaseCreate(process_config));
-  commands.emplace_back(new eventql::cli::TableSplit(process_config));
-  commands.emplace_back(new eventql::cli::TableSplitFinalize(process_config));
-  commands.emplace_back(new eventql::cli::TableConfigSet(process_config));
-  commands.emplace_back(new eventql::cli::TableImport(process_config));
+  commands.emplace_back(new eventql::cli::LocalSQLBenchmark());
 
   /* print help/version and exit */
   bool print_help = flags.isSet("help");
@@ -161,12 +96,10 @@ int main(int argc, const char** argv) {
   if (print_help) {
     if (help_topic.empty()) {
       stdout_os->write(
-        "Usage: $ evqlctl [OPTIONS] <command> [<args>]\n\n"
-        "   -c, --config <file>       Load config from file\n"
-        "   -C name=value             Define a config value on the command line\n"
+        "Usage: $ evqlbench [OPTIONS] <command> [<args>]\n\n"
         "   -?, --help <topic>        Display a command's help text and exit\n"
         "   -v, --version             Display the version of this binary and exit\n\n"
-        "evqlctl commands:\n"
+        "evqlbench commands:\n"
       );
 
       for (const auto c : commands) {
@@ -175,7 +108,7 @@ int main(int argc, const char** argv) {
       }
 
       stdout_os->write(
-        "\nSee 'evqlctl help <command>' to read about a specific subcommand.\n"
+        "\nSee 'evqlbench help <command>' to read about a specific subcommand.\n"
       );
 
       return 0;
@@ -189,7 +122,7 @@ int main(int argc, const char** argv) {
     }
 
     stderr_os->write(StringUtil::format(
-        "evqlctl: No manual entry for evqlctl '$0'\n",
+        "evqlbench: No manual entry for evqlbench '$0'\n",
         help_topic));
     return 1;
   }
@@ -198,7 +131,7 @@ int main(int argc, const char** argv) {
   String cmd_name;
   if (cmd_argv.empty()) {
     stderr_os->write(
-      "evqlctl: command is not specified. See 'evqlctl --help'.\n");
+      "evqlbench: command is not specified. See 'evqlbench --help'.\n");
     return 1;
   } else {
     cmd_name = cmd_argv.front();
@@ -222,7 +155,7 @@ int main(int argc, const char** argv) {
   }
 
   stderr_os->write(StringUtil::format(
-      "evqlctl: '$0' is not a evqlctl command. See 'evqlctl --help'.\n",
+      "evqlbench: '$0' is not a evqlbench command. See 'evqlbench --help'.\n",
       cmd_name));
 
   return 1;

@@ -114,5 +114,5 @@ To build EventQL from a git checkout:
 
 To run the test suite:
 
-    $ make test
+    $ make check
 
