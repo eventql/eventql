@@ -47,6 +47,11 @@ size_t SelectExpression::getColumnCount() const {
   return select_exprs_.size();
 }
 
+SType SelectExpression::getColumnType(size_t idx) const {
+  assert(idx < select_exprs_.size());
+  return select_exprs_[idx].getReturnType();
+}
+
 bool SelectExpression::next(SValue* row, size_t row_len) {
   if (pos_++ == 0) {
     for (int i = 0; i < select_exprs_.size() && i < row_len; ++i) {

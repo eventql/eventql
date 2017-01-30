@@ -118,6 +118,11 @@ size_t NestedLoopJoin::getColumnCount() const {
   return select_exprs_.size();
 }
 
+SType NestedLoopJoin::getColumnType(size_t idx) const {
+  assert(idx < select_exprs_.size());
+  return select_exprs_[idx].getReturnType();
+}
+
 bool NestedLoopJoin::next(SValue* row, size_t row_len) {
   return cursor_(row, row_len);
 }
