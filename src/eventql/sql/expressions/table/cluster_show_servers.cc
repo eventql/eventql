@@ -49,6 +49,11 @@ size_t ClusterShowServersExpression::getColumnCount() const {
   return kNumColumns;
 }
 
+SType ClusterShowServersExpression::getColumnType(size_t idx) const {
+  assert(idx < kNumColumns);
+  return SType::STRING;
+}
+
 bool ClusterShowServersExpression::next(SValue* row, size_t row_len) {
   if (counter_ < rows_.size()) {
     const auto& server = rows_[counter_];

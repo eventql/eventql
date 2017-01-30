@@ -48,6 +48,11 @@ size_t DescribeTableStatement::getColumnCount() const {
   return kNumColumns;
 }
 
+SType DescribeTableStatement::getColumnType(size_t idx) const {
+  assert(idx < kNumColumns);
+  return SType::STRING;
+}
+
 bool DescribeTableStatement::next(SValue* row, size_t row_len) {
   if (counter_ < rows_.size()) {
     const auto& col = rows_[counter_];

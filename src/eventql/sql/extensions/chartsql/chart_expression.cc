@@ -22,6 +22,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <assert.h>
 #include <eventql/sql/extensions/chartsql/chart_expression.h>
 #include <eventql/sql/extensions/chartsql/linechartbuilder.h>
 #include <eventql/sql/extensions/chartsql/areachartbuilder.h>
@@ -408,6 +409,11 @@ void ChartExpression::applyLegend(
 
 size_t ChartExpression::getColumnCount() const {
   return 1;
+}
+
+SType ChartExpression::getColumnType(size_t idx) const {
+  assert(idx == 0);
+  return SType::STRING;
 }
 
 bool ChartExpression::next(SValue* row, size_t row_len) {

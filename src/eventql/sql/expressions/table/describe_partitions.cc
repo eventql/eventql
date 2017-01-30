@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <assert.h>
 #include <eventql/sql/expressions/table/describe_partitions.h>
 #include <eventql/sql/transaction.h>
 
@@ -45,6 +46,11 @@ ReturnCode DescribePartitionsExpression::execute() {
 
 size_t DescribePartitionsExpression::getColumnCount() const {
   return kNumColumns;
+}
+
+SType DescribePartitionsExpression::getColumnType(size_t idx) const {
+  assert(idx < kNumColumns);
+  return SType::STRING;
 }
 
 bool DescribePartitionsExpression::next(SValue* row, size_t row_len) {
