@@ -51,12 +51,16 @@ public:
 
 protected:
 
+  static const size_t kDefaultNumPrints = 10;
+
   ReturnCode runQuery(csql::Runtime* runtime, csql::TableProvider* tables);
 
   bool verbose_;
   std::string query_;
+  size_t num_requests_;
+  size_t request_counter_;
   size_t total_rows_;
-  double total_runtime_ms_;
+  double total_runtime_us_;
 };
 
 } // namespace cli

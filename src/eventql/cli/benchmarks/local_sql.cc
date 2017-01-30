@@ -36,8 +36,10 @@ const String LocalSQLBenchmark::kDescription_ = "Benchmark the SQL engine";
 
 LocalSQLBenchmark::LocalSQLBenchmark() :
     verbose_(false),
+    num_requests_(-1),
+    request_counter_(0),
     total_rows_(0),
-    total_runtime_ms_(0.0) {}
+    total_runtime_us_(0.0) {}
 
 Status LocalSQLBenchmark::execute(
     const std::vector<std::string>& argv,
@@ -100,8 +102,11 @@ Status LocalSQLBenchmark::execute(
     tables->addProvider(new csql::CSTableScanProvider(parts[0], parts[1]));
   }
 
-  size_t num_requests = flags.isSet("num") ? flags.getInt("num") : -1;
-  for (size_t i = 0; i < num_requests; i++) {
+  if (flags.isSet("num")) {
+    num_requests_ = flags.getInt("num");
+  }
+
+  for (size_t i = 0; i < num_requests_; i++) {
     auto rc = runQuery(runtime.get(), tables.get());
 
     if (!rc.isSuccess()) {
@@ -110,7 +115,7 @@ Status LocalSQLBenchmark::execute(
   }
 
   std::cout
-      << "Total: took " << total_runtime_ms_ << "ms" << "; "
+      << "Total: took " << total_runtime_us_ << "ms" << "; "
       << total_rows_ << " rows returned" << std::endl;
 
   return Status::success();
@@ -134,20 +139,26 @@ ReturnCode LocalSQLBenchmark::runQuery(
   }
 
   auto t1 = WallClock::unixMicros();
+  auto num_rows = result.getNumRows();
+  auto runtime_us = (t1-t0) / 1000.0f;
+
+  total_rows_ += num_rows;
+  total_runtime_us_ += runtime_us;
 
   if (verbose_) {
     result.debugPrint();
+
+    std::cout
+        << "took " << runtime_us << "ms" << "; "
+        << num_rows << " rows returned" << std::endl;
+
+  } else if (fmod(++request_counter_, num_requests_ / double(kDefaultNumPrints)) == 0) {
+    std::cout
+      << request_counter_ << "/"
+      << num_requests_ << " requests"
+      << std::endl;
   }
 
-  auto num_rows = result.getNumRows();
-  auto runtime_ms = (t1-t0) / 1000.0f;
-
-  total_rows_ += num_rows;
-  total_runtime_ms_ += runtime_ms;
-
-  std::cout
-      << "Running... took " << runtime_ms << "ms" << "; "
-      << num_rows << " rows returned" << std::endl;
 
   return ReturnCode::success();
 }
