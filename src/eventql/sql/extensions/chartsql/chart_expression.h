@@ -40,13 +40,14 @@ public:
       Vector<Vector<ScopedPtr<TableExpression>>> input_tables,
       Vector<Vector<RefPtr<TableExpressionNode>>> input_table_qtrees);
 
-  ScopedPtr<ResultCursor> execute() override;
+  ReturnCode execute() override;
 
-  size_t getNumColumns() const override;
+  size_t getColumnCount() const override;
+  SType getColumnType(size_t idx) const override;
+
+  bool next(SValue* row, size_t row_len) override;
 
 protected:
-
-  bool next(SValue* row, size_t row_len);
 
   void executeDrawStatement(
       size_t idx,
@@ -64,7 +65,7 @@ protected:
       chart_builder.executeStatement(
           txn_,
           input_table_qtrees_[idx][i],
-          input_tables_[idx][i]->execute());
+          input_tables_[idx][i].get());
     }
 
     return chart_builder.getChart();

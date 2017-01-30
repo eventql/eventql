@@ -32,28 +32,20 @@ ClusterShowServersExpression::ClusterShowServersExpression(
     txn_(txn),
     counter_(0) {}
 
-ScopedPtr<ResultCursor> ClusterShowServersExpression::execute() {
+ReturnCode ClusterShowServersExpression::execute() {
   auto rc = txn_->getTableProvider()->listServers(
       [this] (const eventql::ServerConfig& server) {
     rows_.emplace_back(server);
   });
 
   if (!rc.isSuccess()) {
-    //FIXME handle error
+    return rc;
   }
 
-  return mkScoped(
-      new DefaultResultCursor(
-          kNumColumns,
-          std::bind(
-              &ClusterShowServersExpression::next,
-              this,
-              std::placeholders::_1,
-              std::placeholders::_2)));
-
+  return ReturnCode::success();
 }
 
-size_t ClusterShowServersExpression::getNumColumns() const {
+size_t ClusterShowServersExpression::getColumnCount() const {
   return kNumColumns;
 }
 

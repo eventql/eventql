@@ -45,14 +45,14 @@ public:
       RefPtr<SequentialScanNode> stmt,
       ScopedPtr<TableIterator> iter);
 
-  ScopedPtr<ResultCursor> execute() override;
+  ReturnCode execute() override;
 
-  size_t getNumColumns() const override;
+  size_t getColumnCount() const override;
+  SType getColumnType(size_t idx) const override;
+
+  bool next(SValue* out, size_t out_len) override;
 
 protected:
-
-  bool next(SValue* out, int out_len);
-
   Transaction* txn_;
   ExecutionContext* execution_context_;
   ScopedPtr<TableIterator> iter_;

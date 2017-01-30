@@ -45,7 +45,7 @@ ChartExpression::ChartExpression(
     input_table_qtrees_(input_table_qtrees),
     counter_(0) {}
 
-ScopedPtr<ResultCursor> ChartExpression::execute() {
+ReturnCode ChartExpression::execute() {
   util::chart::Canvas canvas;
   for (size_t i = 0; i < qtree_->getDrawStatements().size(); ++i) {
     executeDrawStatement(i, &canvas);
@@ -55,14 +55,7 @@ ScopedPtr<ResultCursor> ChartExpression::execute() {
   util::chart::SVGTarget svg(svg_data_os.get());
   canvas.render(&svg);
 
-  return mkScoped(
-      new DefaultResultCursor(
-          1,
-          std::bind(
-              &ChartExpression::next,
-              this,
-              std::placeholders::_1,
-              std::placeholders::_2)));
+  return ReturnCode::success();
 }
 
 void ChartExpression::executeDrawStatement(
@@ -413,7 +406,7 @@ void ChartExpression::applyLegend(
   chart->addLegend(vert_pos, horiz_pos, placement, title);
 }
 
-size_t ChartExpression::getNumColumns() const {
+size_t ChartExpression::getColumnCount() const {
   return 1;
 }
 

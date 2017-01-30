@@ -49,7 +49,12 @@ public:
   void executeStatement(
       Transaction* txn,
       RefPtr<TableExpressionNode> stmt,
-      ScopedPtr<ResultCursor> result_cursor) {
+      TableExpression* result_cursor) {
+    auto rc = result_cursor->execute();
+    if (!rc.isSuccess()) {
+      RAISE(kRuntimeError, rc.getMessage());
+    }
+
     name_ind_ = stmt->getComputedColumnIndex("series");
 
     x_ind_ = stmt->getComputedColumnIndex("x");
@@ -108,7 +113,7 @@ public:
     }
 
     bool first = true;
-    Vector<SValue> row(result_cursor->getNumColumns());
+    Vector<SValue> row(result_cursor->getColumnCount());
     while (result_cursor->next(row.data(), row.size())) {
       if (first) {
         first = false;

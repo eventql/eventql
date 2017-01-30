@@ -77,7 +77,7 @@ CSTableScan::CSTableScan(
   execution_context_->incrementNumTasks();
 }
 
-ScopedPtr<ResultCursor> CSTableScan::execute() {
+ReturnCode CSTableScan::execute() {
   execution_context_->incrementNumTasksRunning();
   if (!opened_) {
     open();
@@ -86,14 +86,7 @@ ScopedPtr<ResultCursor> CSTableScan::execute() {
   cur_buf_.resize(colindex_);
   num_records_ = cstable_->numRecords();
 
-  return mkScoped(
-      new DefaultResultCursor(
-          select_list_.size(),
-          std::bind(
-              &CSTableScan::next,
-              this,
-              std::placeholders::_1,
-              std::placeholders::_2)));
+  return ReturnCode::success();
 }
 
 
@@ -153,7 +146,7 @@ void CSTableScan::open() {
   }
 }
 
-bool CSTableScan::next(SValue* out, int out_len) {
+bool CSTableScan::next(SValue* out, size_t out_len) {
   try {
     if (columns_.empty()) {
       return fetchNextWithoutColumns(out, out_len);
@@ -591,7 +584,7 @@ Vector<String> CSTableScan::columnNames() const {
   return column_names_;
 }
 
-size_t CSTableScan::getNumColumns() const {
+size_t CSTableScan::getColumnCount() const {
   return column_names_.size();
 }
 

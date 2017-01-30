@@ -42,15 +42,18 @@ public:
       ScopedPtr<TableExpression> base_tbl,
       ScopedPtr<TableExpression> joined_tbl);
 
-  ScopedPtr<ResultCursor> execute() override;
+  ReturnCode execute() override;
 
-  size_t getNumColumns() const override;
+  size_t getColumnCount() const override;
+  SType getColumnType(size_t idx) const override;
+
+  bool next(SValue* row, size_t row_len) override;
 
 protected:
 
-  ScopedPtr<ResultCursor> executeCartesianJoin();
-  ScopedPtr<ResultCursor> executeInnerJoin();
-  ScopedPtr<ResultCursor> executeOuterJoin();
+  ReturnCode executeCartesianJoin();
+  ReturnCode executeInnerJoin();
+  ReturnCode executeOuterJoin();
 
   Transaction* txn_;
   JoinType join_type_;
@@ -61,7 +64,6 @@ protected:
   Option<ValueExpression> join_cond_expr_;
   Option<ValueExpression> where_expr_;
   ScopedPtr<TableExpression> base_tbl_;
-  ScopedPtr<ResultCursor> base_tbl_cursor_;
   Vector<SValue> base_tbl_row_;
   size_t base_tbl_mincols_;
   ScopedPtr<TableExpression> joined_tbl_;
@@ -69,6 +71,7 @@ protected:
   size_t joined_tbl_pos_;
   size_t joined_tbl_mincols_;
   bool joined_tbl_row_found_;
+  std::function<bool (SValue*, int)> cursor_;
 };
 
 }

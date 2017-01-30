@@ -39,13 +39,14 @@ public:
       Option<ValueExpression> where_expr,
       ScopedPtr<TableExpression> input);
 
-  ScopedPtr<ResultCursor> execute() override;
+  ReturnCode execute() override;
 
-  size_t getNumColumns() const override;
+  size_t getColumnCount() const override;
+  SType getColumnType(size_t idx) const override;
+
+  bool next(SValue* row, size_t row_len) override;
 
 protected:
-
-  bool next(SValue* row, int row_len);
 
   Transaction* txn_;
   ExecutionContext* execution_context_;

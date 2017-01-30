@@ -26,6 +26,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
 #include <eventql/util/SHA1.h>
+#include <eventql/util/return_code.h>
 #include <eventql/sql/svalue.h>
 #include <eventql/sql/result_cursor.h>
 
@@ -36,9 +37,16 @@ public:
 
   virtual ~TableExpression() = default;
 
-  virtual ScopedPtr<ResultCursor> execute() = 0;
+  virtual ReturnCode execute() = 0;
 
-  virtual size_t getNumColumns() const = 0;
+  virtual bool next(SValue* row, size_t row_len) = 0; // legacy
+
+  virtual ReturnCode nextBatch(
+      SVector* columns,
+      size_t* nrecords);
+
+  virtual size_t getColumnCount() const = 0;
+  virtual SType getColumnType(size_t idx) const = 0;
 
   virtual Option<SHA1Hash> getCacheKey() const {
     return None<SHA1Hash>();

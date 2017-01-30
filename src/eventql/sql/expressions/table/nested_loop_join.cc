@@ -65,10 +65,14 @@ NestedLoopJoin::NestedLoopJoin(
 
 static const size_t kMaxInMemoryRows = 1000000;
 
-ScopedPtr<ResultCursor> NestedLoopJoin::execute() {
-  auto joined_cursor = joined_tbl_->execute();
-  Vector<SValue> row(joined_cursor->getNumColumns());
-  while (joined_cursor->next(row.data(), row.size())) {
+ReturnCode NestedLoopJoin::execute() {
+  auto joined_rc = joined_tbl_->execute();
+  if (!joined_rc.isSuccess()) {
+    return joined_rc;
+  }
+
+  Vector<SValue> row(joined_tbl_->getColumnCount());
+  while (joined_tbl_->next(row.data(), row.size())) {
     if (row.size() < joined_tbl_mincols_) {
       RAISE(
           kRuntimeError,
@@ -85,8 +89,12 @@ ScopedPtr<ResultCursor> NestedLoopJoin::execute() {
     }
   }
 
-  base_tbl_cursor_ = base_tbl_->execute();
-  base_tbl_row_.resize(base_tbl_cursor_->getNumColumns());
+  auto base_rc = base_tbl_->execute();
+  if (!base_rc.isSuccess()) {
+    return base_rc;
+  }
+
+  base_tbl_row_.resize(base_tbl_->getColumnCount());
 
   switch (join_type_) {
     case JoinType::OUTER:
@@ -102,19 +110,25 @@ ScopedPtr<ResultCursor> NestedLoopJoin::execute() {
     default:
       RAISE(kIllegalStateError);
   }
+
+  return ReturnCode::success();
 }
 
-size_t NestedLoopJoin::getNumColumns() const {
+size_t NestedLoopJoin::getColumnCount() const {
   return select_exprs_.size();
 }
 
-ScopedPtr<ResultCursor> NestedLoopJoin::executeCartesianJoin() {
-  auto cursor = [this] (SValue* row, int row_len) -> bool {
+bool NestedLoopJoin::next(SValue* row, size_t row_len) {
+  return cursor_(row, row_len);
+}
+
+ReturnCode NestedLoopJoin::executeCartesianJoin() {
+  cursor_ = [this] (SValue* row, int row_len) -> bool {
     for (;;) {
       if (joined_tbl_pos_ == 0 || joined_tbl_pos_ == joined_tbl_data_.size()) {
         joined_tbl_pos_ = 0;
 
-        if (!base_tbl_cursor_->next(
+        if (!base_tbl_->next(
               base_tbl_row_.data(),
               base_tbl_row_.size())) {
           return false;
@@ -173,16 +187,16 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeCartesianJoin() {
     }
   };
 
-  return mkScoped(new DefaultResultCursor(select_exprs_.size(), cursor));
+  return ReturnCode::success();
 }
 
-ScopedPtr<ResultCursor> NestedLoopJoin::executeInnerJoin() {
-  auto cursor = [this] (SValue* row, int row_len) -> bool {
+ReturnCode NestedLoopJoin::executeInnerJoin() {
+  cursor_ = [this] (SValue* row, int row_len) -> bool {
     for (;;) {
       if (joined_tbl_pos_ == 0 || joined_tbl_pos_ == joined_tbl_data_.size()) {
         joined_tbl_pos_ = 0;
 
-        if (!base_tbl_cursor_->next(
+        if (!base_tbl_->next(
               base_tbl_row_.data(),
               base_tbl_row_.size())) {
           return false;
@@ -255,18 +269,18 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeInnerJoin() {
     }
   };
 
-  return mkScoped(new DefaultResultCursor( select_exprs_.size(), cursor));
+  return ReturnCode::success();
 }
 
-ScopedPtr<ResultCursor> NestedLoopJoin::executeOuterJoin() {
-  auto cursor = [this] (SValue* row, int row_len) -> bool {
+ReturnCode NestedLoopJoin::executeOuterJoin() {
+  cursor_ = [this] (SValue* row, int row_len) -> bool {
     for (;;) {
       if (joined_tbl_pos_ == 0 ||
           joined_tbl_pos_ == joined_tbl_data_.size()) {
         joined_tbl_pos_ = 0;
         joined_tbl_row_found_ = false;
 
-        if (!base_tbl_cursor_->next(
+        if (!base_tbl_->next(
               base_tbl_row_.data(),
               base_tbl_row_.size())) {
           return false;
@@ -359,8 +373,8 @@ ScopedPtr<ResultCursor> NestedLoopJoin::executeOuterJoin() {
     }
   };
 
-  return mkScoped(new DefaultResultCursor( select_exprs_.size(), cursor));
+  return ReturnCode::success();
 }
 
+} // namespace csql
 
-}

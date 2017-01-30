@@ -42,13 +42,14 @@ public:
 
   ~GroupByExpression();
 
-  ScopedPtr<ResultCursor> execute() override;
+  ReturnCode execute() override;
 
-  size_t getNumColumns() const override;
+  size_t getColumnCount() const override;
+  SType getColumnType(size_t idx) const override;
+
+  bool next(SValue* row, size_t row_len) override;
 
 protected:
-
-  bool next(SValue* row, size_t row_len);
 
   void freeResult();
 
@@ -75,9 +76,10 @@ public:
 
   ~PartialGroupByExpression();
 
-  ScopedPtr<ResultCursor> execute() override;
+  ReturnCode execute() override;
 
-  size_t getNumColumns() const override;
+  size_t getColumnCount() const override;
+  SType getColumnType(size_t idx) const override;
 
   Option<SHA1Hash> getCacheKey() const override;
 
@@ -112,9 +114,10 @@ public:
 
   ~GroupByMergeExpression();
 
-  ScopedPtr<ResultCursor> execute() override;
+  ReturnCode execute() override;
 
-  size_t getNumColumns() const override;
+  size_t getColumnCount() const override;
+  SType getColumnType(size_t idx) const override;
 
   void addPart(GroupByNode* node, std::vector<std::string> hosts);
 

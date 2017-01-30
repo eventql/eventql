@@ -50,18 +50,11 @@ TableScan::TableScan(
   execution_context_->incrementNumTasks(partitions_.size());
 }
 
-ScopedPtr<csql::ResultCursor> TableScan::execute() {
-  return mkScoped(
-      new csql::DefaultResultCursor(
-          seqscan_->getNumComputedColumns(),
-          std::bind(
-              &TableScan::next,
-              this,
-              std::placeholders::_1,
-              std::placeholders::_2)));
+ReturnCode TableScan::execute() {
+  return ReturnCode::success();
 };
 
-size_t TableScan::getNumColumns() const {
+size_t TableScan::getColumnCount() const {
   return seqscan_->getNumComputedColumns();
 }
 
@@ -113,25 +106,13 @@ ScopedPtr<csql::ResultCursor> TableScan::openLocalPartition(
     return ScopedPtr<csql::ResultCursor>();
   }
 
-  switch (partition.get()->getTable()->storage()) {
-    case eventql::TBL_STORAGE_COLSM:
-      return mkScoped(
-          new PartitionCursor(
-              txn_,
-              &child_execution_context_,
-              table.get(),
-              partition.get()->getSnapshot(),
-              qtree));
-
-    case eventql::TBL_STORAGE_STATIC:
-      return mkScoped(
-          new StaticPartitionCursor(
-              txn_,
-              &child_execution_context_,
-              table.get(),
-              partition.get()->getSnapshot(),
-              qtree));
-  }
+  return mkScoped(
+      new PartitionCursor(
+          txn_,
+          &child_execution_context_,
+          table.get(),
+          partition.get()->getSnapshot(),
+          qtree));
 }
 
 ScopedPtr<csql::ResultCursor> TableScan::openRemotePartition(

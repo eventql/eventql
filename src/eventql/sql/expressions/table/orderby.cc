@@ -49,8 +49,12 @@ OrderByExpression::OrderByExpression(
   execution_context_->incrementNumTasks();
 }
 
-ScopedPtr<ResultCursor> OrderByExpression::execute() {
-  input_cursor_ = input_->execute();
+ReturnCode OrderByExpression::execute() {
+  auto rc =input_->execute();
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
   execution_context_->incrementNumTasksRunning();
 
   Vector<SValue> row(input_cursor_->getNumColumns());
@@ -107,21 +111,14 @@ ScopedPtr<ResultCursor> OrderByExpression::execute() {
     return false;
   });
 
-  return mkScoped(
-      new DefaultResultCursor(
-          input_cursor_->getNumColumns(),
-          std::bind(
-              &OrderByExpression::next,
-              this,
-              std::placeholders::_1,
-              std::placeholders::_2)));
+  return ReturnCode::success();
 }
 
-size_t OrderByExpression::getNumColumns() const {
+size_t OrderByExpression::getColumnCount() const {
   return input_cursor_->getNumColumns();
 }
 
-bool OrderByExpression::next(SValue* out, int out_len) {
+bool OrderByExpression::next(SValue* out, size_t out_len) {
   if (pos_ >= num_rows_) {
     return false;
   } else {

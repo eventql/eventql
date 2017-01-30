@@ -37,19 +37,19 @@ public:
       size_t offset,
       ScopedPtr<TableExpression> input);
 
-  ScopedPtr<ResultCursor> execute() override;
+  ReturnCode execute() override;
 
-  size_t getNumColumns() const override;
+  size_t getColumnCount() const override;
+  SType getColumnType(size_t idx) const override;
+
+  bool next(SValue* row, size_t row_len) override;
 
 protected:
-  bool next(SValue* row, size_t row_len);
-
   ExecutionContext* execution_context_;
   size_t limit_;
   size_t offset_;
   ScopedPtr<TableExpression> input_;
   size_t counter_;
-  ScopedPtr<ResultCursor> input_cursor_;
   Vector<SValue> buf_;
 };
 

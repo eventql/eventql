@@ -39,25 +39,22 @@ SubqueryExpression::SubqueryExpression(
     where_expr_(std::move(where_expr)),
     input_(std::move(input)) {}
 
-ScopedPtr<ResultCursor> SubqueryExpression::execute() {
-  input_cursor_ = input_->execute();
+ReturnCode SubqueryExpression::execute() {
+  auto rc = input_->execute();
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
   buf_.resize(input_cursor_->getNumColumns());
 
-  return mkScoped(
-      new DefaultResultCursor(
-          select_exprs_.size(),
-          std::bind(
-              &SubqueryExpression::next,
-              this,
-              std::placeholders::_1,
-              std::placeholders::_2)));
+  return ReturnCode::success();
 }
 
-size_t SubqueryExpression::getNumColumns() const {
+size_t SubqueryExpression::getColumnCount() const {
   return select_exprs_.size();
 }
 
-bool SubqueryExpression::next(SValue* row, int row_len) {
+bool SubqueryExpression::next(SValue* row, size_t row_len) {
   Vector<SValue> buf_(input_cursor_->getNumColumns());
 
   while (input_cursor_->next(buf_.data(), buf_.size())) {

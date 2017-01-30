@@ -34,24 +34,17 @@ DescribeTableStatement::DescribeTableStatement(
     table_name_(table_name),
     counter_(0) {}
 
-ScopedPtr<ResultCursor> DescribeTableStatement::execute() {
+ReturnCode DescribeTableStatement::execute() {
   auto table_info = txn_->getTableProvider()->describe(table_name_);
   if (table_info.isEmpty()) {
     RAISEF(kNotFoundError, "table not found: $0", table_name_);
   }
 
   rows_ = table_info.get().columns;
-  return mkScoped(
-      new DefaultResultCursor(
-          kNumColumns,
-          std::bind(
-              &DescribeTableStatement::next,
-              this,
-              std::placeholders::_1,
-              std::placeholders::_2)));
+  return ReturnCode::success();
 }
 
-size_t DescribeTableStatement::getNumColumns() const {
+size_t DescribeTableStatement::getColumnCount() const {
   return kNumColumns;
 }
 

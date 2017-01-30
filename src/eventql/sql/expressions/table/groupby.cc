@@ -61,13 +61,17 @@ GroupByExpression::~GroupByExpression() {
   }
 }
 
-ScopedPtr<ResultCursor> GroupByExpression::execute() {
+ReturnCode GroupByExpression::execute() {
   execution_context_->incrementNumTasksRunning();
 
-  auto input_cursor = input_->execute();
-  Vector<SValue> row(input_cursor->getNumColumns());
+  auto rc = input_->execute();
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  Vector<SValue> row(input_->getColumnCount());
   size_t cnt = 0;
-  while (input_cursor->next(row.data(), row.size())) {
+  while (input_->next(row.data(), row.size())) {
     if (++cnt % 4096 == 0) {
       auto rc = txn_->triggerHeartbeat();
       if (!rc.isSuccess()) {
@@ -104,17 +108,10 @@ ScopedPtr<ResultCursor> GroupByExpression::execute() {
   }
 
   groups_iter_ = groups_.begin();
-  return mkScoped(
-      new DefaultResultCursor(
-          select_exprs_.size(),
-          std::bind(
-              &GroupByExpression::next,
-              this,
-              std::placeholders::_1,
-              std::placeholders::_2)));
+  return ReturnCode::success();
 }
 
-size_t GroupByExpression::getNumColumns() const {
+size_t GroupByExpression::getColumnCount() const {
   return select_exprs_.size();
 }
 
@@ -168,7 +165,7 @@ PartialGroupByExpression::~PartialGroupByExpression() {
   }
 }
 
-ScopedPtr<ResultCursor> PartialGroupByExpression::execute() {
+ReturnCode PartialGroupByExpression::execute() {
   bool from_cache = false;
   auto cache_key = getCacheKey();
   auto cache = txn_->getRuntime()->getQueryCache();
@@ -205,10 +202,14 @@ ScopedPtr<ResultCursor> PartialGroupByExpression::execute() {
 
   // execute
   if (!from_cache) {
-    auto input_cursor = input_->execute();
-    Vector<SValue> row(input_cursor->getNumColumns());
+    auto rc = input_->execute();
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+
+    Vector<SValue> row(input_->getColumnCount());
     size_t cnt = 0;
-    while (input_cursor->next(row.data(), row.size())) {
+    while (input_->next(row.data(), row.size())) {
       if (++cnt % 512 == 0) {
         auto rc = txn_->triggerHeartbeat();
         if (!rc.isSuccess()) {
@@ -266,14 +267,7 @@ ScopedPtr<ResultCursor> PartialGroupByExpression::execute() {
   }
 
   groups_iter_ = groups_.begin();
-  return mkScoped(
-      new DefaultResultCursor(
-          2,
-          std::bind(
-              &PartialGroupByExpression::next,
-              this,
-              std::placeholders::_1,
-              std::placeholders::_2)));
+  return ReturnCode::success();
 }
 
 Option<SHA1Hash> PartialGroupByExpression::getCacheKey() const {
@@ -286,7 +280,7 @@ Option<SHA1Hash> PartialGroupByExpression::getCacheKey() const {
   }
 }
 
-size_t PartialGroupByExpression::getNumColumns() const {
+size_t PartialGroupByExpression::getColumnCount() const {
   return 2;
 }
 
@@ -362,7 +356,7 @@ GroupByMergeExpression::~GroupByMergeExpression() {
   }
 }
 
-ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
+ReturnCode GroupByMergeExpression::execute() {
   execution_context_->incrementNumTasksRunning();
 
   ScratchMemory scratch;
@@ -450,17 +444,10 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
   }
 
   groups_iter_ = groups_.begin();
-  return mkScoped(
-      new DefaultResultCursor(
-          select_exprs_.size(),
-          std::bind(
-              &GroupByMergeExpression::next,
-              this,
-              std::placeholders::_1,
-              std::placeholders::_2)));
+  return ReturnCode::success();
 }
 
-size_t GroupByMergeExpression::getNumColumns() const {
+size_t GroupByMergeExpression::getColumnCount() const {
   return select_exprs_.size();
 }
 
