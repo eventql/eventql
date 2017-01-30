@@ -26,6 +26,7 @@
 #include <eventql/cli/benchmarks/local_sql.h>
 #include <eventql/util/cli/flagparser.h>
 #include <eventql/util/wallclock.h>
+#include <eventql/sql/CSTableScanProvider.h>
 
 namespace eventql {
 namespace cli {
@@ -52,6 +53,15 @@ Status LocalSQLBenchmark::execute(
       "<str>");
 
   flags.defineFlag(
+      "input_cstable",
+      ::cli::FlagParser::T_STRING,
+      false,
+      NULL,
+      NULL,
+      "str",
+      "<str>");
+
+  flags.defineFlag(
       "verbose",
       ::cli::FlagParser::T_SWITCH,
       false,
@@ -67,9 +77,19 @@ Status LocalSQLBenchmark::execute(
   }
 
   auto runtime = csql::Runtime::getDefaultRuntime();
+  auto tables = mkRef(new csql::TableRepository());
+
+  for (const auto& t : flags.getStrings("input_cstable")) {
+    auto parts = StringUtil::split(t, ":");
+    if (parts.size() != 2) {
+      return ReturnCode::errorf("EARG", "invalid argument: ", t);
+    }
+
+    tables->addProvider(new csql::CSTableScanProvider(parts[0], parts[1]));
+  }
 
   for (;;) {
-    auto rc = runQuery(runtime.get());
+    auto rc = runQuery(runtime.get(), tables.get());
 
     if (!rc.isSuccess()) {
       return rc;
@@ -80,9 +100,13 @@ Status LocalSQLBenchmark::execute(
 }
 
 
-ReturnCode LocalSQLBenchmark::runQuery(csql::Runtime* runtime) const {
-  auto t0 = WallClock::unixMicros();
+ReturnCode LocalSQLBenchmark::runQuery(
+    csql::Runtime* runtime,
+    csql::TableProvider* tables) const {
   auto txn = runtime->newTransaction();
+  txn->setTableProvider(tables);
+
+  auto t0 = WallClock::unixMicros();
 
   csql::ResultList result;
   try {

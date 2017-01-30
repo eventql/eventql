@@ -51,7 +51,9 @@ public:
 
 protected:
 
-  ReturnCode runQuery(csql::Runtime* runtime) const;
+  ReturnCode runQuery(
+      csql::Runtime* runtime,
+      csql::TableProvider* tables) const;
 
   bool verbose_;
   std::string query_;
