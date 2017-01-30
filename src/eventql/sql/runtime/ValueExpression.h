@@ -45,6 +45,8 @@ public:
 
   VM::Program* program() const;
 
+  SType getReturnType() const;
+
 protected:
   ScopedPtr<VM::Program> program_;
 };

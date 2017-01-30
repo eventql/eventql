@@ -47,4 +47,8 @@ VM::Program* ValueExpression::program() const {
   return program_.get();
 }
 
+SType ValueExpression::getReturnType() const {
+  return program_->return_type_;
+}
+
 }

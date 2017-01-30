@@ -50,7 +50,8 @@ ScopedPtr<VM::Program> Compiler::compile(
           ctx,
           expr,
           std::move(static_storage),
-          dynamic_storage_size));
+          dynamic_storage_size,
+          node->getReturnType()));
 }
 
 VM::Instruction* Compiler::compileValueExpression(

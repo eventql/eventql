@@ -37,11 +37,13 @@ VM::Program::Program(
     Transaction* ctx,
     Instruction* entry,
     ScratchMemory&& static_storage,
-    size_t dynamic_storage_size) :
+    size_t dynamic_storage_size,
+    SType return_type) :
     ctx_(ctx),
     entry_(entry),
     static_storage_(std::move(static_storage)),
     dynamic_storage_size_(dynamic_storage_size),
+    return_type_(return_type),
     has_aggregate_(false) {
   VM::initProgram(ctx_, this, entry_);
 }

@@ -57,7 +57,8 @@ public:
         Transaction* ctx,
         Instruction* entry,
         ScratchMemory&& static_storage,
-        size_t dynamic_storage_size);
+        size_t dynamic_storage_size,
+        SType return_type);
 
     ~Program();
 
@@ -65,6 +66,7 @@ public:
     Instruction* entry_;
     ScratchMemory static_storage_;
     size_t dynamic_storage_size_;
+    SType return_type_;
     bool has_aggregate_;
   };
 
