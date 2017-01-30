@@ -115,6 +115,11 @@ size_t GroupByExpression::getColumnCount() const {
   return select_exprs_.size();
 }
 
+SType GroupByExpression::getColumnType(size_t idx) const {
+  assert(idx < select_exprs_.size());
+  return select_exprs_[idx].getReturnType();
+}
+
 bool GroupByExpression::next(SValue* row, size_t row_len) {
   if (groups_iter_ != groups_.end()) {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
@@ -284,6 +289,11 @@ size_t PartialGroupByExpression::getColumnCount() const {
   return 2;
 }
 
+SType PartialGroupByExpression::getColumnType(size_t idx) const {
+  assert(idx < 2);
+  return SType::STRING;
+}
+
 bool PartialGroupByExpression::next(SValue* row, size_t row_len) {
   if (groups_iter_ != groups_.end()) {
     String group_data;
@@ -449,6 +459,11 @@ ReturnCode GroupByMergeExpression::execute() {
 
 size_t GroupByMergeExpression::getColumnCount() const {
   return select_exprs_.size();
+}
+
+SType GroupByMergeExpression::getColumnType(size_t idx) const {
+  assert(idx < select_exprs_.size());
+  return select_exprs_[idx].getReturnType();
 }
 
 void GroupByMergeExpression::addPart(
