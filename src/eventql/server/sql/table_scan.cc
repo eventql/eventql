@@ -58,6 +58,10 @@ size_t TableScan::getColumnCount() const {
   return seqscan_->getNumComputedColumns();
 }
 
+csql::SType TableScan::getColumnType(size_t idx) const {
+  return seqscan_->getColumnType(idx);
+}
+
 bool TableScan::next(csql::SValue* row, size_t row_len) {
   while (cur_partition_ < partitions_.size()) {
     if (cur_cursor_.get() == nullptr) {
