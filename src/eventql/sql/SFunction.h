@@ -48,11 +48,23 @@ struct SFunctionReturn {
 struct SFunction {
 
   SFunction(
-      kFunctionType _type,
       std::vector<SType> _arg_types,
       SType _return_type,
       void (*_call)(sql_txn* ctx, int argc, SValue* in, SValue* out),
       bool _has_side_effects = false);
+
+  SFunction(
+      std::vector<SType> _arg_types,
+      SType _return_type,
+      size_t _scratch_size,
+      void (*_accumulate)(sql_txn*, void* scratch, int argc, SValue* in),
+      void (*_get)(sql_txn*, void* scratch, SValue* out),
+      void (*_reset)(sql_txn*, void* scratch),
+      void (*_init)(sql_txn*, void* scratch),
+      void (*_free)(sql_txn*, void* scratch),
+      void (*_merge)(sql_txn*, void* scratch, const void* other),
+      void (*_savestate)(sql_txn*, void* scratch, OutputStream* os),
+      void (*_loadstate)(sql_txn*, void* scratch, InputStream* is));
 
   kFunctionType type;
   std::vector<SType> arg_types;

@@ -24,7 +24,7 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/runtime/runtime.h>
-//#include <eventql/sql/expressions/aggregate.h>
+#include <eventql/sql/expressions/aggregate.h>
 //#include <eventql/sql/expressions/boolean.h>
 //#include <eventql/sql/expressions/conversion.h>
 //#include <eventql/sql/expressions/datetime.h>

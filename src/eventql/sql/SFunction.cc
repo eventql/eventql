@@ -28,16 +28,41 @@
 namespace csql {
 
 SFunction::SFunction(
-    kFunctionType _type,
     std::vector<SType> _arg_types,
     SType _return_type,
     void (*_call)(sql_txn* ctx, int argc, SValue* in, SValue* out),
     bool _has_side_effects /* = false */) :
-    type(_type),
+    type(FN_PURE),
     arg_types(_arg_types),
     return_type(_return_type),
     has_side_effects(_has_side_effects) {
   vtable.call = _call;
+}
+
+SFunction::SFunction(
+    std::vector<SType> _arg_types,
+    SType _return_type,
+    size_t _scratch_size,
+    void (*_accumulate)(sql_txn*, void* scratch, int argc, SValue* in),
+    void (*_get)(sql_txn*, void* scratch, SValue* out),
+    void (*_reset)(sql_txn*, void* scratch),
+    void (*_init)(sql_txn*, void* scratch),
+    void (*_free)(sql_txn*, void* scratch),
+    void (*_merge)(sql_txn*, void* scratch, const void* other),
+    void (*_savestate)(sql_txn*, void* scratch, OutputStream* os),
+    void (*_loadstate)(sql_txn*, void* scratch, InputStream* is)) :
+    type(FN_AGGREGATE),
+    scratch_size(_scratch_size),
+    arg_types(_arg_types),
+    return_type(_return_type) {
+  vtable.accumulate = _accumulate;
+  vtable.get = _get;
+  vtable.reset = _reset;
+  vtable.init = _init;
+  vtable.free = _free;
+  vtable.merge = _merge;
+  vtable.savestate = _savestate;
+  vtable.loadstate = _loadstate;
 }
 
 } // namespace csql

@@ -662,10 +662,6 @@ void evql_version(sql_txn* ctx, int argc, csql::SValue* argv, csql::SValue* out)
   *out = csql::SValue::newString("EventQL " + eventql::kVersionString);
 }
 
-const csql::SFunction evqlVersionExpr(
-    csql::FN_PURE,
-    {},
-    csql::SType::STRING,
-    &evql_version);
+const csql::SFunction evqlVersionExpr({}, csql::SType::STRING, &evql_version);
 
 } // namespace csql

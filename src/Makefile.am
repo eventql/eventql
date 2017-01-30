@@ -571,6 +571,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/backends/tableref.h \
     eventql/sql/defaults.cc \
     eventql/sql/defaults.h \
+    eventql/sql/expressions/aggregate.cc \
+    eventql/sql/expressions/aggregate.h \
     eventql/sql/expressions/boolean.cc \
     eventql/sql/expressions/boolean.h \
     eventql/sql/expressions/table/describe_table.cc \

@@ -23,6 +23,7 @@
  * code of your own applications
  */
 #include <eventql/sql/defaults.h>
+#include <eventql/sql/expressions/aggregate.h>
 
 #include "eventql/eventql.h"
 
@@ -30,8 +31,8 @@ namespace csql {
 
 void installDefaultSymbols(SymbolTable* rt) {
   ///* expressions/aggregate.h */
-  //rt->registerFunction("count", expressions::kCountExpr);
-  //rt->registerFunction("sum", expressions::kSumExpr);
+  rt->registerFunction("count", expressions::kCountExpr);
+  rt->registerFunction("sum", expressions::kSumExpr);
   //rt->registerFunction("max", expressions::kMaxExpr);
   //rt->registerFunction("min", expressions::kMinExpr);
 

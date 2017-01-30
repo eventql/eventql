@@ -29,10 +29,10 @@
 namespace csql {
 namespace expressions {
 
-extern const AggregateFunction kCountExpr;
-extern const AggregateFunction kSumExpr;
-extern const AggregateFunction kMaxExpr;
-extern const AggregateFunction kMinExpr;
+extern const SFunction kCountExpr;
+extern const SFunction kSumExpr;
+//extern const AggregateFunction kMaxExpr;
+//extern const AggregateFunction kMinExpr;
 
 }
 }

@@ -62,17 +62,18 @@ void countExprLoad(sql_txn* ctx, void* scratchpad, InputStream* is) {
   *(uint64_t*) scratchpad = is->readVarUInt();
 }
 
-const AggregateFunction kCountExpr {
-  .scratch_size = sizeof(uint64_t),
-  .accumulate = &countExprAcc,
-  .get = &countExprGet,
-  .reset = &countExprReset,
-  .init = &countExprReset,
-  .free = nullptr,
-  .merge = &countExprMerge,
-  .savestate = &countExprSave,
-  .loadstate = &countExprLoad
-};
+const SFunction kCountExpr(
+    { SType::UINT64 },
+    SType::UINT64,
+    sizeof(uint64_t),
+    &countExprAcc,
+    &countExprGet,
+    &countExprReset,
+    &countExprReset,
+    nullptr,
+    &countExprMerge,
+    &countExprSave,
+    &countExprLoad);
 
 
 /**
@@ -159,17 +160,18 @@ void sumExprLoad(sql_txn* ctx, void* scratchpad, InputStream* is) {
   data->val = is->readDouble();
 }
 
-const AggregateFunction kSumExpr {
-  .scratch_size = sizeof(sum_expr_scratchpad),
-  .accumulate = &sumExprAcc,
-  .get = &sumExprGet,
-  .reset = &sumExprReset,
-  .init = &sumExprReset,
-  .free = nullptr,
-  .merge = &sumExprMerge,
-  .savestate = &sumExprSave,
-  .loadstate = &sumExprLoad
-};
+const SFunction kSumExpr(
+    { SType::UINT64 },
+    SType::UINT64,
+    sizeof(sum_expr_scratchpad),
+    &sumExprAcc,
+    &sumExprGet,
+    &sumExprReset,
+    &sumExprReset,
+    nullptr,
+    &sumExprMerge,
+    &sumExprSave,
+    &sumExprLoad);
 
 /**
  * MEAN() expression
@@ -253,144 +255,144 @@ const AggregateFunction kSumExpr {
 /**
  * MAX() expression
  */
-struct max_expr_scratchpad {
-  double max;
-  int count;
-};
-
-void maxExprAcc(sql_txn* ctx, void* scratchpad, int argc, SValue* argv) {
-  auto data = (max_expr_scratchpad*) scratchpad;
-
-  switch(argv->getType()) {
-    case SType::NIL:
-      return;
-
-    default: {
-      auto fval = argv->getFloat();
-      if (data->count == 0 || fval > data->max) {
-        data->max = fval;
-      }
-
-      data->count = 1;
-      return;
-    }
-
-  }
-}
-
-void maxExprGet(sql_txn* ctx, void* scratchpad, SValue* out) {
-  *out = SValue::newFloat(((max_expr_scratchpad*) scratchpad)->max);
-}
-
-void maxExprReset(sql_txn* ctx, void* scratchpad) {
-  memset(scratchpad, 0, sizeof(max_expr_scratchpad));
-}
-
-void maxExprMerge(sql_txn* ctx, void* scratchpad, const void* other) {
-  auto data = (max_expr_scratchpad*) scratchpad;
-  auto other_data = (max_expr_scratchpad*) other;
-
-  if (other_data->count == 0) {
-    return;
-  }
-
-  if (data->count == 0 || other_data->max > data->max) {
-    data->max = other_data->max;
-  }
-
-  data->count = 1;
-}
-
-void maxExprSave(sql_txn* ctx, void* scratchpad, OutputStream* os) {
-  os->write((char*) scratchpad, sizeof(max_expr_scratchpad));
-}
-
-void maxExprLoad(sql_txn* ctx, void* scratchpad, InputStream* is) {
-  is->readNextBytes(scratchpad, sizeof(max_expr_scratchpad));
-}
-
-const AggregateFunction kMaxExpr {
-  .scratch_size = sizeof(max_expr_scratchpad),
-  .accumulate = &maxExprAcc,
-  .get = &maxExprGet,
-  .reset = &maxExprReset,
-  .init = &maxExprReset,
-  .free = nullptr,
-  .merge = &maxExprMerge,
-  .savestate = &maxExprSave,
-  .loadstate = &maxExprLoad
-};
-
-/**
- * MIN() expression
- */
-struct min_expr_scratchpad {
-  double min;
-  int count;
-};
-
-void minExprAcc(sql_txn* ctx, void* scratchpad, int argc, SValue* argv) {
-  auto data = (min_expr_scratchpad*) scratchpad;
-
-  switch(argv->getType()) {
-    case SType::NIL:
-      return;
-
-    default: {
-      auto fval = argv->getFloat();
-      if (data->count == 0 || fval < data->min) {
-        data->min = fval;
-      }
-
-      data->count = 1;
-      return;
-    }
-
-  }
-}
-
-void minExprGet(sql_txn* ctx, void* scratchpad, SValue* out) {
-  *out = SValue::newFloat(((min_expr_scratchpad*) scratchpad)->min);
-}
-
-void minExprReset(sql_txn* ctx, void* scratchpad) {
-  memset(scratchpad, 0, sizeof(min_expr_scratchpad));
-}
-
-void minExprMerge(sql_txn* ctx, void* scratchpad, const void* other) {
-  auto data = (min_expr_scratchpad*) scratchpad;
-  auto other_data = (min_expr_scratchpad*) other;
-
-  if (other_data->count == 0) {
-    return;
-  }
-
-  if (data->count == 0 || other_data->min < data->min) {
-    data->min = other_data->min;
-  }
-
-  data->count = 1;
-}
-
-void minExprSave(sql_txn* ctx, void* scratchpad, OutputStream* os) {
-  os->write((char*) scratchpad, sizeof(min_expr_scratchpad));
-}
-
-void minExprLoad(sql_txn* ctx, void* scratchpad, InputStream* is) {
-  is->readNextBytes(scratchpad, sizeof(min_expr_scratchpad));
-}
-
-const AggregateFunction kMinExpr {
-  .scratch_size = sizeof(min_expr_scratchpad),
-  .accumulate = &minExprAcc,
-  .get = &minExprGet,
-  .reset = &minExprReset,
-  .init = &minExprReset,
-  .free = nullptr,
-  .merge = &minExprMerge,
-  .savestate = &minExprSave,
-  .loadstate = &minExprLoad
-};
+//struct max_expr_scratchpad {
+//  double max;
+//  int count;
+//};
+//
+//void maxExprAcc(sql_txn* ctx, void* scratchpad, int argc, SValue* argv) {
+//  auto data = (max_expr_scratchpad*) scratchpad;
+//
+//  switch(argv->getType()) {
+//    case SType::NIL:
+//      return;
+//
+//    default: {
+//      auto fval = argv->getFloat();
+//      if (data->count == 0 || fval > data->max) {
+//        data->max = fval;
+//      }
+//
+//      data->count = 1;
+//      return;
+//    }
+//
+//  }
+//}
+//
+//void maxExprGet(sql_txn* ctx, void* scratchpad, SValue* out) {
+//  *out = SValue::newFloat(((max_expr_scratchpad*) scratchpad)->max);
+//}
+//
+//void maxExprReset(sql_txn* ctx, void* scratchpad) {
+//  memset(scratchpad, 0, sizeof(max_expr_scratchpad));
+//}
+//
+//void maxExprMerge(sql_txn* ctx, void* scratchpad, const void* other) {
+//  auto data = (max_expr_scratchpad*) scratchpad;
+//  auto other_data = (max_expr_scratchpad*) other;
+//
+//  if (other_data->count == 0) {
+//    return;
+//  }
+//
+//  if (data->count == 0 || other_data->max > data->max) {
+//    data->max = other_data->max;
+//  }
+//
+//  data->count = 1;
+//}
+//
+//void maxExprSave(sql_txn* ctx, void* scratchpad, OutputStream* os) {
+//  os->write((char*) scratchpad, sizeof(max_expr_scratchpad));
+//}
+//
+//void maxExprLoad(sql_txn* ctx, void* scratchpad, InputStream* is) {
+//  is->readNextBytes(scratchpad, sizeof(max_expr_scratchpad));
+//}
+//
+//const AggregateFunction kMaxExpr {
+//  .scratch_size = sizeof(max_expr_scratchpad),
+//  .accumulate = &maxExprAcc,
+//  .get = &maxExprGet,
+//  .reset = &maxExprReset,
+//  .init = &maxExprReset,
+//  .free = nullptr,
+//  .merge = &maxExprMerge,
+//  .savestate = &maxExprSave,
+//  .loadstate = &maxExprLoad
+//};
+//
+///**
+// * MIN() expression
+// */
+//struct min_expr_scratchpad {
+//  double min;
+//  int count;
+//};
+//
+//void minExprAcc(sql_txn* ctx, void* scratchpad, int argc, SValue* argv) {
+//  auto data = (min_expr_scratchpad*) scratchpad;
+//
+//  switch(argv->getType()) {
+//    case SType::NIL:
+//      return;
+//
+//    default: {
+//      auto fval = argv->getFloat();
+//      if (data->count == 0 || fval < data->min) {
+//        data->min = fval;
+//      }
+//
+//      data->count = 1;
+//      return;
+//    }
+//
+//  }
+//}
+//
+//void minExprGet(sql_txn* ctx, void* scratchpad, SValue* out) {
+//  *out = SValue::newFloat(((min_expr_scratchpad*) scratchpad)->min);
+//}
+//
+//void minExprReset(sql_txn* ctx, void* scratchpad) {
+//  memset(scratchpad, 0, sizeof(min_expr_scratchpad));
+//}
+//
+//void minExprMerge(sql_txn* ctx, void* scratchpad, const void* other) {
+//  auto data = (min_expr_scratchpad*) scratchpad;
+//  auto other_data = (min_expr_scratchpad*) other;
+//
+//  if (other_data->count == 0) {
+//    return;
+//  }
+//
+//  if (data->count == 0 || other_data->min < data->min) {
+//    data->min = other_data->min;
+//  }
+//
+//  data->count = 1;
+//}
+//
+//void minExprSave(sql_txn* ctx, void* scratchpad, OutputStream* os) {
+//  os->write((char*) scratchpad, sizeof(min_expr_scratchpad));
+//}
+//
+//void minExprLoad(sql_txn* ctx, void* scratchpad, InputStream* is) {
+//  is->readNextBytes(scratchpad, sizeof(min_expr_scratchpad));
+//}
+//
+//const AggregateFunction kMinExpr {
+//  .scratch_size = sizeof(min_expr_scratchpad),
+//  .accumulate = &minExprAcc,
+//  .get = &minExprGet,
+//  .reset = &minExprReset,
+//  .init = &minExprReset,
+//  .free = nullptr,
+//  .merge = &minExprMerge,
+//  .savestate = &minExprSave,
+//  .loadstate = &minExprLoad
+//};
 
 }
 }
