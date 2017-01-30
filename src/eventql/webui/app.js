@@ -48,6 +48,8 @@ EventQL = (function() {
     viewport_elem = document.getElementById("evql_viewport");
     setPath(window.location.pathname + window.location.search);
 
+    DOMUtil.handleLinks(document.querySelector(".navbar"), navigateTo);
+
     /* handle history entry change */
     setTimeout(function() {
       window.addEventListener('popstate', function(e) {

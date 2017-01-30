@@ -37,14 +37,20 @@ EventQL.SQLEditor = function(elem, params) {
   };
 
   this.changePath = function(new_path, new_route) {
-    var allowed = ["query"];
     var diff = URLUtil.comparePaths(path, new_path);
 
-    if (ArrayUtil.setDifference(diff.params, ["view"]).length == 0) {
+    if (diff.path) {
+      return false;
+    }
+
+    /* view param update */
+    var view_param = ["view"];
+    if (ArrayUtil.setDifference(diff.params, view_param).length == 0) {
       return true;
     }
 
-    if (diff.path || ArrayUtil.setDifference(diff.params, allowed).length) {
+    var allowed = ["query"];
+    if (ArrayUtil.setDifference(diff.params, allowed).length) {
       return false;
     }
 

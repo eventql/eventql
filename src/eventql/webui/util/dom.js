@@ -24,6 +24,22 @@
 
 DOMUtil = this.DOMUtil || {};
 
+DOMUtil.handleLinks = function(elem, fn) {
+  var click_fn = (function() {
+    return function(e) {
+      fn(this.getAttribute("href"));
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    };
+  })();
+
+  var elems = elem.querySelectorAll("a");
+  for (var i = 0; i < elems.length; ++i) {
+    elems[i].addEventListener("click", click_fn);
+  }
+};
+
 DOMUtil.replaceContent = function(elem, new_content) {
   elem.innerHTML = "";
   elem.appendChild(new_content);
