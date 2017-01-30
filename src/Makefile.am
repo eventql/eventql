@@ -1,6 +1,6 @@
 # Process this file with automake to produce Makefile.in
 
-bin_PROGRAMS = evql evqld evqlctl evqlslap cstable_tool
+bin_PROGRAMS = evql evqld evqlctl evqlbench evqlslap cstable_tool
 lib_LTLIBRARIES = libevqlclient.la
 check_LIBRARIES = libevqlcore.a
 
@@ -1031,6 +1031,45 @@ evqlctl_SOURCES = \
     eventql/evqlctl.cc
 
 evqlctl_LDADD = \
+    libevqlclient.la \
+    $(SIMDCOMP_LDADD) \
+    $(INIH_LDADD) \
+    $(ZOOKEEPER_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD) \
+    $(SPIDERMONKEY_LDADD)
+
+################ BIN: evqlbench ###################
+evqlbench_SOURCES = \
+    ${EVQL_CORE_SOURCES_} \
+    $(EVQL_PROTO_SOURCES_) \
+    eventql/cli/commands/cli_command.h \
+    eventql/cli/commands/cli_command.cc \
+    eventql/cli/cli_config.cc \
+    eventql/cli/cli_config.h \
+    eventql/cli/commands/cluster_add_server.h \
+    eventql/cli/commands/cluster_add_server.cc \
+    eventql/cli/commands/cluster_create.h \
+    eventql/cli/commands/cluster_create.cc \
+    eventql/cli/commands/cluster_status.h \
+    eventql/cli/commands/cluster_status.cc \
+    eventql/cli/commands/cluster_remove_server.h \
+    eventql/cli/commands/cluster_remove_server.cc \
+    eventql/cli/commands/cluster_list.h \
+    eventql/cli/commands/cluster_list.cc \
+    eventql/cli/commands/database_create.h \
+    eventql/cli/commands/database_create.cc \
+    eventql/cli/commands/table_config_set.h \
+    eventql/cli/commands/table_config_set.cc \
+    eventql/cli/commands/table_split.h \
+    eventql/cli/commands/table_split.cc \
+    eventql/cli/commands/table_split_finalize.h \
+    eventql/cli/commands/table_split_finalize.cc \
+    eventql/cli/commands/table_import.h \
+    eventql/cli/commands/table_import.cc \
+    eventql/evqlbench.cc
+
+evqlbench_LDADD = \
     libevqlclient.la \
     $(SIMDCOMP_LDADD) \
     $(INIH_LDADD) \
