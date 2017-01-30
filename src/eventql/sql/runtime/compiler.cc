@@ -151,7 +151,12 @@ VM::Instruction* Compiler::compileMethodCall(
     size_t* dynamic_storage_size,
     ScratchMemory* static_storage,
    SymbolTable* symbol_table) {
-  auto fun = node->getFunction();
+  auto entry = symbol_table->lookup(node->symbol());
+  if (!entry) {
+    RAISEF(kRuntimeError, "symbol not found: $0", node->symbol());
+  }
+
+  auto fun = entry->getFunction();
   const auto& args = node->arguments();
 
   auto op = static_storage->construct<VM::Instruction>();

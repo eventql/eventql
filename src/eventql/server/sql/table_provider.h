@@ -92,6 +92,7 @@ protected:
   csql::TableInfo tableInfoForTable(const TableDefinition& table) const;
 
   RefPtr<csql::ValueExpressionNode> simplifyWhereExpression(
+      csql::Transaction* txn,
       RefPtr<Table> table,
       const String& keyrange_begin,
       const String& keyrange_end,

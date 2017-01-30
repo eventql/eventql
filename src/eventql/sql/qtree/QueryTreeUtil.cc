@@ -65,8 +65,7 @@ bool QueryTreeUtil::isConstantExpression(
 
   auto call_expr = dynamic_cast<CallExpressionNode*>(expr.get());
   if (call_expr) {
-    auto fun = call_expr->getFunction();;
-    if (fun->type != FN_PURE || fun->has_side_effects) {
+    if (!call_expr->isPureFunction()) {
       return false;
     }
   }
@@ -81,6 +80,7 @@ bool QueryTreeUtil::isConstantExpression(
 }
 
 ReturnCode QueryTreeUtil::prunePredicateExpression(
+    Transaction* txn,
     RefPtr<ValueExpressionNode> expr,
     const Set<String>& column_whitelist,
     RefPtr<ValueExpressionNode>* out) {
@@ -90,6 +90,7 @@ ReturnCode QueryTreeUtil::prunePredicateExpression(
 
     {
       auto rc = prunePredicateExpression(
+          txn,
           call_expr->arguments()[0],
           column_whitelist,
           &call_args[0]);
@@ -101,6 +102,7 @@ ReturnCode QueryTreeUtil::prunePredicateExpression(
 
     {
       auto rc = prunePredicateExpression(
+          txn,
           call_expr->arguments()[1],
           column_whitelist,
           &call_args[1]);
@@ -110,7 +112,7 @@ ReturnCode QueryTreeUtil::prunePredicateExpression(
       }
     }
 
-    return CallExpressionNode::newNode("logical_and", call_args, out);
+    return CallExpressionNode::newNode(txn, "logical_and", call_args, out);
   }
 
   bool is_invalid = false;
@@ -132,6 +134,7 @@ ReturnCode QueryTreeUtil::prunePredicateExpression(
 }
 
 ReturnCode QueryTreeUtil::removeConstraintFromPredicate(
+    Transaction* txn,
     RefPtr<ValueExpressionNode> expr,
     const ScanConstraint& constraint,
     RefPtr<ValueExpressionNode>* out) {
@@ -140,6 +143,7 @@ ReturnCode QueryTreeUtil::removeConstraintFromPredicate(
     RefPtr<ValueExpressionNode> arg_left;
     {
       auto rc = removeConstraintFromPredicate(
+          txn,
           call_expr->arguments()[0],
           constraint,
           &arg_left);
@@ -152,6 +156,7 @@ ReturnCode QueryTreeUtil::removeConstraintFromPredicate(
     RefPtr<ValueExpressionNode> arg_right;
     {
       auto rc = removeConstraintFromPredicate(
+          txn,
           call_expr->arguments()[1],
           constraint,
           &arg_right);
@@ -183,6 +188,7 @@ ReturnCode QueryTreeUtil::removeConstraintFromPredicate(
       return ReturnCode::success();
     } else {
       return CallExpressionNode::newNode(
+          txn,
           "logical_and",
           Vector<RefPtr<ValueExpressionNode>> { arg_left, arg_right },
           out);

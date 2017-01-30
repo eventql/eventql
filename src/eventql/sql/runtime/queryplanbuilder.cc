@@ -1111,6 +1111,7 @@ QueryTreeNode* QueryPlanBuilder::buildJoinTableReference(
           RefPtr<ValueExpressionNode> cpred;
           {
             auto rc = csql::CallExpressionNode::newNode(
+                txn,
                 "eq",
                 Vector<RefPtr<csql::ValueExpressionNode>>{
                   new csql::ColumnReferenceNode(c.second[i1].first, c.second[i1].second),
@@ -1127,6 +1128,7 @@ QueryTreeNode* QueryPlanBuilder::buildJoinTableReference(
             pred = cpred;
           } else {
             auto rc = csql::CallExpressionNode::newNode(
+                txn,
                 "logical_and",
                 Vector<RefPtr<csql::ValueExpressionNode>>{ pred, cpred },
                 &pred);
@@ -1434,6 +1436,7 @@ QueryTreeNode* QueryPlanBuilder::buildSeqscanTableReference(
       }
 
       auto rc = QueryTreeUtil::prunePredicateExpression(
+          txn,
           pred,
           valid_columns,
           &pred);
@@ -1660,7 +1663,7 @@ ValueExpressionNode* QueryPlanBuilder::buildOperator(
   }
 
   RefPtr<ValueExpressionNode> node;
-  auto rc = CallExpressionNode::newNode(name, args, &node);
+  auto rc = CallExpressionNode::newNode(txn, name, args, &node);
 
   if (!rc.isSuccess()) {
     RAISE(kRuntimeError, rc.getMessage());
@@ -1687,7 +1690,7 @@ ValueExpressionNode* QueryPlanBuilder::buildMethodCall(
   }
 
   RefPtr<ValueExpressionNode> node;
-  auto rc = CallExpressionNode::newNode(symbol, args, &node);
+  auto rc = CallExpressionNode::newNode(txn, symbol, args, &node);
 
   if (!rc.isSuccess()) {
     RAISE(kRuntimeError, rc.getMessage());

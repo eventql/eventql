@@ -28,18 +28,37 @@
 
 namespace csql {
 
+class SymbolTableEntry {
+public:
+
+  SymbolTableEntry(const std::string& function_name, SFunction fun);
+
+  const SFunction* getFunction() const;
+  const std::string& getSymbol() const;
+
+protected:
+  SFunction fun_;
+  std::string symbol_;
+};
+
 class SymbolTable : public RefCounted {
 public:
 
   void registerFunction(const std::string& function_name, SFunction fn);
 
-  const std::vector<SFunction>* lookup(const std::string& symbol) const;
+  ReturnCode resolve(
+      const std::string& function_name,
+      const std::vector<SType>& arguments,
+      const SymbolTableEntry** entry) const;
 
-  bool isAggregateFunction(const std::string& symbol) const;
+  const SymbolTableEntry* lookup(const std::string& symbol) const;
+
+  bool isAggregateFunction(const std::string& function_name) const;
 
 protected:
   mutable std::mutex mutex_;
-  std::unordered_map<std::string, std::vector<SFunction>> symbols_;
+  std::map<std::string, std::vector<const SymbolTableEntry*>> functions_;
+  std::map<std::string, std::unique_ptr<SymbolTableEntry>> symbols_;
 };
 
 }

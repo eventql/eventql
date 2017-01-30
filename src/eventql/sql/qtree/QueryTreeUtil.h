@@ -69,6 +69,7 @@ public:
    * that match the original expression will still match the pruned expression.
    */
   static ReturnCode prunePredicateExpression(
+      Transaction* txn,
       RefPtr<ValueExpressionNode> expr,
       const Set<String>& column_whitelist,
       RefPtr<ValueExpressionNode>* out);
@@ -83,6 +84,7 @@ public:
    * that match the original expression will still match the pruned expression.
    */
   static ReturnCode removeConstraintFromPredicate(
+      Transaction* txn,
       RefPtr<ValueExpressionNode> expr,
       const ScanConstraint& constraint,
       RefPtr<ValueExpressionNode>* out);

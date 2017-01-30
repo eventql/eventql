@@ -28,16 +28,22 @@
 #include <eventql/sql/qtree/ValueExpressionNode.h>
 #include <eventql/sql/qtree/qtree_coder.h>
 #include <eventql/sql/SFunction.h>
-
 #include "eventql/eventql.h"
 
 namespace csql {
+class SymbolTableEntry;
 
 class CallExpressionNode : public ValueExpressionNode {
 public:
 
   static ReturnCode newNode (
-      const String& method_name,
+      Transaction* txn,
+      const std::string& method_name,
+      Vector<RefPtr<ValueExpressionNode>> arguments,
+      RefPtr<ValueExpressionNode>* node);
+
+  static ReturnCode newNode (
+      const SymbolTableEntry* symbol,
       Vector<RefPtr<ValueExpressionNode>> arguments,
       RefPtr<ValueExpressionNode>* node);
 
@@ -51,6 +57,8 @@ public:
 
   SType getReturnType() const override;
 
+  bool isPureFunction() const;
+
   static void encode(
       QueryTreeCoder* coder,
       const CallExpressionNode& node,
@@ -60,17 +68,17 @@ public:
       QueryTreeCoder* coder,
       InputStream* is);
 
-  const SFunction* getFunction() const;
-
 protected:
 
   CallExpressionNode(
       const String& symbol,
       SType return_type,
+      bool is_pure,
       Vector<RefPtr<ValueExpressionNode>> arguments);
 
   String symbol_;
   SType return_type_;
+  bool is_pure_;
   Vector<RefPtr<ValueExpressionNode>> arguments_;
 };
 

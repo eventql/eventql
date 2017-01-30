@@ -30,38 +30,105 @@
 
 namespace csql {
 
+SymbolTableEntry::SymbolTableEntry(
+    const std::string& function_name,
+    SFunction fun) :
+    fun_(fun) {
+  symbol_ = function_name; // FIXME name mangling
+}
+
+const SFunction* SymbolTableEntry::getFunction() const {
+  return &fun_;
+}
+
+const std::string& SymbolTableEntry::getSymbol() const {
+  return symbol_;
+}
+
 void SymbolTable::registerFunction(
     const std::string& function_name,
     SFunction fn) {
   std::unique_lock<std::mutex> lk(mutex_);
-  symbols_[function_name].emplace_back(fn);
+  std::unique_ptr<SymbolTableEntry> entry(
+      new SymbolTableEntry(function_name, fn));
+
+  auto symbol = entry->getSymbol();
+  functions_[function_name].emplace_back(entry.get());
+  symbols_.emplace(symbol, std::move(entry));
 }
 
-const std::vector<SFunction>* SymbolTable::lookup(
-    const std::string& symbol) const {
-  std::unique_lock<std::mutex> lk(mutex_);
+ReturnCode SymbolTable::resolve(
+    const std::string& function_name,
+    const std::vector<SType>& arguments,
+    const SymbolTableEntry** entry) const {
+  std::string function_name_downcase = function_name;
+  StringUtil::toLower(&function_name_downcase);
 
+  std::vector<const SymbolTableEntry*> candidates;
+  {
+    std::unique_lock<std::mutex> lk(mutex_);
+    auto iter = functions_.find(function_name_downcase);
+    if (iter == functions_.end()) {
+      return ReturnCode::errorf("EARG", "method not found: $0", function_name);
+    }
+
+    candidates = iter->second;
+  }
+
+  const SymbolTableEntry* match = nullptr;
+  for (const auto& candidate : candidates) {
+    auto candidate_fn = candidate->getFunction();
+    if (candidate_fn->arg_types.size() != arguments.size()) {
+      continue;
+    }
+
+    match = candidate;
+    for (size_t i = 0; i < arguments.size(); ++i) {
+      if (candidate_fn->arg_types[i] != arguments[i]) {
+        match = nullptr;
+        break;
+      }
+    }
+
+    if (match) {
+      break;
+    }
+  }
+
+  if (match) {
+    *entry = match;
+    return ReturnCode::success();
+  } else {
+    return ReturnCode::errorf(
+        "ERUNTIME",
+        "argument type mismatch for: $0",
+        function_name);
+  }
+}
+
+const SymbolTableEntry* SymbolTable::lookup(const std::string& symbol) const {
   std::string symbol_downcase = symbol;
   StringUtil::toLower(&symbol_downcase);
 
+  std::unique_lock<std::mutex> lk(mutex_);
   auto iter = symbols_.find(symbol_downcase);
   if (iter == symbols_.end()) {
     return nullptr;
   } else {
-    return &iter->second;
+    return iter->second.get();
   }
 }
 
-bool SymbolTable::isAggregateFunction(const std::string& symbol) const {
+bool SymbolTable::isAggregateFunction(const std::string& function_name) const {
   std::unique_lock<std::mutex> lk(mutex_);
 
-  std::string symbol_downcase = symbol;
-  StringUtil::toLower(&symbol_downcase);
+  std::string function_name_downcase = function_name;
+  StringUtil::toLower(&function_name_downcase);
 
-  auto iter = symbols_.find(symbol_downcase);
-  if (iter != symbols_.end()) {
+  auto iter = functions_.find(function_name_downcase);
+  if (iter != functions_.end()) {
     for (const auto& f : iter->second) {
-      if (f.type == FN_AGGREGATE) {
+      if (f->getFunction()->type == FN_AGGREGATE) {
         return true;
       }
     }

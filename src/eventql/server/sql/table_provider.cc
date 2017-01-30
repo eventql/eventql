@@ -163,6 +163,7 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
       if (!pl.qtree->whereExpression().isEmpty()) {
         auto where_expr = seqscan->whereExpression().get();
         where_expr = simplifyWhereExpression(
+            ctx,
             table.get(),
             p.keyrange_begin(),
             p.keyrange_end(),
@@ -200,6 +201,7 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
 
       auto where_expr = pl.qtree->whereExpression().get();
       where_expr = simplifyWhereExpression(
+          ctx,
           table.get(),
           pstate.partition_keyrange_begin(),
           pstate.partition_keyrange_end(),
@@ -586,10 +588,11 @@ const String& TSDBTableProvider::getNamespace() const {
 }
 
 RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
-      RefPtr<Table> table,
-      const String& keyrange_begin,
-      const String& keyrange_end,
-      RefPtr<csql::ValueExpressionNode> expr) const {
+    csql::Transaction* txn,
+    RefPtr<Table> table,
+    const String& keyrange_begin,
+    const String& keyrange_end,
+    RefPtr<csql::ValueExpressionNode> expr) const {
   auto pkey_col = table->getPartitionKey();
   auto pkeyspace = table->getKeyspaceType();
 
@@ -641,7 +644,12 @@ RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
 
     }
 
-    auto rc = csql::QueryTreeUtil::removeConstraintFromPredicate(expr, c, &expr);
+    auto rc = csql::QueryTreeUtil::removeConstraintFromPredicate(
+        txn,
+        expr,
+        c,
+        &expr);
+
     if (!rc.isSuccess()) {
       RAISE(kRuntimeError, rc.getMessage());
     }
