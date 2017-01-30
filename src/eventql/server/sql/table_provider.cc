@@ -34,12 +34,10 @@
 namespace eventql {
 
 TSDBTableProvider::TSDBTableProvider(
-    const String& tsdb_namespace,
     PartitionMap* partition_map,
     ConfigDirectory* cdir,
     TableService* table_service,
     InternalAuth* auth) :
-    tsdb_namespace_(tsdb_namespace),
     partition_map_(partition_map),
     cdir_(cdir),
     table_service_(table_service),
@@ -528,6 +526,17 @@ Status TSDBTableProvider::listServers(
     for (const auto& s : servers) {
       fn(s);
     }
+    return Status::success();
+
+  } catch (const std::exception& e) {
+    return Status(eRuntimeError, e.what());
+  }
+}
+
+Status TSDBTableProvider::listDatabases(
+    Function<void (const NamespaceConfig& cfg)> fn) const {
+  try {
+    cdir_->listNamespaces(fn);
     return Status::success();
 
   } catch (const std::exception& e) {

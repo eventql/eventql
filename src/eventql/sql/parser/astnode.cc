@@ -330,6 +330,9 @@ void ASTNode::debugPrint(int indent /* = 0 */) const {
     case T_SHOW_TABLES:
       printf("- T_SHOW_TABLES");
       break;
+    case T_SHOW_DATABASES:
+      printf("- T_SHOW_DATABASES");
+      break;
     case T_DESCRIBE_TABLE:
       printf("- T_DESCRIBE_TABLE");
       break;

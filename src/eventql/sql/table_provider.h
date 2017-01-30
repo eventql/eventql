@@ -60,6 +60,11 @@ public:
     return Status(eNotImplementedError, "not implemented");
   }
 
+  virtual Status listDatabases(
+      Function<void (const ::eventql::NamespaceConfig& cfg)> fn) const {
+    return Status(eNotImplementedError, "not implemented");
+  }
+
   virtual Option<TableInfo> describe(const String& table_name) const = 0;
 
   virtual Status createTable(const CreateTableNode& create_table) {

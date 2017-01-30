@@ -597,6 +597,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/expressions/table/describe_partitions.h \
     eventql/sql/expressions/table/cluster_show_servers.cc \
     eventql/sql/expressions/table/cluster_show_servers.h \
+    eventql/sql/expressions/table/show_databases.cc \
+    eventql/sql/expressions/table/show_databases.h \
     eventql/sql/expressions/table/groupby.cc \
     eventql/sql/expressions/table/groupby.h \
     eventql/sql/expressions/table/limit.cc \
@@ -707,6 +709,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/qtree/nodes/describe_partitions.h \
     eventql/sql/qtree/nodes/cluster_show_servers.cc \
     eventql/sql/qtree/nodes/cluster_show_servers.h \
+    eventql/sql/qtree/nodes/show_databases.cc \
+    eventql/sql/qtree/nodes/show_databases.h \
     eventql/sql/qtree/qtree_coder.cc \
     eventql/sql/qtree/qtree_coder.h \
     eventql/sql/qtree/qtree_coder_impl.h \

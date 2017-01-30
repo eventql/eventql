@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -21,35 +21,32 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/auth/client_auth_legacy.h"
-#include "eventql/util/protobuf/msg.h"
+#pragma once
+#include "eventql/eventql.h"
+#include <eventql/util/stdtypes.h>
+#include <eventql/sql/runtime/tablerepository.h>
 
-namespace eventql {
+namespace csql {
 
-LegacyClientAuth::LegacyClientAuth(
-    const String& secret) :
-    cookie_coder_(secret) {}
+class ShowDatabasesExpression : public TableExpression {
+public:
 
-Status LegacyClientAuth::authenticateNonInteractive(
-    Session* session,
-    HashMap<String, String> auth_data) {
-  const auto& auth_token_str = auth_data["auth_token"];
-  if (auth_token_str.empty()) {
-    return Status(eRuntimeError, "missing auth token");
-  }
+  static const size_t kNumColumns = 1;
 
-  auto auth_token = cookie_coder_.decodeAndVerify(auth_token_str);
-  if (auth_token.isEmpty()) {
-    return Status(eRuntimeError, "invalid auth token");
-  }
+  ShowDatabasesExpression(Transaction* txn);
 
-  auto token_data = msg::decode<LegacyAuthTokenData>(auth_token.get().data());
-  session->setEffectiveNamespace(token_data.db_namespace());
-  session->setUserID(token_data.userid());
-  session->setAuthToken(auth_token_str);
+  ScopedPtr<ResultCursor> execute() override;
 
-  return Status::success();
-}
+  size_t getNumColumns() const override;
 
-} // namespace eventql
+protected:
+
+  bool next(SValue* row, size_t row_len);
+
+  Transaction* txn_;
+  Vector<SValue> rows_;
+  size_t counter_;
+};
+
+} //csql
 

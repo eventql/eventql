@@ -482,6 +482,11 @@ next:
     goto next;
   }
 
+  if (token == "DATABASES") {
+    token_list->emplace_back(Token::T_DATABASES);
+    goto next;
+  }
+
   if (token == "USE") {
     token_list->emplace_back(Token::T_USE);
     goto next;

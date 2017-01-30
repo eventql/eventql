@@ -115,6 +115,7 @@ const char* Token::getTypeName(kTokenType type) {
     case T_TABLE: return "T_TABLE";
     case T_TABLES: return "T_TABLES";
     case T_DATABASE: return "T_DATABASE";
+    case T_DATABASES: return "T_DATABASES";
     case T_USE: return "T_USE";
     case T_ON: return "T_ON";
     case T_OFF: return "T_OFF";

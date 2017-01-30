@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
+ * Copyright (c) 2017 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -21,35 +21,42 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/auth/client_auth_legacy.h"
-#include "eventql/util/protobuf/msg.h"
+#pragma once
+#include "eventql/eventql.h"
+#include <eventql/util/stdtypes.h>
+#include <eventql/sql/qtree/TableExpressionNode.h>
+#include <eventql/sql/qtree/qtree_coder.h>
 
-namespace eventql {
+namespace csql {
 
-LegacyClientAuth::LegacyClientAuth(
-    const String& secret) :
-    cookie_coder_(secret) {}
+class ShowDatabasesNode : public TableExpressionNode {
+public:
 
-Status LegacyClientAuth::authenticateNonInteractive(
-    Session* session,
-    HashMap<String, String> auth_data) {
-  const auto& auth_token_str = auth_data["auth_token"];
-  if (auth_token_str.empty()) {
-    return Status(eRuntimeError, "missing auth token");
-  }
+  Vector<RefPtr<QueryTreeNode>> inputTables() const;
 
-  auto auth_token = cookie_coder_.decodeAndVerify(auth_token_str);
-  if (auth_token.isEmpty()) {
-    return Status(eRuntimeError, "invalid auth token");
-  }
+  Vector<String> getResultColumns() const override;
 
-  auto token_data = msg::decode<LegacyAuthTokenData>(auth_token.get().data());
-  session->setEffectiveNamespace(token_data.db_namespace());
-  session->setUserID(token_data.userid());
-  session->setAuthToken(auth_token_str);
+  Vector<QualifiedColumn> getAvailableColumns() const override;
 
-  return Status::success();
-}
+  RefPtr<QueryTreeNode> deepCopy() const override;
 
-} // namespace eventql
+  String toString() const override;
+
+  size_t getComputedColumnIndex(
+      const String& column_name,
+      bool allow_add = false) override;
+
+  size_t getNumComputedColumns() const override;
+
+  static void encode(
+      QueryTreeCoder* coder,
+      const ShowDatabasesNode& node,
+      OutputStream* os);
+
+  static RefPtr<QueryTreeNode> decode (
+      QueryTreeCoder* coder,
+      InputStream* is);
+};
+
+} // namespace csql
 

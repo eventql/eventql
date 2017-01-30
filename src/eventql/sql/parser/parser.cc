@@ -878,11 +878,24 @@ ASTNode* Parser::importStatement() {
 
 ASTNode* Parser::showStatement() {
   consumeToken();
-  expectAndConsume(Token::T_TABLES);
 
-  auto stmt = new ASTNode(ASTNode::T_SHOW_TABLES);
+  ASTNode* stmt;
+  switch (cur_token_->getType()) {
+    case Token::T_TABLES:
+      stmt = new ASTNode(ASTNode::T_SHOW_TABLES);
+      break;
 
+    case Token::T_DATABASES:
+      stmt = new ASTNode(ASTNode::T_SHOW_DATABASES);
+      break;
+
+    default:
+      assertExpectation(Token::T_TABLES);
+  }
+
+  consumeToken();
   consumeIf(Token::T_SEMICOLON);
+
   return stmt;
 }
 

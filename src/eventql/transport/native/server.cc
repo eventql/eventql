@@ -188,9 +188,7 @@ ReturnCode Server::performHandshake(NativeConnection* conn) {
 
   /* switch database */
   if (hello_frame.hasDatabase()) {
-    auto rc = dbctx->client_auth->changeNamespace(
-        session,
-        hello_frame.getDatabase());
+    auto rc = session->changeNamespace(hello_frame.getDatabase());
 
     if (!rc.isSuccess()) {
       return conn->sendErrorFrame(rc.message());

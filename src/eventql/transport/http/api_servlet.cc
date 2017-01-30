@@ -223,7 +223,7 @@ void APIServlet::listTables(
   /* database */
   auto database = json::objectGetString(jreq, "database");
   if (!database.isEmpty()) {
-    auto auth_rc = dbctx->client_auth->changeNamespace(session, database.get());
+    auto auth_rc = session->changeNamespace(database.get());
     if (!auth_rc.isSuccess()) {
       res->setStatus(http::kStatusForbidden);
       res->addHeader("Content-Type", "text/plain; charset=utf-8");
@@ -300,7 +300,7 @@ void APIServlet::fetchTableDefinition(
   /* database */
   auto database = json::objectGetString(jreq, "database");
   if (!database.isEmpty()) {
-    auto auth_rc = dbctx->client_auth->changeNamespace(session, database.get());
+    auto auth_rc = session->changeNamespace(database.get());
     if (!auth_rc.isSuccess()) {
       res->setStatus(http::kStatusForbidden);
       res->addHeader("Content-Type", "text/plain; charset=utf-8");
@@ -412,7 +412,7 @@ void APIServlet::createTable(
 
   auto database = json::objectGetString(jreq, "database");
   if (!database.isEmpty()) {
-    auto auth_rc = dbctx->client_auth->changeNamespace(session, database.get());
+    auto auth_rc = session->changeNamespace(database.get());
     if (!auth_rc.isSuccess()) {
       res->setStatus(http::kStatusForbidden);
       res->addHeader("Content-Type", "text/plain; charset=utf-8");
@@ -530,7 +530,7 @@ void APIServlet::addTableField(
   /* database */
   auto database = json::objectGetString(jreq, "database");
   if (!database.isEmpty()) {
-    auto auth_rc = dbctx->client_auth->changeNamespace(session, database.get());
+    auto auth_rc = session->changeNamespace(database.get());
     if (!auth_rc.isSuccess()) {
       res->setStatus(http::kStatusForbidden);
       res->addHeader("Content-Type", "text/plain; charset=utf-8");
@@ -612,7 +612,7 @@ void APIServlet::removeTableField(
   /* database */
   auto database = json::objectGetString(jreq, "database");
   if (!database.isEmpty()) {
-    auto auth_rc = dbctx->client_auth->changeNamespace(session, database.get());
+    auto auth_rc = session->changeNamespace(database.get());
     if (!auth_rc.isSuccess()) {
       res->setStatus(http::kStatusForbidden);
       res->addHeader("Content-Type", "text/plain; charset=utf-8");
@@ -681,7 +681,7 @@ void APIServlet::dropTable(
   /* database */
   auto database = json::objectGetString(jreq, "database");
   if (!database.isEmpty()) {
-    auto auth_rc = dbctx->client_auth->changeNamespace(session, database.get());
+    auto auth_rc = session->changeNamespace(database.get());
     if (!auth_rc.isSuccess()) {
       res->setStatus(http::kStatusForbidden);
       res->addHeader("Content-Type", "text/plain; charset=utf-8");
@@ -767,7 +767,7 @@ void APIServlet::insertIntoTable(
 
     if (!tc.get().config().allow_public_insert() &&
         insert_database != session->getEffectiveNamespace()) {
-      auto rc = dbctx->client_auth->changeNamespace(session, insert_database);
+      auto rc = session->changeNamespace(insert_database);
       if (!rc.isSuccess()) {
         res->setStatus(http::kStatusForbidden);
         return;
@@ -959,7 +959,7 @@ void APIServlet::executeSQL_BINARY(
     csql::BinaryResultFormat result_format(write_cb, true);
 
     if (!database.empty()) {
-      auto rc = dbctx->client_auth->changeNamespace(session, database);
+      auto rc = session->changeNamespace(database);
       if (!rc.isSuccess()) {
         result_format.sendError(rc.message());
         res_stream->finishResponse();
@@ -998,7 +998,7 @@ void APIServlet::executeSQL_JSON(
   auto dbctx = session->getDatabaseContext();
 
   if (!database.empty()) {
-    auto rc = dbctx->client_auth->changeNamespace(session, database);
+    auto rc = session->changeNamespace(database);
     if (!rc.isSuccess()) {
       Buffer buf;
       json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
@@ -1085,7 +1085,7 @@ void APIServlet::executeSQL_JSONSSE(
   sse_stream->start();
 
   if (!database.empty()) {
-    auto rc = dbctx->client_auth->changeNamespace(session, database);
+    auto rc = session->changeNamespace(database);
     if (!rc.isSuccess()) {
       Buffer buf;
       json::JSONOutputStream json(BufferOutputStream::fromBuffer(&buf));
