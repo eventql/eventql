@@ -59,6 +59,11 @@ size_t TableScan::getColumnCount() const {
   return iter_->numColumns();
 }
 
+SType TableScan::getColumnType(size_t idx) const {
+  RAISE(kNotYetImplementedError);
+  return SType::NIL;
+}
+
 bool TableScan::next(SValue* out, size_t out_len) {
   Vector<SValue> buf(iter_->numColumns());
 
