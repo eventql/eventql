@@ -70,6 +70,15 @@ Status LocalSQLBenchmark::execute(
       "flag",
       "<flag>");
 
+  flags.defineFlag(
+      "num",
+      ::cli::FlagParser::T_INTEGER,
+      false,
+      "n",
+      NULL,
+      "total number of request (inifite if unset)",
+      "<rate>");
+
   flags.parseArgv(argv);
   query_ = flags.getString("query");
   if (flags.isSet("verbose")) {
@@ -88,7 +97,8 @@ Status LocalSQLBenchmark::execute(
     tables->addProvider(new csql::CSTableScanProvider(parts[0], parts[1]));
   }
 
-  for (;;) {
+  size_t num_requests = flags.isSet("num") ? flags.getInt("num") : -1;
+  for (size_t i = 0; i < num_requests; i++) {
     auto rc = runQuery(runtime.get(), tables.get());
 
     if (!rc.isSuccess()) {
@@ -145,7 +155,8 @@ void LocalSQLBenchmark::printHelp(OutputStream* stdout_os) const {
 
   std::cout <<
       "Usage: evqlbench local-sql [OPTIONS]\n\n"
-      "   -q, --query <query>        Specify the SQL query to run\n";
+      "   -q, --query <query>        Specify the SQL query to run\n\n"
+      "   -n, --num   <num>           Maximum total number of request (default is infinite)\n";
 
 }
 
