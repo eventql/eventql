@@ -34,7 +34,10 @@ namespace cli {
 const String LocalSQLBenchmark::kName_ = "local-sql";
 const String LocalSQLBenchmark::kDescription_ = "Benchmark the SQL engine";
 
-LocalSQLBenchmark::LocalSQLBenchmark() : verbose_(false) {}
+LocalSQLBenchmark::LocalSQLBenchmark() :
+    verbose_(false),
+    total_rows_(0),
+    total_runtime_ms_(0.0) {}
 
 Status LocalSQLBenchmark::execute(
     const std::vector<std::string>& argv,
@@ -106,13 +109,17 @@ Status LocalSQLBenchmark::execute(
     }
   }
 
+  std::cout
+      << "Total: took " << total_runtime_ms_ << "ms" << "; "
+      << total_rows_ << " rows returned" << std::endl;
+
   return Status::success();
 }
 
 
 ReturnCode LocalSQLBenchmark::runQuery(
     csql::Runtime* runtime,
-    csql::TableProvider* tables) const {
+    csql::TableProvider* tables) {
   auto txn = runtime->newTransaction();
   txn->setTableProvider(tables);
 
@@ -132,9 +139,15 @@ ReturnCode LocalSQLBenchmark::runQuery(
     result.debugPrint();
   }
 
+  auto num_rows = result.getNumRows();
+  auto runtime_ms = (t1-t0) / 1000.0f;
+
+  total_rows_ += num_rows;
+  total_runtime_ms_ += runtime_ms;
+
   std::cout
-      << "took " << (t1-t0) / 1000.0f << "ms" << "; "
-      << result.getNumRows() << " rows returned" << std::endl;
+      << "Running... took " << runtime_ms << "ms" << "; "
+      << num_rows << " rows returned" << std::endl;
 
   return ReturnCode::success();
 }

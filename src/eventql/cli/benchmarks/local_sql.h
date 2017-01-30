@@ -51,12 +51,12 @@ public:
 
 protected:
 
-  ReturnCode runQuery(
-      csql::Runtime* runtime,
-      csql::TableProvider* tables) const;
+  ReturnCode runQuery(csql::Runtime* runtime, csql::TableProvider* tables);
 
   bool verbose_;
   std::string query_;
+  size_t total_rows_;
+  double total_runtime_ms_;
 };
 
 } // namespace cli
