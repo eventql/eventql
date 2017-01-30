@@ -104,6 +104,7 @@ protected:
   Transaction* txn_;
   ExecutionContext* execution_context_;
   Vector<String> column_names_;
+  Vector<SType> column_types_;
   ScratchMemory scratch_;
   RefPtr<SequentialScanNode> stmt_;
   String cstable_filename_;

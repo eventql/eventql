@@ -50,6 +50,9 @@ CSTableScan::CSTableScan(
     cur_filter_pred_(true),
     cur_pos_(0) {
   column_names_ = stmt_->selectedColumns();
+  for (const auto& c : column_names_) {
+    column_types_.emplace_back(stmt_->getComputedColumnInfo(c).second);
+  }
   execution_context_->incrementNumTasks();
 }
 
@@ -74,6 +77,9 @@ CSTableScan::CSTableScan(
     cur_filter_pred_(true),
     cur_pos_(0) {
   column_names_ = stmt_->selectedColumns();
+  for (const auto& c : column_names_) {
+    column_types_.emplace_back(stmt_->getComputedColumnInfo(c).second);
+  }
   execution_context_->incrementNumTasks();
 }
 
@@ -586,6 +592,11 @@ Vector<String> CSTableScan::columnNames() const {
 
 size_t CSTableScan::getColumnCount() const {
   return column_names_.size();
+}
+
+SType CSTableScan::getColumnType(size_t idx) const {
+  assert(idx < column_types_.size());
+  return column_types_[idx];
 }
 
 size_t CSTableScan::rowsScanned() const {
