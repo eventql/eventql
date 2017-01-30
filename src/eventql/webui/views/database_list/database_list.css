@@ -1,0 +1,11 @@
+.evql_database_list {
+  padding: 20px;
+}
+
+.evql_database_list h1 {
+  font-weight: 300;
+  font-size: 20px;
+  color: #333;
+  margin-bottom: 16px;
+}
+

@@ -7,9 +7,13 @@
 - [x] SQLEditor: Query Progress
 - [x] ChartPlotter bar chart
 - [x] Console: save history in browser local storage
+- [x] SQLEditor: save chart type in url
+- [x] handleLinks
+
+- [ ] database list
+- [ ] create database
 
 - [ ] handle auth / database
-- [ ] SQLEditor: save chart type in url
 - [ ] ChartPlotter add area chart
 - [ ] SQLEditor: make x, y axes for generated chart selectable
 - [ ] fix font

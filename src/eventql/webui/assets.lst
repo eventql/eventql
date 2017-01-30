@@ -45,4 +45,6 @@ views/sql_editor/table.html
 views/sql_editor/table.js
 views/sql_editor/chart.html
 views/sql_editor/chart.js
-
+views/database_list/database_list.css
+views/database_list/database_list.html
+views/database_list/database_list.js

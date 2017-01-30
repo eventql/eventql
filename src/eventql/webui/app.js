@@ -40,7 +40,7 @@ EventQL = (function() {
   var init = function() {
     console.log(">> EventQL Cloud ", VERSION);
 
-    api_stubs.evql = new API({}, "test"); //FIXME get auth data and database name
+    api_stubs.evql = new API({});
 
     document.querySelector(".navbar").style.display = "block";
     showLoader();
@@ -96,9 +96,17 @@ EventQL = (function() {
     params.app = app;
     params.path = path;
 
+    var m = path.match(/\/ui\/([a-z0-9A-Z_-]+)(\/?.*)/);
+    if (m) {
+      api_stubs.evql.setDatabase(m[1]);
+      params.vpath = "/ui/<database>" + m[2];
+    } else {
+      params.vpath = path;
+    }
+
     /* try changing the path in the current view instance */
     if (current_view && current_view.changePath) {
-      var route = findRoute(params.path);
+      var route = findRoute(params.vpath);
       if (current_view.changePath(path, route)) {
         return;
       }
@@ -107,7 +115,7 @@ EventQL = (function() {
     /* otherwise search for the new view class */
     showLoader();
 
-    var route = params.path ? findRoute(params.path) : null;
+    var route = params.path ? findRoute(params.vpath) : null;
     params.route = route;
 
     var view = route ? EventQL.views[route.view] : null;

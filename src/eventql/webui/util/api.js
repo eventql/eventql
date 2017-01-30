@@ -1,8 +1,14 @@
-var API = function(auth_data, database) {
+var API = function(auth_data) {
   'use strict';
 
   const HOSTNAME = document.location.hostname;
   const PORT = document.location.port;
+
+  var database;
+
+  this.setDatabase = function(db) {
+    database = db;
+  };
 
   this.executeSQLSSE = function(query) {
     var url = "/api/v1/sql?format=json_sse&query=" + encodeURIComponent(query);

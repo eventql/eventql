@@ -26,11 +26,15 @@ EventQL = this.EventQL || {}
 
 EventQL.routes = [
   {
-    "route": "/ui",
+    "route": "/ui/<database>",
     "view": "eventql.console"
   },
   {
-    "route": "/ui/sql",
+    "route": "/ui/<database>/sql",
     "view": "eventql.sql_editor"
+  },
+  {
+    "route": "/ui",
+    "view": "eventql.database_list"
   },
 ];
