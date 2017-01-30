@@ -61,7 +61,9 @@ public:
   }
 
   virtual Status listDatabases(
-      Function<void (const ::eventql::NamespaceConfig& cfg)> fn) const = 0;
+      Function<void (const ::eventql::NamespaceConfig& cfg)> fn) const {
+    return Status(eNotImplementedError, "not implemented");
+  }
 
   virtual Option<TableInfo> describe(const String& table_name) const = 0;
 
