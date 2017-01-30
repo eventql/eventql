@@ -37,22 +37,18 @@ LimitExpression::LimitExpression(
     input_(std::move(input)),
     counter_(0) {}
 
-ScopedPtr<ResultCursor> LimitExpression::execute() {
-  input_cursor_ = input_->execute();
-  buf_.resize(input_cursor_->getNumColumns());
+ReturnCode LimitExpression::execute() {
+  auto rc = input_->execute();
+  if (!rc.isSuccess()) {
+    return rc;
+  }
 
-  return mkScoped(
-      new DefaultResultCursor(
-          input_cursor_->getNumColumns(),
-          std::bind(
-              &LimitExpression::next,
-              this,
-              std::placeholders::_1,
-              std::placeholders::_2)));
+  buf_.resize(input_->getColumnCount());
+  return ReturnCode::success();
 }
 
-size_t LimitExpression::getNumColumns() const {
-  return input_cursor_->getNumColumns();
+size_t LimitExpression::getColumnCount() const {
+  return input_->getColumnCount();
 }
 
 bool LimitExpression::next(SValue* row, size_t row_len) {
@@ -60,7 +56,7 @@ bool LimitExpression::next(SValue* row, size_t row_len) {
     return false;
   }
 
-  while (input_cursor_->next(buf_.data(), buf_.size())) {
+  while (input_->next(buf_.data(), buf_.size())) {
     if (counter_++ < offset_) {
       continue;
     } else {

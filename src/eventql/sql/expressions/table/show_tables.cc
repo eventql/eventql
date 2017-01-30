@@ -32,7 +32,7 @@ ShowTablesExpression::ShowTablesExpression(
     txn_(txn),
     counter_(0) {}
 
-ScopedPtr<ResultCursor> ShowTablesExpression::execute() {
+ReturnCode ShowTablesExpression::execute() {
   txn_->getTableProvider()->listTables([this] (const TableInfo& table) {
     Vector<SValue> row;
     row.emplace_back(table.table_name);
@@ -46,17 +46,10 @@ ScopedPtr<ResultCursor> ShowTablesExpression::execute() {
     buf_.emplace_back(row);
   });
 
-  return mkScoped(
-      new DefaultResultCursor(
-          kNumColumns,
-          std::bind(
-              &ShowTablesExpression::next,
-              this,
-              std::placeholders::_1,
-              std::placeholders::_2)));
+  return ReturnCode::success();
 }
 
-size_t ShowTablesExpression::getNumColumns() const {
+size_t ShowTablesExpression::getColumnCount() const {
   return kNumColumns;
 }
 

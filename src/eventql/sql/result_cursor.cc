@@ -45,15 +45,19 @@ bool DefaultResultCursor::next(SValue* row, int row_len) {
 
 TableExpressionResultCursor::TableExpressionResultCursor(
     ScopedPtr<TableExpression> table_expression) :
-    table_expression_(std::move(table_expression)),
-    cursor_(table_expression_->execute()) {}
+    table_expression_(std::move(table_expression)) {
+  auto rc = table_expression_->execute();
+  if (!rc.isSuccess()) {
+    RAISE(kRuntimeError, rc.getMessage());
+  }
+}
 
 bool TableExpressionResultCursor::next(SValue* row, int row_len) {
-  return cursor_->next(row, row_len);
+  return table_expression_->next(row, row_len);
 }
 
 size_t TableExpressionResultCursor::getNumColumns() {
-  return cursor_->getNumColumns();
+  return table_expression_->getColumnCount();
 }
 
 bool EmptyResultCursor::next(SValue* row, int row_len) {

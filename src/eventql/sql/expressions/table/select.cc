@@ -37,24 +37,17 @@ SelectExpression::SelectExpression(
   execution_context_->incrementNumTasks();
 }
 
-ScopedPtr<ResultCursor> SelectExpression::execute() {
+ReturnCode SelectExpression::execute() {
   execution_context_->incrementNumTasksRunning();
 
-  return mkScoped(
-      new DefaultResultCursor(
-          select_exprs_.size(),
-          std::bind(
-              &SelectExpression::next,
-              this,
-              std::placeholders::_1,
-              std::placeholders::_2)));
+  return ReturnCode::success();
 }
 
-size_t SelectExpression::getNumColumns() const {
+size_t SelectExpression::getColumnCount() const {
   return select_exprs_.size();
 }
 
-bool SelectExpression::next(SValue* row, int row_len) {
+bool SelectExpression::next(SValue* row, size_t row_len) {
   if (pos_++ == 0) {
     for (int i = 0; i < select_exprs_.size() && i < row_len; ++i) {
       VM::evaluate(txn_, select_exprs_[i].program(), 0, nullptr,  &row[i]);

@@ -36,14 +36,14 @@ public:
 
   ShowTablesExpression(Transaction* txn);
 
-  ScopedPtr<ResultCursor> execute() override;
+  ReturnCode execute() override;
 
-  size_t getNumColumns() const override;
+  size_t getColumnCount() const override;
+  SType getColumnType(size_t idx) const override;
+
+  bool next(SValue* row, size_t row_len) override;
 
 protected:
-
-  bool next(SValue* row, size_t row_len);
-
   Transaction* txn_;
   size_t counter_;
   Vector<Vector<SValue>> buf_;

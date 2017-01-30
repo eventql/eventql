@@ -2,7 +2,6 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
- *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -22,34 +21,15 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include <eventql/util/stdtypes.h>
-#include <eventql/sql/qtree/ShowTablesNode.h>
-#include <eventql/sql/runtime/tablerepository.h>
+#include "eventql/sql/expressions/table_expression.h"
 
 namespace csql {
 
-class DescribeTableStatement : public TableExpression {
-public:
-
-  static const size_t kNumColumns = 6;
-
-  DescribeTableStatement(
-      Transaction* txn,
-      const String& table_name);
-
-  ReturnCode execute() override;
-
-  size_t getColumnCount() const override;
-  SType getColumnType(size_t idx) const override;
-
-  bool next(SValue* row, size_t row_len) override;
-
-protected:
-  Transaction* txn_;
-  String table_name_;
-  Vector<ColumnInfo> rows_;
-  size_t counter_;
-};
-
+ReturnCode TableExpression::nextBatch(
+    SVector* columns,
+    size_t* nrecords) {
+  return ReturnCode::error("ERUNTIME", "not yet implemented");
 }
+
+} // namespace csql
+

@@ -46,16 +46,16 @@ PartitionCursor::PartitionCursor(
 
 bool PartitionCursor::next(csql::SValue* row, int row_len) {
   for (;;) {
-    if (cur_cursor_.get() == nullptr) {
+    if (cur_scan_.get() == nullptr) {
       if (!openNextTable()) {
         break;
       }
     }
 
-    if (cur_cursor_->next(row, row_len)) {
+    if (cur_scan_->next(row, row_len)) {
       return true;
     } else {
-      cur_cursor_.reset(nullptr);
+      cur_scan_.reset(nullptr);
     }
   }
 
@@ -196,7 +196,12 @@ bool PartitionCursor::openNextTable() {
   }
 
   ++cur_table_;
-  cur_cursor_ = cur_scan_->execute();
+
+  auto rc = cur_scan_->execute();
+  if (!rc.isSuccess()) {
+    RAISE(kRuntimeError, rc.getMessage());
+  }
+
   return true;
 }
 
@@ -359,64 +364,6 @@ ReturnCode RemotePartitionCursor::fetchRows() {
   }
 
   return ReturnCode::success();
-}
-
-StaticPartitionCursor::StaticPartitionCursor(
-    csql::Transaction* txn,
-    csql::ExecutionContext* execution_context,
-    RefPtr<Table> table,
-    RefPtr<PartitionSnapshot> snap,
-    RefPtr<csql::SequentialScanNode> stmt) :
-    txn_(txn),
-    execution_context_(execution_context),
-    table_(table),
-    snap_(snap),
-    stmt_(stmt) {};
-
-bool StaticPartitionCursor::next(csql::SValue* row, int row_len) {
-  if (cur_cursor_.get() == nullptr) {
-    auto cstable_file = FileUtil::joinPaths(snap_->base_path, "_cstable");
-    if (!FileUtil::exists(cstable_file)) {
-      return false;
-    }
-
-    auto cstable = cstable::CSTableReader::openFile(cstable_file);
-
-    cur_scan_.reset(
-        new csql::CSTableScan(txn_, execution_context_, stmt_, cstable));
-
-    //for (const auto& col : table_->schema()->columns()) {
-    //  switch (col.second.type) {
-    //    case msg::FieldType::BOOLEAN:
-    //      cur_scan_->setColumnType(col.first, csql::SType::BOOL);
-    //      break;
-    //    case msg::FieldType::UINT32:
-    //      cur_scan_->setColumnType(col.first, csql::SType::INT64);
-    //      break;
-    //    case msg::FieldType::UINT64:
-    //      cur_scan_->setColumnType(col.first, csql::SType::INT64);
-    //      break;
-    //    case msg::FieldType::STRING:
-    //      cur_scan_->setColumnType(col.first, csql::SType::STRING);
-    //      break;
-    //    case msg::FieldType::DOUBLE:
-    //      cur_scan_->setColumnType(col.first, csql::SType::FLOAT64);
-    //      break;
-    //    case msg::FieldType::DATETIME:
-    //      cur_scan_->setColumnType(col.first, csql::SType::TIMESTAMP64);
-    //      break;
-    //  }
-    //}
-
-    cur_cursor_ = cur_scan_->execute();
-  }
-
-  return cur_cursor_->next(row, row_len);
-}
-
-
-size_t StaticPartitionCursor::getNumColumns() {
-  return stmt_->getNumComputedColumns();
 }
 
 }

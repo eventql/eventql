@@ -24,6 +24,7 @@
  */
 #pragma once
 #include "eventql/eventql.h"
+#include "eventql/sql/svalue.h"
 #include <eventql/sql/expressions/table_expression.h>
 #include <eventql/auth/internal_auth.h>
 #include <eventql/db/partition_map.h>
@@ -65,15 +66,16 @@ public:
     PartitionMap* partition_map,
     InternalAuth* auth);
 
-  ScopedPtr<csql::ResultCursor> execute() override;
+  virtual ReturnCode execute() override;
 
-  size_t getNumColumns() const override;
+  size_t getColumnCount() const override;
+  csql::SType getColumnType(size_t idx) const override;
+
+  bool next(csql::SValue* row, size_t row_len) override;
 
   Option<SHA1Hash> getCacheKey() const override;
 
 protected:
-
-  bool next(csql::SValue* row, size_t row_len);
 
   ScopedPtr<csql::ResultCursor> openPartition(
       const PartitionLocation& partition);

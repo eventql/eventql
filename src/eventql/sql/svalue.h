@@ -141,6 +141,11 @@ protected:
   } data_;
 };
 
+class SVector {
+public:
+  ~SVector() = default;
+};
+
 String sql_escape(const String& str);
 
 }

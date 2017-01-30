@@ -33,25 +33,17 @@ DescribePartitionsExpression::DescribePartitionsExpression(
     table_name_(table_name),
     counter_(0) {}
 
-ScopedPtr<ResultCursor> DescribePartitionsExpression::execute() {
+ReturnCode DescribePartitionsExpression::execute() {
   txn_->getTableProvider()->listPartitions(
       table_name_,
       [this] (const eventql::TablePartitionInfo& p_info) {
     rows_.emplace_back(p_info);
   });
 
-  return mkScoped(
-      new DefaultResultCursor(
-          kNumColumns,
-          std::bind(
-              &DescribePartitionsExpression::next,
-              this,
-              std::placeholders::_1,
-              std::placeholders::_2)));
-
+  return ReturnCode::success();
 }
 
-size_t DescribePartitionsExpression::getNumColumns() const {
+size_t DescribePartitionsExpression::getColumnCount() const {
   return kNumColumns;
 }
 

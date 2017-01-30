@@ -49,10 +49,14 @@ public:
       RefPtr<cstable::CSTableReader> cstable,
       const String& cstable_filename = "<unknown>");
 
-  ScopedPtr<ResultCursor> execute() override;
+  ReturnCode execute() override;
+
+  size_t getColumnCount() const override;
+  SType getColumnType(size_t idx) const override;
+
+  bool next(SValue* out, size_t out_len) override;
 
   virtual Vector<String> columnNames() const;
-  size_t getNumColumns() const override;
 
   size_t rowsScanned() const;
 
@@ -62,7 +66,6 @@ public:
 protected:
 
   void open();
-  bool next(SValue* out, int out_len);
 
   struct ColumnRef {
     ColumnRef(RefPtr<cstable::ColumnReader> r, size_t i, SType t);

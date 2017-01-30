@@ -51,22 +51,15 @@ TableScan::TableScan(
   }
 }
 
-ScopedPtr<ResultCursor> TableScan::execute() {
-  return mkScoped(
-      new DefaultResultCursor(
-          select_exprs_.size(),
-          std::bind(
-              &TableScan::next,
-              this,
-              std::placeholders::_1,
-              std::placeholders::_2)));
+ReturnCode TableScan::execute() {
+  return ReturnCode::success();
 }
 
-size_t TableScan::getNumColumns() const {
+size_t TableScan::getColumnCount() const {
   return iter_->numColumns();
 }
 
-bool TableScan::next(SValue* out, int out_len) {
+bool TableScan::next(SValue* out, size_t out_len) {
   Vector<SValue> buf(iter_->numColumns());
 
   while (iter_->nextRow(buf.data())) {

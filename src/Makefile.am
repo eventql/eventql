@@ -597,6 +597,7 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/expressions/table/subquery.h \
     eventql/sql/expressions/table/tablescan.cc \
     eventql/sql/expressions/table/tablescan.h \
+    eventql/sql/expressions/table_expression.cc \
     eventql/sql/expressions/table_expression.h \
     eventql/sql/extensions/chartsql/areachartbuilder.cc \
     eventql/sql/extensions/chartsql/areachartbuilder.h \
