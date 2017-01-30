@@ -51,6 +51,10 @@ size_t LimitExpression::getColumnCount() const {
   return input_->getColumnCount();
 }
 
+SType LimitExpression::getColumnType(size_t idx) const {
+  return input_->getColumnType(idx);
+}
+
 bool LimitExpression::next(SValue* row, size_t row_len) {
   if (limit_ == 0 || counter_ >= offset_ + limit_) {
     return false;

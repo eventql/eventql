@@ -118,6 +118,10 @@ size_t OrderByExpression::getColumnCount() const {
   return input_cursor_->getNumColumns();
 }
 
+SType OrderByExpression::getColumnType(size_t idx) const {
+  return input_->getColumnType(idx);
+}
+
 bool OrderByExpression::next(SValue* out, size_t out_len) {
   if (pos_ >= num_rows_) {
     return false;
