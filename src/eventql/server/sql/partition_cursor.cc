@@ -59,6 +59,7 @@ ReturnCode PartitionCursor::nextBatch(csql::SVector* columns, size_t* nrows) {
 
     if (!*nrows) {
       cur_scan_.reset(nullptr);
+      continue;
     }
 
     return ReturnCode::success();

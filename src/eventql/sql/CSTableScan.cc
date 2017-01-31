@@ -721,7 +721,7 @@ ReturnCode FastCSTableScan::nextBatch(
   /* calculate batch size */
   size_t batch_size = std::min(
       num_records_,
-      *nrecords > 0 ? *nrecords : size_t(128));
+      *nrecords > 0 ? *nrecords : size_t(8192));
 
   /* fetch input columns */
   for (size_t i = 0; i < column_buffers_.size(); ++i) {
@@ -753,6 +753,7 @@ ReturnCode FastCSTableScan::nextBatch(
   }
 
   *nrecords = batch_size;
+  assert(*nrecords > 0);
   num_records_ -= batch_size;
   return ReturnCode::success();
 }
