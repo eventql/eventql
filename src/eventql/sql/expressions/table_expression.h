@@ -39,10 +39,10 @@ public:
 
   virtual ReturnCode execute() = 0;
 
-  virtual bool next(SValue* row, size_t row_len) = 0; // legacy
+  virtual bool next(SValue* row, size_t row_len); // legacy
 
   virtual ReturnCode nextBatch(
-      SVector* columns,
+      SVector** columns,
       size_t* nrecords);
 
   virtual size_t getColumnCount() const = 0;
