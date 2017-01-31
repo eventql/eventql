@@ -45,7 +45,7 @@ Option<ScopedPtr<TableExpression>> CSTableScanProvider::buildSequentialScan(
 
   return Option<ScopedPtr<TableExpression>>(
       ScopedPtr<TableExpression>(
-          new CSTableScan(
+          new FastCSTableScan(
               txn,
               execution_context,
               node,

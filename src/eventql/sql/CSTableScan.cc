@@ -21,6 +21,8 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <assert.h>
+#include <iostream>
 #include "eventql/eventql.h"
 #include <eventql/sql/CSTableScan.h>
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
@@ -648,5 +650,130 @@ CSTableScan::ExpressionRef::~ExpressionRef() {
   }
 }
 
+FastCSTableScan::FastCSTableScan(
+    Transaction* txn,
+    ExecutionContext* execution_context,
+    RefPtr<SequentialScanNode> stmt,
+    const String& cstable_filename) :
+    txn_(txn),
+    execution_context_(execution_context),
+    stmt_(stmt->deepCopyAs<SequentialScanNode>()),
+    cstable_filename_(cstable_filename) {}
+
+FastCSTableScan::FastCSTableScan(
+    Transaction* txn,
+    ExecutionContext* execution_context,
+    RefPtr<SequentialScanNode> stmt,
+    RefPtr<cstable::CSTableReader> cstable,
+    const String& cstable_filename /* = "<unknown>" */) :
+    txn_(txn),
+    execution_context_(execution_context),
+    stmt_(stmt->deepCopyAs<SequentialScanNode>()),
+    cstable_(cstable),
+    cstable_filename_(cstable_filename) {}
+
+FastCSTableScan::~FastCSTableScan() {
+  for (auto buf : column_buffers_) {
+    delete buf;
+  }
+}
+
+ReturnCode FastCSTableScan::execute() {
+  for (const auto& slnode : stmt_->selectList()) {
+    select_list_.emplace_back(
+        txn_->getCompiler()->buildValueExpression(txn_, slnode->expression()));
+  }
+
+  if (!cstable_.get()) {
+    cstable_ = cstable::CSTableReader::openFile(cstable_filename_);
+  }
+
+  num_records_ = cstable_->numRecords();
+
+  for (const auto& c : stmt_->selectedColumns()) {
+    auto colinfo = stmt_->getComputedColumnInfo(c);
+    column_types_.emplace_back(colinfo.second);
+    column_buffers_.emplace_back(new SVector());
+
+    if (cstable_->hasColumn(c)) {
+      column_readers_.emplace_back(cstable_->getColumnReader(c));
+    } else {
+      column_readers_.emplace_back(nullptr);
+    }
+  }
+
+  return ReturnCode::success();
+}
+
+ReturnCode FastCSTableScan::nextBatch(
+    SVector** out,
+    size_t* nrecords) {
+  if (num_records_ == 0) {
+    *nrecords = 0;
+    return ReturnCode::success();
+  }
+
+  /* calculate batch size */
+  size_t batch_size = std::min(num_records_, size_t(1));
+
+  /* fetch input columns */
+  for (size_t i = 0; i < column_buffers_.size(); ++i) {
+    auto rc = ReturnCode::success();
+
+    switch (column_types_[i]) {
+      case SType::UINT64:
+      case SType::TIMESTAMP64:
+        rc = fetchColumnUInt64(i, batch_size);
+        break;
+      default:
+        assert(0);
+    }
+
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  /* compute output columns */
+  for (size_t i = 0; i < select_list_.size(); ++i) {
+    VM::evaluateVector(
+        txn_,
+        select_list_[i].program(),
+        column_buffers_.size(),
+        (const csql::SVector**) column_buffers_.data(),
+        out[i]);
+  }
+
+  *nrecords = batch_size;
+  num_records_ -= batch_size;
+  return ReturnCode::success();
+}
+
+ReturnCode FastCSTableScan::fetchColumnUInt64(size_t idx, size_t batch_size) {
+  auto buffer = column_buffers_[idx];
+  size_t buffer_len = batch_size * sizeof(uint64_t);
+  if (buffer->getCapacity() < buffer_len) {
+    buffer->increaseCapacity(buffer_len);
+  }
+
+  cstable::FixedColumnStorage col_storage(buffer->getMutableData(), &buffer_len);
+  auto reader = column_readers_[idx];
+  reader->readValues(batch_size, &col_storage);
+
+  assert(buffer_len == batch_size * sizeof(uint64_t));
+  buffer->setSize(buffer_len);
+
+  return ReturnCode::success();
+}
+
+size_t FastCSTableScan::getColumnCount() const {
+  return select_list_.size();
+}
+
+SType FastCSTableScan::getColumnType(size_t idx) const {
+  assert(idx < select_list_.size());
+  return select_list_[idx].getReturnType();
+}
 
 } // namespace csql
+

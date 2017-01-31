@@ -126,5 +126,47 @@ protected:
   size_t cur_pos_;
 };
 
+class FastCSTableScan : public TableExpression {
+public:
+
+  FastCSTableScan(
+      Transaction* txn,
+      ExecutionContext* execution_context,
+      RefPtr<SequentialScanNode> stmt,
+      const String& cstable_filename);
+
+  FastCSTableScan(
+      Transaction* txn,
+      ExecutionContext* execution_context,
+      RefPtr<SequentialScanNode> stmt,
+      RefPtr<cstable::CSTableReader> cstable,
+      const String& cstable_filename = "<unknown>");
+
+  ~FastCSTableScan();
+
+  ReturnCode execute() override;
+
+  ReturnCode nextBatch(
+      SVector** columns,
+      size_t* nrecords) override;
+
+  size_t getColumnCount() const override;
+  SType getColumnType(size_t idx) const override;
+
+protected:
+
+  ReturnCode fetchColumnUInt64(size_t idx, size_t batch_size);
+
+  Transaction* txn_;
+  ExecutionContext* execution_context_;
+  RefPtr<SequentialScanNode> stmt_;
+  String cstable_filename_;
+  RefPtr<cstable::CSTableReader> cstable_;
+  std::vector<ValueExpression> select_list_;
+  size_t num_records_;
+  std::vector<SType> column_types_;
+  std::vector<SVector*> column_buffers_;
+  std::vector<RefPtr<cstable::ColumnReader>> column_readers_;
+};
 
 } // namespace csql
