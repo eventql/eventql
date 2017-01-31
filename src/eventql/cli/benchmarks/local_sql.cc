@@ -154,7 +154,7 @@ Status LocalSQLBenchmark::execute(
         << std::endl
         << std::setw(22)
         << "Total runtime: "
-        << total / 1000000.f << " seconds"
+        << total / 1000000.f << " s"
         << std::endl
         << std::endl
         << "Runtimes (ms)"
@@ -184,52 +184,61 @@ Status LocalSQLBenchmark::execute(
         << max / 1000.0f
         << std::endl
         << std::endl
-        << "Percentage of the runtimes (ms)"
+        << "Percentage of the runtimes"
         << std::endl
         << std::setw(5)
         << "50%"
-        << std::setw(5)
-        << runtimes_us_[(runtimes_us_.size() - 1) * 0.5]
+        << std::setw(8)
+        << runtimes_us_[(runtimes_us_.size() - 1) * 0.5] / 1000.f
+        << " ms"
         << std::endl
         << std::setw(5)
         << "66%"
-        << std::setw(5)
-        << runtimes_us_[(runtimes_us_.size() - 1) * 0.66]
+        << std::setw(8)
+        << runtimes_us_[(runtimes_us_.size() - 1) * 0.66] / 1000.f
+        << " ms"
         << std::endl
         << std::setw(5)
         << "75%"
-        << std::setw(5)
-        << runtimes_us_[(runtimes_us_.size() - 1) * 0.75]
+        << std::setw(8)
+        << runtimes_us_[(runtimes_us_.size() - 1) * 0.75] / 1000.f
+        << " ms"
         << std::endl
         << std::setw(5)
         << "80%"
-        << std::setw(5)
-        << runtimes_us_[(runtimes_us_.size() - 1) * 0.8]
+        << std::setw(8)
+        << runtimes_us_[(runtimes_us_.size() - 1) * 0.8] / 1000.f
+        << " ms"
         << std::endl
         << std::setw(5)
         << "90%"
-        << std::setw(5)
-        << runtimes_us_[(runtimes_us_.size() - 1) * 0.9]
+        << std::setw(8)
+        << runtimes_us_[(runtimes_us_.size() - 1) * 0.9] / 1000.f
+        << " ms"
         << std::endl
         << std::setw(5)
         << "95%"
-        << std::setw(5)
-        << runtimes_us_[(runtimes_us_.size() - 1) * 0.95]
+        << std::setw(8)
+        << runtimes_us_[(runtimes_us_.size() - 1) * 0.95] / 1000.f
+        << " ms"
         << std::endl
         << std::setw(5)
         << "98%"
-        << std::setw(5)
-        << runtimes_us_[(runtimes_us_.size() - 1) * 0.98]
+        << std::setw(8)
+        << runtimes_us_[(runtimes_us_.size() - 1) * 0.98] / 1000.f
+        << " ms"
         << std::endl
         << std::setw(5)
         << "99%"
-        << std::setw(5)
-        << runtimes_us_[(runtimes_us_.size() - 1) * 0.99]
+        << std::setw(8)
+        << runtimes_us_[(runtimes_us_.size() - 1) * 0.99] / 1000.f
+        << " ms"
         << std::endl
         << std::setw(5)
         << "100%"
-        << std::setw(5)
-        << runtimes_us_[runtimes_us_.size() - 1]
+        << std::setw(8)
+        << runtimes_us_[runtimes_us_.size() - 1] / 1000.f
+        << " ms"
         << std::endl;
   }
 
