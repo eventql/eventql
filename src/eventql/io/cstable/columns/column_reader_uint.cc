@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <assert.h>
 #include <eventql/io/cstable/columns/column_reader_uint.h>
 #include <eventql/io/cstable/columns/page_reader_uint32.h>
 #include <eventql/io/cstable/columns/page_reader_uint64.h>
@@ -71,6 +72,24 @@ UnsignedIntColumnReader::UnsignedIntColumnReader(
           "invalid storage type for unsigned integer column '$0'",
           config_.column_name);
 
+  }
+}
+
+void UnsignedIntColumnReader::readValues(
+    size_t n,
+    ColumnStorage* dst,
+    std::vector<uint32_t>* dlevels /* = nullptr */,
+    std::vector<uint32_t>* rlevels /* = nullptr */) {
+  dst->resize(n * sizeof(uint64_t));
+  uint64_t* data = (uint64_t*) dst->data();
+  assert(data);
+
+  uint64_t rlvl;
+  uint64_t dlvl;
+  for (size_t i = 0; i < n; ++i) {
+    if (!readUnsignedInt(&rlvl, &dlvl, data + i)) {
+      data[i] = 0;
+    }
   }
 }
 

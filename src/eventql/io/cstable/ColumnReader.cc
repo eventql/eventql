@@ -21,8 +21,8 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <assert.h>
 #include <eventql/io/cstable/ColumnReader.h>
-
 
 namespace cstable {
 
@@ -38,6 +38,22 @@ bool ColumnReader::readDateTime(
     *value = UnixTime(0);
     return false;
   }
+}
+
+void ColumnReader::readValues(
+    size_t n,
+    ColumnStorage* dst,
+    std::vector<uint32_t>* dlevels /* = nullptr */,
+    std::vector<uint32_t>* rlevels /* = nullptr */) {
+  RAISE(kNotYetImplementedError, "not yet implemented");
+}
+
+void ColumnReader::readValues(
+    size_t n,
+    ColumnStorage* dst,
+    std::vector<bool>* null_set,
+    std::vector<uint32_t>* rlevels /* = nullptr */) {
+  RAISE(kNotYetImplementedError, "not yet implemented");
 }
 
 DefaultColumnReader::DefaultColumnReader(
@@ -70,6 +86,26 @@ uint64_t DefaultColumnReader::nextRepetitionLevel() {
   } else {
     return 0;
   }
+}
+
+FixedColumnStorage::FixedColumnStorage(
+    void* data,
+    size_t* size) :
+    data_(data),
+    size_(size),
+    size_max_(*size) {}
+
+void* FixedColumnStorage::data() {
+  return data_;
+}
+
+size_t FixedColumnStorage::size() {
+  return *size_;
+}
+
+void FixedColumnStorage::resize(size_t new_size) {
+  assert(new_size <= size_max_);
+  *size_ = new_size;
 }
 
 } // namespace cstable

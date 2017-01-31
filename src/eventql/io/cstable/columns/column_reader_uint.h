@@ -38,6 +38,12 @@ public:
       ScopedPtr<UnsignedIntPageReader> dlevel_reader,
       const PageManager* page_mgr);
 
+  void readValues(
+      size_t n,
+      ColumnStorage* dst,
+      std::vector<uint32_t>* dlevels = nullptr,
+      std::vector<uint32_t>* rlevels = nullptr) override;
+
   bool readBoolean(
       uint64_t* rlvl,
       uint64_t* dlvl,
