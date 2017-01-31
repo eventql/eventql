@@ -1,6 +1,6 @@
 # Process this file with automake to produce Makefile.in
 
-bin_PROGRAMS = evql evqld evqlctl evqlslap cstable_tool
+bin_PROGRAMS = evql evqld evqlctl evqlbench evqlslap cstable_tool
 lib_LTLIBRARIES = libevqlclient.la
 check_LIBRARIES = libevqlcore.a
 
@@ -1040,6 +1040,27 @@ evqlctl_SOURCES = \
     eventql/evqlctl.cc
 
 evqlctl_LDADD = \
+    libevqlclient.la \
+    $(SIMDCOMP_LDADD) \
+    $(INIH_LDADD) \
+    $(ZOOKEEPER_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD) \
+    $(SPIDERMONKEY_LDADD)
+
+################ BIN: evqlbench ###################
+evqlbench_SOURCES = \
+    ${EVQL_CORE_SOURCES_} \
+    $(EVQL_PROTO_SOURCES_) \
+    eventql/cli/commands/cli_command.h \
+    eventql/cli/commands/cli_command.cc \
+    eventql/cli/cli_config.cc \
+    eventql/cli/cli_config.h \
+    eventql/cli/benchmarks/local_sql.h \
+    eventql/cli/benchmarks/local_sql.cc \
+    eventql/evqlbench.cc
+
+evqlbench_LDADD = \
     libevqlclient.la \
     $(SIMDCOMP_LDADD) \
     $(INIH_LDADD) \

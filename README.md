@@ -95,7 +95,7 @@ you need a modern c++ compiler, libz, autotools and python (for spidermonkey/moz
     $ apt-get install clang make automake autoconf libtool zlib1g-dev
 
     # OSX
-    $ brew install automake autoconf
+    $ brew install automake autoconf libtool
 
 To build EventQL from a distribution tarball:
 
