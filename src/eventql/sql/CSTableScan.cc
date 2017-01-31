@@ -693,7 +693,7 @@ ReturnCode FastCSTableScan::execute() {
   for (const auto& c : stmt_->selectedColumns()) {
     auto colinfo = stmt_->getComputedColumnInfo(c);
     column_types_.emplace_back(colinfo.second);
-    column_buffers_.emplace_back(new SVector());
+    column_buffers_.emplace_back(new SVector(colinfo.second));
 
     if (cstable_->hasColumn(c)) {
       column_readers_.emplace_back(cstable_->getColumnReader(c));
@@ -741,6 +741,7 @@ ReturnCode FastCSTableScan::nextBatch(
         select_list_[i].program(),
         column_buffers_.size(),
         (const csql::SVector**) column_buffers_.data(),
+        batch_size,
         out[i]);
   }
 

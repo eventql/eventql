@@ -119,7 +119,9 @@ VM::Instruction* Compiler::compileLiteral(
   ins->arg0 = static_storage->construct<SValue>(node->value());
   ins->child = nullptr;
   ins->next  = nullptr;
-
+  ins->retval.capacity = node->value().getSize();
+  ins->retval.data = static_storage->alloc(ins->retval.capacity);
+  memcpy(ins->retval.data, node->value().getData(), ins->retval.capacity);
   return ins;
 }
 
@@ -135,6 +137,8 @@ VM::Instruction* Compiler::compileColumnReference(
     ins->arg0 = static_storage->construct<SValue>();
     ins->child = nullptr;
     ins->next  = nullptr;
+    ins->retval.capacity = 0;
+    ins->retval.data = nullptr;
     return ins;
   } else {
     auto ins = static_storage->construct<VM::Instruction>();
@@ -143,6 +147,8 @@ VM::Instruction* Compiler::compileColumnReference(
     ins->argn = 0;
     ins->child = nullptr;
     ins->next  = nullptr;
+    ins->retval.capacity = 0;
+    ins->retval.data = nullptr;
     return ins;
   }
 }
@@ -165,6 +171,8 @@ VM::Instruction* Compiler::compileMethodCall(
   op->argn  = args.size();
   op->child = nullptr;
   op->next  = nullptr;
+
+  allocateReturnValue(node->getReturnType(), op, static_storage);
 
   switch (fun->type) {
     case FN_PURE:
@@ -208,6 +216,8 @@ VM::Instruction* Compiler::compileIfStatement(
   op->child = nullptr;
   op->next  = nullptr;
 
+  allocateReturnValue(node->getReturnType(), op, static_storage);
+
   auto cur = &op->child;
   for (auto e : args) {
     auto next = compileValueExpression(
@@ -232,6 +242,9 @@ VM::Instruction* Compiler::compileRegexOperator(
   ins->type = VM::X_REGEX;
   ins->arg0 = static_storage->construct<RegExp>(node->pattern());
   ins->next  = nullptr;
+
+  allocateReturnValue(node->getReturnType(), ins, static_storage);
+
   ins->child = compileValueExpression(
       node->subject(),
       dynamic_storage_size,
@@ -250,6 +263,9 @@ VM::Instruction* Compiler::compileLikeOperator(
   ins->type = VM::X_LIKE;
   ins->arg0 = static_storage->construct<LikePattern>(node->pattern());
   ins->next  = nullptr;
+
+  allocateReturnValue(node->getReturnType(), ins, static_storage);
+
   ins->child = compileValueExpression(
       node->subject(),
       dynamic_storage_size,
@@ -257,6 +273,24 @@ VM::Instruction* Compiler::compileLikeOperator(
       symbol_table);
 
   return ins;
+}
+
+void Compiler::allocateReturnValue(
+    SType return_type,
+    VM::Instruction* op,
+    ScratchMemory* static_storage) { // FIXME
+  switch (return_type) {
+    case SType::UINT64:
+      op->retval.capacity = sizeof(uint64_t);
+      op->retval.data = static_storage->alloc(op->retval.capacity);
+      break;
+    case SType::INT64:
+      op->retval.capacity = sizeof(uint64_t);
+      op->retval.data = static_storage->alloc(op->retval.capacity);
+      break;
+    default:
+      assert(false);
+  }
 }
 
 }

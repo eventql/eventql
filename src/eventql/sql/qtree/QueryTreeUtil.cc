@@ -46,7 +46,7 @@ void QueryTreeUtil::findColumns(
 RefPtr<ValueExpressionNode> QueryTreeUtil::foldConstants(
     Transaction* txn,
     RefPtr<ValueExpressionNode> expr) {
-  if (isConstantExpression(txn, expr)) {
+  if (false && isConstantExpression(txn, expr)) {
     auto runtime = txn->getRuntime();
     auto const_val = runtime->evaluateConstExpression(txn, expr);
 
@@ -63,15 +63,15 @@ bool QueryTreeUtil::isConstantExpression(
     return false;
   }
 
-  auto call_expr = dynamic_cast<CallExpressionNode*>(expr.get());
-  if (call_expr) {
-    if (!call_expr->isPureFunction()) {
+  for (const auto& arg : expr->arguments()) {
+    if (!isConstantExpression(txn, arg)) {
       return false;
     }
   }
 
-  for (const auto& arg : expr->arguments()) {
-    if (!isConstantExpression(txn, arg)) {
+  auto call_expr = dynamic_cast<CallExpressionNode*>(expr.get());
+  if (call_expr) {
+    if (!call_expr->isPureFunction()) {
       return false;
     }
   }

@@ -32,17 +32,11 @@
 #include "eventql/eventql.h"
 
 namespace csql {
+class VMRegister;
 
 enum kFunctionType {
   FN_PURE,
   FN_AGGREGATE
-};
-
-struct SFunctionReturn {
-  void* data;
-  size_t size;
-  void* context; // userdata
-  void (*resize)(SFunctionReturn* self, size_t new_size);
 };
 
 struct SFunction {
@@ -50,15 +44,15 @@ struct SFunction {
   SFunction(
       std::vector<SType> _arg_types,
       SType _return_type,
-      void (*_call)(sql_txn* ctx, int argc, SValue* in, SValue* out),
+      void (*_call)(sql_txn* ctx, int argc, void** argv, VMRegister* out),
       bool _has_side_effects = false);
 
   SFunction(
       std::vector<SType> _arg_types,
       SType _return_type,
       size_t _scratch_size,
-      void (*_accumulate)(sql_txn*, void* scratch, int argc, SValue* in),
-      void (*_get)(sql_txn*, void* scratch, SValue* out),
+      void (*_accumulate)(sql_txn*, void* scratch, int argc, void** argv),
+      void (*_get)(sql_txn*, void* scratch, VMRegister* out),
       void (*_reset)(sql_txn*, void* scratch),
       void (*_init)(sql_txn*, void* scratch),
       void (*_free)(sql_txn*, void* scratch),
@@ -73,9 +67,9 @@ struct SFunction {
   size_t scratch_size;
 
   struct VTable {
-    void (*call)(sql_txn* ctx, int argc, SValue* in, SValue* out);
-    void (*accumulate)(sql_txn*, void* scratch, int argc, SValue* in);
-    void (*get)(sql_txn*, void* scratch, SValue* out);
+    void (*call)(sql_txn* ctx, int argc, void** argv, VMRegister* out);
+    void (*accumulate)(sql_txn*, void* scratch, int argc, void** argv);
+    void (*get)(sql_txn*, void* scratch, VMRegister* out);
     void (*reset)(sql_txn*, void* scratch);
     void (*init)(sql_txn*, void* scratch);
     void (*free)(sql_txn*, void* scratch);

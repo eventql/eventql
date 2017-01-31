@@ -34,7 +34,11 @@ SymbolTableEntry::SymbolTableEntry(
     const std::string& function_name,
     SFunction fun) :
     fun_(fun) {
-  symbol_ = function_name; // FIXME name mangling
+  symbol_ = function_name + "#" + getSTypeName(fun_.return_type) + "/";
+
+  for (const auto& t : fun_.arg_types) {
+    symbol_ += getSTypeName(t) + ";";
+  }
 }
 
 const SFunction* SymbolTableEntry::getFunction() const {
@@ -99,10 +103,30 @@ ReturnCode SymbolTable::resolve(
     *entry = match;
     return ReturnCode::success();
   } else {
+    std::vector<std::string> expected_types;
+    for (const auto& candidate : candidates) {
+      std::vector<std::string> candidate_types;
+      auto candidate_fn = candidate->getFunction();
+
+      for (const auto& type : candidate_fn->arg_types) {
+        candidate_types.emplace_back(getSTypeName(type));
+      }
+
+      expected_types.emplace_back(
+          function_name + "<" + StringUtil::join(candidate_types, ", ") + ">");
+    }
+
+    std::vector<std::string> actual_types;
+    for (auto type : arguments) {
+      actual_types.emplace_back(getSTypeName(type));
+    }
+
     return ReturnCode::errorf(
         "ERUNTIME",
-        "argument type mismatch for: $0",
-        function_name);
+        "type error for $0<$1>; expected: $2",
+        function_name,
+        StringUtil::join(actual_types, ", "),
+        StringUtil::join(expected_types, " or "));
   }
 }
 

@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <eventql/sql/expressions/aggregate.h>
 #include <eventql/sql/svalue.h>
+#include <eventql/sql/runtime/vm.h>
 
 namespace csql {
 namespace expressions {
@@ -31,19 +32,12 @@ namespace expressions {
 /**
  * COUNT() expression
  */
-void countExprAcc(sql_txn* ctx, void* scratchpad, int argc, SValue* argv) {
-  switch(argv->getType()) {
-    case SType::NIL:
-      return;
-
-    default:
-      ++(*(uint64_t*) scratchpad);
-      return;
-  }
+void countExprAcc(sql_txn* ctx, void* scratchpad, int argc, void** argv) {
+  ++(*(uint64_t*) scratchpad);
 }
 
-void countExprGet(sql_txn* ctx, void* scratchpad, SValue* out) {
-  *out = SValue(SValue::IntegerType(*((uint64_t*) scratchpad)));
+void countExprGet(sql_txn* ctx, void* scratchpad, VMRegister* out) {
+  *((uint64_t*) out->data) = *((uint64_t*) scratchpad);
 }
 
 void countExprReset(sql_txn* ctx, void* scratchpad) {
@@ -77,101 +71,91 @@ const SFunction kCountExpr(
 
 
 /**
- * SUM() expression
+ * SUM(int64) expression
  */
-struct sum_expr_scratchpad {
-  SType type;
-  double val;
-};
-
-void sumExprAcc(sql_txn* ctx, void* scratchpad, int argc, SValue* argv) {
-  SValue* val = argv;
-  auto data = (sum_expr_scratchpad*) scratchpad;
-
-  if (argc != 1) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for sum(). expected: 1, got: %i\n",
-        argc);
-  }
-
-  switch(val->getType()) {
-    case SType::NIL:
-      return;
-
-    case SType::INT64:
-      data->type = SType::INT64;
-      data->val += val->getInteger();
-      return;
-
-    case SType::FLOAT64:
-    default:
-      data->type = SType::FLOAT64;
-      data->val += val->getFloat();
-      return;
-  }
+void sum_int64_acc(sql_txn* ctx, void* scratchpad, int argc, void** argv) {
+  *static_cast<int64_t*>(scratchpad) += *static_cast<int64_t*>(argv[0]);
 }
 
-void sumExprGet(sql_txn* ctx, void* scratchpad, SValue* out) {
-  auto data = (sum_expr_scratchpad*) scratchpad;
-
-  switch(data->type) {
-    case SType::INT64:
-      *out = SValue(SValue::IntegerType(data->val));
-      return;
-
-    case SType::FLOAT64:
-      *out = SValue(SValue::FloatType(data->val));
-      return;
-
-    default:
-      *out = SValue();
-      return;
-  }
+void sum_int64_get(sql_txn* ctx, void* scratchpad, VMRegister* out) {
+  *((int64_t*) out->data) = *((int64_t*) scratchpad);
 }
 
-void sumExprReset(sql_txn* ctx, void* scratchpad) {
-  memset(scratchpad, 0, sizeof(sum_expr_scratchpad));
+void sum_int64_reset(sql_txn* ctx, void* scratchpad) {
+  memset(scratchpad, 0, sizeof(int64_t));
 }
 
-void sumExprMerge(sql_txn* ctx, void* scratchpad, const void* other) {
-  auto this_data = (sum_expr_scratchpad*) scratchpad;
-  auto other_data = (const sum_expr_scratchpad*) other;
-
-  if (this_data->type == SType::INT64 &&
-      other_data->type == SType::INT64) {
-    this_data->type = SType::INT64;
-  } else {
-    this_data->type = SType::FLOAT64;
-  }
-
-  this_data->val += other_data->val;
+void sum_int64_merge(sql_txn* ctx, void* scratchpad, const void* other) {
+  auto this_data = (int64_t*) scratchpad;
+  auto other_data = (const int64_t*) other;
+  *this_data += *other_data;
 }
 
-void sumExprSave(sql_txn* ctx, void* scratchpad, OutputStream* os) {
-  auto data = (sum_expr_scratchpad*) scratchpad;
-  os->appendVarUInt((uint8_t) data->type);
-  os->appendDouble(data->val);
+void sum_int64_save(sql_txn* ctx, void* scratchpad, OutputStream* os) {
+  os->appendVarUInt(*(int64_t*) scratchpad);
 }
 
-void sumExprLoad(sql_txn* ctx, void* scratchpad, InputStream* is) {
-  auto data = (sum_expr_scratchpad*) scratchpad;
-  data->type = (SType) is->readVarUInt();
-  data->val = is->readDouble();
+void sum_int64_load(sql_txn* ctx, void* scratchpad, InputStream* is) {
+  auto data = (int64_t*) scratchpad;
+  *data = is->readVarUInt();
 }
 
-const SFunction kSumExpr(
-    { SType::UINT64 },
-    SType::UINT64,
-    sizeof(sum_expr_scratchpad),
-    &sumExprAcc,
-    &sumExprGet,
-    &sumExprReset,
-    &sumExprReset,
+const SFunction sum_int64(
+    { SType::INT64 },
+    SType::INT64,
+    sizeof(int64_t),
+    &sum_int64_acc,
+    &sum_int64_get,
+    &sum_int64_reset,
+    &sum_int64_reset,
     nullptr,
-    &sumExprMerge,
-    &sumExprSave,
-    &sumExprLoad);
+    &sum_int64_merge,
+    &sum_int64_save,
+    &sum_int64_load);
+
+/**
+* SUM(uint64) expression
+*/
+void sum_uint64_acc(sql_txn* ctx, void* scratchpad, int argc, void** argv) {
+  *static_cast<uint64_t*>(scratchpad) += *static_cast<uint64_t*>(argv[0]);
+}
+
+void sum_uint64_get(sql_txn* ctx, void* scratchpad, VMRegister* out) {
+ *((uint64_t*) out->data) = *((uint64_t*) scratchpad);
+}
+
+void sum_uint64_reset(sql_txn* ctx, void* scratchpad) {
+ memset(scratchpad, 0, sizeof(uint64_t));
+}
+
+void sum_uint64_merge(sql_txn* ctx, void* scratchpad, const void* other) {
+ auto this_data = (uint64_t*) scratchpad;
+ auto other_data = (const uint64_t*) other;
+ *this_data += *other_data;
+}
+
+void sum_uint64_save(sql_txn* ctx, void* scratchpad, OutputStream* os) {
+ os->appendVarUInt(*(uint64_t*) scratchpad);
+}
+
+void sum_uint64_load(sql_txn* ctx, void* scratchpad, InputStream* is) {
+ auto data = (uint64_t*) scratchpad;
+ *data = is->readVarUInt();
+}
+
+const SFunction sum_uint64(
+   { SType::UINT64 },
+   SType::UINT64,
+   sizeof(uint64_t),
+   &sum_uint64_acc,
+   &sum_uint64_get,
+   &sum_uint64_reset,
+   &sum_uint64_reset,
+   nullptr,
+   &sum_uint64_merge,
+   &sum_uint64_save,
+   &sum_uint64_load);
+
 
 /**
  * MEAN() expression

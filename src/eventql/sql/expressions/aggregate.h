@@ -30,7 +30,8 @@ namespace csql {
 namespace expressions {
 
 extern const SFunction kCountExpr;
-extern const SFunction kSumExpr;
+extern const SFunction sum_int64;
+extern const SFunction sum_uint64;
 //extern const AggregateFunction kMaxExpr;
 //extern const AggregateFunction kMinExpr;
 

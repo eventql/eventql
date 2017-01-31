@@ -47,6 +47,8 @@ enum class SType : uint8_t {
   TIMESTAMP64
 };
 
+std::string getSTypeName(SType type);
+
 class SValue {
 public:
   typedef std::string StringType;
@@ -124,6 +126,12 @@ public:
 
   static std::string makeUniqueKey(SValue* arr, size_t len);
 
+  const void* getData() const;
+  void* getData();
+
+  size_t getCapacity() const;
+  size_t getSize() const;
+
 protected:
   struct {
     SType type;
@@ -144,10 +152,12 @@ protected:
 class SVector {
 public:
 
-  SVector();
+  SVector(SType type);
   SVector(const SVector& other) = delete;
   SVector& operator=(const SVector& other) = delete;
   ~SVector();
+
+  SType getType() const;
 
   const void* getData() const;
   void* getMutableData();
@@ -160,7 +170,11 @@ public:
 
   void copyFrom(const SVector* other);
 
+  static size_t next(SType type, void** cursor);
+  size_t next(void** cursor) const;
+
 protected:
+  SType type_;
   void* data_;
   bool data_owned_;
   size_t capacity_;

@@ -36,7 +36,7 @@ bool TableExpression::next(SValue* out, size_t out_len) {
   std::vector<std::unique_ptr<SVector>> column_buffers;
   std::vector<SVector*> column_buffer_ptrs;
   for (size_t i = 0; i < getColumnCount(); ++i) {
-    column_buffers.emplace_back(new SVector());
+    column_buffers.emplace_back(new SVector(getColumnType(i)));
     column_buffer_ptrs.emplace_back(column_buffers.back().get());
   }
 

@@ -31,234 +31,264 @@
 namespace csql {
 namespace expressions {
 
-void addExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  if (argc != 2) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for add. expected: 2, got: %i", argc);
-  }
-
-  SValue* lhs = argv;
-  SValue* rhs = argv + 1;
-
-  if (lhs->getType() == SType::NIL || rhs->getType() == SType::NIL) {
-    *out = SValue();
-    return;
-  }
-
-  if (!lhs->isConvertibleToNumeric() || !rhs->isConvertibleToNumeric()) {
-    *out = SValue(lhs->getString() + rhs->getString());
-    return;
-  }
-
-  SValue lhs_num = lhs->toNumeric();
-  SValue rhs_num = rhs->toNumeric();
-
-  if (lhs_num.getType() == SType::INT64 && rhs_num.getType() == SType::INT64) {
-    *out = SValue((int64_t) (lhs_num.getInteger() + rhs_num.getInteger()));
-  } else {
-    *out = SValue((double) (lhs_num.getFloat() + rhs_num.getFloat()));
-  }
+void add_uint64_call(sql_txn* ctx, int argc, void** argv, VMRegister* out) {
+  *static_cast<uint64_t*>(out->data) =
+      *static_cast<uint64_t*>(argv[0]) + *static_cast<uint64_t*>(argv[1]);
 }
 
-void subExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  if (argc != 2) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for sub. expected: 2, got: %i", argc);
-  }
+const SFunction add_uint64(
+    { SType::UINT64, SType::UINT64 },
+    SType::UINT64,
+    &add_uint64_call);
 
-  SValue* lhs = argv;
-  SValue* rhs = argv + 1;
-
-  if (lhs->getType() == SType::NIL || rhs->getType() == SType::NIL) {
-    *out = SValue();
-    return;
-  }
-
-  if (!lhs->isConvertibleToNumeric() || !rhs->isConvertibleToNumeric()) {
-    RAISE(kRuntimeError, "can't subtract %s and %s",
-      lhs->getTypeName(),
-      rhs->getTypeName());
-  }
-
-  SValue lhs_num = lhs->toNumeric();
-  SValue rhs_num = rhs->toNumeric();
-
-  if (lhs_num.getType() == SType::INT64 && rhs_num.getType() == SType::INT64) {
-    *out = SValue((int64_t) (lhs_num.getInteger() - rhs_num.getInteger()));
-  } else {
-    *out = SValue((double) (lhs_num.getFloat() - rhs_num.getFloat()));
-  }
+void add_int64_call(sql_txn* ctx, int argc, void** argv, VMRegister* out) {
+  *static_cast<int64_t*>(out->data) =
+      *static_cast<int64_t*>(argv[0]) + *static_cast<int64_t*>(argv[1]);
 }
 
-void mulExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  if (argc != 2) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for mul. expected: 2, got: %i", argc);
-  }
+const SFunction add_int64(
+    { SType::INT64, SType::INT64 },
+    SType::INT64,
+    &add_int64_call);
 
-  SValue* lhs = argv;
-  SValue* rhs = argv + 1;
-
-  if (lhs->getType() == SType::NIL || rhs->getType() == SType::NIL) {
-    *out = SValue();
-    return;
-  }
-
-  if (!lhs->isConvertibleToNumeric() || !rhs->isConvertibleToNumeric()) {
-    RAISE(kRuntimeError, "can't multiply %s and %s",
-      lhs->getTypeName(),
-      rhs->getTypeName());
-  }
-
-  SValue lhs_num = lhs->toNumeric();
-  SValue rhs_num = rhs->toNumeric();
-
-  if (lhs_num.getType() == SType::INT64 && rhs_num.getType() == SType::INT64) {
-    *out = SValue((int64_t) (lhs_num.getInteger() * rhs_num.getInteger()));
-  } else {
-    *out = SValue((double) (lhs_num.getFloat() * rhs_num.getFloat()));
-  }
+void add_float64_call(sql_txn* ctx, int argc, void** argv, VMRegister* out) {
+  *static_cast<double*>(out->data) =
+      *static_cast<double*>(argv[0]) + *static_cast<double*>(argv[1]);
 }
 
-void divExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  if (argc != 2) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for div. expected: 2, got: %i", argc);
-  }
+const SFunction add_float64(
+    { SType::FLOAT64, SType::FLOAT64 },
+    SType::FLOAT64,
+    &add_float64_call);
 
-  SValue* lhs = argv;
-  SValue* rhs = argv + 1;
+//void addExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
+//  if (argc != 2) {
+//    RAISE(
+//        kRuntimeError,
+//        "wrong number of arguments for add. expected: 2, got: %i", argc);
+//  }
+//
+//  SValue* lhs = argv;
+//  SValue* rhs = argv + 1;
+//
+//  if (lhs->getType() == SType::NIL || rhs->getType() == SType::NIL) {
+//    *out = SValue();
+//    return;
+//  }
+//
+//  if (!lhs->isConvertibleToNumeric() || !rhs->isConvertibleToNumeric()) {
+//    *out = SValue(lhs->getString() + rhs->getString());
+//    return;
+//  }
+//
+//  SValue lhs_num = lhs->toNumeric();
+//  SValue rhs_num = rhs->toNumeric();
+//
+//  if (lhs_num.getType() == SType::INT64 && rhs_num.getType() == SType::INT64) {
+//    *out = SValue((int64_t) (lhs_num.getInteger() + rhs_num.getInteger()));
+//  } else {
+//    *out = SValue((double) (lhs_num.getFloat() + rhs_num.getFloat()));
+//  }
+//}
 
-  if (lhs->getType() == SType::NIL || rhs->getType() == SType::NIL) {
-    *out = SValue();
-    return;
-  }
-
-  if (!lhs->isConvertibleToNumeric() || !rhs->isConvertibleToNumeric()) {
-    RAISE(kRuntimeError, "can't divide %s and %s",
-      lhs->getTypeName(),
-      rhs->getTypeName());
-  }
-
-  SValue lhs_num = lhs->toNumeric();
-  SValue rhs_num = rhs->toNumeric();
-
-  *out = SValue((double) (lhs_num.getFloat() / rhs_num.getFloat()));
-}
-
-void modExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  if (argc != 2) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for mod. expected: 2, got: %i", argc);
-  }
-
-  SValue* lhs = argv;
-  SValue* rhs = argv + 1;
-
-  if (lhs->getType() == SType::NIL || rhs->getType() == SType::NIL) {
-    *out = SValue();
-    return;
-  }
-
-  if (!lhs->isConvertibleToNumeric() || !rhs->isConvertibleToNumeric()) {
-    RAISE(kRuntimeError, "can't modulo %s and %s",
-      lhs->getTypeName(),
-      rhs->getTypeName());
-  }
-
-  SValue lhs_num = lhs->toNumeric();
-  SValue rhs_num = rhs->toNumeric();
-
-  if (lhs_num.getType() == SType::INT64 && rhs_num.getType() == SType::INT64) {
-    *out = SValue((int64_t) (lhs_num.getInteger() % rhs_num.getInteger()));
-  } else {
-    *out = SValue((double) fmod(lhs_num.getFloat(), rhs_num.getFloat()));
-  }
-}
-
-void powExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  if (argc != 2) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for pow. expected: 2, got: %i", argc);
-  }
-
-  SValue* lhs = argv;
-  SValue* rhs = argv + 1;
-
-  if (lhs->getType() == SType::NIL || rhs->getType() == SType::NIL) {
-    *out = SValue();
-    return;
-  }
-
-  if (!lhs->isConvertibleToNumeric() || !rhs->isConvertibleToNumeric()) {
-    RAISE(kRuntimeError, "can't modulo %s and %s",
-      lhs->getTypeName(),
-      rhs->getTypeName());
-  }
-
-  SValue lhs_num = lhs->toNumeric();
-  SValue rhs_num = rhs->toNumeric();
-
-  if (lhs_num.getType() == SType::INT64 && rhs_num.getType() == SType::INT64) {
-    *out = SValue((int64_t) pow(lhs_num.getInteger(), rhs_num.getInteger()));
-  } else {
-    *out = SValue((double) pow(lhs_num.getFloat(), rhs_num.getFloat()));
-  }
-}
-
-void roundExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  switch (argc) {
-
-    // round to integer
-    case 1:
-      RAISE(kNotYetImplementedError);
-
-    // round to arbitrary precision float
-    case 2:
-      RAISE(kNotYetImplementedError);
-
-    default:
-      RAISE(
-          kRuntimeError,
-          "wrong number of arguments for ROUND. expected: 1 or 2, got: %i", argc);
-  }
-}
-
-void truncateExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  switch (argc) {
-
-    // truncate to integer
-    case 1: {
-      SValue* val = argv;
-      switch(val->getType()) {
-        case SType::INT64:
-        case SType::FLOAT64:
-          *out = SValue(SValue::IntegerType(val->getFloat()));
-          return;
-        case SType::NIL:
-          *out = SValue();
-          return;
-        default:
-          RAISE(kRuntimeError, "can't TRUNCATE %s", val->getTypeName());
-      }
-    }
-
-    // truncate to specified number of decimal places
-    case 2:
-      RAISE(kNotYetImplementedError);
-
-    default:
-      RAISE(
-          kRuntimeError,
-          "wrong number of arguments for TRUNCATE. expected: 1 or 2, got: %i", argc);
-  }
-}
+//void subExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
+//  if (argc != 2) {
+//    RAISE(
+//        kRuntimeError,
+//        "wrong number of arguments for sub. expected: 2, got: %i", argc);
+//  }
+//
+//  SValue* lhs = argv;
+//  SValue* rhs = argv + 1;
+//
+//  if (lhs->getType() == SType::NIL || rhs->getType() == SType::NIL) {
+//    *out = SValue();
+//    return;
+//  }
+//
+//  if (!lhs->isConvertibleToNumeric() || !rhs->isConvertibleToNumeric()) {
+//    RAISE(kRuntimeError, "can't subtract %s and %s",
+//      lhs->getTypeName(),
+//      rhs->getTypeName());
+//  }
+//
+//  SValue lhs_num = lhs->toNumeric();
+//  SValue rhs_num = rhs->toNumeric();
+//
+//  if (lhs_num.getType() == SType::INT64 && rhs_num.getType() == SType::INT64) {
+//    *out = SValue((int64_t) (lhs_num.getInteger() - rhs_num.getInteger()));
+//  } else {
+//    *out = SValue((double) (lhs_num.getFloat() - rhs_num.getFloat()));
+//  }
+//}
+//
+//void mulExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
+//  if (argc != 2) {
+//    RAISE(
+//        kRuntimeError,
+//        "wrong number of arguments for mul. expected: 2, got: %i", argc);
+//  }
+//
+//  SValue* lhs = argv;
+//  SValue* rhs = argv + 1;
+//
+//  if (lhs->getType() == SType::NIL || rhs->getType() == SType::NIL) {
+//    *out = SValue();
+//    return;
+//  }
+//
+//  if (!lhs->isConvertibleToNumeric() || !rhs->isConvertibleToNumeric()) {
+//    RAISE(kRuntimeError, "can't multiply %s and %s",
+//      lhs->getTypeName(),
+//      rhs->getTypeName());
+//  }
+//
+//  SValue lhs_num = lhs->toNumeric();
+//  SValue rhs_num = rhs->toNumeric();
+//
+//  if (lhs_num.getType() == SType::INT64 && rhs_num.getType() == SType::INT64) {
+//    *out = SValue((int64_t) (lhs_num.getInteger() * rhs_num.getInteger()));
+//  } else {
+//    *out = SValue((double) (lhs_num.getFloat() * rhs_num.getFloat()));
+//  }
+//}
+//
+//void divExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
+//  if (argc != 2) {
+//    RAISE(
+//        kRuntimeError,
+//        "wrong number of arguments for div. expected: 2, got: %i", argc);
+//  }
+//
+//  SValue* lhs = argv;
+//  SValue* rhs = argv + 1;
+//
+//  if (lhs->getType() == SType::NIL || rhs->getType() == SType::NIL) {
+//    *out = SValue();
+//    return;
+//  }
+//
+//  if (!lhs->isConvertibleToNumeric() || !rhs->isConvertibleToNumeric()) {
+//    RAISE(kRuntimeError, "can't divide %s and %s",
+//      lhs->getTypeName(),
+//      rhs->getTypeName());
+//  }
+//
+//  SValue lhs_num = lhs->toNumeric();
+//  SValue rhs_num = rhs->toNumeric();
+//
+//  *out = SValue((double) (lhs_num.getFloat() / rhs_num.getFloat()));
+//}
+//
+//void modExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
+//  if (argc != 2) {
+//    RAISE(
+//        kRuntimeError,
+//        "wrong number of arguments for mod. expected: 2, got: %i", argc);
+//  }
+//
+//  SValue* lhs = argv;
+//  SValue* rhs = argv + 1;
+//
+//  if (lhs->getType() == SType::NIL || rhs->getType() == SType::NIL) {
+//    *out = SValue();
+//    return;
+//  }
+//
+//  if (!lhs->isConvertibleToNumeric() || !rhs->isConvertibleToNumeric()) {
+//    RAISE(kRuntimeError, "can't modulo %s and %s",
+//      lhs->getTypeName(),
+//      rhs->getTypeName());
+//  }
+//
+//  SValue lhs_num = lhs->toNumeric();
+//  SValue rhs_num = rhs->toNumeric();
+//
+//  if (lhs_num.getType() == SType::INT64 && rhs_num.getType() == SType::INT64) {
+//    *out = SValue((int64_t) (lhs_num.getInteger() % rhs_num.getInteger()));
+//  } else {
+//    *out = SValue((double) fmod(lhs_num.getFloat(), rhs_num.getFloat()));
+//  }
+//}
+//
+//void powExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
+//  if (argc != 2) {
+//    RAISE(
+//        kRuntimeError,
+//        "wrong number of arguments for pow. expected: 2, got: %i", argc);
+//  }
+//
+//  SValue* lhs = argv;
+//  SValue* rhs = argv + 1;
+//
+//  if (lhs->getType() == SType::NIL || rhs->getType() == SType::NIL) {
+//    *out = SValue();
+//    return;
+//  }
+//
+//  if (!lhs->isConvertibleToNumeric() || !rhs->isConvertibleToNumeric()) {
+//    RAISE(kRuntimeError, "can't modulo %s and %s",
+//      lhs->getTypeName(),
+//      rhs->getTypeName());
+//  }
+//
+//  SValue lhs_num = lhs->toNumeric();
+//  SValue rhs_num = rhs->toNumeric();
+//
+//  if (lhs_num.getType() == SType::INT64 && rhs_num.getType() == SType::INT64) {
+//    *out = SValue((int64_t) pow(lhs_num.getInteger(), rhs_num.getInteger()));
+//  } else {
+//    *out = SValue((double) pow(lhs_num.getFloat(), rhs_num.getFloat()));
+//  }
+//}
+//
+//void roundExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
+//  switch (argc) {
+//
+//    // round to integer
+//    case 1:
+//      RAISE(kNotYetImplementedError);
+//
+//    // round to arbitrary precision float
+//    case 2:
+//      RAISE(kNotYetImplementedError);
+//
+//    default:
+//      RAISE(
+//          kRuntimeError,
+//          "wrong number of arguments for ROUND. expected: 1 or 2, got: %i", argc);
+//  }
+//}
+//
+//void truncateExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
+//  switch (argc) {
+//
+//    // truncate to integer
+//    case 1: {
+//      SValue* val = argv;
+//      switch(val->getType()) {
+//        case SType::INT64:
+//        case SType::FLOAT64:
+//          *out = SValue(SValue::IntegerType(val->getFloat()));
+//          return;
+//        case SType::NIL:
+//          *out = SValue();
+//          return;
+//        default:
+//          RAISE(kRuntimeError, "can't TRUNCATE %s", val->getTypeName());
+//      }
+//    }
+//
+//    // truncate to specified number of decimal places
+//    case 2:
+//      RAISE(kNotYetImplementedError);
+//
+//    default:
+//      RAISE(
+//          kRuntimeError,
+//          "wrong number of arguments for TRUNCATE. expected: 1 or 2, got: %i", argc);
+//  }
+//}
 
 
 }

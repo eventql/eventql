@@ -30,7 +30,7 @@ namespace csql {
 SFunction::SFunction(
     std::vector<SType> _arg_types,
     SType _return_type,
-    void (*_call)(sql_txn* ctx, int argc, SValue* in, SValue* out),
+    void (*_call)(sql_txn* ctx, int argc, void** argv, VMRegister* out),
     bool _has_side_effects /* = false */) :
     type(FN_PURE),
     arg_types(_arg_types),
@@ -43,8 +43,8 @@ SFunction::SFunction(
     std::vector<SType> _arg_types,
     SType _return_type,
     size_t _scratch_size,
-    void (*_accumulate)(sql_txn*, void* scratch, int argc, SValue* in),
-    void (*_get)(sql_txn*, void* scratch, SValue* out),
+    void (*_accumulate)(sql_txn*, void* scratch, int argc, void** argv),
+    void (*_get)(sql_txn*, void* scratch, VMRegister* out),
     void (*_reset)(sql_txn*, void* scratch),
     void (*_init)(sql_txn*, void* scratch),
     void (*_free)(sql_txn*, void* scratch),

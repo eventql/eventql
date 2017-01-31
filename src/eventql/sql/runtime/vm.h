@@ -30,6 +30,11 @@ namespace csql {
 class SValue;
 class ScratchMemory;
 
+struct VMRegister {
+  void* data;
+  size_t capacity;
+};
+
 class VM {
 public:
 
@@ -50,6 +55,7 @@ public:
     Instruction* next;
     Instruction* child;
     SFunction::VTable vtable;
+    VMRegister retval;
   };
 
   struct Program {
@@ -81,11 +87,19 @@ public:
       const SValue* argv,
       SValue* out);
 
+  static void evaluate(
+      Transaction* ctx,
+      const Program* program,
+      int argc,
+      void** argv,
+      VMRegister* out);
+
   static void evaluateVector(
       Transaction* ctx,
       const Program* program,
       int argc,
       const SVector** argv,
+      size_t vlen,
       SVector* out);
 
   static Instance allocInstance(
@@ -103,7 +117,20 @@ public:
       const Program* program,
       Instance* instance,
       int argc,
+      void** argv);
+
+  static void accumulate(
+      Transaction* ctx,
+      const Program* program,
+      Instance* instance,
+      int argc,
       const SValue* argv);
+
+  static void result(
+      Transaction* ctx,
+      const Program* program,
+      const Instance* instance,
+      VMRegister* out);
 
   static void result(
       Transaction* ctx,
@@ -135,6 +162,8 @@ public:
       Instance* instance,
       InputStream* os);
 
+  static void copyRegister(SType type, VMRegister* dst, void* src);
+
 protected:
 
   static void evaluate(
@@ -143,8 +172,8 @@ protected:
       Instance* instance,
       Instruction* expr,
       int argc,
-      const SValue* argv,
-      SValue* out);
+      void** argv,
+      VMRegister* out);
 
   static void accumulate(
       Transaction* ctx,
@@ -152,7 +181,7 @@ protected:
       Instance* instance,
       Instruction* expr,
       int argc,
-      const SValue* argv);
+      void** argv);
 
   static void initInstance(
       Transaction* ctx,

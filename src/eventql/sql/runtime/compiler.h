@@ -92,6 +92,10 @@ protected:
       ScratchMemory* static_storage,
       SymbolTable* symbol_table);
 
+  static void allocateReturnValue(
+      SType return_type,
+      VM::Instruction* instruction,
+      ScratchMemory* static_storage);
 
 };
 

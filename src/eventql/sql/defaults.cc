@@ -24,6 +24,7 @@
  */
 #include <eventql/sql/defaults.h>
 #include <eventql/sql/expressions/aggregate.h>
+#include <eventql/sql/expressions/math.h>
 
 #include "eventql/eventql.h"
 
@@ -32,7 +33,8 @@ namespace csql {
 void installDefaultSymbols(SymbolTable* rt) {
   ///* expressions/aggregate.h */
   rt->registerFunction("count", expressions::kCountExpr);
-  rt->registerFunction("sum", expressions::kSumExpr);
+  rt->registerFunction("sum", expressions::sum_int64);
+  rt->registerFunction("sum", expressions::sum_uint64);
   //rt->registerFunction("max", expressions::kMaxExpr);
   //rt->registerFunction("min", expressions::kMinExpr);
 
@@ -97,7 +99,9 @@ void installDefaultSymbols(SymbolTable* rt) {
   //rt->registerFunction("time_at", PureFunction(&expressions::timeAtExpr));
 
   ///* expressions/math.h */
-  //rt->registerFunction("add", PureFunction(&expressions::addExpr));
+  rt->registerFunction("add", expressions::add_uint64);
+  rt->registerFunction("add", expressions::add_int64);
+  rt->registerFunction("add", expressions::add_float64);
   //rt->registerFunction("sub", PureFunction(&expressions::subExpr));
   //rt->registerFunction("mul", PureFunction(&expressions::mulExpr));
   //rt->registerFunction("div", PureFunction(&expressions::divExpr));

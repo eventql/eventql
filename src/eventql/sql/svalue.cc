@@ -36,6 +36,20 @@
 
 namespace csql {
 
+std::string getSTypeName(SType type) {
+  switch (type) {
+    case SType::NIL: return "nil";
+    case SType::UINT64: return "uint64";
+    case SType::INT64: return "int64";
+    case SType::FLOAT64: return "float64";
+    case SType::BOOL: return "bool";
+    case SType::STRING: return "string";
+    case SType::TIMESTAMP64: return "timestamp64";
+  }
+
+  return "???";
+}
+
 SValue SValue::newNull() {
   return SValue();
 }
@@ -773,6 +787,48 @@ void SValue::decode(InputStream* is) {
   }
 }
 
+const void* SValue::getData() const {
+  switch (data_.type) {
+    case SType::UINT64:
+      return &data_.u.t_uint64;
+    case SType::INT64:
+      return &data_.u.t_int64;
+    default:
+      assert(false);
+  }
+}
+
+void* SValue::getData() {
+  switch (data_.type) {
+    case SType::UINT64:
+      return &data_.u.t_uint64;
+    case SType::INT64:
+      return &data_.u.t_int64;
+    default:
+      assert(false);
+  }
+}
+
+size_t SValue::getCapacity() const {
+  return getSize();
+}
+
+size_t SValue::getSize() const {
+  switch (data_.type) {
+    case SType::STRING:
+      assert(false);
+    case SType::FLOAT64:
+    case SType::INT64:
+    case SType::UINT64:
+    case SType::TIMESTAMP64:
+      return 8;
+    case SType::BOOL:
+      return 1;
+    case SType::NIL:
+      return 0;
+  }
+}
+
 String sql_escape(const String& orig_str) {
   auto str = orig_str;
   StringUtil::replaceAll(&str, "\\", "\\\\");
@@ -801,7 +857,9 @@ template <> bool SValue::isOfType<SValue::TimeType>() const {
   return isTimestamp();
 }
 
-SVector::SVector() :
+SVector::SVector(
+    SType type) :
+    type_(type),
     data_(nullptr),
     data_owned_(true),
     capacity_(0),
@@ -811,6 +869,10 @@ SVector::~SVector() {
   if (data_owned_ && data_) {
     free(data_);
   }
+}
+
+SType SVector::getType() const {
+  return type_;
 }
 
 const void* SVector::getData() const {
@@ -855,6 +917,27 @@ void SVector::copyFrom(const SVector* other) {
   increaseCapacity(other->capacity_);
   size_ = other->size_;
   memcpy(data_, other->data_, size_);
+}
+
+size_t SVector::next(SType type, void** cursor) {
+  switch (type) {
+    case SType::STRING:
+    case SType::NIL:
+      assert(false);
+    case SType::FLOAT64:
+    case SType::INT64:
+    case SType::UINT64:
+    case SType::TIMESTAMP64:
+      *cursor = (char*) *cursor + 8;
+      return 8;
+    case SType::BOOL:
+      *cursor = (char*) *cursor + 1;
+      return 1;
+  }
+}
+
+size_t SVector::next(void** cursor) const {
+  return next(type_, cursor);
 }
 
 } // namespace csql

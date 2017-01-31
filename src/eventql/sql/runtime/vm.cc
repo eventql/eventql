@@ -95,18 +95,30 @@ void VM::result(
     const Program* program,
     const Instance* instance,
     SValue* out) {
-  if (program->has_aggregate_) {
-    return evaluate(
-        ctx,
-        program,
-        const_cast<Instance*>(instance),
-        program->entry_,
-        0,
-        nullptr,
-        out);
-  } else {
-    *out = *((SValue*) instance->scratch);
-  }
+  *out = SValue::newUInt64(0);
+
+  VMRegister out_reg;
+  out_reg.data = out->getData();
+  out_reg.capacity = out->getCapacity();
+
+  VM::result(ctx, program, instance, &out_reg);
+}
+
+void VM::result(
+    Transaction* ctx,
+    const Program* program,
+    const Instance* instance,
+    VMRegister* out) {
+  assert(program->has_aggregate_);
+
+  return evaluate(
+      ctx,
+      program,
+      const_cast<Instance*>(instance),
+      program->entry_,
+      0,
+      nullptr,
+      out);
 }
 
 void VM::accumulate(
@@ -115,18 +127,25 @@ void VM::accumulate(
     Instance* instance,
     int argc,
     const SValue* argv) {
-  if (program->has_aggregate_) {
-    return accumulate(ctx, program, instance, program->entry_, argc, argv);
-  } else {
-    return evaluate(
-        ctx,
-        program,
-        nullptr,
-        program->entry_,
-        argc,
-        argv,
-        (SValue*) instance->scratch);
+  void** stackv = nullptr;
+  if (argc > 0) {
+    stackv = reinterpret_cast<void**>(alloca(sizeof(void*) * argc));
+    for (int i = 0; i < argc; ++i) {
+      stackv[i] = (void*) argv[i].getData();
+    }
   }
+
+  accumulate(ctx, program, instance, argc, stackv);
+}
+
+void VM::accumulate(
+    Transaction* ctx,
+    const Program* program,
+    Instance* instance,
+    int argc,
+    void** argv) {
+  assert(program->has_aggregate_);
+  accumulate(ctx, program, instance, program->entry_, argc, argv);
 }
 
 void VM::evaluate(
@@ -135,7 +154,45 @@ void VM::evaluate(
     int argc,
     const SValue* argv,
     SValue* out) {
-  return evaluate(ctx, program, nullptr, program->entry_, argc, argv, out);
+  void** stackv = nullptr;
+  if (argc > 0) {
+    stackv = reinterpret_cast<void**>(alloca(sizeof(void*) * argc));
+    for (int i = 0; i < argc; ++i) {
+      stackv[i] = (void*) argv[i].getData();
+    }
+  }
+
+  *out = SValue::newUInt64(0);
+
+  VMRegister out_reg;
+  out_reg.data = out->getData();
+  out_reg.capacity = out->getCapacity();
+
+  evaluate(ctx, program, argc, stackv, &out_reg);
+}
+
+void VM::evaluate(
+    Transaction* ctx,
+    const Program* program,
+    int argc,
+    void** argv,
+    VMRegister* out) {
+  switch (program->entry_->type) {
+    case X_INPUT:
+      copyRegister(
+          program->return_type_,
+          out,
+          argv[reinterpret_cast<uint64_t>(program->entry_->arg0)]);
+      break;
+
+    case X_LITERAL:
+      copyRegister(program->return_type_, out, program->entry_->retval.data);
+      break;
+
+    default:
+      evaluate(ctx, program, nullptr, program->entry_, argc, argv, out);
+      break;
+  }
 }
 
 void VM::evaluateVector(
@@ -143,8 +200,9 @@ void VM::evaluateVector(
     const Program* program,
     int argc,
     const SVector** argv,
+    size_t vlen,
     SVector* out) {
-  if (program->entry_->type = X_INPUT) {
+  if (program->entry_->type == X_INPUT) {
     auto index = reinterpret_cast<uint64_t>(program->entry_->arg0);
 
     if (index >= argc) {
@@ -155,7 +213,48 @@ void VM::evaluateVector(
     return;
   }
 
-  RAISE(kNotYetImplementedError, "evaluateVector not yet implemented");
+  void** stackv = nullptr;
+  if (argc > 0) {
+    stackv = reinterpret_cast<void**>(alloca(sizeof(void*) * argc));
+  }
+
+  for (size_t i = 0; i < argc; ++i) {
+    if (false) { // FIXME only if input required
+      stackv[i] = nullptr;
+    } else {
+      stackv[i] = (void*) argv[i]->getData();
+    }
+  }
+
+  switch (out->getType()) {
+    case SType::UINT64: // FIXME
+      out->increaseCapacity(vlen * sizeof(uint64_t));
+      break;
+    case SType::INT64:
+      out->increaseCapacity(vlen * sizeof(uint64_t));
+      break;
+    default:
+      assert(false);
+  }
+
+  VMRegister out_reg;
+  out_reg.data = out->getMutableData();
+  out_reg.capacity = out->getCapacity();
+
+  auto rtype = program->return_type_;
+  for (size_t n = 0; n < vlen; ++n) {
+    evaluate(ctx, program, argc, stackv, &out_reg);
+
+    // increment input iterators
+    for (size_t i = 0; i < argc; ++i) {
+      if (stackv[i]) {
+        argv[i]->next(&stackv[i]);
+      }
+    }
+
+    // increment output iterator
+    out_reg.capacity -= SVector::next(rtype, &out_reg.data);
+  }
 }
 
 void VM::merge(
@@ -310,112 +409,93 @@ void VM::evaluate(
     Instance* instance,
     Instruction* expr,
     int argc,
-    const SValue* argv,
-    SValue* out) {
+    void** argv,
+    VMRegister* out) {
 
   /* execute expression */
   switch (expr->type) {
 
-    case X_IF: {
-      SValue cond;
-      auto cond_expr = expr->child;
-      evaluate(ctx, program, instance, cond_expr, argc, argv, &cond);
+    //case X_IF: {
+    //  SValue cond;
+    //  auto cond_expr = expr->child;
+    //  evaluate(ctx, program, instance, cond_expr, argc, argv, &cond);
 
-      auto branch = cond_expr->next;
-      if (!cond.getBool()) {
-        branch = branch->next;
-      }
+    //  auto branch = cond_expr->next;
+    //  if (!cond.getBool()) {
+    //    branch = branch->next;
+    //  }
 
-      evaluate(ctx, program, instance, branch, argc, argv, out);
-      return;
-    }
+    //  evaluate(ctx, program, instance, branch, argc, argv, out);
+    //  return;
+    //}
 
     case X_CALL_PURE: {
-      SValue* stackv = nullptr;
+      void** stackv = nullptr;
       auto stackn = expr->argn;
       if (stackn > 0) {
-        stackv = reinterpret_cast<SValue*>(alloca(sizeof(SValue) * expr->argn));
-        for (int i = 0; i < stackn; ++i) {
-          new (stackv + i) SValue();
-        }
+        stackv = reinterpret_cast<void**>(alloca(sizeof(void*) * expr->argn));
 
-        try {
-          auto stackp = stackv;
-          for (auto cur = expr->child; cur != nullptr; cur = cur->next) {
-            evaluate(ctx, program, instance, cur, argc, argv, stackp++);
+        auto stackp = stackv;
+        for (auto cur = expr->child; cur != nullptr; cur = cur->next) {
+          switch (cur->type) {
+            case X_INPUT:
+              *(stackp++) = argv[reinterpret_cast<uint64_t>(cur->arg0)];
+              break;
+
+            case X_LITERAL:
+              *(stackp++) = cur->retval.data;
+              break;
+
+            default:
+              evaluate(
+                  ctx,
+                  program,
+                  instance,
+                  cur,
+                  argc,
+                  argv,
+                  &cur->retval);
+
+              *(stackp++) = cur->retval.data;
+              break;
           }
-
-          expr->vtable.call(Transaction::get(ctx), stackn, stackv, out);
-        } catch (...) {
-          for (int i = 0; i < stackn; ++i) {
-            (stackv + i)->~SValue();
-          }
-
-          throw;
-        };
-
-        for (int i = 0; i < stackn; ++i) {
-          (stackv + i)->~SValue();
         }
-      } else {
-        expr->vtable.call(Transaction::get(ctx), 0, nullptr, out);
       }
 
+      expr->vtable.call(Transaction::get(ctx), stackn, stackv, out);
       return;
     }
 
     case X_CALL_AGGREGATE: {
-      if (!instance) {
-        RAISE(
-            kIllegalArgumentError,
-            "non-static expression called without instance pointer");
-      }
-
+      assert(instance);
       auto scratch = (char *) instance->scratch + (size_t) expr->arg0;
       expr->vtable.get(Transaction::get(ctx), scratch, out);
       return;
     }
 
-    case X_LITERAL: {
-      *out = *static_cast<SValue*>(expr->arg0);
-      return;
-    }
+    //case X_REGEX: {
+    //  SValue subj;
+    //  auto subj_expr = expr->child;
+    //  evaluate(ctx, program, instance, subj_expr, argc, argv, &subj);
 
-    case X_INPUT: {
-      auto index = reinterpret_cast<uint64_t>(expr->arg0);
+    //  auto match = ((RegExp*) expr->arg0)->match(subj.getString());
+    //  *out = SValue(SValue::BoolType(match));
 
-      if (index >= argc) {
-        RAISE(kRuntimeError, "invalid row index %i", index);
-      }
+    //  return;
+    //}
 
-      *out = argv[index];
-      return;
-    }
+    //case X_LIKE: {
+    //  SValue subj;
+    //  auto subj_expr = expr->child;
+    //  evaluate(ctx, program, instance, subj_expr, argc, argv, &subj);
 
-    case X_REGEX: {
-      SValue subj;
-      auto subj_expr = expr->child;
-      evaluate(ctx, program, instance, subj_expr, argc, argv, &subj);
+    //  auto match = ((LikePattern*) expr->arg0)->match(subj.getString());
+    //  *out = SValue(SValue::BoolType(match));
 
-      auto match = ((RegExp*) expr->arg0)->match(subj.getString());
-      *out = SValue(SValue::BoolType(match));
-
-      return;
-    }
-
-    case X_LIKE: {
-      SValue subj;
-      auto subj_expr = expr->child;
-      evaluate(ctx, program, instance, subj_expr, argc, argv, &subj);
-
-      auto match = ((LikePattern*) expr->arg0)->match(subj.getString());
-      *out = SValue(SValue::BoolType(match));
-
-      return;
-    }
+    //  return;
+    //}
 
   }
-
 }
 
 void VM::accumulate(
@@ -424,31 +504,39 @@ void VM::accumulate(
     Instance* instance,
     Instruction* expr,
     int argc,
-    const SValue* argv) {
+    void** argv) {
 
   switch (expr->type) {
 
     case X_CALL_AGGREGATE: {
-      SValue* stackv = nullptr;
+      void** stackv = nullptr;
       auto stackn = expr->argn;
       if (stackn > 0) {
-        stackv = reinterpret_cast<SValue*>(
-            alloca(sizeof(SValue) * expr->argn));
-
-        for (int i = 0; i < stackn; ++i) {
-          new (stackv + i) SValue();
-        }
+        stackv = reinterpret_cast<void**>(alloca(sizeof(void*) * expr->argn));
 
         auto stackp = stackv;
         for (auto cur = expr->child; cur != nullptr; cur = cur->next) {
-          evaluate(
-              ctx,
-              program,
-              instance,
-              cur,
-              argc,
-              argv,
-              stackp++);
+          switch (cur->type) {
+            case X_INPUT:
+              *(stackp++) = argv[reinterpret_cast<uint64_t>(cur->arg0)];
+              break;
+
+            case X_LITERAL:
+              *(stackp++) = cur->retval.data;
+              break;
+
+            default:
+              evaluate(
+                  ctx,
+                  program,
+                  instance,
+                  cur,
+                  argc,
+                  argv,
+                  &cur->retval);
+
+              *(stackp++) = cur->retval.data;
+          }
         }
       }
 
@@ -542,5 +630,22 @@ void VM::loadInstance(
   }
 }
 
+void VM::copyRegister(SType type, VMRegister* dst, void* src) {
+  switch (type) { // FIXME
+    case SType::UINT64:
+    case SType::TIMESTAMP64:
+      memcpy(dst->data, src, sizeof(uint64_t));
+      break;
+
+    case SType::INT64:
+      memcpy(dst->data, src, sizeof(int64_t));
+      break;
+
+    case SType::FLOAT64:
+      memcpy(dst->data, src, sizeof(double));
+      break;
+
+  }
+}
 
 }
