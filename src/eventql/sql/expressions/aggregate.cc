@@ -32,43 +32,120 @@ namespace expressions {
 /**
  * COUNT() expression
  */
-void countExprAcc(sql_txn* ctx, void* scratchpad, int argc, void** argv) {
+void count_acc(sql_txn* ctx, void* scratchpad, int argc, void** argv) {
   ++(*(uint64_t*) scratchpad);
 }
 
-void countExprGet(sql_txn* ctx, void* scratchpad, VMRegister* out) {
+void count_get(sql_txn* ctx, void* scratchpad, VMRegister* out) {
   *((uint64_t*) out->data) = *((uint64_t*) scratchpad);
 }
 
-void countExprReset(sql_txn* ctx, void* scratchpad) {
+void count_reset(sql_txn* ctx, void* scratchpad) {
   memset(scratchpad, 0, sizeof(uint64_t));
 }
 
-void countExprMerge(sql_txn* ctx, void* scratchpad, const void* other) {
+void count_merge(sql_txn* ctx, void* scratchpad, const void* other) {
   *(uint64_t*) scratchpad += *(uint64_t*) other;
 }
 
-void countExprSave(sql_txn* ctx, void* scratchpad, OutputStream* os) {
+void count_save(sql_txn* ctx, void* scratchpad, OutputStream* os) {
   os->appendVarUInt(*(uint64_t*) scratchpad);
 }
 
-void countExprLoad(sql_txn* ctx, void* scratchpad, InputStream* is) {
+void count_load(sql_txn* ctx, void* scratchpad, InputStream* is) {
   *(uint64_t*) scratchpad = is->readVarUInt();
 }
 
-const SFunction kCountExpr(
+const SFunction count_nil(
+    { SType::NIL },
+    SType::UINT64,
+    sizeof(uint64_t),
+    &count_acc,
+    &count_get,
+    &count_reset,
+    &count_reset,
+    nullptr,
+    &count_merge,
+    &count_save,
+    &count_load);
+
+const SFunction count_uint64(
     { SType::UINT64 },
     SType::UINT64,
     sizeof(uint64_t),
-    &countExprAcc,
-    &countExprGet,
-    &countExprReset,
-    &countExprReset,
+    &count_acc,
+    &count_get,
+    &count_reset,
+    &count_reset,
     nullptr,
-    &countExprMerge,
-    &countExprSave,
-    &countExprLoad);
+    &count_merge,
+    &count_save,
+    &count_load);
 
+const SFunction count_int64(
+    { SType::INT64 },
+    SType::UINT64,
+    sizeof(uint64_t),
+    &count_acc,
+    &count_get,
+    &count_reset,
+    &count_reset,
+    nullptr,
+    &count_merge,
+    &count_save,
+    &count_load);
+
+const SFunction count_float64(
+    { SType::FLOAT64 },
+    SType::UINT64,
+    sizeof(uint64_t),
+    &count_acc,
+    &count_get,
+    &count_reset,
+    &count_reset,
+    nullptr,
+    &count_merge,
+    &count_save,
+    &count_load);
+
+const SFunction count_bool(
+    { SType::BOOL },
+    SType::UINT64,
+    sizeof(uint64_t),
+    &count_acc,
+    &count_get,
+    &count_reset,
+    &count_reset,
+    nullptr,
+    &count_merge,
+    &count_save,
+    &count_load);
+
+const SFunction count_string(
+    { SType::STRING },
+    SType::UINT64,
+    sizeof(uint64_t),
+    &count_acc,
+    &count_get,
+    &count_reset,
+    &count_reset,
+    nullptr,
+    &count_merge,
+    &count_save,
+    &count_load);
+
+const SFunction count_timestamp64(
+    { SType::TIMESTAMP64 },
+    SType::UINT64,
+    sizeof(uint64_t),
+    &count_acc,
+    &count_get,
+    &count_reset,
+    &count_reset,
+    nullptr,
+    &count_merge,
+    &count_save,
+    &count_load);
 
 /**
  * SUM(int64) expression

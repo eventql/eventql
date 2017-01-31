@@ -32,7 +32,13 @@ namespace csql {
 
 void installDefaultSymbols(SymbolTable* rt) {
   ///* expressions/aggregate.h */
-  rt->registerFunction("count", expressions::kCountExpr);
+  rt->registerFunction("count", expressions::count_nil);
+  rt->registerFunction("count", expressions::count_uint64);
+  rt->registerFunction("count", expressions::count_int64);
+  rt->registerFunction("count", expressions::count_float64);
+  rt->registerFunction("count", expressions::count_bool);
+  rt->registerFunction("count", expressions::count_string);
+  rt->registerFunction("count", expressions::count_timestamp64);
   rt->registerFunction("sum", expressions::sum_int64);
   rt->registerFunction("sum", expressions::sum_uint64);
   //rt->registerFunction("max", expressions::kMaxExpr);
