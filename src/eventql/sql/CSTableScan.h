@@ -147,7 +147,7 @@ public:
   ReturnCode execute() override;
 
   ReturnCode nextBatch(
-      SVector** columns,
+      SVector* columns,
       size_t* nrecords) override;
 
   size_t getColumnCount() const override;

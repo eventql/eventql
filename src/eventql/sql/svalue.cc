@@ -861,12 +861,22 @@ SVector::SVector(
     SType type) :
     type_(type),
     data_(nullptr),
-    data_owned_(true),
     capacity_(0),
     size_(0) {}
 
+SVector::SVector(
+    SVector&& other) :
+    type_(other.type_),
+    data_(other.data_),
+    capacity_(other.capacity_),
+    size_(other.size_) {
+  other.data_ = nullptr;
+  other.capacity_ = 0;
+  other.size_ = 0;
+}
+
 SVector::~SVector() {
-  if (data_owned_ && data_) {
+  if (data_) {
     free(data_);
   }
 }
@@ -880,7 +890,6 @@ const void* SVector::getData() const {
 }
 
 void* SVector::getMutableData() {
-  assert(data_owned_);
   return data_;
 }
 
@@ -902,7 +911,6 @@ void SVector::increaseCapacity(size_t min_capacity) {
     return;
   }
 
-  assert(data_owned_);
   auto new_capactity = min_capacity; // FIXME
   if (data_) {
     data_ = realloc(data_, new_capactity);

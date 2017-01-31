@@ -87,6 +87,13 @@ public:
       const SValue* argv,
       SValue* out);
 
+  static void evaluateLegacy(
+      Transaction* ctx,
+      const Program* program,
+      int argc,
+      void** argv,
+      SValue* out);
+
   static void evaluate(
       Transaction* ctx,
       const Program* program,

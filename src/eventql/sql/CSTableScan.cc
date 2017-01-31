@@ -706,7 +706,7 @@ ReturnCode FastCSTableScan::execute() {
 }
 
 ReturnCode FastCSTableScan::nextBatch(
-    SVector** out,
+    SVector* out,
     size_t* nrecords) {
   if (num_records_ == 0) {
     *nrecords = 0;
@@ -714,7 +714,9 @@ ReturnCode FastCSTableScan::nextBatch(
   }
 
   /* calculate batch size */
-  size_t batch_size = std::min(num_records_, size_t(1));
+  size_t batch_size = std::min(
+      num_records_,
+      *nrecords > 0 ? *nrecords : size_t(128));
 
   /* fetch input columns */
   for (size_t i = 0; i < column_buffers_.size(); ++i) {
@@ -742,7 +744,7 @@ ReturnCode FastCSTableScan::nextBatch(
         column_buffers_.size(),
         (const csql::SVector**) column_buffers_.data(),
         batch_size,
-        out[i]);
+        out + i);
   }
 
   *nrecords = batch_size;

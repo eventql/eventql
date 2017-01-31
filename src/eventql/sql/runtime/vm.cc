@@ -162,13 +162,22 @@ void VM::evaluate(
     }
   }
 
+  evaluateLegacy(ctx, program, argc, stackv, out);
+}
+
+void VM::evaluateLegacy(
+    Transaction* ctx,
+    const Program* program,
+    int argc,
+    void** argv,
+    SValue* out) {
   *out = SValue::newUInt64(0);
 
   VMRegister out_reg;
   out_reg.data = out->getData();
   out_reg.capacity = out->getCapacity();
 
-  evaluate(ctx, program, argc, stackv, &out_reg);
+  evaluate(ctx, program, argc, argv, &out_reg);
 }
 
 void VM::evaluate(

@@ -154,6 +154,7 @@ public:
 
   SVector(SType type);
   SVector(const SVector& other) = delete;
+  SVector(SVector&& other);
   SVector& operator=(const SVector& other) = delete;
   ~SVector();
 
@@ -176,7 +177,6 @@ public:
 protected:
   SType type_;
   void* data_;
-  bool data_owned_;
   size_t capacity_;
   size_t size_;
 };
