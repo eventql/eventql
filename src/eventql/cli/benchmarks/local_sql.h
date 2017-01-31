@@ -59,9 +59,7 @@ protected:
   std::string query_;
   size_t num_requests_;
   size_t request_counter_;
-  uint64_t total_runtime_us_;
-  uint64_t min_runtime_us_;
-  uint64_t max_runtime_us_;
+  std::vector<uint32_t> runtimes_us_;
 };
 
 } // namespace cli

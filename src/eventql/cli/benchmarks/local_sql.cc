@@ -23,6 +23,7 @@
  * code of your own applications
  */
 #include <iostream>
+#include <iomanip>
 #include <eventql/cli/benchmarks/local_sql.h>
 #include <eventql/util/cli/flagparser.h>
 #include <eventql/util/wallclock.h>
@@ -37,10 +38,7 @@ const String LocalSQLBenchmark::kDescription_ = "Benchmark the SQL engine";
 LocalSQLBenchmark::LocalSQLBenchmark() :
     verbose_(false),
     num_requests_(-1),
-    request_counter_(0),
-    total_runtime_us_(0),
-    min_runtime_us_(-1),
-    max_runtime_us_(0) {}
+    request_counter_(0) {}
 
 Status LocalSQLBenchmark::execute(
     const std::vector<std::string>& argv,
@@ -115,12 +113,71 @@ Status LocalSQLBenchmark::execute(
     }
   }
 
-  std::cout
-      << "Total: took " << total_runtime_us_ / 1000.0f << "ms" << "; "
-      << "min: " << min_runtime_us_ / 1000.0f << "ms" << "; "
-      << "max: " << max_runtime_us_ / 1000.0f << "ms" << "; "
-      << "mean: " << (total_runtime_us_ / 1000.0f) / double(num_requests_) << "ms" << "; "
-      << std::endl;
+  if (runtimes_us_.size() > 0) {
+    std::sort(runtimes_us_.begin(), runtimes_us_.end());
+    auto min = runtimes_us_[0];
+    auto max = runtimes_us_[runtimes_us_.size() - 1];
+    uint32_t total = 0;
+    for (auto i : runtimes_us_) {
+      total += i;
+    }
+
+    auto mean = total / double(runtimes_us_.size());
+
+    uint32_t median;
+    if (runtimes_us_.size() % 2 == 0) {
+      auto left = runtimes_us_[(runtimes_us_.size() - 1) / 2];
+      auto right = runtimes_us_[runtimes_us_.size() / 2];
+      median = left + right / 2;
+    } else {
+      median = runtimes_us_[(runtimes_us_.size() - 1) / 2];
+    }
+
+    uint32_t std_dev_sum = 0;
+    for (auto i : runtimes_us_) {
+      std_dev_sum += pow((i - mean), 2);
+    }
+
+    auto std_dev = std_dev_sum / double(runtimes_us_.size());
+
+    std::cout
+        << "\n\n"
+        << std::left
+        << std::setw(20)
+        << "Query: "
+        << query_ << "\n"
+        << std::setw(20)
+        << "Complete iterations: "
+        << num_requests_ << "\n"
+        << std::setw(20)
+        << "Total runtime: "
+        << total / 1000000.f << " seconds" << "\n\n"
+        << "Runtimes (ms)" << "\n"
+        << std::right
+        << std::setw(8)
+        << "min"
+        << std::setw(8)
+        << "mean"
+        << std::setw(8)
+        << "[+/-sd]"
+        << std::setw(8)
+        << "median"
+        << std::setw(8)
+        << "max"
+        << "\n"
+        << std::setprecision(3) << std::fixed
+        << std::setw(8)
+        << min / 1000.0f
+        << std::setw(8)
+        << mean / 1000.0f
+        << std::setw(8)
+        << std_dev / 1000.0f
+        << std::setw(8)
+        << median / 1000.0f
+        << std::setw(8)
+        << max / 1000.0f
+        << std::endl;
+  }
 
   return Status::success();
 }
@@ -146,13 +203,8 @@ ReturnCode LocalSQLBenchmark::runQuery(
   auto num_rows = result.getNumRows();
   auto runtime_us = t1 - t0;
 
-  total_runtime_us_ += runtime_us;
-  if (runtime_us < min_runtime_us_) {
-    min_runtime_us_ = runtime_us;
-  }
-
-  if (runtime_us > max_runtime_us_) {
-    max_runtime_us_ = runtime_us;
+  if (num_requests_) {
+    runtimes_us_.emplace_back(runtime_us);
   }
 
   if (verbose_) {
