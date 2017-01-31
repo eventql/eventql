@@ -81,6 +81,13 @@ public:
       const SValue* argv,
       SValue* out);
 
+  static void evaluateVector(
+      Transaction* ctx,
+      const Program* program,
+      int argc,
+      const SVector** argv,
+      SVector* out);
+
   static Instance allocInstance(
       Transaction* ctx,
       const Program* program,

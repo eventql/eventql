@@ -138,6 +138,26 @@ void VM::evaluate(
   return evaluate(ctx, program, nullptr, program->entry_, argc, argv, out);
 }
 
+void VM::evaluateVector(
+    Transaction* ctx,
+    const Program* program,
+    int argc,
+    const SVector** argv,
+    SVector* out) {
+  if (program->entry_->type = X_INPUT) {
+    auto index = reinterpret_cast<uint64_t>(program->entry_->arg0);
+
+    if (index >= argc) {
+      RAISE(kRuntimeError, "invalid row index %i", index);
+    }
+
+    out->copyFrom(argv[index]);
+    return;
+  }
+
+  RAISE(kNotYetImplementedError, "evaluateVector not yet implemented");
+}
+
 void VM::merge(
     Transaction* ctx,
     const Program* program,
