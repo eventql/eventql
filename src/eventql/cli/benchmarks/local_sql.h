@@ -51,12 +51,15 @@ public:
 
 protected:
 
-  ReturnCode runQuery(
-      csql::Runtime* runtime,
-      csql::TableProvider* tables) const;
+  static const size_t kDefaultNumPrints = 10;
+
+  ReturnCode runQuery(csql::Runtime* runtime, csql::TableProvider* tables);
 
   bool verbose_;
   std::string query_;
+  size_t num_requests_;
+  size_t request_counter_;
+  std::vector<uint32_t> runtimes_us_;
 };
 
 } // namespace cli
