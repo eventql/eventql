@@ -141,6 +141,12 @@ ReturnCode GroupByExpression::execute() {
   return ReturnCode::success();
 }
 
+ReturnCode GroupByExpression::nextBatch(
+    SVector* columns,
+    size_t* nrecords) {
+  return ReturnCode::error("ERUNTIME", "GroupByExpression::nextBatch not yet implemented");
+}
+
 size_t GroupByExpression::getColumnCount() const {
   return select_exprs_.size();
 }
@@ -335,6 +341,12 @@ ReturnCode PartialGroupByExpression::execute() {
   return ReturnCode::success();
 }
 
+ReturnCode PartialGroupByExpression::nextBatch(
+    SVector* columns,
+    size_t* nrecords) {
+  return ReturnCode::error("ERUNTIME", "PartialGroupByExpression::nextBatch not yet implemented");
+}
+
 Option<SHA1Hash> PartialGroupByExpression::getCacheKey() const {
   auto input_cache_key = input_->getCacheKey();
   if (input_cache_key.isEmpty()) {
@@ -515,6 +527,12 @@ ReturnCode GroupByMergeExpression::execute() {
 
   groups_iter_ = groups_.begin();
   return ReturnCode::success();
+}
+
+ReturnCode GroupByMergeExpression::nextBatch(
+    SVector* columns,
+    size_t* nrecords) {
+  return ReturnCode::error("ERUNTIME", "GroupByMergeExpression::nextBatch not yet implemented");
 }
 
 size_t GroupByMergeExpression::getColumnCount() const {

@@ -26,10 +26,8 @@
 
 namespace csql {
 
-ReturnCode TableExpression::nextBatch(
-    SVector* columns,
-    size_t* nrecords) {
-  return ReturnCode::error("ERUNTIME", "not yet implemented");
+ReturnCode TableExpression::execute() {
+  return ReturnCode::success();
 }
 
 bool TableExpression::next(SValue* out, size_t out_len) {

@@ -37,13 +37,13 @@ public:
 
   virtual ~TableExpression() = default;
 
-  virtual ReturnCode execute() = 0;
+  virtual ReturnCode execute();
 
   virtual bool next(SValue* row, size_t row_len); // legacy
 
   virtual ReturnCode nextBatch(
       SVector* columns,
-      size_t* nrecords);
+      size_t* nrecords) = 0;
 
   virtual size_t getColumnCount() const = 0;
   virtual SType getColumnType(size_t idx) const = 0;

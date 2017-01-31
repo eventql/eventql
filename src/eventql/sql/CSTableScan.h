@@ -55,6 +55,7 @@ public:
   SType getColumnType(size_t idx) const override;
 
   bool next(SValue* out, size_t out_len) override;
+  ReturnCode nextBatch(SVector* columns, size_t* nrecords) override;
 
   virtual Vector<String> columnNames() const;
 
@@ -145,10 +146,7 @@ public:
   ~FastCSTableScan();
 
   ReturnCode execute() override;
-
-  ReturnCode nextBatch(
-      SVector* columns,
-      size_t* nrecords) override;
+  ReturnCode nextBatch(SVector* columns, size_t* nrecords) override;
 
   size_t getColumnCount() const override;
   SType getColumnType(size_t idx) const override;

@@ -38,6 +38,7 @@ public:
       Vector<ValueExpression> select_expressions);
 
   ReturnCode execute() override;
+  ReturnCode nextBatch(SVector* columns, size_t* nrecords) override;
 
   size_t getColumnCount() const override;
   SType getColumnType(size_t idx) const override;

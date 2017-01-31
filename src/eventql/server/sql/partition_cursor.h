@@ -36,7 +36,7 @@
 
 namespace eventql {
 
-class PartitionCursor : public csql::ResultCursor {
+class PartitionCursor : public csql::TableExpression {
 public:
 
   PartitionCursor(
@@ -46,9 +46,10 @@ public:
       RefPtr<PartitionSnapshot> snap,
       RefPtr<csql::SequentialScanNode> stmt);
 
-  bool next(csql::SValue* row, int row_len) override;
+  ReturnCode nextBatch(csql::SVector* columns, size_t* nrows) override;
 
-  size_t getNumColumns() override;
+  size_t getColumnCount() const override;
+  csql::SType getColumnType(size_t idx) const override;
 
 protected:
 
@@ -61,11 +62,11 @@ protected:
   RefPtr<csql::SequentialScanNode> stmt_;
   Set<SHA1Hash> id_set_;
   size_t cur_table_;
-  ScopedPtr<csql::CSTableScan> cur_scan_;
+  ScopedPtr<csql::FastCSTableScan> cur_scan_;
   ScopedPtr<PartitionArena::SkiplistReader> cur_skiplist_;
 };
 
-class RemotePartitionCursor : public csql::ResultCursor {
+class RemotePartitionCursor : public csql::TableExpression {
 public:
 
   RemotePartitionCursor(
@@ -76,9 +77,12 @@ public:
       RefPtr<csql::SequentialScanNode> stmt,
       const std::vector<std::string>& servers);
 
-  bool next(csql::SValue* row, int row_len) override;
+  bool next(csql::SValue* row, size_t row_len) override;
 
-  size_t getNumColumns() override;
+  ReturnCode nextBatch(csql::SVector* columns, size_t* nrows) override;
+
+  size_t getColumnCount() const override;
+  csql::SType getColumnType(size_t idx) const override;
 
 protected:
 

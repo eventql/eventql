@@ -49,6 +49,12 @@ ReturnCode ShowTablesExpression::execute() {
   return ReturnCode::success();
 }
 
+ReturnCode ShowTablesExpression::nextBatch(
+    SVector* columns,
+    size_t* nrecords) {
+  return ReturnCode::error("ERUNTIME", "ShowTablesExpression::nextBatch not yet implemented");
+}
+
 size_t ShowTablesExpression::getColumnCount() const {
   return kNumColumns;
 }

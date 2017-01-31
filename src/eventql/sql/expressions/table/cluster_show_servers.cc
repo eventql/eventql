@@ -45,6 +45,12 @@ ReturnCode ClusterShowServersExpression::execute() {
   return ReturnCode::success();
 }
 
+ReturnCode ClusterShowServersExpression::nextBatch(
+    SVector* columns,
+    size_t* nrecords) {
+  return ReturnCode::error("ERUNTIME", "ClusterShowServersExpression::nextBatch not yet implemented");
+}
+
 size_t ClusterShowServersExpression::getColumnCount() const {
   return kNumColumns;
 }

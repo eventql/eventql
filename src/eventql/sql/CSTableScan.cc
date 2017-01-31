@@ -97,6 +97,11 @@ ReturnCode CSTableScan::execute() {
   return ReturnCode::success();
 }
 
+ReturnCode CSTableScan::nextBatch(
+    SVector* columns,
+    size_t* nrecords) {
+  return ReturnCode::error("ERUNTIME", "CSTableScan::nextBatch not yet implemented");
+}
 
 void CSTableScan::open() {
   auto runtime = txn_->getCompiler();

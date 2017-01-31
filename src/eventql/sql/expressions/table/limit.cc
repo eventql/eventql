@@ -47,6 +47,12 @@ ReturnCode LimitExpression::execute() {
   return ReturnCode::success();
 }
 
+ReturnCode LimitExpression::nextBatch(
+    SVector* columns,
+    size_t* nrecords) {
+  return ReturnCode::error("ERUNTIME", "LimitExpression::nextBatch not yet implemented");
+}
+
 size_t LimitExpression::getColumnCount() const {
   return input_->getColumnCount();
 }

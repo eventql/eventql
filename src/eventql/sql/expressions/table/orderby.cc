@@ -114,6 +114,12 @@ ReturnCode OrderByExpression::execute() {
   return ReturnCode::success();
 }
 
+ReturnCode OrderByExpression::nextBatch(
+    SVector* columns,
+    size_t* nrecords) {
+  return ReturnCode::error("ERUNTIME", "OrderByExpression::nextBatch not yet implemented");
+}
+
 size_t OrderByExpression::getColumnCount() const {
   return input_cursor_->getNumColumns();
 }

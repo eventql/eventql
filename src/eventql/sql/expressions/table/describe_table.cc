@@ -44,6 +44,12 @@ ReturnCode DescribeTableStatement::execute() {
   return ReturnCode::success();
 }
 
+ReturnCode DescribeTableStatement::nextBatch(
+    SVector* columns,
+    size_t* nrecords) {
+  return ReturnCode::error("ERUNTIME", "DescribeTableExpression::nextBatch not yet implemented");
+}
+
 size_t DescribeTableStatement::getColumnCount() const {
   return kNumColumns;
 }

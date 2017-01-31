@@ -71,20 +71,20 @@ public:
   size_t getColumnCount() const override;
   csql::SType getColumnType(size_t idx) const override;
 
-  bool next(csql::SValue* row, size_t row_len) override;
+  ReturnCode nextBatch(csql::SVector* columns, size_t* nrows) override;
 
   Option<SHA1Hash> getCacheKey() const override;
 
 protected:
 
-  ScopedPtr<csql::ResultCursor> openPartition(
+  ScopedPtr<csql::TableExpression> openPartition(
       const PartitionLocation& partition);
 
-  ScopedPtr<csql::ResultCursor> openLocalPartition(
+  ScopedPtr<csql::TableExpression> openLocalPartition(
       const SHA1Hash& partition_id,
       RefPtr<csql::SequentialScanNode> qtree);
 
-  ScopedPtr<csql::ResultCursor> openRemotePartition(
+  ScopedPtr<csql::TableExpression> openRemotePartition(
       const SHA1Hash& partition_id,
       RefPtr<csql::SequentialScanNode> qtree,
       const Vector<ReplicaRef> servers);
@@ -99,7 +99,7 @@ protected:
   Option<SHA1Hash> cache_key_;
   PartitionMap* partition_map_;
   InternalAuth* auth_;
-  ScopedPtr<csql::ResultCursor> cur_cursor_;
+  ScopedPtr<csql::TableExpression> cur_cursor_;
   size_t cur_partition_;
 };
 

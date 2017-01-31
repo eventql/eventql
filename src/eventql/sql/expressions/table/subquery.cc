@@ -51,6 +51,12 @@ ReturnCode SubqueryExpression::execute() {
   return ReturnCode::success();
 }
 
+ReturnCode SubqueryExpression::nextBatch(
+    SVector* columns,
+    size_t* nrecords) {
+  return ReturnCode::error("ERUNTIME", "SubqueryExpression::nextBatch not yet implemented");
+}
+
 size_t SubqueryExpression::getColumnCount() const {
   return select_exprs_.size();
 }

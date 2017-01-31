@@ -44,6 +44,12 @@ ReturnCode DescribePartitionsExpression::execute() {
   return ReturnCode::success();
 }
 
+ReturnCode DescribePartitionsExpression::nextBatch(
+    SVector* columns,
+    size_t* nrecords) {
+  return ReturnCode::error("ERUNTIME", "DescribePartitionsExpression::nextBatch not yet implemented");
+}
+
 size_t DescribePartitionsExpression::getColumnCount() const {
   return kNumColumns;
 }

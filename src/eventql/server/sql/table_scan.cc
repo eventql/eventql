@@ -62,26 +62,38 @@ csql::SType TableScan::getColumnType(size_t idx) const {
   return seqscan_->getColumnType(idx);
 }
 
-bool TableScan::next(csql::SValue* row, size_t row_len) {
+ReturnCode TableScan::nextBatch(csql::SVector* columns, size_t* nrows) {
   while (cur_partition_ < partitions_.size()) {
     if (cur_cursor_.get() == nullptr) {
       cur_cursor_ = openPartition(partitions_[cur_partition_]);
       execution_context_->incrementNumTasksRunning();
     }
 
-    if (cur_cursor_.get() && cur_cursor_->next(row, row_len)) {
-      return true;
-    } else {
+    if (!cur_cursor_.get()) {
+      ++cur_partition_;
+      execution_context_->incrementNumTasksCompleted();
+      continue;
+    }
+
+    auto rc = cur_cursor_->nextBatch(columns, nrows);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+
+    if (!*nrows) {
       cur_cursor_.reset(nullptr);
       ++cur_partition_;
       execution_context_->incrementNumTasksCompleted();
     }
+
+    return ReturnCode::success();
   }
 
-  return false;
+  *nrows = 0;
+  return ReturnCode::success();
 }
 
-ScopedPtr<csql::ResultCursor> TableScan::openPartition(
+ScopedPtr<csql::TableExpression> TableScan::openPartition(
     const PartitionLocation& partition) {
   if (partition.servers.empty()) {
     return openLocalPartition(partition.partition_id, partition.qtree);
@@ -93,7 +105,7 @@ ScopedPtr<csql::ResultCursor> TableScan::openPartition(
   }
 }
 
-ScopedPtr<csql::ResultCursor> TableScan::openLocalPartition(
+ScopedPtr<csql::TableExpression> TableScan::openLocalPartition(
     const SHA1Hash& partition_key,
     RefPtr<csql::SequentialScanNode> qtree) {
   auto partition =  partition_map_->findPartition(
@@ -107,7 +119,7 @@ ScopedPtr<csql::ResultCursor> TableScan::openLocalPartition(
   }
 
   if (partition.isEmpty()) {
-    return ScopedPtr<csql::ResultCursor>();
+    return ScopedPtr<csql::TableExpression>();
   }
 
   return mkScoped(
@@ -119,7 +131,7 @@ ScopedPtr<csql::ResultCursor> TableScan::openLocalPartition(
           qtree));
 }
 
-ScopedPtr<csql::ResultCursor> TableScan::openRemotePartition(
+ScopedPtr<csql::TableExpression> TableScan::openRemotePartition(
     const SHA1Hash& partition_key,
     RefPtr<csql::SequentialScanNode> qtree,
     const Vector<ReplicaRef> servers) {

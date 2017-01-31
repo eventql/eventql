@@ -127,6 +127,12 @@ bool NestedLoopJoin::next(SValue* row, size_t row_len) {
   return cursor_(row, row_len);
 }
 
+ReturnCode NestedLoopJoin::nextBatch(
+    SVector* columns,
+    size_t* nrecords) {
+  return ReturnCode::error("ERUNTIME", "NestedLoopJoin::nextBatch not yet implemented");
+}
+
 ReturnCode NestedLoopJoin::executeCartesianJoin() {
   cursor_ = [this] (SValue* row, int row_len) -> bool {
     for (;;) {

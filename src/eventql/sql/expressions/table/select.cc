@@ -43,6 +43,12 @@ ReturnCode SelectExpression::execute() {
   return ReturnCode::success();
 }
 
+ReturnCode SelectExpression::nextBatch(
+    SVector* columns,
+    size_t* nrecords) {
+  return ReturnCode::error("ERUNTIME", "SelectExpression::nextBatch not yet implemented");
+}
+
 size_t SelectExpression::getColumnCount() const {
   return select_exprs_.size();
 }

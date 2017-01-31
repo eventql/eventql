@@ -59,6 +59,12 @@ ReturnCode ChartExpression::execute() {
   return ReturnCode::success();
 }
 
+ReturnCode ChartExpression::nextBatch(
+    SVector* columns,
+    size_t* nrecords) {
+  return ReturnCode::error("ERUNTIME", "ChartExpression::nextBatch not yet implemented");
+}
+
 void ChartExpression::executeDrawStatement(
     size_t idx,
     util::chart::Canvas* canvas) {

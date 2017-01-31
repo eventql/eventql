@@ -48,6 +48,7 @@ public:
   SType getColumnType(size_t idx) const override;
 
   bool next(SValue* row, size_t row_len) override;
+  ReturnCode nextBatch(SVector* columns, size_t* nrecords) override;
 
 protected:
 
