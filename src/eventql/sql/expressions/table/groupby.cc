@@ -112,6 +112,7 @@ ReturnCode GroupByExpression::execute() {
       }
 
       auto group_key = SValue::makeUniqueKey(gkey.data(), gkey.size());
+
       auto& group = groups_[group_key];
       if (group.size() == 0) {
         for (const auto& e : select_exprs_) {
@@ -241,41 +242,71 @@ ReturnCode PartialGroupByExpression::execute() {
       return rc;
     }
 
-    Vector<SValue> row(input_->getColumnCount());
+    Vector<SVector> input_cols;
+    for (size_t i = 0; i < input_->getColumnCount(); ++i) {
+      input_cols.emplace_back(input_->getColumnType(i));
+    }
+
     size_t cnt = 0;
-    while (input_->next(row.data(), row.size())) {
-      if (++cnt % 512 == 0) {
+    for (;;) {
+      size_t nrecords = 0;
+      {
+        auto rc = input_->nextBatch(input_cols.data(), &nrecords);
+        if (!rc.isSuccess()) {
+          RAISE(kRuntimeError, rc.getMessage());
+        }
+      }
+
+      if (nrecords == 0) {
+        break;
+      }
+
+      {
         auto rc = txn_->triggerHeartbeat();
         if (!rc.isSuccess()) {
           RAISE(kRuntimeError, rc.getMessage());
         }
       }
 
-      Vector<SValue> gkey(group_exprs_.size(), SValue{});
-      for (size_t i = 0; i < group_exprs_.size(); ++i) {
-        VM::evaluate(
-            txn_,
-            group_exprs_[i].program(),
-            row.size(),
-            row.data(),
-            &gkey[i]);
+      Vector<void*> input_col_cursor;
+      for (const auto& c : input_cols) {
+        input_col_cursor.emplace_back((void*) c.getData());
       }
 
-      auto group_key = SValue::makeUniqueKey(gkey.data(), gkey.size());
-      auto& group = groups_[group_key];
-      if (group.size() == 0) {
-        for (const auto& e : select_exprs_) {
-          group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch_));
+      for (size_t n = 0; n < nrecords; n++) {
+        Vector<SValue> gkey(group_exprs_.size(), SValue{});
+        for (size_t i = 0; i < group_exprs_.size(); ++i) {
+          VM::evaluateLegacy(
+              txn_,
+              group_exprs_[i].program(),
+              input_col_cursor.size(),
+              input_col_cursor.data(),
+              &gkey[i]);
         }
-      }
 
-      for (size_t i = 0; i < select_exprs_.size(); ++i) {
-        VM::accumulate(
-            txn_,
-            select_exprs_[i].program(),
-            &group[i],
-            row.size(),
-            row.data());
+        auto group_key = SValue::makeUniqueKey(gkey.data(), gkey.size());
+
+        auto& group = groups_[group_key];
+        if (group.size() == 0) {
+          for (const auto& e : select_exprs_) {
+            group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch_));
+          }
+        }
+
+        for (size_t i = 0; i < select_exprs_.size(); ++i) {
+          VM::accumulate(
+              txn_,
+              select_exprs_[i].program(),
+              &group[i],
+              input_col_cursor.size(),
+              input_col_cursor.data());
+        }
+
+        for (size_t i = 0; i < input_col_cursor.size(); ++i) {
+          if (input_col_cursor[i]) {
+            input_cols[i].next(&input_col_cursor[i]);
+          }
+        }
       }
     }
   }
