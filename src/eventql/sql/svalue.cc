@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #define __STDC_FORMAT_MACROS
+#include <assert.h>
 #include <inttypes.h>
 #include <stdlib.h>
 #include <string>
@@ -800,7 +801,63 @@ template <> bool SValue::isOfType<SValue::TimeType>() const {
   return isTimestamp();
 }
 
+SVector::SVector() :
+    data_(nullptr),
+    data_owned_(true),
+    capacity_(0),
+    size_(0) {}
+
+SVector::~SVector() {
+  if (data_owned_ && data_) {
+    free(data_);
+  }
 }
+
+const void* SVector::getData() const {
+  return data_;
+}
+
+void* SVector::getMutableData() {
+  assert(data_owned_);
+  return data_;
+}
+
+size_t SVector::getSize() const {
+  return size_;
+}
+
+void SVector::setSize(size_t new_size) {
+  assert(new_size <= capacity_);
+  size_ = new_size;
+}
+
+size_t SVector::getCapacity() const {
+  return capacity_;
+}
+
+void SVector::increaseCapacity(size_t min_capacity) {
+  if (min_capacity <= capacity_) {
+    return;
+  }
+
+  assert(data_owned_);
+  auto new_capactity = min_capacity; // FIXME
+  if (data_) {
+    data_ = realloc(data_, new_capactity);
+  } else {
+    data_ = malloc(new_capactity);
+  }
+
+  capacity_ = new_capactity;
+}
+
+void SVector::copyFrom(const SVector* other) {
+  increaseCapacity(other->capacity_);
+  size_ = other->size_;
+  memcpy(data_, other->data_, size_);
+}
+
+} // namespace csql
 
 template <>
 std::string inspect<csql::SType>(

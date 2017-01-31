@@ -143,7 +143,28 @@ protected:
 
 class SVector {
 public:
-  ~SVector() = default;
+
+  SVector();
+  SVector(const SVector& other) = delete;
+  SVector& operator=(const SVector& other) = delete;
+  ~SVector();
+
+  const void* getData() const;
+  void* getMutableData();
+
+  size_t getSize() const;
+  void setSize(size_t new_size);
+
+  size_t getCapacity() const;
+  void increaseCapacity(size_t min_capacity);
+
+  void copyFrom(const SVector* other);
+
+protected:
+  void* data_;
+  bool data_owned_;
+  size_t capacity_;
+  size_t size_;
 };
 
 String sql_escape(const String& str);
