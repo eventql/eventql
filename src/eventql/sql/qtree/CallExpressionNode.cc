@@ -31,7 +31,7 @@ namespace csql {
 
 ReturnCode CallExpressionNode::newNode(
     Transaction* txn,
-    const std::string& method_name,
+    const std::string& function_name,
     Vector<RefPtr<ValueExpressionNode>> arguments,
     RefPtr<ValueExpressionNode>* node) {
   std::vector<csql::SType> arg_types;
@@ -40,15 +40,16 @@ ReturnCode CallExpressionNode::newNode(
   }
 
   const SymbolTableEntry* symbol;
-  auto rc = txn->getSymbolTable()->resolve(method_name, arg_types, &symbol);
+  auto rc = txn->getSymbolTable()->resolve(function_name, arg_types, &symbol);
   if (!rc.isSuccess()) {
     return rc;
   }
 
-  return CallExpressionNode::newNode(symbol, arguments, node);
+  return CallExpressionNode::newNode(function_name, symbol, arguments, node);
 }
 
 ReturnCode CallExpressionNode::newNode(
+    const std::string& function_name,
     const SymbolTableEntry* symbol,
     Vector<RefPtr<ValueExpressionNode>> arguments,
     RefPtr<ValueExpressionNode>* node) {
@@ -57,6 +58,7 @@ ReturnCode CallExpressionNode::newNode(
 
   *node = RefPtr<ValueExpressionNode>(
       new CallExpressionNode(
+          function_name,
           symbol->getSymbol(),
           fun->return_type,
           is_pure,
@@ -66,10 +68,12 @@ ReturnCode CallExpressionNode::newNode(
 }
 
 CallExpressionNode::CallExpressionNode(
+    const String& function_name,
     const String& symbol,
     SType return_type,
     bool is_pure,
     Vector<RefPtr<ValueExpressionNode>> arguments) :
+    function_name_(function_name),
     symbol_(symbol),
     return_type_(return_type),
     is_pure_(is_pure),
@@ -79,7 +83,11 @@ Vector<RefPtr<ValueExpressionNode>> CallExpressionNode::arguments() const {
   return arguments_;
 }
 
-const String& CallExpressionNode::symbol() const {
+const String& CallExpressionNode::getFunctionName() const {
+  return function_name_;
+}
+
+const String& CallExpressionNode::getSymbol() const {
   return symbol_;
 }
 
@@ -93,7 +101,12 @@ RefPtr<QueryTreeNode> CallExpressionNode::deepCopy() const {
     args.emplace_back(arg->deepCopyAs<ValueExpressionNode>());
   }
 
-  return new CallExpressionNode(symbol_, return_type_, is_pure_, args);
+  return new CallExpressionNode(
+      function_name_,
+      symbol_,
+      return_type_,
+      is_pure_,
+      args);
 }
 
 String CallExpressionNode::toSQL() const {
@@ -104,7 +117,7 @@ String CallExpressionNode::toSQL() const {
 
   return StringUtil::format(
       "$0($1)",
-      symbol_,
+      function_name_,
       StringUtil::join(args_sql, ","));
 }
 
@@ -116,7 +129,8 @@ void CallExpressionNode::encode(
     QueryTreeCoder* coder,
     const CallExpressionNode& node,
     OutputStream* os) {
-  os->appendLenencString(node.symbol());
+  os->appendLenencString(node.getFunctionName());
+  os->appendLenencString(node.getSymbol());
   os->appendVarUInt((uint8_t) node.getReturnType());
   os->appendVarUInt(node.isPureFunction());
   os->appendVarUInt(node.arguments_.size());
@@ -128,6 +142,7 @@ void CallExpressionNode::encode(
 RefPtr<QueryTreeNode> CallExpressionNode::decode (
     QueryTreeCoder* coder,
     InputStream* is) {
+  auto function_name = is->readLenencString();
   auto symbol = is->readLenencString();
   auto return_type = (SType) is->readVarUInt();
   auto is_pure = is->readVarUInt() > 0 ? true : false;
@@ -138,7 +153,12 @@ RefPtr<QueryTreeNode> CallExpressionNode::decode (
     arguments.emplace_back(coder->decode(is).asInstanceOf<ValueExpressionNode>());
   }
 
-  return new CallExpressionNode(symbol, return_type, is_pure, arguments);
+  return new CallExpressionNode(
+      function_name,
+      symbol,
+      return_type,
+      is_pure,
+      arguments);
 }
 
 } // namespace csql

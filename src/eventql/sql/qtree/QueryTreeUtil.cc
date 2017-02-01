@@ -85,7 +85,7 @@ ReturnCode QueryTreeUtil::prunePredicateExpression(
     const Set<String>& column_whitelist,
     RefPtr<ValueExpressionNode>* out) {
   auto call_expr = dynamic_cast<CallExpressionNode*>(expr.get());
-  if (call_expr && call_expr->symbol() == "logical_and") {
+  if (call_expr && call_expr->getFunctionName() == "logical_and") {
     Vector<RefPtr<ValueExpressionNode>> call_args(2);
 
     {
@@ -139,7 +139,7 @@ ReturnCode QueryTreeUtil::removeConstraintFromPredicate(
     const ScanConstraint& constraint,
     RefPtr<ValueExpressionNode>* out) {
   auto call_expr = dynamic_cast<CallExpressionNode*>(expr.get());
-  if (call_expr && call_expr->symbol() == "logical_and") {
+  if (call_expr && call_expr->getFunctionName() == "logical_and") {
     RefPtr<ValueExpressionNode> arg_left;
     {
       auto rc = removeConstraintFromPredicate(
@@ -212,7 +212,7 @@ void QueryTreeUtil::findConstraints(
   auto call_expr = dynamic_cast<CallExpressionNode*>(expr.get());
 
   // logical ands allow chaining multiple constraints
-  if (call_expr && call_expr->symbol() == "logical_and") {
+  if (call_expr && call_expr->getFunctionName() == "logical_and") {
     for (const auto& arg : call_expr->arguments()) {
       findConstraints(arg, constraints);
     }
@@ -256,7 +256,7 @@ Option<ScanConstraint> QueryTreeUtil::findConstraint(
   }
 
   // EQUAL_TO
-  if (call_expr->symbol() == "eq") {
+  if (call_expr->getFunctionName() == "eq") {
     ScanConstraint constraint;
     constraint.column_name = column->fieldName();
     constraint.type = ScanConstraintType::EQUAL_TO;
@@ -265,7 +265,7 @@ Option<ScanConstraint> QueryTreeUtil::findConstraint(
   }
 
   // NOT_EQUAL_TO
-  if (call_expr->symbol() == "neq") {
+  if (call_expr->getFunctionName() == "neq") {
     ScanConstraint constraint;
     constraint.column_name = column->fieldName();
     constraint.type = ScanConstraintType::NOT_EQUAL_TO;
@@ -274,7 +274,7 @@ Option<ScanConstraint> QueryTreeUtil::findConstraint(
   }
 
   // LESS_THAN
-  if (call_expr->symbol() == "lt") {
+  if (call_expr->getFunctionName() == "lt") {
     ScanConstraint constraint;
     constraint.column_name = column->fieldName();
     constraint.type = reverse_expr ?
@@ -285,7 +285,7 @@ Option<ScanConstraint> QueryTreeUtil::findConstraint(
   }
 
   // LESS_THAN_OR_EQUALS
-  if (call_expr->symbol() == "lte") {
+  if (call_expr->getFunctionName() == "lte") {
     ScanConstraint constraint;
     constraint.column_name = column->fieldName();
     constraint.type = reverse_expr ?
@@ -296,7 +296,7 @@ Option<ScanConstraint> QueryTreeUtil::findConstraint(
   }
 
   // GREATER_THAN
-  if (call_expr->symbol() == "gt") {
+  if (call_expr->getFunctionName() == "gt") {
     ScanConstraint constraint;
     constraint.column_name = column->fieldName();
     constraint.type = reverse_expr ?
@@ -307,7 +307,7 @@ Option<ScanConstraint> QueryTreeUtil::findConstraint(
   }
 
   // GREATER_THAN_OR_EQUAL_TO
-  if (call_expr->symbol() == "gte") {
+  if (call_expr->getFunctionName() == "gte") {
     ScanConstraint constraint;
     constraint.column_name = column->fieldName();
     constraint.type = reverse_expr ?
