@@ -186,7 +186,8 @@ size_t JoinNode::getInputColumnIndex(
     input_map_.emplace_back(InputColumnRef{
       .column = column_name,
       .table_idx = 0,
-      .column_idx = base_table_idx
+      .column_idx = base_table_idx,
+      .type = base_table_.asInstanceOf<TableExpressionNode>()->getColumnType(base_table_idx)
     });
 
     return input_map_.size() - 1;
@@ -196,7 +197,8 @@ size_t JoinNode::getInputColumnIndex(
     input_map_.emplace_back(InputColumnRef{
       .column = column_name,
       .table_idx = 1,
-      .column_idx = joined_table_idx
+      .column_idx = joined_table_idx,
+      .type = joined_table_.asInstanceOf<TableExpressionNode>()->getColumnType(joined_table_idx)
     });
 
     return input_map_.size() - 1;

@@ -50,6 +50,9 @@ public:
   ReturnCode nextBatch(SVector* columns, size_t* nrecords) override;
 
 protected:
+
+  ReturnCode readJoinedTable();
+
   Transaction* txn_;
   JoinType join_type_;
   Vector<JoinNode::InputColumnRef> input_map_;
@@ -59,6 +62,7 @@ protected:
   std::vector<std::pair<ValueExpression, ValueExpression>> conjunction_exprs_;
   ScopedPtr<TableExpression> base_tbl_;
   ScopedPtr<TableExpression> joined_tbl_;
+  std::multimap<std::string, std::vector<SValue>> joined_tbl_data_;
 };
 
 } // namespace csql

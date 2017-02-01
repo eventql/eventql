@@ -46,6 +46,11 @@ HashJoin::HashJoin(
     joined_tbl_(std::move(joined_tbl)) {}
 
 ReturnCode HashJoin::execute() {
+  auto rc = readJoinedTable();
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
   return ReturnCode::success();
 }
 
@@ -61,6 +66,85 @@ size_t HashJoin::getColumnCount() const {
 SType HashJoin::getColumnType(size_t idx) const {
   assert(idx < select_exprs_.size());
   return select_exprs_[idx].getReturnType();
+}
+
+ReturnCode HashJoin::readJoinedTable() {
+  auto joined_rc = joined_tbl_->execute();
+  if (!joined_rc.isSuccess()) {
+    return joined_rc;
+  }
+
+
+  Vector<SVector> input_cols;
+  for (size_t i = 0; i < joined_tbl_->getColumnCount(); ++i) {
+    input_cols.emplace_back(joined_tbl_->getColumnType(i));
+  }
+
+  size_t cnt = 0;
+  for (;;) {
+    size_t nrecords = 0;
+    {
+      auto rc = joined_tbl_->nextBatch(input_cols.data(), &nrecords);
+      if (!rc.isSuccess()) {
+        RAISE(kRuntimeError, rc.getMessage());
+      }
+    }
+
+    if (nrecords == 0) {
+      break;
+    }
+
+    {
+      auto rc = txn_->triggerHeartbeat();
+      if (!rc.isSuccess()) {
+        RAISE(kRuntimeError, rc.getMessage());
+      }
+    }
+
+    Vector<void*> input_col_cursor;
+    for (const auto& c : input_cols) {
+      input_col_cursor.emplace_back((void*) c.getData());
+    }
+
+    Vector<SValue> row;
+    for (size_t i = 0; i < input_map_.size(); ++i) {
+      row.emplace_back(input_map_[i].type);
+    }
+
+    for (size_t n = 0; n < nrecords; n++) {
+      for (size_t i = 0; i < input_map_.size(); ++i) {
+        const auto& m = input_map_[i];
+        if (m.table_idx != 1) {
+          continue;
+        }
+
+        row[i].copyFrom(input_col_cursor[m.column_idx]);
+      }
+
+      assert(row[0].getData());
+
+      Vector<SValue> hkey(conjunction_exprs_.size());
+      for (size_t i = 0; i < conjunction_exprs_.size(); ++i) {
+        VM::evaluate(
+            txn_,
+            conjunction_exprs_[i].second.program(),
+            row.size(),
+            row.data(),
+            &hkey[i]);
+      }
+
+      auto hash_key = SValue::makeUniqueKey(hkey.data(), hkey.size());
+      joined_tbl_data_.emplace(hash_key, row);
+
+      for (size_t i = 0; i < input_col_cursor.size(); ++i) {
+        if (input_col_cursor[i]) {
+          input_cols[i].next(&input_col_cursor[i]);
+        }
+      }
+    }
+  }
+
+  return ReturnCode::success();
 }
 
 } // namespace csql

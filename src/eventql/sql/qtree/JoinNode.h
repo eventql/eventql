@@ -68,6 +68,7 @@ public:
     String column;
     size_t table_idx;
     size_t column_idx;
+    SType type;
   };
 
   static const uint8_t kHasWhereExprFlag = 1;
