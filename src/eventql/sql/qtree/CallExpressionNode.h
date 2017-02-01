@@ -38,26 +38,24 @@ public:
 
   static ReturnCode newNode (
       Transaction* txn,
-      const std::string& method_name,
+      const std::string& function_name,
       Vector<RefPtr<ValueExpressionNode>> arguments,
       RefPtr<ValueExpressionNode>* node);
 
   static ReturnCode newNode (
+      const std::string& function_name,
       const SymbolTableEntry* symbol,
       Vector<RefPtr<ValueExpressionNode>> arguments,
       RefPtr<ValueExpressionNode>* node);
 
+  const String& getFunctionName() const;
+  const String& getSymbol() const;
+  SType getReturnType() const override;
+  bool isPureFunction() const;
   Vector<RefPtr<ValueExpressionNode>> arguments() const override;
 
-  const String& symbol() const;
-
   RefPtr<QueryTreeNode> deepCopy() const override;
-
   String toSQL() const override;
-
-  SType getReturnType() const override;
-
-  bool isPureFunction() const;
 
   static void encode(
       QueryTreeCoder* coder,
@@ -71,11 +69,13 @@ public:
 protected:
 
   CallExpressionNode(
+      const String& function_name,
       const String& symbol,
       SType return_type,
       bool is_pure,
       Vector<RefPtr<ValueExpressionNode>> arguments);
 
+  String function_name_;
   String symbol_;
   SType return_type_;
   bool is_pure_;
