@@ -816,77 +816,56 @@ static Option<uint64_t> parseInterval(String time_interval) {
 //}
 
 void time_at_call(sql_txn* ctx, int argc, void** argv, VMRegister* out) {
-  //auto str_len = ((uint32_t*)) argv[0]
+  String time_str(sql_cstr(argv[0]), sql_strlen(argv[0]));
 
-  //uint64_t ts;
-  //switch (argv->getType()) {
-  //  case SType::TIMESTAMP64:
-  //    *out = *argv;
-  //    return;
-  //  case SType::INT64:
-  //  case SType::FLOAT64:
-  //    ts = parseTimestamp(argv);
-  //  default: {
-  //    if (argv->isConvertibleToNumeric()) {
-  //      ts = parseTimestamp(argv);
-  //      break;
-  //    }
+  StringUtil::toLower(&time_str);
+  if (time_str == "now") {
+    *static_cast<uint64_t*>(out->data) = WallClock::unixMicros();
+    return;
+  }
 
-  //    String time_str = argv->getString();
-  //    StringUtil::toLower(&time_str);
-  //    if (time_str == "now") {
-  //      ts = WallClock::unixMicros();
-  //      break;
-  //    }
+  if (StringUtil::beginsWith(time_str, "-")) {
+    try {
+      auto now = uint64_t(WallClock::now());
+      Option<uint64_t> time_val = parseInterval(time_str.substr(1));
+      if (!time_val.isEmpty()) {
+        *static_cast<uint64_t*>(out->data) = now - time_val.get();
+        return;
+      }
+    } catch (...) {
+      RAISEF(
+        kRuntimeError,
+        "TIME_AT: invalid argument $0",
+        time_str);
+    }
+  }
 
-  //    if (StringUtil::beginsWith(time_str, "-")) {
-  //      try {
-  //        auto now = uint64_t(WallClock::now());
-  //        Option<uint64_t> time_val = parseInterval(time_str.substr(1));
-  //        if (!time_val.isEmpty()) {
-  //          ts = now - time_val.get();
-  //          break;
-  //        }
-  //      } catch (...) {
-  //        RAISEF(
-  //          kRuntimeError,
-  //          "TIME_AT: invalid argument $0",
-  //          time_str);
-  //      }
-  //    }
+  if (StringUtil::endsWith(time_str, "ago")) {
+    try {
+      auto now = uint64_t(WallClock::now());
+      Option<uint64_t> time_val = parseInterval(
+          time_str.substr(0, time_str.length() - 4));
+      if (!time_val.isEmpty()) {
+        *static_cast<uint64_t*>(out->data) = now - time_val.get();
+        return;
+      }
+    } catch (...) {
+      RAISEF(
+        kRuntimeError,
+        "TIME_AT: invalid argument $0",
+        time_str);
+    }
+  }
 
-  //    if (StringUtil::endsWith(time_str, "ago")) {
-  //      try {
-  //        auto now = uint64_t(WallClock::now());
-  //        Option<uint64_t> time_val = parseInterval(
-  //            time_str.substr(0, time_str.length() - 4));
-  //        if (!time_val.isEmpty()) {
-  //          ts = now - time_val.get();
-  //          break;
-  //        }
-  //      } catch (...) {
-  //        RAISEF(
-  //          kRuntimeError,
-  //          "TIME_AT: invalid argument $0",
-  //          time_str);
-  //      }
-  //    }
+  auto time_opt = Human::parseTime(time_str);
+  if (time_opt.isEmpty()) {
+    RAISEF(
+       kTypeError,
+        "can't convert '$0' to TIMESTAMP",
+        time_str);
+  }
 
-  //    auto time_opt = Human::parseTime(time_str);
-  //    if (time_opt.isEmpty()) {
-  //      RAISEF(
-  //         kTypeError,
-  //          "can't convert $0 '$1' to TIMESTAMP",
-  //          SValue::getTypeName(argv->getType()),
-  //          argv->getString());
-  //    }
-
-  //    ts = time_opt.get().unixMicros();
-  //    break;
-  //  }
-  //}
-
-  //*out = SValue(SValue::TimeType(ts));
+  *static_cast<uint64_t*>(out->data) = time_opt.get().unixMicros();
 }
 
 const SFunction time_at(

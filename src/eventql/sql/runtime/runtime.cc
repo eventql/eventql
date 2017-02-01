@@ -174,7 +174,7 @@ SValue Runtime::evaluateConstExpression(
     RefPtr<ValueExpressionNode> expr) {
   auto compiled = query_builder_->buildValueExpression(txn, expr);
 
-  SValue out;
+  SValue out(compiled.getReturnType());
   VM::evaluate(txn, compiled.program(), 0, nullptr, &out);
   return out;
 }
@@ -182,7 +182,7 @@ SValue Runtime::evaluateConstExpression(
 SValue Runtime::evaluateConstExpression(
     Transaction* txn,
     const ValueExpression& expr) {
-  SValue out;
+  SValue out(expr.getReturnType());
   VM::evaluate(txn, expr.program(), 0, nullptr, &out);
   return out;
 }

@@ -21,12 +21,12 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <iostream>
+#include "eventql/eventql.h"
 #include <eventql/sql/runtime/runtime.h>
 #include <eventql/sql/qtree/QueryTreeUtil.h>
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
 #include <eventql/util/logging.h>
-
-#include "eventql/eventql.h"
 
 namespace csql {
 
@@ -46,10 +46,10 @@ void QueryTreeUtil::findColumns(
 RefPtr<ValueExpressionNode> QueryTreeUtil::foldConstants(
     Transaction* txn,
     RefPtr<ValueExpressionNode> expr) {
-  if (false && isConstantExpression(txn, expr)) {
+  if (isConstantExpression(txn, expr) &&
+      !dynamic_cast<LiteralExpressionNode*>(expr.get())) {
     auto runtime = txn->getRuntime();
     auto const_val = runtime->evaluateConstExpression(txn, expr);
-
     return new LiteralExpressionNode(const_val);
   } else {
     return expr;

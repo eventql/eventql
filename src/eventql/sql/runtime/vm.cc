@@ -171,7 +171,7 @@ void VM::evaluateLegacy(
     int argc,
     void** argv,
     SValue* out) {
-  *out = SValue::newUInt64(0);
+  assert(out->getType() == program->return_type_);
 
   VMRegister out_reg;
   out_reg.data = out->getData();

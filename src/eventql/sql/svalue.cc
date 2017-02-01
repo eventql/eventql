@@ -882,7 +882,7 @@ size_t SValue::getCapacity() const {
 size_t SValue::getSize() const {
   switch (data_.type) {
     case SType::STRING:
-      assert(false);
+      return sql_strlen(data_.u.t_string) + sizeof(uint32_t);
     case SType::FLOAT64:
     case SType::INT64:
     case SType::UINT64:

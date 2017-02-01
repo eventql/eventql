@@ -140,8 +140,10 @@ ReturnCode HashJoin::computeInnerJoin(
       }
     }
 
-    Vector<SValue> hkey(conjunction_exprs_.size());
+    Vector<SValue> hkey;
     for (size_t i = 0; i < conjunction_exprs_.size(); ++i) {
+      hkey.emplace_back(conjunction_exprs_[i].first.getReturnType());
+
       VM::evaluate(
           txn_,
           conjunction_exprs_[i].first.program(),
@@ -181,7 +183,7 @@ bool HashJoin::computeOutputRow(
     const std::vector<SValue>& input,
     SVector* output) {
   {
-    SValue pred;
+    SValue pred(SType::BOOL);
     VM::evaluate(
         txn_,
         join_cond_expr_.get().program(),
@@ -195,7 +197,7 @@ bool HashJoin::computeOutputRow(
   }
 
   if (!where_expr_.isEmpty()) {
-    SValue pred;
+    SValue pred(SType::BOOL);
     VM::evaluate(
         txn_,
         where_expr_.get().program(),
@@ -275,8 +277,10 @@ ReturnCode HashJoin::readJoinedTable() {
         row[i].copyFrom(input_col_cursor[m.column_idx]);
       }
 
-      Vector<SValue> hkey(conjunction_exprs_.size());
+      Vector<SValue> hkey;
       for (size_t i = 0; i < conjunction_exprs_.size(); ++i) {
+        hkey.emplace_back(conjunction_exprs_[i].second.getReturnType());
+
         VM::evaluate(
             txn_,
             conjunction_exprs_[i].second.program(),
