@@ -677,11 +677,7 @@ FastCSTableScan::FastCSTableScan(
     cstable_(cstable),
     cstable_filename_(cstable_filename) {}
 
-FastCSTableScan::~FastCSTableScan() {
-  for (auto buf : column_buffers_) {
-    delete buf;
-  }
-}
+FastCSTableScan::~FastCSTableScan() {}
 
 ReturnCode FastCSTableScan::execute() {
   for (const auto& slnode : stmt_->selectList()) {
@@ -698,7 +694,7 @@ ReturnCode FastCSTableScan::execute() {
   for (const auto& c : stmt_->selectedColumns()) {
     auto colinfo = stmt_->getComputedColumnInfo(c);
     column_types_.emplace_back(colinfo.second);
-    column_buffers_.emplace_back(new SVector(colinfo.second));
+    column_buffers_.emplace_back(colinfo.second);
 
     if (cstable_->hasColumn(c)) {
       column_readers_.emplace_back(cstable_->getColumnReader(c));
@@ -747,7 +743,7 @@ ReturnCode FastCSTableScan::nextBatch(
         txn_,
         select_list_[i].program(),
         column_buffers_.size(),
-        (const csql::SVector**) column_buffers_.data(),
+        column_buffers_.data(),
         batch_size,
         out + i);
   }
@@ -759,7 +755,7 @@ ReturnCode FastCSTableScan::nextBatch(
 }
 
 ReturnCode FastCSTableScan::fetchColumnUInt64(size_t idx, size_t batch_size) {
-  auto buffer = column_buffers_[idx];
+  auto buffer = &column_buffers_[idx];
   size_t buffer_len = batch_size * sizeof(uint64_t);
   if (buffer->getCapacity() < buffer_len) {
     buffer->increaseCapacity(buffer_len);

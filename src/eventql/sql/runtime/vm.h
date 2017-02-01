@@ -105,7 +105,7 @@ public:
       Transaction* ctx,
       const Program* program,
       int argc,
-      const SVector** argv,
+      const SVector* argv,
       size_t vlen,
       SVector* out);
 

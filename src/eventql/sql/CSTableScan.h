@@ -163,7 +163,7 @@ protected:
   std::vector<ValueExpression> select_list_;
   size_t num_records_;
   std::vector<SType> column_types_;
-  std::vector<SVector*> column_buffers_;
+  std::vector<SVector> column_buffers_;
   std::vector<RefPtr<cstable::ColumnReader>> column_readers_;
 };
 

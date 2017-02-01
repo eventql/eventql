@@ -188,6 +188,7 @@ void VM::evaluate(
     VMRegister* out) {
   switch (program->entry_->type) {
     case X_INPUT:
+      assert(argv[reinterpret_cast<uint64_t>(program->entry_->arg0)]);
       copyRegister(
           program->return_type_,
           out,
@@ -208,7 +209,7 @@ void VM::evaluateVector(
     Transaction* ctx,
     const Program* program,
     int argc,
-    const SVector** argv,
+    const SVector* argv,
     size_t vlen,
     SVector* out) {
   if (program->entry_->type == X_INPUT) {
@@ -218,7 +219,7 @@ void VM::evaluateVector(
       RAISE(kRuntimeError, "invalid row index %i", index);
     }
 
-    out->copyFrom(argv[index]);
+    out->copyFrom(argv + index);
     return;
   }
 
@@ -231,7 +232,7 @@ void VM::evaluateVector(
     if (false) { // FIXME only if input required
       stackv[i] = nullptr;
     } else {
-      stackv[i] = (void*) argv[i]->getData();
+      stackv[i] = (void*) argv[i].getData();
     }
   }
 
@@ -257,7 +258,7 @@ void VM::evaluateVector(
     // increment input iterators
     for (size_t i = 0; i < argc; ++i) {
       if (stackv[i]) {
-        argv[i]->next(&stackv[i]);
+        argv[i].next(&stackv[i]);
       }
     }
 
@@ -640,6 +641,9 @@ void VM::loadInstance(
 }
 
 void VM::copyRegister(SType type, VMRegister* dst, void* src) {
+  assert(dst->data);
+  assert(src);
+
   switch (type) { // FIXME
     case SType::UINT64:
     case SType::TIMESTAMP64:
@@ -653,7 +657,6 @@ void VM::copyRegister(SType type, VMRegister* dst, void* src) {
     case SType::FLOAT64:
       memcpy(dst->data, src, sizeof(double));
       break;
-
   }
 }
 
