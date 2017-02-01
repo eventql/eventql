@@ -75,6 +75,7 @@ public:
   const char* getTypeName() const;
 
   explicit SValue();
+  SValue(SType type);
   SValue(const SValue& copy);
   SValue& operator=(const SValue& copy);
   bool operator==(const SValue& other) const;
@@ -125,6 +126,8 @@ public:
   String toSQL() const;
 
   static std::string makeUniqueKey(SValue* arr, size_t len);
+
+  void copyFrom(void* data);
 
   const void* getData() const;
   void* getData();

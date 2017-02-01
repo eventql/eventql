@@ -113,11 +113,18 @@ SValue::SValue() {
   data_.type = SType::NIL;
 }
 
+SValue::SValue(SType type) {
+  memset(&data_, 0, sizeof(data_));
+  data_.type = type;
+}
+
 SValue::~SValue() {
   switch (data_.type) {
 
     case SType::STRING:
-      free(data_.u.t_string);
+      if (data_.u.t_string) {
+        free(data_.u.t_string);
+      }
       break;
 
     default:
@@ -166,10 +173,14 @@ SValue::SValue(const SValue& copy) {
   switch (copy.data_.type) {
 
     case SType::STRING: {
-      auto len = sql_strlen(copy.data_.u.t_string) + sizeof(uint32_t);
-      data_.type = SType::STRING;
-      data_.u.t_string = malloc(len);
-      memcpy(data_.u.t_string, copy.data_.u.t_string, len);
+      if (copy.data_.u.t_string) {
+        auto len = sql_strlen(copy.data_.u.t_string) + sizeof(uint32_t);
+        data_.type = SType::STRING;
+        data_.u.t_string = malloc(len);
+        memcpy(data_.u.t_string, copy.data_.u.t_string, len);
+      } else {
+        data_.u.t_string = nullptr;
+      }
       break;
     }
 
@@ -182,15 +193,19 @@ SValue::SValue(const SValue& copy) {
 }
 
 SValue& SValue::operator=(const SValue& copy) {
-  if (data_.type == SType::STRING) {
+  if (data_.type == SType::STRING && data_.u.t_string) {
     free(data_.u.t_string);
   }
 
   if (copy.data_.type == SType::STRING) {
-    auto len = sql_strlen(copy.data_.u.t_string) + sizeof(uint32_t);
-    data_.type = SType::STRING;
-    data_.u.t_string = malloc(len);
-    memcpy(data_.u.t_string, copy.data_.u.t_string, len);
+    if (copy.data_.u.t_string) {
+      auto len = sql_strlen(copy.data_.u.t_string) + sizeof(uint32_t);
+      data_.type = SType::STRING;
+      data_.u.t_string = malloc(len);
+      memcpy(data_.u.t_string, copy.data_.u.t_string, len);
+    } else {
+      data_.u.t_string = nullptr;
+    }
   } else {
     memcpy(&data_, &copy.data_, sizeof(data_));
   }
@@ -218,6 +233,14 @@ bool SValue::operator==(const SValue& other) const {
     }
 
     case SType::STRING: {
+      if (data_.u.t_string == data_.u.t_string) {
+        return true;
+      }
+
+      if (!!data_.u.t_string ^ !!data_.u.t_string) {
+        return false;
+      }
+
       if (sql_strlen(data_.u.t_string) != sql_strlen(other.data_.u.t_string)) {
         return false;
       }
@@ -774,6 +797,43 @@ void SValue::decode(InputStream* is) {
     case SType::NIL:
       *this = SValue();
       return;
+  }
+}
+
+void SValue::copyFrom(void* data) {
+  switch (data_.type) {
+
+    case SType::NIL:
+      break;
+
+    case SType::STRING: {
+      if (data_.u.t_string) {
+        free(data_.u.t_string);
+      }
+
+      auto len = sql_strlen(data) + sizeof(uint32_t);
+      data_.u.t_string = malloc(len);
+      memcpy(data_.u.t_string, data, len);
+      break;
+    }
+
+    case SType::UINT64:
+    case SType::TIMESTAMP64:
+      memcpy(&data_.u.t_uint64, data, sizeof(uint64_t));
+      break;
+
+    case SType::INT64:
+      memcpy(&data_.u.t_int64, data, sizeof(int64_t));
+      break;
+
+    case SType::FLOAT64:
+      memcpy(&data_.u.t_float, data, sizeof(double));
+      break;
+
+    case SType::BOOL:
+      memcpy(&data_.u.t_bool, data, sizeof(uint8_t));
+      break;
+
   }
 }
 
