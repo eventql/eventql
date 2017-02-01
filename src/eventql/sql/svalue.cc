@@ -150,7 +150,7 @@ SValue::SValue(
     SValue(std::string(string_value)) {}
 
 SValue::SValue(SValue::IntegerType integer_value) {
-  data_.type = SType::INT64;
+  data_.type = SType::UINT64;
   data_.u.t_int64 = integer_value;
 }
 
@@ -968,6 +968,39 @@ void SVector::setSize(size_t new_size) {
   size_ = new_size;
 }
 
+void SVector::appendFrom(const void* other) {
+  switch (type_) {
+
+    case SType::NIL:
+      return;
+
+    case SType::STRING:
+      assert(false);
+
+    case SType::FLOAT64:
+    case SType::INT64:
+    case SType::UINT64:
+    case SType::TIMESTAMP64:
+      if (capacity_ < size_ + 8) {
+        increaseCapacity(size_ + 8);
+      }
+
+      memcpy((char*) data_ + size_, other, 8);
+      size_ += 8;
+      break;
+
+    case SType::BOOL:
+      if (capacity_ < size_ + 1) {
+        increaseCapacity(size_ + 1);
+      }
+
+      memcpy((char*) data_ + size_, other, 1);
+      size_++;
+      break;
+
+  }
+}
+
 size_t SVector::getCapacity() const {
   return capacity_;
 }
@@ -1020,6 +1053,21 @@ size_t sql_strlen(void* str) {
 
 char* sql_cstr(void* str) {
   return (char*) str + sizeof(uint32_t);
+}
+
+size_t sql_sizeof_static(SType type) {
+  switch (type) {
+    case SType::STRING:
+    case SType::NIL:
+      return 0;
+    case SType::FLOAT64:
+    case SType::INT64:
+    case SType::UINT64:
+    case SType::TIMESTAMP64:
+      return 8;
+    case SType::BOOL:
+      return 1;
+  }
 }
 
 } // namespace csql

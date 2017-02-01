@@ -53,7 +53,7 @@ class SValue {
 public:
   typedef std::string StringType;
   typedef double FloatType;
-  typedef int64_t IntegerType;
+  typedef uint64_t IntegerType;
   typedef bool BoolType;
   typedef UnixTime TimeType;
 
@@ -169,6 +169,7 @@ public:
   size_t getCapacity() const;
   void increaseCapacity(size_t min_capacity);
 
+  void appendFrom(const void* other);
   void copyFrom(const SVector* other);
 
   static size_t next(SType type, void** cursor);
@@ -185,6 +186,7 @@ String sql_escape(const String& str);
 
 size_t sql_strlen(void* str);
 char* sql_cstr(void* str);
+size_t sql_sizeof_static(SType type);
 
 }
 
