@@ -25,6 +25,7 @@
 #include "eventql/eventql.h"
 #include <eventql/sql/scheduler.h>
 #include <eventql/sql/query_plan.h>
+#include <eventql/sql/qtree/constraints.h>
 #include "eventql/server/session.h"
 #include "eventql/db/database.h"
 #include "eventql/auth/client_auth.h"
@@ -167,42 +168,91 @@ ScopedPtr<TableExpression> DefaultScheduler::buildJoinExpression(
     Transaction* ctx,
     ExecutionContext* execution_context,
     RefPtr<JoinNode> node) {
+  auto compiler = ctx->getCompiler();
+
   Vector<String> column_names;
   Vector<ValueExpression> select_expressions;
 
   for (const auto& slnode : node->selectList()) {
     select_expressions.emplace_back(
-        ctx->getCompiler()->buildValueExpression(ctx, slnode->expression()));
+        compiler->buildValueExpression(ctx, slnode->expression()));
   }
 
+  std::vector<JoinConjunction> conjunctions;
   Option<ValueExpression> where_expr;
   if (!node->whereExpression().isEmpty()) {
     where_expr = std::move(Option<ValueExpression>(
-        ctx->getCompiler()->buildValueExpression(ctx, node->whereExpression().get())));
+        compiler->buildValueExpression(ctx, node->whereExpression().get())));
+
+    findJoinConjunctions(
+        node.get(),
+        node->whereExpression().get().get(),
+        &conjunctions);
   }
 
   Option<ValueExpression> join_cond_expr;
   if (!node->joinCondition().isEmpty()) {
     join_cond_expr = std::move(Option<ValueExpression>(
-        ctx->getCompiler()->buildValueExpression(ctx, node->joinCondition().get())));
+        compiler->buildValueExpression(ctx, node->joinCondition().get())));
+
+    findJoinConjunctions(
+        node.get(),
+        node->joinCondition().get().get(),
+        &conjunctions);
   }
 
-  return mkScoped(
-      new NestedLoopJoin(
-          ctx,
-          node->joinType(),
-          node->inputColumnMap(),
-          std::move(select_expressions),
-          std::move(join_cond_expr),
-          std::move(where_expr),
-          buildTableExpression(
-              ctx,
-              execution_context,
-              node->baseTable().asInstanceOf<TableExpressionNode>()),
-          buildTableExpression(
-              ctx,
-              execution_context,
-              node->joinedTable().asInstanceOf<TableExpressionNode>())));
+  std::vector<JoinConjunction> equi_conjunctions;
+  for (const auto& c : conjunctions) {
+    if (c.type == JoinConjunctionType::EQUAL_TO) {
+      equi_conjunctions.emplace_back(c);
+    }
+  }
+
+  if (equi_conjunctions.size() > 0) {
+    /* hash join for equi-joins */
+    std::vector<std::pair<ValueExpression, ValueExpression>> conjunction_exprs;
+    for (const auto& c : equi_conjunctions) {
+      conjunction_exprs.emplace_back(
+          compiler->buildValueExpression(ctx, c.base_table_expr.get()),
+          compiler->buildValueExpression(ctx, c.joined_table_expr.get()));
+    }
+
+    return mkScoped(
+        new HashJoin(
+            ctx,
+            node->joinType(),
+            node->inputColumnMap(),
+            std::move(select_expressions),
+            std::move(join_cond_expr),
+            std::move(where_expr),
+            std::move(conjunction_exprs),
+            buildTableExpression(
+                ctx,
+                execution_context,
+                node->baseTable().asInstanceOf<TableExpressionNode>()),
+            buildTableExpression(
+                ctx,
+                execution_context,
+                node->joinedTable().asInstanceOf<TableExpressionNode>())));
+  } else {
+    /* default to nested loop join */
+    return mkScoped(
+        new NestedLoopJoin(
+            ctx,
+            node->joinType(),
+            node->inputColumnMap(),
+            std::move(select_expressions),
+            std::move(join_cond_expr),
+            std::move(where_expr),
+            buildTableExpression(
+                ctx,
+                execution_context,
+                node->baseTable().asInstanceOf<TableExpressionNode>()),
+            buildTableExpression(
+                ctx,
+                execution_context,
+                node->joinedTable().asInstanceOf<TableExpressionNode>())));
+  }
 }
 
 ScopedPtr<TableExpression> DefaultScheduler::buildTableExpression(

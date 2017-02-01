@@ -587,6 +587,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/expressions/table/cluster_show_servers.h \
     eventql/sql/expressions/table/groupby.cc \
     eventql/sql/expressions/table/groupby.h \
+    eventql/sql/expressions/table/hash_join.cc \
+    eventql/sql/expressions/table/hash_join.h \
     eventql/sql/expressions/table/limit.cc \
     eventql/sql/expressions/table/limit.h \
     eventql/sql/expressions/table/nested_loop_join.cc \

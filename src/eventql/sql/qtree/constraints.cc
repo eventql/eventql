@@ -22,7 +22,6 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <iostream>
 #include <eventql/sql/qtree/constraints.h>
 
 namespace csql {
@@ -35,7 +34,6 @@ void findJoinConjunctions(
   if (!call_expr) {
     return;
   }
-  std::cerr << "SEARCH: " << call_expr->getFunctionName() << std::endl;
 
   // logical ands allow chaining multiple conjunctions
   if (call_expr->getFunctionName() == "logical_and") {

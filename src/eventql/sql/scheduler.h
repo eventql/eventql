@@ -52,6 +52,7 @@
 #include <eventql/sql/expressions/table/cluster_show_servers.h>
 #include <eventql/sql/expressions/table/groupby.h>
 #include <eventql/sql/expressions/table/nested_loop_join.h>
+#include <eventql/sql/expressions/table/hash_join.h>
 #include <eventql/sql/extensions/chartsql/chart_expression.h>
 #include <eventql/sql/qtree/SelectExpressionNode.h>
 #include <eventql/sql/qtree/SubqueryNode.h>
