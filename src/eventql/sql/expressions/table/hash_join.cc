@@ -69,14 +69,17 @@ ReturnCode HashJoin::execute() {
   return ReturnCode::success();
 }
 
-ReturnCode HashJoin::nextBatch(SVector* out, size_t* nrecords) {
+ReturnCode HashJoin::nextBatch(
+    size_t limit,
+    SVector* out,
+    size_t* nrecords) {
   for (;;) {
     *nrecords = 0;
 
     /* fetch base table input columns */
     size_t base_nrecords = 0;
     {
-      auto rc = base_tbl_->nextBatch(base_tbl_cols_.data(), &base_nrecords);
+      auto rc = base_tbl_->nextBatch(0, base_tbl_cols_.data(), &base_nrecords);
       if (!rc.isSuccess()) {
         RAISE(kRuntimeError, rc.getMessage());
       }
@@ -235,7 +238,7 @@ ReturnCode HashJoin::readJoinedTable() {
   for (;;) {
     size_t nrecords = 0;
     {
-      auto rc = joined_tbl_->nextBatch(input_cols.data(), &nrecords);
+      auto rc = joined_tbl_->nextBatch(0, input_cols.data(), &nrecords);
       if (!rc.isSuccess()) {
         RAISE(kRuntimeError, rc.getMessage());
       }

@@ -50,6 +50,7 @@ ReturnCode ShowTablesExpression::execute() {
 }
 
 ReturnCode ShowTablesExpression::nextBatch(
+    size_t limit,
     SVector* columns,
     size_t* nrecords) {
   return ReturnCode::error("ERUNTIME", "ShowTablesExpression::nextBatch not yet implemented");

@@ -36,8 +36,8 @@ bool TableExpression::next(SValue* out, size_t out_len) {
     column_buffers.emplace_back(getColumnType(i));
   }
 
-  size_t nrecords = 1;
-  auto rc = nextBatch(column_buffers.data(), &nrecords);
+  size_t nrecords = 0;
+  auto rc = nextBatch(1, column_buffers.data(), &nrecords);
   if (!rc.isSuccess()) {
     RAISE(kRuntimeError, rc.getMessage());
   }

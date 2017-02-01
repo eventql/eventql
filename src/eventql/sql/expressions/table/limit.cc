@@ -48,6 +48,7 @@ ReturnCode LimitExpression::execute() {
 }
 
 ReturnCode LimitExpression::nextBatch(
+    size_t limit,
     SVector* columns,
     size_t* nrecords) {
   return ReturnCode::error("ERUNTIME", "LimitExpression::nextBatch not yet implemented");

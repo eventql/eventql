@@ -46,6 +46,7 @@ ReturnCode ClusterShowServersExpression::execute() {
 }
 
 ReturnCode ClusterShowServersExpression::nextBatch(
+    size_t limit,
     SVector* columns,
     size_t* nrecords) {
   return ReturnCode::error("ERUNTIME", "ClusterShowServersExpression::nextBatch not yet implemented");

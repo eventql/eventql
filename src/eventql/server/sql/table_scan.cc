@@ -62,7 +62,10 @@ csql::SType TableScan::getColumnType(size_t idx) const {
   return seqscan_->getColumnType(idx);
 }
 
-ReturnCode TableScan::nextBatch(csql::SVector* columns, size_t* nrows) {
+ReturnCode TableScan::nextBatch(
+    size_t limit,
+    csql::SVector* columns,
+    size_t* nrows) {
   while (cur_partition_ < partitions_.size()) {
     if (cur_cursor_.get() == nullptr) {
       cur_cursor_ = openPartition(partitions_[cur_partition_]);
@@ -75,7 +78,7 @@ ReturnCode TableScan::nextBatch(csql::SVector* columns, size_t* nrows) {
       continue;
     }
 
-    auto rc = cur_cursor_->nextBatch(columns, nrows);
+    auto rc = cur_cursor_->nextBatch(limit, columns, nrows);
     if (!rc.isSuccess()) {
       return rc;
     }

@@ -128,6 +128,7 @@ bool NestedLoopJoin::next(SValue* row, size_t row_len) {
 }
 
 ReturnCode NestedLoopJoin::nextBatch(
+    size_t limit,
     SVector* columns,
     size_t* nrecords) {
   return ReturnCode::error("ERUNTIME", "NestedLoopJoin::nextBatch not yet implemented");

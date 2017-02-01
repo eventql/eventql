@@ -46,7 +46,7 @@ public:
       RefPtr<PartitionSnapshot> snap,
       RefPtr<csql::SequentialScanNode> stmt);
 
-  ReturnCode nextBatch(csql::SVector* columns, size_t* nrows) override;
+  ReturnCode nextBatch(size_t limit, csql::SVector* columns, size_t* len) override;
 
   size_t getColumnCount() const override;
   csql::SType getColumnType(size_t idx) const override;
@@ -79,7 +79,7 @@ public:
 
   bool next(csql::SValue* row, size_t row_len) override;
 
-  ReturnCode nextBatch(csql::SVector* columns, size_t* nrows) override;
+  ReturnCode nextBatch(size_t limit, csql::SVector* columns, size_t* len) override;
 
   size_t getColumnCount() const override;
   csql::SType getColumnType(size_t idx) const override;

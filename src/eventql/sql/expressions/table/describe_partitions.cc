@@ -45,6 +45,7 @@ ReturnCode DescribePartitionsExpression::execute() {
 }
 
 ReturnCode DescribePartitionsExpression::nextBatch(
+    size_t limit,
     SVector* columns,
     size_t* nrecords) {
   return ReturnCode::error("ERUNTIME", "DescribePartitionsExpression::nextBatch not yet implemented");

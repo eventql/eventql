@@ -98,6 +98,7 @@ ReturnCode CSTableScan::execute() {
 }
 
 ReturnCode CSTableScan::nextBatch(
+    size_t limit,
     SVector* columns,
     size_t* nrecords) {
   return ReturnCode::error("ERUNTIME", "CSTableScan::nextBatch not yet implemented");
@@ -707,6 +708,7 @@ ReturnCode FastCSTableScan::execute() {
 }
 
 ReturnCode FastCSTableScan::nextBatch(
+    size_t limit,
     SVector* out,
     size_t* nrecords) {
   if (num_records_ == 0) {
@@ -717,7 +719,7 @@ ReturnCode FastCSTableScan::nextBatch(
   /* calculate batch size */
   size_t batch_size = std::min(
       num_records_,
-      *nrecords > 0 ? *nrecords : size_t(8192));
+      limit > 0 ? limit : size_t(8192));
 
   /* fetch input columns */
   for (size_t i = 0; i < column_buffers_.size(); ++i) {

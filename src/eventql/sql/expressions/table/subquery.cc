@@ -56,13 +56,14 @@ ReturnCode SubqueryExpression::execute() {
 }
 
 ReturnCode SubqueryExpression::nextBatch(
+    size_t limit,
     SVector* out,
     size_t* nrecords) {
   for (;;) {
     /* fetch input columns */
     size_t input_nrecords = 0;
     {
-      auto rc = input_->nextBatch(input_cols_.data(), &input_nrecords);
+      auto rc = input_->nextBatch(limit, input_cols_.data(), &input_nrecords);
       if (!rc.isSuccess()) {
         RAISE(kRuntimeError, rc.getMessage());
       }

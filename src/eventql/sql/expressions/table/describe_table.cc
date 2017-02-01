@@ -45,6 +45,7 @@ ReturnCode DescribeTableStatement::execute() {
 }
 
 ReturnCode DescribeTableStatement::nextBatch(
+    size_t limit,
     SVector* columns,
     size_t* nrecords) {
   return ReturnCode::error("ERUNTIME", "DescribeTableExpression::nextBatch not yet implemented");

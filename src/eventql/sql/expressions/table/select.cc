@@ -44,6 +44,7 @@ ReturnCode SelectExpression::execute() {
 }
 
 ReturnCode SelectExpression::nextBatch(
+    size_t limit,
     SVector* columns,
     size_t* nrecords) {
   return ReturnCode::error("ERUNTIME", "SelectExpression::nextBatch not yet implemented");

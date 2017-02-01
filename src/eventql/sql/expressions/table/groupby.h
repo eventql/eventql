@@ -43,7 +43,7 @@ public:
   ~GroupByExpression();
 
   ReturnCode execute() override;
-  ReturnCode nextBatch(SVector* columns, size_t* nrecords) override;
+  ReturnCode nextBatch(size_t limit, SVector* columns, size_t* len) override;
 
   size_t getColumnCount() const override;
   SType getColumnType(size_t idx) const override;
@@ -78,7 +78,7 @@ public:
   ~PartialGroupByExpression();
 
   ReturnCode execute() override;
-  ReturnCode nextBatch(SVector* columns, size_t* nrecords) override;
+  ReturnCode nextBatch(size_t limit, SVector* columns, size_t* len) override;
 
   size_t getColumnCount() const override;
   SType getColumnType(size_t idx) const override;
@@ -117,7 +117,7 @@ public:
   ~GroupByMergeExpression();
 
   ReturnCode execute() override;
-  ReturnCode nextBatch(SVector* columns, size_t* nrecords) override;
+  ReturnCode nextBatch(size_t limit, SVector* columns, size_t* len) override;
 
   size_t getColumnCount() const override;
   SType getColumnType(size_t idx) const override;

@@ -115,6 +115,7 @@ ReturnCode OrderByExpression::execute() {
 }
 
 ReturnCode OrderByExpression::nextBatch(
+    size_t limit,
     SVector* columns,
     size_t* nrecords) {
   return ReturnCode::error("ERUNTIME", "OrderByExpression::nextBatch not yet implemented");

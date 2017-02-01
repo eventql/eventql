@@ -44,7 +44,10 @@ PartitionCursor::PartitionCursor(
     stmt_(stmt),
     cur_table_(0) {};
 
-ReturnCode PartitionCursor::nextBatch(csql::SVector* columns, size_t* nrows) {
+ReturnCode PartitionCursor::nextBatch(
+    size_t limit,
+    csql::SVector* columns,
+    size_t* nrows) {
   for (;;) {
     if (cur_scan_.get() == nullptr) {
       if (!openNextTable()) {
@@ -52,7 +55,7 @@ ReturnCode PartitionCursor::nextBatch(csql::SVector* columns, size_t* nrows) {
       }
     }
 
-    auto rc = cur_scan_->nextBatch(columns, nrows);
+    auto rc = cur_scan_->nextBatch(limit, columns, nrows);
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -272,6 +275,7 @@ bool RemotePartitionCursor::next(csql::SValue* row, size_t row_len) {
 }
 
 ReturnCode RemotePartitionCursor::nextBatch(
+    size_t limit,
     csql::SVector* columns,
     size_t* nrecords) {
   return ReturnCode::error("ERUNTIME", "RemotePartitionCursor::nextBatch not yet implemented");
