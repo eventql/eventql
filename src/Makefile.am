@@ -630,6 +630,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/parser/token.h \
     eventql/sql/parser/tokenize.cc \
     eventql/sql/parser/tokenize.h \
+    eventql/sql/qtree/constraints.cc \
+    eventql/sql/qtree/constraints.h \
     eventql/sql/qtree/CallExpressionNode.cc \
     eventql/sql/qtree/CallExpressionNode.h \
     eventql/sql/qtree/ChartStatementNode.cc \

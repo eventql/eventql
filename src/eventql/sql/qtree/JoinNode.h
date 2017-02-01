@@ -38,6 +38,29 @@ enum class JoinType {
   CARTESIAN, INNER, OUTER
 };
 
+enum class JoinConjunctionType : uint8_t {
+  EQUAL_TO,
+  NOT_EQUAL_TO,
+  LESS_THAN,
+  LESS_THAN_OR_EQUAL_TO,
+  GREATER_THAN,
+  GREATER_THAN_OR_EQUAL_TO
+};
+
+/**
+ * Describes a "join conjunction", i.e.a predicate expression that implies a
+ * logical relation (equal/less than/greather than) between columns (or
+ * projections of columns) of the two input tables of the join.
+ */
+struct JoinConjunction {
+  JoinConjunctionType type;
+  RefPtr<ValueExpressionNode> left;
+  RefPtr<ValueExpressionNode> right;
+
+  bool operator==(const JoinConjunction& other) const;
+  bool operator!=(const JoinConjunction& other) const;
+};
+
 class JoinNode : public TableExpressionNode {
 public:
 
