@@ -284,8 +284,16 @@ void Compiler::allocateReturnValue(
       op->retval.capacity = sizeof(uint64_t);
       op->retval.data = static_storage->alloc(op->retval.capacity);
       break;
+    case SType::TIMESTAMP64:
+      op->retval.capacity = sizeof(uint64_t);
+      op->retval.data = static_storage->alloc(op->retval.capacity);
+      break;
     case SType::INT64:
       op->retval.capacity = sizeof(uint64_t);
+      op->retval.data = static_storage->alloc(op->retval.capacity);
+      break;
+    case SType::BOOL:
+      op->retval.capacity = sizeof(uint8_t);
       op->retval.data = static_storage->alloc(op->retval.capacity);
       break;
     default:

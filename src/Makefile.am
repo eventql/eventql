@@ -575,6 +575,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/expressions/aggregate.h \
     eventql/sql/expressions/boolean.cc \
     eventql/sql/expressions/boolean.h \
+    eventql/sql/expressions/datetime.cc \
+    eventql/sql/expressions/datetime.h \
     eventql/sql/expressions/math.cc \
     eventql/sql/expressions/math.h \
     eventql/sql/expressions/table/describe_table.cc \

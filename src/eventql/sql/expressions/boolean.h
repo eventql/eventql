@@ -24,10 +24,25 @@
 #ifndef _FNORDMETRIC_SQL_EXPRESSIONS_BOOLEAN_H
 #define _FNORDMETRIC_SQL_EXPRESSIONS_BOOLEAN_H
 #include <eventql/sql/svalue.h>
+#include <eventql/sql/SFunction.h>
 #include <eventql/sql/transaction.h>
+#include <eventql/sql/runtime/vm.h>
 
 namespace csql {
 namespace expressions {
+
+extern const SFunction logical_and;
+extern const SFunction logical_or;
+extern const SFunction eq_uint64;
+extern const SFunction eq_timestamp64;
+extern const SFunction lt_uint64;
+extern const SFunction lt_timestamp64;
+extern const SFunction lte_uint64;
+extern const SFunction lte_timestamp64;
+extern const SFunction gt_uint64;
+extern const SFunction gt_timestamp64;
+extern const SFunction gte_uint64;
+extern const SFunction gte_timestamp64;
 
 void eqExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
 void neqExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);

@@ -24,6 +24,8 @@
  */
 #include <eventql/sql/defaults.h>
 #include <eventql/sql/expressions/aggregate.h>
+#include <eventql/sql/expressions/boolean.h>
+#include <eventql/sql/expressions/datetime.h>
 #include <eventql/sql/expressions/math.h>
 
 #include "eventql/eventql.h"
@@ -75,15 +77,21 @@ void installDefaultSymbols(SymbolTable* rt) {
   ////    &expressions::maxExprFree);
 
   ///* expressions/boolean.h */
-  //rt->registerFunction("eq",  PureFunction(&expressions::eqExpr));
+  rt->registerFunction("eq",  expressions::eq_uint64);
+  rt->registerFunction("eq",  expressions::eq_timestamp64);
+
   //rt->registerFunction("neq", PureFunction(&expressions::neqExpr));
-  //rt->registerFunction("logical_and", PureFunction(&expressions::andExpr));
-  //rt->registerFunction("logical_or", PureFunction(&expressions::orExpr));
+  rt->registerFunction("logical_and", expressions::logical_and);
+  rt->registerFunction("logical_or", expressions::logical_or);
   //rt->registerFunction("neg", PureFunction(&expressions::negExpr));
-  //rt->registerFunction("lt",  PureFunction(&expressions::ltExpr));
-  //rt->registerFunction("lte", PureFunction(&expressions::lteExpr));
-  //rt->registerFunction("gt",  PureFunction(&expressions::gtExpr));
-  //rt->registerFunction("gte", PureFunction(&expressions::gteExpr));
+  rt->registerFunction("lt", expressions::lt_uint64);
+  rt->registerFunction("lt", expressions::lt_timestamp64);
+  rt->registerFunction("lte", expressions::lte_uint64);
+  rt->registerFunction("lte", expressions::lte_timestamp64);
+  rt->registerFunction("gt", expressions::gt_uint64);
+  rt->registerFunction("gt", expressions::gt_timestamp64);
+  rt->registerFunction("gte", expressions::gte_uint64);
+  rt->registerFunction("gte", expressions::gte_timestamp64);
   //rt->registerFunction("isnull", PureFunction(&expressions::isNullExpr));
 
   ///* expressions/conversion.h */
@@ -102,7 +110,7 @@ void installDefaultSymbols(SymbolTable* rt) {
   //rt->registerFunction("date_trunc", PureFunction(&expressions::dateTruncExpr));
   //rt->registerFunction("date_add", PureFunction(&expressions::dateAddExpr));
   //rt->registerFunction("date_sub", PureFunction(&expressions::dateAddExpr));
-  //rt->registerFunction("time_at", PureFunction(&expressions::timeAtExpr));
+  rt->registerFunction("time_at", expressions::time_at);
 
   ///* expressions/math.h */
   rt->registerFunction("add", expressions::add_uint64);
