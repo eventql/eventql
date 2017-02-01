@@ -117,7 +117,7 @@ SValue::~SValue() {
   switch (data_.type) {
 
     case SType::STRING:
-      free(data_.u.t_string.ptr);
+      free(data_.u.t_string);
       break;
 
     default:
@@ -128,17 +128,14 @@ SValue::~SValue() {
 
 SValue::SValue(const SValue::StringType& string_value) {
   data_.type = SType::STRING;
-  data_.u.t_string.len = string_value.size();
-  data_.u.t_string.ptr = static_cast<char *>(malloc(data_.u.t_string.len));
+  data_.u.t_string = malloc(string_value.size() + sizeof(uint32_t));
 
-  if (data_.u.t_string.ptr == nullptr) {
-    RAISE(kRuntimeError, "could not allocate SValue");
-  }
+  *((uint32_t*) data_.u.t_string) = string_value.size();
 
   memcpy(
-      data_.u.t_string.ptr,
+      ((char*) data_.u.t_string) + sizeof(uint32_t),
       string_value.data(),
-      data_.u.t_string.len);
+      string_value.size());
 }
 
 SValue::SValue(
@@ -168,20 +165,13 @@ SValue::SValue(SValue::TimeType time_value) {
 SValue::SValue(const SValue& copy) {
   switch (copy.data_.type) {
 
-    case SType::STRING:
+    case SType::STRING: {
+      auto len = sql_strlen(copy.data_.u.t_string) + sizeof(uint32_t);
       data_.type = SType::STRING;
-      data_.u.t_string.len = copy.data_.u.t_string.len;
-      data_.u.t_string.ptr = static_cast<char *>(malloc(data_.u.t_string.len));
-
-      if (data_.u.t_string.ptr == nullptr) {
-        RAISE(kRuntimeError, "could not allocate SValue");
-      }
-
-      memcpy(
-          data_.u.t_string.ptr,
-          copy.data_.u.t_string.ptr,
-          data_.u.t_string.len);
+      data_.u.t_string = malloc(len);
+      memcpy(data_.u.t_string, copy.data_.u.t_string, len);
       break;
+    }
 
     default:
       memcpy(&data_, &copy.data_, sizeof(data_));
@@ -193,22 +183,14 @@ SValue::SValue(const SValue& copy) {
 
 SValue& SValue::operator=(const SValue& copy) {
   if (data_.type == SType::STRING) {
-    free(data_.u.t_string.ptr);
+    free(data_.u.t_string);
   }
 
   if (copy.data_.type == SType::STRING) {
+    auto len = sql_strlen(copy.data_.u.t_string) + sizeof(uint32_t);
     data_.type = SType::STRING;
-    data_.u.t_string.len = copy.data_.u.t_string.len;
-    data_.u.t_string.ptr = static_cast<char *>(malloc(data_.u.t_string.len));
-
-    if (data_.u.t_string.ptr == nullptr) {
-      RAISE(kRuntimeError, "could not allocate SValue");
-    }
-
-    memcpy(
-        data_.u.t_string.ptr,
-        copy.data_.u.t_string.ptr,
-        data_.u.t_string.len);
+    data_.u.t_string = malloc(len);
+    memcpy(data_.u.t_string, copy.data_.u.t_string, len);
   } else {
     memcpy(&data_, &copy.data_, sizeof(data_));
   }
@@ -236,10 +218,14 @@ bool SValue::operator==(const SValue& other) const {
     }
 
     case SType::STRING: {
+      if (sql_strlen(data_.u.t_string) != sql_strlen(other.data_.u.t_string)) {
+        return false;
+      }
+
       return memcmp(
-          data_.u.t_string.ptr,
-          other.data_.u.t_string.ptr,
-          data_.u.t_string.len) == 0;
+          sql_cstr(data_.u.t_string),
+          sql_cstr(other.data_.u.t_string),
+          sql_strlen(data_.u.t_string)) == 0;
     }
 
     case SType::NIL: {
@@ -457,7 +443,9 @@ SValue SValue::toString() const {
 
 std::string SValue::getString() const {
   if (data_.type == SType::STRING) {
-    return std::string(data_.u.t_string.ptr, data_.u.t_string.len);
+    return std::string(
+        sql_cstr(data_.u.t_string),
+        sql_strlen(data_.u.t_string));
   }
 
   char buf[512];
@@ -735,7 +723,9 @@ void SValue::encode(OutputStream* os) const {
 
   switch (data_.type) {
     case SType::STRING:
-      os->appendLenencString(data_.u.t_string.ptr, data_.u.t_string.len);
+      os->appendLenencString(
+          sql_cstr(data_.u.t_string),
+          sql_strlen(data_.u.t_string));
       return;
     case SType::FLOAT64:
       os->appendDouble(data_.u.t_float);
@@ -793,8 +783,16 @@ const void* SValue::getData() const {
       return &data_.u.t_uint64;
     case SType::INT64:
       return &data_.u.t_int64;
+    case SType::FLOAT64:
+      return &data_.u.t_float;
+    case SType::BOOL:
+      return &data_.u.t_bool;
+    case SType::TIMESTAMP64:
+      return &data_.u.t_timestamp;
+    case SType::STRING:
+      return data_.u.t_string;
     default:
-      assert(false);
+      return nullptr;
   }
 }
 
@@ -804,8 +802,16 @@ void* SValue::getData() {
       return &data_.u.t_uint64;
     case SType::INT64:
       return &data_.u.t_int64;
+    case SType::FLOAT64:
+      return &data_.u.t_float;
+    case SType::BOOL:
+      return &data_.u.t_bool;
+    case SType::TIMESTAMP64:
+      return &data_.u.t_timestamp;
+    case SType::STRING:
+      return data_.u.t_string;
     default:
-      assert(false);
+      return nullptr;
   }
 }
 
@@ -946,6 +952,14 @@ size_t SVector::next(SType type, void** cursor) {
 
 size_t SVector::next(void** cursor) const {
   return next(type_, cursor);
+}
+
+size_t sql_strlen(void* str) {
+  return *((uint32_t*) str);
+}
+
+char* sql_cstr(void* str) {
+  return (char*) str + sizeof(uint32_t);
 }
 
 } // namespace csql

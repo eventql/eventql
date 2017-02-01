@@ -139,12 +139,9 @@ protected:
       int64_t t_int64;
       uint64_t t_uint64;
       double t_float;
-      bool t_bool;
+      uint8_t t_bool;
       uint64_t t_timestamp;
-      struct {
-        char* ptr;
-        uint32_t len;
-      } t_string;
+      void* t_string;
     } u;
   } data_;
 };
@@ -182,6 +179,9 @@ protected:
 };
 
 String sql_escape(const String& str);
+
+size_t sql_strlen(void* str);
+char* sql_cstr(void* str);
 
 }
 
