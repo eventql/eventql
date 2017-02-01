@@ -211,8 +211,9 @@ void VM::evaluateVector(
     int argc,
     const SVector* argv,
     size_t vlen,
-    SVector* out) {
-  if (program->entry_->type == X_INPUT) {
+    SVector* out,
+    const std::vector<bool>* filter /* = nullptr */) {
+  if (program->entry_->type == X_INPUT && !filter) {
     auto index = reinterpret_cast<uint64_t>(program->entry_->arg0);
 
     if (index >= argc) {
@@ -236,13 +237,71 @@ void VM::evaluateVector(
     }
   }
 
+  auto rtype = program->return_type_;
+  assert(rtype == out->getType());
+
   if (sql_sizeof_static(out->getType())) {
     out->increaseCapacity(sql_sizeof_static(out->getType()) * vlen);
+    out->setSize(sql_sizeof_static(out->getType()) * vlen);
   }
 
   VMRegister out_reg;
   out_reg.data = out->getMutableData();
   out_reg.capacity = out->getCapacity();
+
+  for (size_t n = 0; n < vlen; ++n) {
+    if (!filter || (*filter)[n]) {
+      evaluate(ctx, program, argc, stackv, &out_reg);
+
+      // increment input iterators
+      for (size_t i = 0; i < argc; ++i) {
+        if (stackv[i]) {
+          argv[i].next(&stackv[i]);
+        }
+      }
+
+      // increment output iterator
+      out_reg.capacity -= SVector::next(rtype, &out_reg.data);
+    } else {
+      // increment input iterators
+      for (size_t i = 0; i < argc; ++i) {
+        if (stackv[i]) {
+          argv[i].next(&stackv[i]);
+        }
+      }
+    }
+  }
+}
+
+void VM::evaluatePredicateVector(
+    Transaction* ctx,
+    const Program* program,
+    int argc,
+    const SVector* argv,
+    size_t vlen,
+    std::vector<bool>* out,
+    size_t* out_cardinality) {
+  assert(program->return_type_ == SType::BOOL);
+
+  void** stackv = nullptr;
+  if (argc > 0) {
+    stackv = reinterpret_cast<void**>(alloca(sizeof(void*) * argc));
+  }
+
+  for (size_t i = 0; i < argc; ++i) {
+    if (false) { // FIXME only if input required
+      stackv[i] = nullptr;
+    } else {
+      stackv[i] = (void*) argv[i].getData();
+    }
+  }
+
+  out->resize(vlen);
+  *out_cardinality = 0;
+
+  VMRegister out_reg;
+  out_reg.data = alloca(1);
+  out_reg.capacity = 1;
 
   auto rtype = program->return_type_;
   for (size_t n = 0; n < vlen; ++n) {
@@ -255,8 +314,10 @@ void VM::evaluateVector(
       }
     }
 
-    // increment output iterator
-    out_reg.capacity -= SVector::next(rtype, &out_reg.data);
+    // store result
+    uint8_t pred = *static_cast<uint8_t*>(out_reg.data);
+    (*out)[n] = pred;
+    *out_cardinality += pred;
   }
 }
 
@@ -475,6 +536,18 @@ void VM::evaluate(
       expr->vtable.get(Transaction::get(ctx), scratch, out);
       return;
     }
+
+    case X_INPUT:
+      assert(argv[reinterpret_cast<uint64_t>(expr->arg0)]);
+      copyRegister(
+          expr->rettype,
+          out,
+          argv[reinterpret_cast<uint64_t>(expr->arg0)]);
+      break;
+
+    case X_LITERAL:
+      copyRegister(expr->rettype, out, expr->retval.data);
+      break;
 
     //case X_REGEX: {
     //  SValue subj;

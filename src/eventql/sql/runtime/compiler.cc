@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <assert.h>
 #include <stdlib.h>
 #include <eventql/util/RegExp.h>
 #include <eventql/sql/parser/astnode.h>
@@ -119,6 +120,7 @@ VM::Instruction* Compiler::compileLiteral(
   ins->arg0 = static_storage->construct<SValue>(node->value());
   ins->child = nullptr;
   ins->next  = nullptr;
+  ins->rettype = node->value().getType();
   ins->retval.capacity = node->value().getSize();
   ins->retval.data = static_storage->alloc(ins->retval.capacity);
   memcpy(ins->retval.data, node->value().getData(), ins->retval.capacity);
@@ -131,26 +133,18 @@ VM::Instruction* Compiler::compileColumnReference(
    SymbolTable* symbol_table) {
   auto col_idx = node->columnIndex();
 
-  if (col_idx == size_t(-1)) {
-    auto ins = static_storage->construct<VM::Instruction>();
-    ins->type = VM::X_LITERAL;
-    ins->arg0 = static_storage->construct<SValue>();
-    ins->child = nullptr;
-    ins->next  = nullptr;
-    ins->retval.capacity = 0;
-    ins->retval.data = nullptr;
-    return ins;
-  } else {
-    auto ins = static_storage->construct<VM::Instruction>();
-    ins->type = VM::X_INPUT;
-    ins->arg0 = (void *) col_idx;
-    ins->argn = 0;
-    ins->child = nullptr;
-    ins->next  = nullptr;
-    ins->retval.capacity = 0;
-    ins->retval.data = nullptr;
-    return ins;
-  }
+  assert(col_idx != size_t(-1));
+
+  auto ins = static_storage->construct<VM::Instruction>();
+  ins->type = VM::X_INPUT;
+  ins->arg0 = (void *) col_idx;
+  ins->argn = 0;
+  ins->child = nullptr;
+  ins->next  = nullptr;
+  ins->retval.capacity = 0;
+  ins->retval.data = nullptr;
+  ins->rettype = node->getReturnType();
+  return ins;
 }
 
 VM::Instruction* Compiler::compileMethodCall(
@@ -279,6 +273,8 @@ void Compiler::allocateReturnValue(
     SType return_type,
     VM::Instruction* op,
     ScratchMemory* static_storage) { // FIXME
+  op->rettype = return_type;
+
   switch (return_type) {
     case SType::UINT64:
       op->retval.capacity = sizeof(uint64_t);

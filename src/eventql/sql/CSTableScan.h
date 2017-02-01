@@ -161,6 +161,7 @@ protected:
   String cstable_filename_;
   RefPtr<cstable::CSTableReader> cstable_;
   std::vector<ValueExpression> select_list_;
+  ValueExpression where_expr_;
   size_t num_records_;
   std::vector<SType> column_types_;
   std::vector<SVector> column_buffers_;

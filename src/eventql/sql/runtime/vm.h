@@ -56,6 +56,7 @@ public:
     Instruction* child;
     SFunction::VTable vtable;
     VMRegister retval;
+    SType rettype;
   };
 
   struct Program {
@@ -107,7 +108,17 @@ public:
       int argc,
       const SVector* argv,
       size_t vlen,
-      SVector* out);
+      SVector* out,
+      const std::vector<bool>* filter = nullptr);
+
+  static void evaluatePredicateVector(
+      Transaction* ctx,
+      const Program* program,
+      int argc,
+      const SVector* argv,
+      size_t vlen,
+      std::vector<bool>* out,
+      size_t* out_cardinality);
 
   static Instance allocInstance(
       Transaction* ctx,

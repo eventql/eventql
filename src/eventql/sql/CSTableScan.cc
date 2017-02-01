@@ -686,6 +686,11 @@ ReturnCode FastCSTableScan::execute() {
         txn_->getCompiler()->buildValueExpression(txn_, slnode->expression()));
   }
 
+  auto where_expr = stmt_->whereExpression();
+  if (!where_expr.isEmpty()) {
+    where_expr_ = txn_->getCompiler()->buildValueExpression(txn_, where_expr.get());
+  }
+
   if (!cstable_.get()) {
     cstable_ = cstable::CSTableReader::openFile(cstable_filename_);
   }
@@ -711,49 +716,75 @@ ReturnCode FastCSTableScan::nextBatch(
     size_t limit,
     SVector* out,
     size_t* nrecords) {
-  if (num_records_ == 0) {
-    *nrecords = 0;
+  for (;;) {
+    if (num_records_ == 0) {
+      *nrecords = 0;
+      return ReturnCode::success();
+    }
+
+    /* calculate batch size */
+    size_t batch_size = std::min(
+        num_records_,
+        limit > 0 ? limit : size_t(8192 * 16));
+
+    /* fetch input columns */
+    for (size_t i = 0; i < column_buffers_.size(); ++i) {
+      auto rc = ReturnCode::success();
+
+      switch (column_types_[i]) {
+        case SType::UINT64:
+        case SType::TIMESTAMP64:
+          rc = fetchColumnUInt64(i, batch_size);
+          break;
+        default:
+          assert(0);
+      }
+
+      if (!rc.isSuccess()) {
+        return rc;
+      }
+    }
+
+    num_records_ -= batch_size;
+
+    /* evalute where expression */
+    std::vector<bool> filter_set;
+    size_t filter_set_count = 0;
+    if (where_expr_.program() == nullptr) {
+      filter_set = std::vector<bool>(batch_size, true);
+      filter_set_count = batch_size;
+    } else {
+      SValue pref(SType::BOOL);
+      VM::evaluatePredicateVector(
+          txn_,
+          where_expr_.program(),
+          column_buffers_.size(),
+          column_buffers_.data(),
+          batch_size,
+          &filter_set,
+          &filter_set_count);
+    }
+
+    if (filter_set_count == 0) {
+      continue;
+    }
+
+    /* compute output columns */
+    for (size_t i = 0; i < select_list_.size(); ++i) {
+      VM::evaluateVector(
+          txn_,
+          select_list_[i].program(),
+          column_buffers_.size(),
+          column_buffers_.data(),
+          batch_size,
+          out + i,
+          filter_set_count < batch_size ? &filter_set : nullptr);
+    }
+
+    *nrecords = filter_set_count;
+    assert(*nrecords > 0);
     return ReturnCode::success();
   }
-
-  /* calculate batch size */
-  size_t batch_size = std::min(
-      num_records_,
-      limit > 0 ? limit : size_t(8192));
-
-  /* fetch input columns */
-  for (size_t i = 0; i < column_buffers_.size(); ++i) {
-    auto rc = ReturnCode::success();
-
-    switch (column_types_[i]) {
-      case SType::UINT64:
-      case SType::TIMESTAMP64:
-        rc = fetchColumnUInt64(i, batch_size);
-        break;
-      default:
-        assert(0);
-    }
-
-    if (!rc.isSuccess()) {
-      return rc;
-    }
-  }
-
-  /* compute output columns */
-  for (size_t i = 0; i < select_list_.size(); ++i) {
-    VM::evaluateVector(
-        txn_,
-        select_list_[i].program(),
-        column_buffers_.size(),
-        column_buffers_.data(),
-        batch_size,
-        out + i);
-  }
-
-  *nrecords = batch_size;
-  assert(*nrecords > 0);
-  num_records_ -= batch_size;
-  return ReturnCode::success();
 }
 
 ReturnCode FastCSTableScan::fetchColumnUInt64(size_t idx, size_t batch_size) {
