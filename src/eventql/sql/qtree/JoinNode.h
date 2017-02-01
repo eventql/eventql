@@ -54,8 +54,8 @@ enum class JoinConjunctionType : uint8_t {
  */
 struct JoinConjunction {
   JoinConjunctionType type;
-  RefPtr<ValueExpressionNode> left;
-  RefPtr<ValueExpressionNode> right;
+  RefPtr<ValueExpressionNode> base_table_expr;
+  RefPtr<ValueExpressionNode> joined_table_expr;
 
   bool operator==(const JoinConjunction& other) const;
   bool operator!=(const JoinConjunction& other) const;

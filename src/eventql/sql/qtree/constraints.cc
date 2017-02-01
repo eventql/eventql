@@ -47,45 +47,47 @@ void findJoinConjunctions(
   }
 
   // check if this function is a candidate
-  JoinConjunction conjunction;
-  bool conjunction_found = false;
+  JoinConjunctionType conjunction_type;
   if (call_expr->getFunctionName() == "eq") {
-    conjunction_found = true;
-    conjunction.type = JoinConjunctionType::EQUAL_TO;
+    conjunction_type = JoinConjunctionType::EQUAL_TO;
   } else if (call_expr->getFunctionName() == "neq") {
-    conjunction_found = true;
-    conjunction.type = JoinConjunctionType::NOT_EQUAL_TO;
+    conjunction_type = JoinConjunctionType::NOT_EQUAL_TO;
   } else if (call_expr->getFunctionName() == "lt") {
-    conjunction_found = true;
-    conjunction.type = JoinConjunctionType::LESS_THAN;
+    conjunction_type = JoinConjunctionType::LESS_THAN;
   } else if (call_expr->getFunctionName() == "lte") {
-    conjunction_found = true;
-    conjunction.type = JoinConjunctionType::LESS_THAN_OR_EQUAL_TO;
+    conjunction_type = JoinConjunctionType::LESS_THAN_OR_EQUAL_TO;
   } else if (call_expr->getFunctionName() == "gt") {
-    conjunction_found = true;
-    conjunction.type = JoinConjunctionType::GREATER_THAN;
+    conjunction_type = JoinConjunctionType::GREATER_THAN;
   } else if (call_expr->getFunctionName() == "gte") {
-    conjunction_found = true;
-    conjunction.type = JoinConjunctionType::GREATER_THAN_OR_EQUAL_TO;
-  }
-
-  if (!conjunction_found) {
+    conjunction_type = JoinConjunctionType::GREATER_THAN_OR_EQUAL_TO;
+  } else {
     return;
   }
 
   assert(call_expr->arguments().size() == 2);
-  conjunction.left = call_expr->arguments()[0];
-  conjunction.right = call_expr->arguments()[1];
 
   std::set<size_t> left_tables;
-  findJoinInputDependencies(join, conjunction.left.get(), &left_tables);
+  auto left_expr = call_expr->arguments()[0];
+  findJoinInputDependencies(join, left_expr.get(), &left_tables);
+
   std::set<size_t> right_tables;
-  findJoinInputDependencies(join, conjunction.right.get(), &right_tables);
+  auto right_expr = call_expr->arguments()[1];
+  findJoinInputDependencies(join, right_expr.get(), &right_tables);
 
   if (left_tables.size() != 1 ||
       right_tables.size() != 1 ||
       left_tables == right_tables) {
     return;
+  }
+
+  JoinConjunction conjunction;
+  conjunction.type = conjunction_type;
+  if (left_tables.count(0) > 0) {
+    conjunction.base_table_expr = left_expr;
+    conjunction.joined_table_expr = right_expr;
+  } else {
+    conjunction.base_table_expr = right_expr;
+    conjunction.joined_table_expr = left_expr;
   }
 
   conjunctions->emplace_back(std::move(conjunction));
