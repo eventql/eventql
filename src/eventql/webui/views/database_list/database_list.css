@@ -1,11 +1,31 @@
 .evql_database_list {
-  padding: 20px;
+  padding: 0 20px;
+}
+
+.evql_database_list .section_title {
+  position: relative;
 }
 
 .evql_database_list h1 {
   font-weight: 300;
+  line-height: 60px;
+  height: 60px;
   font-size: 20px;
   color: #333;
-  margin-bottom: 16px;
+  margin: 0;
 }
 
+.evql_database_list button.btn {
+  right: 0;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.evql_database_list table.evql_table {
+  border-top: 1px solid #ddd;
+}
+
+.evql_database_list table.evql_table th {
+  background: transparent;
+}

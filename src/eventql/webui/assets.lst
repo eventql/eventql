@@ -33,6 +33,8 @@ widgets/query_progress/progress_bar.js
 widgets/dropdown/dropdown.html
 widgets/dropdown/dropdown.css
 widgets/dropdown/dropdown.js
+widgets/modal/modal.css
+widgets/modal/modal.js
 views/console/console.css
 views/console/console.html
 views/console/console.js

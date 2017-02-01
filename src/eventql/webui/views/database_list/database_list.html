@@ -1,6 +1,10 @@
 <template id="evql-database-list-tpl">
   <div class="evql_database_list">
-    <h1>Please select a database</h1>
+
+    <div class="section_title">
+      <button class="btn" data-control="create_database">Create Database</button>
+      <h1>Please select a database</h1>
+    </div>
 
     <table class="evql_table database_list">
       <thead>
@@ -10,5 +14,19 @@
       </thead>
       <tbody></tbody>
     </table>
+
+    <div class="evql_modal">
+      <div class="modal_window">
+        <div class="header">Create Database</div>
+        <div class="body">
+          <label>Please enter a name</label>
+          <input type="text" />
+        </div>
+        <div class="footer">
+          <button data-control="hide">Cancel</button>
+          <button data-control="submit"> Save</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>

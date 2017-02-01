@@ -1,0 +1,29 @@
+.evql_modal {
+  display: none;
+  background: rgba(45, 53, 59, 0.85);
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  z-index: 99999;
+}
+
+.evql_modal.active {
+  display: block;
+}
+
+.evql_modal .modal_window {
+  display: block;
+  position: relative;
+  width: 590px;
+  height: 400px;
+  top: 50%;
+  margin: auto;
+  margin-top: -250px;
+  background: #fafafa;
+  vertical-align: center;
+  padding: 10px 50px;
+}

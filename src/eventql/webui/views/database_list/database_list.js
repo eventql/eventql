@@ -31,8 +31,22 @@ EventQL.DatabaseList = function(elem, params) {
     var tpl = TemplateUtil.getTemplate("evql-database-list-tpl");
     elem.appendChild(tpl);
 
+    initCreateDatabaseControl();
     fetchData();
   };
+
+  function initCreateDatabaseControl() {
+    var modal_elem = elem.querySelector(".evql_modal");
+    var modal = new EventQL.Modal(modal_elem);
+    modal.onSubmit(function() {
+      console.log("create database");
+    });
+
+    var control = elem.querySelector("button[data-control='create_database']");
+    control.addEventListener("click", function(e) {
+      modal.show();
+    }, false);
+  }
 
   function fetchData() {
     var query_str = "SHOW DATABASES;";
