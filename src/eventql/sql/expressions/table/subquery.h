@@ -54,7 +54,6 @@ protected:
   Vector<ValueExpression> select_exprs_;
   Option<ValueExpression> where_expr_;
   ScopedPtr<TableExpression> input_;
-  ScopedPtr<ResultCursor> input_cursor_;
   Vector<SValue> buf_;
 };
 

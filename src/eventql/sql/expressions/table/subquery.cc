@@ -46,7 +46,7 @@ ReturnCode SubqueryExpression::execute() {
     return rc;
   }
 
-  buf_.resize(input_cursor_->getNumColumns());
+  buf_.resize(input_->getColumnCount());
 
   return ReturnCode::success();
 }
@@ -67,9 +67,9 @@ SType SubqueryExpression::getColumnType(size_t idx) const {
 }
 
 bool SubqueryExpression::next(SValue* row, size_t row_len) {
-  Vector<SValue> buf_(input_cursor_->getNumColumns());
+  Vector<SValue> buf_(input_->getColumnCount());
 
-  while (input_cursor_->next(buf_.data(), buf_.size())) {
+  while (input_->next(buf_.data(), buf_.size())) {
     if (!where_expr_.isEmpty()) {
       SValue pred;
       VM::evaluate(
