@@ -51,6 +51,13 @@ public:
 
 protected:
 
+  ReturnCode computeInnerJoin(
+      size_t base_records,
+      SVector* output,
+      size_t* output_records);
+
+  bool computeOutputRow(const std::vector<SValue>& input, SVector* output);
+
   ReturnCode readJoinedTable();
 
   Transaction* txn_;
@@ -62,6 +69,7 @@ protected:
   std::vector<std::pair<ValueExpression, ValueExpression>> conjunction_exprs_;
   ScopedPtr<TableExpression> base_tbl_;
   ScopedPtr<TableExpression> joined_tbl_;
+  std::vector<SVector> base_tbl_cols_;
   std::multimap<std::string, std::vector<SValue>> joined_tbl_data_;
 };
 
