@@ -48,12 +48,12 @@ public:
   bool next(SValue* row, size_t row_len) override;
 
 protected:
-
   Transaction* txn_;
   ExecutionContext* execution_context_;
   Vector<ValueExpression> select_exprs_;
   Option<ValueExpression> where_expr_;
   ScopedPtr<TableExpression> input_;
+  Vector<SVector> input_cols_;
   Vector<SValue> buf_;
 };
 

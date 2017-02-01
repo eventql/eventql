@@ -46,15 +46,47 @@ ReturnCode SubqueryExpression::execute() {
     return rc;
   }
 
+  for (size_t i = 0; i < input_->getColumnCount(); ++i) {
+    input_cols_.emplace_back(input_->getColumnType(i));
+  }
+
   buf_.resize(input_->getColumnCount());
 
   return ReturnCode::success();
 }
 
 ReturnCode SubqueryExpression::nextBatch(
-    SVector* columns,
+    SVector* out,
     size_t* nrecords) {
-  return ReturnCode::error("ERUNTIME", "SubqueryExpression::nextBatch not yet implemented");
+  for (;;) {
+    /* fetch input columns */
+    size_t input_nrecords = 0;
+    {
+      auto rc = input_->nextBatch(input_cols_.data(), &input_nrecords);
+      if (!rc.isSuccess()) {
+        RAISE(kRuntimeError, rc.getMessage());
+      }
+    }
+
+    if (input_nrecords == 0) {
+      *nrecords = 0;
+      return ReturnCode::success();
+    }
+
+    /* compute output columns */
+    for (size_t i = 0; i < select_exprs_.size(); ++i) {
+      VM::evaluateVector(
+          txn_,
+          select_exprs_[i].program(),
+          input_cols_.size(),
+          input_cols_.data(),
+          input_nrecords,
+          out + i);
+    }
+
+    *nrecords = input_nrecords;
+    return ReturnCode::success();
+  }
 }
 
 size_t SubqueryExpression::getColumnCount() const {
