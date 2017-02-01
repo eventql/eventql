@@ -80,13 +80,13 @@ ReturnCode TableScan::nextBatch(csql::SVector* columns, size_t* nrows) {
       return rc;
     }
 
-    if (!*nrows) {
+    if (*nrows > 0) {
+      return ReturnCode::success();
+    } else {
       cur_cursor_.reset(nullptr);
       ++cur_partition_;
       execution_context_->incrementNumTasksCompleted();
     }
-
-    return ReturnCode::success();
   }
 
   *nrows = 0;

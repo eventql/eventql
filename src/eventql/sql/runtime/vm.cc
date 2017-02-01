@@ -236,15 +236,8 @@ void VM::evaluateVector(
     }
   }
 
-  switch (out->getType()) {
-    case SType::UINT64: // FIXME
-      out->increaseCapacity(vlen * sizeof(uint64_t));
-      break;
-    case SType::INT64:
-      out->increaseCapacity(vlen * sizeof(uint64_t));
-      break;
-    default:
-      assert(false);
+  if (sql_sizeof_static(out->getType())) {
+    out->increaseCapacity(sql_sizeof_static(out->getType()) * vlen);
   }
 
   VMRegister out_reg;
