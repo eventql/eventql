@@ -58,7 +58,7 @@ public:
 protected:
 
   static ReturnCode compileExpression(
-      RefPtr<ValueExpressionNode> node,
+      const ValueExpressionNode* node,
       vm::Program* program,
       SymbolTable* symbol_table);
 

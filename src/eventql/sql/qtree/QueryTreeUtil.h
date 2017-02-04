@@ -28,6 +28,7 @@
 #include <eventql/sql/qtree/ValueExpressionNode.h>
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
 #include <eventql/sql/qtree/SequentialScanNode.h>
+#include <eventql/sql/qtree/CallExpressionNode.h>
 #include <eventql/sql/transaction.h>
 
 #include "eventql/eventql.h"
@@ -89,7 +90,7 @@ public:
       const ScanConstraint& constraint,
       RefPtr<ValueExpressionNode>* out);
 
-  static const ValueExpressionNode* findAggregateExpression(
+  static const CallExpressionNode* findAggregateExpression(
       const ValueExpressionNode* expr);
 
   /**

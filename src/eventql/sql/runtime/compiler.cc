@@ -26,6 +26,7 @@
 #include <eventql/util/RegExp.h>
 #include <eventql/sql/parser/astnode.h>
 #include <eventql/sql/parser/token.h>
+#include <eventql/sql/qtree/QueryTreeUtil.h>
 #include <eventql/sql/runtime/compiler.h>
 #include <eventql/sql/runtime/symboltable.h>
 #include <eventql/sql/runtime/LikePattern.h>
@@ -56,48 +57,79 @@ ReturnCode Compiler::compile(
   program->method_call = vm::EntryPoint(0);
 
   /* compile root expression */
-  auto rc = compileExpression(node, program.get(), symbol_table);
+  auto rc = compileExpression(node.get(), program.get(), symbol_table);
   if (!rc.isSuccess()) {
     return rc;
   }
 
   program->instructions.emplace_back(vm::X_RETURN, intptr_t(0));
 
-  /* compile aggregate subexpression */
-  // FIXME
+  /* compile aggregate/accumulate subexpression */
+  auto aggr_expr = QueryTreeUtil::findAggregateExpression(node.get());
+  if (aggr_expr) {
+    auto symbol = symbol_table->lookup(aggr_expr->getSymbol());
+    if (!symbol) {
+      return ReturnCode::errorf(
+          "ERUNTIME",
+          "symbol not found: $0",
+          aggr_expr->getSymbol());
+    }
+
+    auto aggr_fun = symbol->getFunction();
+    program->method_accumulate = vm::EntryPoint(program->instructions.size());
+    program->instance_reset = aggr_fun->vtable.reset;
+    program->instance_init = aggr_fun->vtable.init;
+    program->instance_free = aggr_fun->vtable.free;
+    program->instance_merge = aggr_fun->vtable.merge;
+    program->instance_savestate = aggr_fun->vtable.savestate;
+    program->instance_loadstate = aggr_fun->vtable.loadstate;
+
+    for (auto e : aggr_expr->arguments()) {
+      auto rc = compileExpression(e.get(), program.get(), symbol_table);
+      if (!rc.isSuccess()) {
+        return rc;
+      }
+    }
+
+    program->instructions.emplace_back(
+        vm::X_CALL_INSTANCE,
+        intptr_t(aggr_fun->vtable.accumulate));
+
+    program->instructions.emplace_back(vm::X_RETURN, intptr_t(0));
+  }
 
   *output = std::move(program);
   return ReturnCode::success();
 }
 
 ReturnCode Compiler::compileExpression(
-    RefPtr<ValueExpressionNode> node,
+    const ValueExpressionNode* node,
     vm::Program* program,
     SymbolTable* symbol_table) {
-  if (dynamic_cast<ColumnReferenceNode*>(node.get())) {
+  if (dynamic_cast<const ColumnReferenceNode*>(node)) {
     return compileColumnReference(
-        node.asInstanceOf<ColumnReferenceNode>().get(),
+        dynamic_cast<const ColumnReferenceNode*>(node),
         program,
         symbol_table);
   }
 
-  if (dynamic_cast<LiteralExpressionNode*>(node.get())) {
+  if (dynamic_cast<const LiteralExpressionNode*>(node)) {
     return compileLiteral(
-        node.asInstanceOf<LiteralExpressionNode>().get(),
+        dynamic_cast<const LiteralExpressionNode*>(node),
         program,
         symbol_table);
   }
 
-  if (dynamic_cast<IfExpressionNode*>(node.get())) {
+  if (dynamic_cast<const IfExpressionNode*>(node)) {
     return compileIfExpression(
-        node.asInstanceOf<IfExpressionNode>().get(),
+        dynamic_cast<const IfExpressionNode*>(node),
         program,
         symbol_table);
   }
 
-  if (dynamic_cast<CallExpressionNode*>(node.get())) {
+  if (dynamic_cast<const CallExpressionNode*>(node)) {
     return compileMethodCall(
-        node.asInstanceOf<CallExpressionNode>().get(),
+        dynamic_cast<const CallExpressionNode*>(node),
         program,
         symbol_table);
   }
@@ -143,7 +175,7 @@ ReturnCode Compiler::compileIfExpression(
     vm::Program* program,
     SymbolTable* symbol_table) {
   {
-    auto rc = compileExpression(node->conditional(), program, symbol_table);
+    auto rc = compileExpression(node->conditional().get(), program, symbol_table);
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -153,7 +185,7 @@ ReturnCode Compiler::compileIfExpression(
   program->instructions.emplace_back(vm::X_CJUMP, intptr_t(0));
 
   {
-    auto rc = compileExpression(node->falseBranch(), program, symbol_table);
+    auto rc = compileExpression(node->falseBranch().get(), program, symbol_table);
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -164,7 +196,7 @@ ReturnCode Compiler::compileIfExpression(
   jump_idx = program->instructions.size() - 1;
 
   {
-    auto rc = compileExpression(node->trueBranch(), program, symbol_table);
+    auto rc = compileExpression(node->trueBranch().get(), program, symbol_table);
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -192,7 +224,7 @@ ReturnCode Compiler::compileMethodCall(
 
     case FN_PURE:
       for (auto e : node->arguments()) {
-        auto rc = compileExpression(e, program, symbol_table);
+        auto rc = compileExpression(e.get(), program, symbol_table);
         if (!rc.isSuccess()) {
           return rc;
         }

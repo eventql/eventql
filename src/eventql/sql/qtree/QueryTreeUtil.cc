@@ -206,14 +206,14 @@ ReturnCode QueryTreeUtil::removeConstraintFromPredicate(
   return ReturnCode::success();
 }
 
-const ValueExpressionNode* QueryTreeUtil::findAggregateExpression(
+const CallExpressionNode* QueryTreeUtil::findAggregateExpression(
     const ValueExpressionNode* expr) {
   auto call_expr = dynamic_cast<const CallExpressionNode*>(expr);
   if (call_expr && call_expr->isAggregateFunction()) {
     return call_expr;
   }
 
-  for (const auto& arg : call_expr->arguments()) {
+  for (const auto& arg : expr->arguments()) {
     auto aggr = findAggregateExpression(arg.get());
     if (aggr) {
       return aggr;

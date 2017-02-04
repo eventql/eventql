@@ -47,6 +47,8 @@ bool ResultCursor::next(SValue* row) {
     if (!rc.isSuccess()) {
       RAISE(kRuntimeError, rc.getMessage());
     }
+
+    started_ = true;
   }
 
   return table_expression_->next(row, table_expression_->getColumnCount());
