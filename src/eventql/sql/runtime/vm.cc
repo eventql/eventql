@@ -180,16 +180,17 @@ void VM::evaluateVector(
     size_t vlen,
     SVector* out,
     const std::vector<bool>* filter /* = nullptr */) {
-  //if (program->entry_->type == X_INPUT && !filter) {
-  //  auto index = reinterpret_cast<uint64_t>(program->entry_->arg0);
+  if (program->instructions[entrypoint.offset].type == vm::X_INPUT && !filter) {
+    const auto& op = program->instructions[entrypoint.offset];
+    size_t index = op.arg0;
 
-  //  if (index >= argc) {
-  //    RAISE(kRuntimeError, "invalid row index %i", index);
-  //  }
+    if (index >= argc) {
+      RAISE(kRuntimeError, "invalid row index %i", index);
+    }
 
-  //  out->copyFrom(argv + index);
-  //  return;
-  //}
+    out->copyFrom(argv + index);
+    return;
+  }
 
   void** argv_cursor = nullptr;
   if (argc > 0) {
