@@ -118,7 +118,7 @@ void VM::evaluate(
         continue;
 
       case vm::X_LITERAL:
-        // FIXME
+        pushUnboxed(stack, op.argt, reinterpret_cast<const void*>(op.arg0));
         ++pc;
         continue;
 

@@ -81,13 +81,12 @@ ReturnCode Compiler::compileExpression(
         symbol_table);
   }
 
-  //if (dynamic_cast<LiteralExpressionNode*>(node.get())) {
-  //  return compileLiteral(
-  //      node.asInstanceOf<LiteralExpressionNode>(),
-  //      instance_storage_size,
-  //      static_storage,
-  //      symbol_table);
-  //}
+  if (dynamic_cast<LiteralExpressionNode*>(node.get())) {
+    return compileLiteral(
+        node.asInstanceOf<LiteralExpressionNode>().get(),
+        program,
+        symbol_table);
+  }
 
   if (dynamic_cast<IfExpressionNode*>(node.get())) {
     return compileIfExpression(
@@ -118,6 +117,22 @@ ReturnCode Compiler::compileColumnReference(
   program->instructions.emplace_back(
       vm::X_INPUT,
       intptr_t(col_idx),
+      node->getReturnType());
+
+  return ReturnCode::success();
+}
+
+ReturnCode Compiler::compileLiteral(
+    const LiteralExpressionNode* node,
+    vm::Program* program,
+    SymbolTable* symbol_table) {
+  const auto& val = node->value();
+  auto static_alloc = program->static_storage.alloc(val.getSize());
+  memcpy(static_alloc, val.getData(), val.getSize());
+
+  program->instructions.emplace_back(
+      vm::X_LITERAL,
+      intptr_t(static_alloc),
       node->getReturnType());
 
   return ReturnCode::success();

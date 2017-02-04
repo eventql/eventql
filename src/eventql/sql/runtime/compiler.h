@@ -67,6 +67,11 @@ protected:
       vm::Program* program,
       SymbolTable* symbol_table);
 
+  static ReturnCode compileLiteral(
+      const LiteralExpressionNode* node,
+      vm::Program* program,
+      SymbolTable* symbol_table);
+
   static ReturnCode compileIfExpression(
       const IfExpressionNode* node,
       vm::Program* program,
