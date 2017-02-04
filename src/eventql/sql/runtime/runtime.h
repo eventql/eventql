@@ -60,35 +60,6 @@ public:
       Transaction* ctx,
       Vector<RefPtr<csql::QueryTreeNode>> statements);
 
-  SValue evaluateScalarExpression(
-      Transaction* ctx,
-      const String& expr,
-      int argc,
-      const SValue* argv);
-
-  SValue evaluateScalarExpression(
-      Transaction* ctx,
-      ASTNode* expr,
-      int argc,
-      const SValue* argv);
-
-  SValue evaluateScalarExpression(
-      Transaction* ctx,
-      RefPtr<ValueExpressionNode> expr,
-      int argc,
-      const SValue* argv);
-
-  SValue evaluateScalarExpression(
-      Transaction* ctx,
-      const ValueExpression& expr,
-      int argc,
-      const SValue* argv);
-
-  SValue evaluateConstExpression(Transaction* ctx, const String& expr);
-  SValue evaluateConstExpression(Transaction* ctx, ASTNode* expr);
-  SValue evaluateConstExpression(Transaction* ctx, RefPtr<ValueExpressionNode> expr);
-  SValue evaluateConstExpression(Transaction* ctx, const ValueExpression& expr);
-
   Option<String> cacheDir() const;
   void setCacheDir(const String& cachedir);
 
@@ -103,6 +74,9 @@ public:
 
   QueryCache* getQueryCache() const;
   void setQueryCache(QueryCache* cache);
+
+  SValue evaluateConstExpression(Transaction* txn, ASTNode* expr);
+  SValue evaluateConstExpression(Transaction* txn, RefPtr<ValueExpressionNode> expr);
 
 protected:
   thread::ThreadPool tpool_;

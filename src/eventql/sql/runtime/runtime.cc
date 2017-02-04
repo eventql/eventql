@@ -123,5 +123,31 @@ void Runtime::setQueryCache(QueryCache* cache) {
   query_cache_ = cache;
 }
 
+SValue Runtime::evaluateConstExpression(Transaction* txn, ASTNode* expr) {
+  auto val_expr = query_plan_builder_->buildValueExpression(txn,expr);
+  evaluateConstExpression(txn, val_expr);
+}
+
+SValue Runtime::evaluateConstExpression(
+    Transaction* txn,
+    RefPtr<ValueExpressionNode> expr) {
+  auto compiled = query_builder_->buildValueExpression(txn, expr);
+
+  VMStack stack;
+  VM::evaluate(
+      txn,
+      compiled.program(),
+      compiled.program()->method_call,
+      &stack,
+      nullptr,
+      0,
+      nullptr);
+
+  SValue out(expr->getReturnType());
+  popBoxed(&stack, &out);
+
+  return out;
+}
+
 }
 
