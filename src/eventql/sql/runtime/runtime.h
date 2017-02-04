@@ -21,8 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _FNORDMETRIC_SQL_RUNTIME_H
-#define _FNORDMETRIC_SQL_RUNTIME_H
+#pragma once
 #include <stdlib.h>
 #include <string>
 #include <vector>
@@ -88,5 +87,5 @@ protected:
   QueryCache* query_cache_;
 };
 
-}
-#endif
+} // namespace sql
+

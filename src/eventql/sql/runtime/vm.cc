@@ -33,9 +33,43 @@
 
 namespace csql {
 
+VMStack::VMStack() :
+  data(nullptr),
+  size(0),
+  top(nullptr) {}
+
 namespace vm {
 
+Instruction::Instruction(
+    InstructionType _type,
+    intptr_t _arg0) :
+    type(_type),
+    arg0(_arg0),
+    argt(SType::NIL) {}
+
+Instruction::Instruction(
+    InstructionType _type,
+    intptr_t _arg0,
+    SType _argt) :
+    type(_type),
+    arg0(_arg0),
+    argt(_argt) {}
+
+EntryPoint::EntryPoint() : offset(0) {}
+EntryPoint::EntryPoint(size_t _offset) : offset(offset) {}
+
+Program::Program() :
+    instance_storage_size(0),
+    return_type(SType::NIL),
+    instance_reset(nullptr),
+    instance_init(nullptr),
+    instance_free(nullptr),
+    instance_merge(nullptr),
+    instance_savestate(nullptr),
+    instance_loadstate(nullptr) {}
+
 } // namespace vm
+
 
 using PureFunctionPtr = void (*)(sql_txn*, VMStack*);
 using InstanceFunctionPtr = void (*)(sql_txn*, void*, VMStack*);

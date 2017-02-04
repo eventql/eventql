@@ -149,5 +149,5 @@ SValue Runtime::evaluateConstExpression(
   return out;
 }
 
-}
+} // namespace sql
 

@@ -37,7 +37,7 @@ struct VMStack {
   char* top;
 };
 
-void resizeStack(VMStack* stack);
+void growStack(VMStack* stack, size_t bytes);
 
 namespace vm {
 
@@ -73,7 +73,6 @@ struct Program {
   ScratchMemory static_storage;
   size_t instance_storage_size;
   SType return_type;
-  bool has_aggregate;
   void (*instance_reset)(sql_txn*, void* self);
   void (*instance_init)(sql_txn*, void* self);
   void (*instance_free)(sql_txn*, void* self);

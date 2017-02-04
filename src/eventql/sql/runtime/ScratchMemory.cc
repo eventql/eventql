@@ -61,4 +61,5 @@ void ScratchMemory::appendBlock(size_t size) {
   head_ = block;
 }
 
-}
+} // namespace csql
+
