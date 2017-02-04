@@ -330,6 +330,71 @@ void pushBoolUnboxed(VMStack* stack, const void* value) {
   memcpy(stack->top, value, sizeof(uint8_t));
 }
 
+void popString(VMStack* stack, const char** data, size_t* len) {
+  assert(stack->limit - stack->top >= sizeof(uint32_t));
+  *len = *reinterpret_cast<uint32_t*>(stack->top);
+  *data = stack->top + sizeof(uint32_t);
+  assert(stack->limit - stack->top >= sizeof(uint32_t) + *len);
+  stack->top += sizeof(uint32_t) + *len;
+}
+
+std::string popString(VMStack* stack) {
+  assert(stack->limit - stack->top >= sizeof(uint32_t));
+  size_t len = *reinterpret_cast<uint32_t*>(stack->top);
+  auto data = stack->top + sizeof(uint32_t);
+  assert(stack->limit - stack->top >= sizeof(uint32_t) + len);
+  stack->top += len + sizeof(uint32_t);
+  return std::string(data, len);
+}
+
+void popStringBoxed(VMStack* stack, SValue* value) {
+  assert(stack->limit - stack->top >= sizeof(uint32_t));
+  size_t len = *reinterpret_cast<uint32_t*>(stack->top);
+  value->setData(stack->top, sizeof(uint32_t) + len);
+  assert(stack->limit - stack->top >= sizeof(uint32_t) + len);
+  stack->top += sizeof(uint32_t) + len;
+}
+
+void popStringVector(VMStack* stack, SVector* vector) {
+  assert(stack->limit - stack->top >= sizeof(uint32_t));
+  size_t len = *reinterpret_cast<uint32_t*>(stack->top);
+  vector->append(stack->top, sizeof(uint32_t) + len);
+  assert(stack->limit - stack->top >= sizeof(uint32_t) + len);
+  stack->top += sizeof(uint32_t) + len;
+}
+
+void pushString(VMStack* stack, const char* data, size_t len) {
+  if (stack->top - stack->data < sizeof(uint32_t) + len) {
+    vm::growStack(stack, sizeof(uint32_t) + len);
+  }
+
+  *reinterpret_cast<uint32_t*>(stack->top - len - sizeof(uint32_t)) = len;
+  memcpy(stack->top - len, data, len);
+  stack->top -= sizeof(uint32_t) + len;
+}
+
+void pushString(VMStack* stack, const std::string& str) {
+  auto len = str.size();
+
+  if (stack->top - stack->data < sizeof(uint32_t) + len) {
+    vm::growStack(stack, sizeof(uint32_t) + len);
+  }
+
+  *reinterpret_cast<uint32_t*>(stack->top - sizeof(uint32_t) - len) = len;
+  memcpy(stack->top - len, str.data(), len);
+  stack->top -= sizeof(uint32_t) + len;
+}
+
+void pushStringUnboxed(VMStack* stack, const void* value) {
+  auto len = *static_cast<const uint32_t*>(value);
+  if (stack->top - stack->data < sizeof(uint32_t) + len) {
+    vm::growStack(stack, sizeof(uint32_t) + len);
+  }
+
+  memcpy(stack->top - sizeof(uint32_t) - len, value, len + sizeof(uint32_t));
+  stack->top -= sizeof(uint32_t) + len;
+}
+
 uint64_t popTimestamp64(VMStack* stack) {
   assert(stack->limit - stack->top >= sizeof(uint64_t));
   auto value = *reinterpret_cast<uint64_t*>(stack->top);
