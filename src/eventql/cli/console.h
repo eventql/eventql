@@ -78,9 +78,6 @@ public:
   Status runJS(const String& query);
 
 protected:
-
-  Status sendRequest(const String& query, csql::BinaryResultParser* res_parser);
-
   CLIConfig cfg_;
   evql_client_t* client_;
 };
