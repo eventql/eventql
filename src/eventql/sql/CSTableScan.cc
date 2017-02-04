@@ -754,7 +754,7 @@ ReturnCode FastCSTableScan::nextBatch(
     /* calculate batch size */
     size_t batch_size = std::min(
         num_records_,
-        limit > 0 ? limit : size_t(8192 * 16));
+        limit > 0 ? limit : size_t(1024));
 
     /* fetch input columns */
     for (size_t i = 0; i < column_buffers_.size(); ++i) {
