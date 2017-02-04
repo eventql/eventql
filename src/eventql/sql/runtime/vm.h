@@ -33,6 +33,7 @@ class Transaction;
 
 struct VMStack {
   VMStack();
+  ~VMStack();
   char* data;
   char* top;
   char* limit;

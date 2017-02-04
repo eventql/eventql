@@ -38,6 +38,12 @@ VMStack::VMStack() :
   top(nullptr),
   limit(nullptr) {}
 
+VMStack::~VMStack() {
+  if (data) {
+    free(data);
+  }
+}
+
 namespace vm {
 
 Instruction::Instruction(
