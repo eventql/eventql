@@ -102,7 +102,10 @@ ReturnCode Compiler::compileColumnReference(
   auto col_idx = node->columnIndex();
   assert(col_idx != size_t(-1));
 
-  program->instructions.emplace_back(vm::X_INPUT, intptr_t(col_idx));
+  program->instructions.emplace_back(
+      vm::X_INPUT,
+      intptr_t(col_idx),
+      node->getReturnType());
 
   return ReturnCode::success();
 }
@@ -167,11 +170,15 @@ ReturnCode Compiler::compileMethodCall(
         }
       }
 
-      program->instructions.emplace_back(vm::X_CALL, intptr_t(fun->vtable.call));
+      program->instructions.emplace_back(
+          vm::X_CALL_PURE,
+          intptr_t(fun->vtable.call));
       break;
 
     case FN_AGGREGATE:
-      program->instructions.emplace_back(vm::X_CALL, intptr_t(fun->vtable.get));
+      program->instructions.emplace_back(
+          vm::X_CALL_INSTANCE,
+          intptr_t(fun->vtable.get));
       break;
 
   }

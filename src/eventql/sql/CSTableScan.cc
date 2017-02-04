@@ -676,11 +676,11 @@ CSTableScan::ExpressionRef::ExpressionRef(
     rep_level(other.rep_level),
     compiled(std::move(other.compiled)),
     instance(other.instance) {
-  other.instance.scratch = nullptr;
+  other.instance = nullptr;
 }
 
 CSTableScan::ExpressionRef::~ExpressionRef() {
-  if (instance.scratch) {
+  if (instance) {
     VM::freeInstance(txn, compiled.program(), &instance);
   }
 }

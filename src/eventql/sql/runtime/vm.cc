@@ -37,6 +37,58 @@ namespace vm {
 
 } // namespace vm
 
+using PureFunctionPtr = void (*)(sql_txn*, VMStack*);
+using InstanceFunctionPtr = void (*)(sql_txn*, void*, VMStack*);
+
+void VM::evaluate(
+    Transaction* ctx,
+    const vm::Program* program,
+    vm::EntryPoint entrypoint,
+    VMStack* stack,
+    Instance* instance,
+    int argc,
+    void** argv) {
+  auto instructions = program->instructions.data();
+
+  for (size_t pc = entrypoint.offset; ;) {
+    const auto& op = instructions[pc];
+    switch (op.type) {
+
+      case vm::X_CALL_PURE:
+        ((PureFunctionPtr) op.arg0)(Transaction::get(ctx), stack);
+        ++pc;
+        continue;
+
+      case vm::X_CALL_INSTANCE:
+        ((InstanceFunctionPtr) op.arg0)(Transaction::get(ctx), instance, stack);
+        ++pc;
+        continue;
+
+      case vm::X_LITERAL:
+        // FIXME
+        ++pc;
+        continue;
+
+      case vm::X_INPUT:
+        pushUnboxed(stack, op.argt, argv[op.arg0]);
+        ++pc;
+        continue;
+
+      case vm::X_JUMP:
+        pc = op.arg0;
+        continue;
+
+      case vm::X_CJUMP:
+        pc = popBool(stack) ? op.arg0 : pc + 1;
+        continue;
+
+      case vm::X_RETURN:
+        return;
+
+    }
+  }
+}
+
 void VM::evaluateBoxed(
     Transaction* ctx,
     const vm::Program* program,

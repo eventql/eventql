@@ -42,7 +42,8 @@ void resizeStack(VMStack* stack);
 namespace vm {
 
 enum InstructionType {
-  X_CALL,
+  X_CALL_PURE,
+  X_CALL_INSTANCE,
   X_LITERAL,
   X_INPUT,
   X_JUMP,
@@ -52,8 +53,10 @@ enum InstructionType {
 
 struct Instruction {
   Instruction(InstructionType _type, intptr_t _arg0);
+  Instruction(InstructionType _type, intptr_t _arg0, SType _argt);
   InstructionType type;
   intptr_t arg0;
+  SType argt;
 };
 
 struct EntryPoint {
@@ -78,9 +81,7 @@ struct Program {
 class VM {
 public:
 
-  struct Instance {
-    void* scratch;
-  };
+  using Instance = void*;
 
   static void evaluate(
       Transaction* ctx,
