@@ -815,12 +815,12 @@ static Option<uint64_t> parseInterval(String time_interval) {
 //      argv[2].getString());
 //}
 
-void time_at_call(sql_txn* ctx, int argc, void** argv, VMRegister* out) {
-  String time_str(sql_cstr(argv[0]), sql_strlen(argv[0]));
+void time_at_call(sql_txn* ctx, VMStack* stack) {
+  auto time_str = popString(stack);
 
   StringUtil::toLower(&time_str);
   if (time_str == "now") {
-    *static_cast<uint64_t*>(out->data) = WallClock::unixMicros();
+    pushTimestamp64(stack, WallClock::unixMicros());
     return;
   }
 
@@ -829,7 +829,7 @@ void time_at_call(sql_txn* ctx, int argc, void** argv, VMRegister* out) {
       auto now = uint64_t(WallClock::now());
       Option<uint64_t> time_val = parseInterval(time_str.substr(1));
       if (!time_val.isEmpty()) {
-        *static_cast<uint64_t*>(out->data) = now - time_val.get();
+        pushTimestamp64(stack, now - time_val.get());
         return;
       }
     } catch (...) {
@@ -846,7 +846,7 @@ void time_at_call(sql_txn* ctx, int argc, void** argv, VMRegister* out) {
       Option<uint64_t> time_val = parseInterval(
           time_str.substr(0, time_str.length() - 4));
       if (!time_val.isEmpty()) {
-        *static_cast<uint64_t*>(out->data) = now - time_val.get();
+        pushTimestamp64(stack, now - time_val.get());
         return;
       }
     } catch (...) {
@@ -865,7 +865,7 @@ void time_at_call(sql_txn* ctx, int argc, void** argv, VMRegister* out) {
         time_str);
   }
 
-  *static_cast<uint64_t*>(out->data) = time_opt.get().unixMicros();
+  pushTimestamp64(stack, time_opt.get().unixMicros());
 }
 
 const SFunction time_at(

@@ -30,7 +30,7 @@ namespace csql {
 SFunction::SFunction(
     std::vector<SType> _arg_types,
     SType _return_type,
-    void (*_call)(sql_txn* ctx, int argc, void** argv, VMRegister* out),
+    void (*_call)(sql_txn* ctx, VMStack* stack),
     bool _has_side_effects /* = false */) :
     type(FN_PURE),
     arg_types(_arg_types),
@@ -42,17 +42,17 @@ SFunction::SFunction(
 SFunction::SFunction(
     std::vector<SType> _arg_types,
     SType _return_type,
-    size_t _scratch_size,
-    void (*_accumulate)(sql_txn*, void* scratch, int argc, void** argv),
-    void (*_get)(sql_txn*, void* scratch, VMRegister* out),
-    void (*_reset)(sql_txn*, void* scratch),
-    void (*_init)(sql_txn*, void* scratch),
-    void (*_free)(sql_txn*, void* scratch),
-    void (*_merge)(sql_txn*, void* scratch, const void* other),
-    void (*_savestate)(sql_txn*, void* scratch, OutputStream* os),
-    void (*_loadstate)(sql_txn*, void* scratch, InputStream* is)) :
+    size_t _instance_size,
+    void (*_accumulate)(sql_txn*, void* self, VMStack* stack),
+    void (*_get)(sql_txn*, void* self, VMStack* stack),
+    void (*_reset)(sql_txn*, void* self),
+    void (*_init)(sql_txn*, void* self),
+    void (*_free)(sql_txn*, void* self),
+    void (*_merge)(sql_txn*, void* self, const void* other),
+    void (*_savestate)(sql_txn*, void* self, OutputStream* os),
+    void (*_loadstate)(sql_txn*, void* self, InputStream* is)) :
     type(FN_AGGREGATE),
-    scratch_size(_scratch_size),
+    instance_size(_instance_size),
     arg_types(_arg_types),
     return_type(_return_type) {
   vtable.accumulate = _accumulate;

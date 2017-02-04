@@ -31,9 +31,10 @@
 namespace csql {
 namespace expressions {
 
-void add_uint64_call(sql_txn* ctx, int argc, void** argv, VMRegister* out) {
-  *static_cast<uint64_t*>(out->data) =
-      *static_cast<uint64_t*>(argv[0]) + *static_cast<uint64_t*>(argv[1]);
+void add_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  pushUInt64(stack, left + right);
 }
 
 const SFunction add_uint64(
@@ -41,9 +42,10 @@ const SFunction add_uint64(
     SType::UINT64,
     &add_uint64_call);
 
-void add_int64_call(sql_txn* ctx, int argc, void** argv, VMRegister* out) {
-  *static_cast<int64_t*>(out->data) =
-      *static_cast<int64_t*>(argv[0]) + *static_cast<int64_t*>(argv[1]);
+void add_int64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popInt64(stack);
+  auto left = popInt64(stack);
+  pushInt64(stack, left + right);
 }
 
 const SFunction add_int64(
@@ -51,9 +53,10 @@ const SFunction add_int64(
     SType::INT64,
     &add_int64_call);
 
-void add_float64_call(sql_txn* ctx, int argc, void** argv, VMRegister* out) {
-  *static_cast<double*>(out->data) =
-      *static_cast<double*>(argv[0]) + *static_cast<double*>(argv[1]);
+void add_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popFloat64(stack);
+  auto left = popFloat64(stack);
+  pushInt64(stack, left + right);
 }
 
 const SFunction add_float64(

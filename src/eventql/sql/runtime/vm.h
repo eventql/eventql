@@ -30,11 +30,6 @@ namespace csql {
 class SValue;
 class ScratchMemory;
 
-struct VMRegister {
-  void* data;
-  size_t capacity;
-};
-
 struct VMStack {
   VMStack();
   char* data;

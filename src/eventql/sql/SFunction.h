@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/ieee754.h>
 #include <eventql/util/util/binarymessagereader.h>
@@ -29,10 +30,8 @@
 #include <eventql/sql/svalue.h>
 #include <eventql/sql/transaction.h>
 
-#include "eventql/eventql.h"
-
 namespace csql {
-class VMRegister;
+struct VMStack;
 
 enum kFunctionType {
   FN_PURE,
@@ -41,42 +40,45 @@ enum kFunctionType {
 
 struct SFunction {
 
+  /* A pure/stateless function */
   SFunction(
       std::vector<SType> _arg_types,
       SType _return_type,
-      void (*_call)(sql_txn* ctx, int argc, void** argv, VMRegister* out),
+      void (*_call)(sql_txn* ctx, VMStack* stack),
       bool _has_side_effects = false);
 
+  /* A stateful ("aggregate") function */
   SFunction(
       std::vector<SType> _arg_types,
       SType _return_type,
-      size_t _scratch_size,
-      void (*_accumulate)(sql_txn*, void* scratch, int argc, void** argv),
-      void (*_get)(sql_txn*, void* scratch, VMRegister* out),
-      void (*_reset)(sql_txn*, void* scratch),
-      void (*_init)(sql_txn*, void* scratch),
-      void (*_free)(sql_txn*, void* scratch),
-      void (*_merge)(sql_txn*, void* scratch, const void* other),
-      void (*_savestate)(sql_txn*, void* scratch, OutputStream* os),
-      void (*_loadstate)(sql_txn*, void* scratch, InputStream* is));
+      size_t _instance_size,
+      void (*_accumulate)(sql_txn*, void* self, VMStack* stack),
+      void (*_get)(sql_txn*, void* self, VMStack* stack),
+      void (*_reset)(sql_txn*, void* self),
+      void (*_init)(sql_txn*, void* self),
+      void (*_free)(sql_txn*, void* self),
+      void (*_merge)(sql_txn*, void* self, const void* other),
+      void (*_savestate)(sql_txn*, void* self, OutputStream* os),
+      void (*_loadstate)(sql_txn*, void* self, InputStream* is));
 
   kFunctionType type;
   std::vector<SType> arg_types;
   SType return_type;
   bool has_side_effects;
-  size_t scratch_size;
+  size_t instance_size;
 
   struct VTable {
-    void (*call)(sql_txn* ctx, int argc, void** argv, VMRegister* out);
-    void (*accumulate)(sql_txn*, void* scratch, int argc, void** argv);
-    void (*get)(sql_txn*, void* scratch, VMRegister* out);
-    void (*reset)(sql_txn*, void* scratch);
-    void (*init)(sql_txn*, void* scratch);
-    void (*free)(sql_txn*, void* scratch);
-    void (*merge)(sql_txn*, void* scratch, const void* other);
-    void (*savestate)(sql_txn*, void* scratch, OutputStream* os);
-    void (*loadstate)(sql_txn*, void* scratch, InputStream* is);
+    void (*call)(sql_txn*, VMStack*);
+    void (*accumulate)(sql_txn*, void* self, VMStack* stack);
+    void (*get)(sql_txn*, void* self, VMStack* stack);
+    void (*reset)(sql_txn*, void* self);
+    void (*init)(sql_txn*, void* self);
+    void (*free)(sql_txn*, void* self);
+    void (*merge)(sql_txn*, void* self, const void* other);
+    void (*savestate)(sql_txn*, void* self, OutputStream* os);
+    void (*loadstate)(sql_txn*, void* self, InputStream* is);
   } vtable;
 };
 
 } // namespace csql
+

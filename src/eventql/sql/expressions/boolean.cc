@@ -31,9 +31,10 @@
 namespace csql {
 namespace expressions {
 
-void logical_and_call(sql_txn* ctx, int argc, void** argv, VMRegister* out) {
-  *static_cast<uint8_t*>(out->data) =
-      !!*static_cast<uint8_t*>(argv[0]) && !!*static_cast<uint8_t*>(argv[1]);
+void logical_and_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popBool(stack);
+  auto left = popBool(stack);
+  pushBool(stack, left && right);
 }
 
 const SFunction logical_and(
@@ -42,9 +43,10 @@ const SFunction logical_and(
     &logical_and_call);
 
 
-void logical_or_call(sql_txn* ctx, int argc, void** argv, VMRegister* out) {
-  *static_cast<uint8_t*>(out->data) =
-      !!*static_cast<uint8_t*>(argv[0]) || !!*static_cast<uint8_t*>(argv[1]);
+void logical_or_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popBool(stack);
+  auto left = popBool(stack);
+  pushBool(stack, left || right);
 }
 
 const SFunction logical_or(
@@ -53,9 +55,10 @@ const SFunction logical_or(
     &logical_or_call);
 
 
-void eq_uint64_call(sql_txn* ctx, int argc, void** argv, VMRegister* out) {
-  *static_cast<uint8_t*>(out->data) =
-      *static_cast<uint64_t*>(argv[0]) == *static_cast<uint64_t*>(argv[1]);
+void eq_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  pushBool(stack, left == right);
 }
 
 const SFunction eq_uint64(
@@ -69,9 +72,10 @@ const SFunction eq_timestamp64(
     &eq_uint64_call);
 
 
-void lt_uint64_call(sql_txn* ctx, int argc, void** argv, VMRegister* out) {
-  *static_cast<uint8_t*>(out->data) =
-      *static_cast<uint64_t*>(argv[0]) < *static_cast<uint64_t*>(argv[1]);
+void lt_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  pushBool(stack, left < right);
 }
 
 const SFunction lt_uint64(
@@ -85,9 +89,10 @@ const SFunction lt_timestamp64(
     &lt_uint64_call);
 
 
-void lte_uint64_call(sql_txn* ctx, int argc, void** argv, VMRegister* out) {
-  *static_cast<uint8_t*>(out->data) =
-      *static_cast<uint64_t*>(argv[0]) <= *static_cast<uint64_t*>(argv[1]);
+void lte_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  pushBool(stack, left <= right);
 }
 
 const SFunction lte_uint64(
@@ -100,9 +105,10 @@ const SFunction lte_timestamp64(
     SType::BOOL,
     &lte_uint64_call);
 
-void gt_uint64_call(sql_txn* ctx, int argc, void** argv, VMRegister* out) {
-  *static_cast<uint8_t*>(out->data) =
-      *static_cast<uint64_t*>(argv[0]) > *static_cast<uint64_t*>(argv[1]);
+void gt_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  pushBool(stack, left > right);
 }
 
 const SFunction gt_uint64(
@@ -116,9 +122,10 @@ const SFunction gt_timestamp64(
     &gt_uint64_call);
 
 
-void gte_uint64_call(sql_txn* ctx, int argc, void** argv, VMRegister* out) {
-  *static_cast<uint8_t*>(out->data) =
-      *static_cast<uint64_t*>(argv[0]) >= *static_cast<uint64_t*>(argv[1]);
+void gte_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  pushBool(stack, left >= right);
 }
 
 const SFunction gte_uint64(

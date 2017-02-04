@@ -29,13 +29,7 @@
 namespace csql {
 namespace expressions {
 
-extern const SFunction count_nil;
-extern const SFunction count_uint64;
-extern const SFunction count_int64;
-extern const SFunction count_float64;
-extern const SFunction count_bool;
-extern const SFunction count_string;
-extern const SFunction count_timestamp64;
+extern const SFunction count;
 extern const SFunction sum_int64;
 extern const SFunction sum_uint64;
 

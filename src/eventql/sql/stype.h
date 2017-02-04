@@ -77,7 +77,9 @@ bool popBool(VMStack* stack);
 void pushBool(VMStack* stack, bool value);
 
 void popString(VMStack* stack, char** data, size_t* len);
+std::string popString(VMStack* stack);
 void pushString(VMStack* stack, const char* data, size_t len);
+void pushString(VMStack* stack, const std::string& str);
 
 uint64_t popTimestamp64(VMStack* stack);
 void pushTimestamp64(VMStack* stack, uint64_t value);

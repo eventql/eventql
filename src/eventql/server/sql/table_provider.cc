@@ -658,8 +658,8 @@ RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
   return expr;
 }
 
-void evql_version(sql_txn* ctx, int argc, void** argv, csql::VMRegister* out) {
-  //*out = csql::SValue::newString("EventQL " + eventql::kVersionString);
+void evql_version(sql_txn* ctx, csql::VMStack* stack) {
+  pushString(stack, "EventQL " + eventql::kVersionString);
 }
 
 const csql::SFunction evqlVersionExpr({}, csql::SType::STRING, &evql_version);
