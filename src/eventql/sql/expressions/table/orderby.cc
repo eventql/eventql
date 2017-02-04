@@ -95,8 +95,8 @@ ReturnCode OrderByExpression::execute() {
           right.data());
 
       std::array<SValue, 2> args = {
-          sort.expr.program()->return_type_,
-          sort.expr.program()->return_type_ };
+          sort.expr.program()->return_type,
+          sort.expr.program()->return_type };
 
       popBoxed(&vm_stack_, &args[0]);
       popBoxed(&vm_stack_, &args[1]);

@@ -26,6 +26,7 @@
 #include <eventql/sql/scheduler.h>
 #include <eventql/sql/query_plan.h>
 #include <eventql/sql/qtree/constraints.h>
+#include <eventql/sql/qtree/QueryTreeUtil.h>
 #include "eventql/server/session.h"
 #include "eventql/db/database.h"
 #include "eventql/auth/client_auth.h"
@@ -453,13 +454,14 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeInsertInto(
   auto value_specs = insert_into->getValueSpecs();
   VMStack vm_stack;
   for (auto spec : value_specs) {
-    auto expr = txn->getCompiler()->buildValueExpression(txn, spec.expr);
-    auto program = expr.program();
-    if (program->has_aggregate_) {
+    if (!QueryTreeUtil::isConstantExpression(txn, spec.expr)) {
       RAISE(
           kRuntimeError,
-          "insert into expression must not contain aggregate expressions");
+          "insert into expression must contain only constant expressions");
     }
+
+    auto expr = txn->getCompiler()->buildValueExpression(txn, spec.expr);
+    auto program = expr.program();
 
     VM::evaluate(
         txn,
@@ -470,7 +472,7 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeInsertInto(
         0,
         nullptr);
 
-    SValue value(program->return_type_);
+    SValue value(program->return_type);
     popBoxed(&vm_stack, &value);
 
     Pair<String, SValue> result;

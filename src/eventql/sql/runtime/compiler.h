@@ -44,58 +44,10 @@ class ASTNode;
 class Compiler {
 public:
 
-  static ScopedPtr<VM::Program> compile(
+  static ScopedPtr<vm::Program> compile(
       Transaction* ctx,
       RefPtr<ValueExpressionNode> node,
       SymbolTable* symbol_table);
-
-protected:
-
-  static VM::Instruction* compileIfStatement(
-      RefPtr<IfExpressionNode> node,
-      size_t* dynamic_storage_size,
-      ScratchMemory* static_storage,
-      SymbolTable* symbol_table);
-
-  static VM::Instruction* compileValueExpression(
-      RefPtr<ValueExpressionNode> node,
-      size_t* dynamic_storage_size,
-      ScratchMemory* static_storage,
-      SymbolTable* symbol_table);
-
-  static VM::Instruction* compileLiteral(
-      RefPtr<LiteralExpressionNode> node,
-      size_t* dynamic_storage_size,
-      ScratchMemory* static_storage,
-      SymbolTable* symbol_table);
-
-  static VM::Instruction* compileColumnReference(
-      RefPtr<ColumnReferenceNode> node,
-      ScratchMemory* static_storage,
-      SymbolTable* symbol_table);
-
-  static VM::Instruction* compileMethodCall(
-      RefPtr<CallExpressionNode> node,
-      size_t* dynamic_storage_size,
-      ScratchMemory* static_storage,
-      SymbolTable* symbol_table);
-
-  static VM::Instruction* compileRegexOperator(
-      RefPtr<RegexExpressionNode> node,
-      size_t* dynamic_storage_size,
-      ScratchMemory* static_storage,
-      SymbolTable* symbol_table);
-
-  static VM::Instruction* compileLikeOperator(
-      RefPtr<LikeExpressionNode> node,
-      size_t* dynamic_storage_size,
-      ScratchMemory* static_storage,
-      SymbolTable* symbol_table);
-
-  static void allocateReturnValue(
-      SType return_type,
-      VM::Instruction* instruction,
-      ScratchMemory* static_storage);
 
 };
 

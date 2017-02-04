@@ -44,50 +44,39 @@ struct VMStack {
 
 void resizeStack(VMStack* stack);
 
+namespace vm {
+
+enum InstructionType {
+  X_CALL,
+  X_LITERAL,
+  X_INPUT
+};
+
+struct Instruction {
+  vm::InstructionType type;
+  void* arg0;
+};
+
+struct EntryPoint {
+  size_t offset;
+};
+
+struct Program {
+  Transaction* ctx_;
+  std::vector<vm::Instruction> instructions_;
+  vm::EntryPoint method_call;
+  vm::EntryPoint method_aggr_acc;
+  vm::EntryPoint method_aggr_get;
+  ScratchMemory static_storage;
+  size_t instance_storage_size;
+  SType return_type;
+  bool has_aggregate;
+};
+
+} // namespace vm
+
 class VM {
 public:
-
-  enum kInstructionType {
-    X_CALL_PURE,
-    X_CALL_AGGREGATE,
-    X_LITERAL,
-    X_INPUT,
-    X_IF,
-    X_REGEX,
-    X_LIKE
-  };
-
-  struct Instruction {
-    kInstructionType type;
-    void* arg0;
-    size_t argn;
-    Instruction* next;
-    Instruction* child;
-    SFunction::VTable vtable;
-    VMRegister retval;
-    SType rettype;
-  };
-
-  struct Program {
-    Program(
-        Transaction* ctx,
-        Instruction* entry,
-        ScratchMemory&& static_storage,
-        size_t dynamic_storage_size,
-        SType return_type);
-
-    ~Program();
-
-    Transaction* ctx_;
-    Instruction* entry_;
-    Instruction* method_call;
-    Instruction* method_aggr_acc;
-    Instruction* method_aggr_get;
-    ScratchMemory static_storage_;
-    size_t dynamic_storage_size_;
-    SType return_type_;
-    bool has_aggregate_;
-  };
 
   struct Instance {
     void* scratch;
@@ -95,8 +84,8 @@ public:
 
   static void evaluate(
       Transaction* ctx,
-      const Program* program,
-      const Instruction* entrypoint,
+      const vm::Program* program,
+      vm::EntryPoint entrypoint,
       VMStack* stack,
       Instance* instance,
       int argc,
@@ -104,8 +93,8 @@ public:
 
   static void evaluateBoxed(
       Transaction* ctx,
-      const Program* program,
-      const Instruction* entrypoint,
+      const vm::Program* program,
+      vm::EntryPoint entrypoint,
       VMStack* stack,
       Instance* instance,
       int argc,
@@ -113,8 +102,8 @@ public:
 
   static void evaluateVector(
       Transaction* ctx,
-      const Program* program,
-      const Instruction* entrypoint,
+      const vm::Program* program,
+      vm::EntryPoint entrypoint,
       VMStack* stack,
       Instance* instance,
       int argc,
@@ -125,8 +114,8 @@ public:
 
   static void evaluatePredicateVector(
       Transaction* ctx,
-      const Program* program,
-      const Instruction* entrypoint,
+      const vm::Program* program,
+      vm::EntryPoint entrypoint,
       VMStack* stack,
       Instance* instance,
       int argc,
@@ -137,34 +126,34 @@ public:
 
   static Instance allocInstance(
       Transaction* ctx,
-      const Program* program,
+      const vm::Program* program,
       ScratchMemory* scratch);
 
   static void freeInstance(
       Transaction* ctx,
-      const Program* program,
+      const vm::Program* program,
       Instance* instance);
 
   static void resetInstance(
       Transaction* ctx,
-      const Program* program,
+      const vm::Program* program,
       Instance* instance);
 
   static void mergeInstance(
       Transaction* ctx,
-      const Program* program,
+      const vm::Program* program,
       Instance* dst,
       const Instance* src);
 
   static void saveInstanceState(
       Transaction* ctx,
-      const Program* program,
+      const vm::Program* program,
       const Instance* instance,
       OutputStream* os);
 
   static void loadInstanceState(
       Transaction* ctx,
-      const Program* program,
+      const vm::Program* program,
       Instance* instance,
       InputStream* os);
 
@@ -172,50 +161,50 @@ protected:
 
   static void initProgram(
       Transaction* ctx,
-      Program* program,
-      Instruction* e);
+      vm::Program* program,
+      vm::Instruction* e);
 
   static void freeProgram(
       Transaction* ctx,
-      const Program* program,
-      Instruction* e);
+      const vm::Program* program,
+      vm::Instruction* e);
 
   static void initInstance(
       Transaction* ctx,
-      const Program* program,
-      Instruction* e,
+      const vm::Program* program,
+      vm::Instruction* e,
       Instance* instance);
 
   static void freeInstance(
       Transaction* ctx,
-      const Program* program,
-      Instruction* e,
+      const vm::Program* program,
+      vm::Instruction* e,
       Instance* instance);
 
   static void resetInstance(
       Transaction* ctx,
-      const Program* program,
-      Instruction* e,
+      const vm::Program* program,
+      vm::Instruction* e,
       Instance* instance);
 
   static void mergeInstance(
       Transaction* ctx,
-      const Program* program,
-      Instruction* e,
+      const vm::Program* program,
+      vm::Instruction* e,
       Instance* dst,
       const Instance* src);
 
   static void saveInstance(
       Transaction* ctx,
-      const Program* program,
-      Instruction* e,
+      const vm::Program* program,
+      vm::Instruction* e,
       const Instance* instance,
       OutputStream* os);
 
   static void loadInstance(
       Transaction* ctx,
-      const Program* program,
-      Instruction* e,
+      const vm::Program* program,
+      vm::Instruction* e,
       Instance* instance,
       InputStream* is);
 

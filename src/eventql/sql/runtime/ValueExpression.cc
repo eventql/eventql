@@ -31,7 +31,7 @@ namespace csql {
 ValueExpression::ValueExpression() : program_(nullptr) {}
 
 ValueExpression::ValueExpression(
-    ScopedPtr<VM::Program> program) :
+    ScopedPtr<vm::Program> program) :
     program_(std::move(program)) {}
 
 ValueExpression::ValueExpression(
@@ -43,12 +43,12 @@ ValueExpression& ValueExpression::operator=(ValueExpression&& other) {
   return *this;
 }
 
-VM::Program* ValueExpression::program() const {
+vm::Program* ValueExpression::program() const {
   return program_.get();
 }
 
 SType ValueExpression::getReturnType() const {
-  return program_->return_type_;
+  return program_->return_type;
 }
 
 }
