@@ -36,7 +36,7 @@
 #include <eventql/sql/stype.h>
 
 namespace csql {
-class VMStack;
+struct VMStack;
 
 class SValue {
 public:
