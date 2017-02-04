@@ -861,6 +861,41 @@ void* SValue::getData() {
   }
 }
 
+void SValue::setData(const void* data, size_t size) {
+  switch (data_.type) {
+
+    case SType::UINT64:
+      data_.u.t_uint64 = *static_cast<const uint64_t*>(data);
+      return;
+
+    case SType::INT64:
+      data_.u.t_int64 = *static_cast<const int64_t*>(data);
+      return;
+
+    case SType::FLOAT64:
+      data_.u.t_float = *static_cast<const double*>(data);
+      return;
+
+    case SType::BOOL:
+      data_.u.t_bool = *static_cast<const uint8_t*>(data);
+      return;
+
+    case SType::TIMESTAMP64:
+      data_.u.t_timestamp = *static_cast<const uint64_t*>(data);
+      return;
+
+    case SType::STRING:
+      if (data_.u.t_string) {
+        free(data_.u.t_string);
+      }
+
+      data_.u.t_string = malloc(size);
+      memcpy(data_.u.t_string, data, size);
+      return;
+
+  }
+}
+
 size_t SValue::getCapacity() const {
   return getSize();
 }
