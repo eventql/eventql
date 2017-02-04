@@ -31,6 +31,7 @@
 #include "eventql/util/io/inputstream.h"
 #include "eventql/sql/runtime/defaultruntime.h"
 #include "eventql/sql/CSTableScanProvider.h"
+#include "eventql/sql/result_list.h"
 
 #include "eventql/eventql.h"
 using namespace csql;
@@ -44,16 +45,14 @@ Status executeQuery(const std::string& query) {
   txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "eventql/sql/testdata/testtbl.cst"));
+          "./sql_testdata/testtbl.cst"));
 
-  //ResultList result;
-  //auto qplan = runtime->buildQueryPlan(txn.get(), query);
-  //qplan->execute(0, &result);
-
+  auto qplan = runtime->buildQueryPlan(txn.get(), query);
+  ResultList result;
+  qplan->execute(0, &result);
 
 
   return Status::success();
-
 }
 
 Status runTest(const std::string& file) {
