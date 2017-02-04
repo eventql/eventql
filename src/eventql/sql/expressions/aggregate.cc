@@ -45,7 +45,7 @@ void count_reset(sql_txn* ctx, void* self) {
 }
 
 void count_merge(sql_txn* ctx, void* self, const void* other) {
-  *static_cast<uint64_t*>(self) = *static_cast<const uint64_t*>(other);
+  *static_cast<uint64_t*>(self) += *static_cast<const uint64_t*>(other);
 }
 
 void count_save(sql_txn* ctx, const void* self, OutputStream* os) {

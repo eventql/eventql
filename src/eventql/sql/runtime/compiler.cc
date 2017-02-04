@@ -83,6 +83,7 @@ ReturnCode Compiler::compile(
     program->instance_merge = aggr_fun->vtable.merge;
     program->instance_savestate = aggr_fun->vtable.savestate;
     program->instance_loadstate = aggr_fun->vtable.loadstate;
+    program->instance_storage_size = aggr_fun->instance_size;
 
     for (auto e : aggr_expr->arguments()) {
       auto rc = compileExpression(e.get(), program.get(), symbol_table);

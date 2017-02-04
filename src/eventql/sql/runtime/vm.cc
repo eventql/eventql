@@ -104,7 +104,7 @@ void VM::evaluate(
     const vm::Program* program,
     vm::EntryPoint entrypoint,
     VMStack* stack,
-    Instance* instance,
+    Instance instance,
     int argc,
     void** argv) {
   auto instructions = program->instructions.data();
@@ -155,7 +155,7 @@ void VM::evaluateBoxed(
     const vm::Program* program,
     vm::EntryPoint entrypoint,
     VMStack* stack,
-    Instance* instance,
+    Instance instance,
     int argc,
     const SValue* argv) {
   void** argv_unboxed = nullptr;
@@ -174,7 +174,7 @@ void VM::evaluateVector(
     const vm::Program* program,
     vm::EntryPoint entrypoint,
     VMStack* stack,
-    Instance* instance,
+    Instance instance,
     int argc,
     const SVector* argv,
     size_t vlen,
@@ -227,7 +227,7 @@ void VM::evaluatePredicateVector(
     const vm::Program* program,
     vm::EntryPoint entrypoint,
     VMStack* stack,
-    Instance* instance,
+    Instance instance,
     int argc,
     const SVector* argv,
     size_t vlen,
@@ -269,8 +269,7 @@ VM::Instance VM::allocInstance(
     Transaction* ctx,
     const vm::Program* program,
     ScratchMemory* scratch) {
-  Instance self;
-  self = scratch->alloc(program->instance_storage_size);
+  auto self = scratch->alloc(program->instance_storage_size);
 
   if (program->instance_init) {
     program->instance_init(Transaction::get(ctx), self);
@@ -282,7 +281,7 @@ VM::Instance VM::allocInstance(
 void VM::freeInstance(
     Transaction* ctx,
     const vm::Program* program,
-    Instance* instance) {
+    Instance instance) {
   if (program->instance_free) {
     program->instance_free(Transaction::get(ctx), instance);
   }
@@ -291,22 +290,22 @@ void VM::freeInstance(
 void VM::resetInstance(
     Transaction* ctx,
     const vm::Program* program,
-    Instance* instance) {
+    Instance instance) {
   program->instance_reset(Transaction::get(ctx), instance);
 }
 
 void VM::mergeInstance(
     Transaction* ctx,
     const vm::Program* program,
-    Instance* dst,
-    const Instance* src) {
+    Instance dst,
+    Instance src) {
   program->instance_merge(Transaction::get(ctx), dst, src);
 }
 
 void VM::saveInstanceState(
     Transaction* ctx,
     const vm::Program* program,
-    const Instance* instance,
+    Instance instance,
     OutputStream* os) {
   program->instance_savestate(Transaction::get(ctx), instance, os);
 }
@@ -314,7 +313,7 @@ void VM::saveInstanceState(
 void VM::loadInstanceState(
     Transaction* ctx,
     const vm::Program* program,
-    Instance* instance,
+    Instance instance,
     InputStream* is) {
   program->instance_loadstate(Transaction::get(ctx), instance, is);
 }

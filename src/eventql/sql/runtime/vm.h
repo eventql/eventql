@@ -90,14 +90,14 @@ void growStack(VMStack* stack, size_t bytes);
 class VM {
 public:
 
-  using Instance = void*;
+  typedef void* Instance;
 
   static void evaluate(
       Transaction* ctx,
       const vm::Program* program,
       vm::EntryPoint entrypoint,
       VMStack* stack,
-      Instance* instance,
+      Instance instance,
       int argc,
       void** argv);
 
@@ -106,7 +106,7 @@ public:
       const vm::Program* program,
       vm::EntryPoint entrypoint,
       VMStack* stack,
-      Instance* instance,
+      Instance instance,
       int argc,
       const SValue* argv);
 
@@ -115,7 +115,7 @@ public:
       const vm::Program* program,
       vm::EntryPoint entrypoint,
       VMStack* stack,
-      Instance* instance,
+      Instance instance,
       int argc,
       const SVector* argv,
       size_t vlen,
@@ -127,7 +127,7 @@ public:
       const vm::Program* program,
       vm::EntryPoint entrypoint,
       VMStack* stack,
-      Instance* instance,
+      Instance instance,
       int argc,
       const SVector* argv,
       size_t vlen,
@@ -142,29 +142,29 @@ public:
   static void freeInstance(
       Transaction* ctx,
       const vm::Program* program,
-      Instance* instance);
+      Instance instance);
 
   static void resetInstance(
       Transaction* ctx,
       const vm::Program* program,
-      Instance* instance);
+      Instance instance);
 
   static void mergeInstance(
       Transaction* ctx,
       const vm::Program* program,
-      Instance* dst,
-      const Instance* src);
+      Instance dst,
+      Instance src);
 
   static void saveInstanceState(
       Transaction* ctx,
       const vm::Program* program,
-      const Instance* instance,
+      Instance instance,
       OutputStream* os);
 
   static void loadInstanceState(
       Transaction* ctx,
       const vm::Program* program,
-      Instance* instance,
+      Instance instance,
       InputStream* os);
 
 };

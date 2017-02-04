@@ -130,7 +130,7 @@ ReturnCode GroupByExpression::execute() {
             select_exprs_[i].program(),
             select_exprs_[i].program()->method_accumulate,
             &vm_stack_,
-            &group[i],
+            group[i],
             input_col_cursor.size(),
             input_col_cursor.data());
       }
@@ -171,7 +171,7 @@ bool GroupByExpression::next(SValue* row, size_t row_len) {
           select_exprs_[i].program(),
           select_exprs_[i].program()->method_call,
           &vm_stack_,
-          &groups_iter_->second[i],
+          groups_iter_->second[i],
           0,
           nullptr);
     }
@@ -189,7 +189,7 @@ bool GroupByExpression::next(SValue* row, size_t row_len) {
 void GroupByExpression::freeResult() {
   for (auto& group : groups_) {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::freeInstance(txn_, select_exprs_[i].program(), &group.second[i]);
+      VM::freeInstance(txn_, select_exprs_[i].program(), group.second[i]);
     }
   }
 
@@ -242,7 +242,7 @@ ReturnCode PartialGroupByExpression::execute() {
           VM::loadInstanceState(
               txn_,
               select_exprs_[i].program(),
-              &group[i],
+              group[i],
               is);
         }
       }
@@ -319,7 +319,7 @@ ReturnCode PartialGroupByExpression::execute() {
               select_exprs_[i].program(),
               select_exprs_[i].program()->method_accumulate,
               &vm_stack_,
-              &group[i],
+              group[i],
               input_col_cursor.size(),
               input_col_cursor.data());
         }
@@ -346,7 +346,7 @@ ReturnCode PartialGroupByExpression::execute() {
           VM::saveInstanceState(
               txn_,
               select_exprs_[i].program(),
-              &g.second[i],
+              g.second[i],
               os);
         }
       }
@@ -391,7 +391,7 @@ bool PartialGroupByExpression::next(SValue* row, size_t row_len) {
       VM::saveInstanceState(
           txn_,
           select_exprs_[i].program(),
-          &groups_iter_->second[i],
+          groups_iter_->second[i],
           group_data_os.get());
     }
 
@@ -413,11 +413,10 @@ bool PartialGroupByExpression::next(SValue* row, size_t row_len) {
   }
 }
 
-
 void PartialGroupByExpression::freeResult() {
   for (auto& group : groups_) {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::freeInstance(txn_, select_exprs_[i].program(), &group.second[i]);
+      VM::freeInstance(txn_, select_exprs_[i].program(), group.second[i]);
     }
   }
 
@@ -467,7 +466,7 @@ ReturnCode GroupByMergeExpression::execute() {
 
   RunOnDestroy remote_group_finalizer([this, &remote_group] {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::freeInstance(txn_, select_exprs_[i].program(), &remote_group[i]);
+      VM::freeInstance(txn_, select_exprs_[i].program(), remote_group[i]);
     }
   });
 
@@ -516,8 +515,8 @@ ReturnCode GroupByMergeExpression::execute() {
 
       for (size_t i = 0; i < select_exprs_.size(); ++i) {
         const auto& e = select_exprs_[i];
-        VM::loadInstanceState(txn_, e.program(), &remote_group[i], &is);
-        VM::mergeInstance(txn_, e.program(), &group[i], &remote_group[i]);
+        VM::loadInstanceState(txn_, e.program(), remote_group[i], &is);
+        VM::mergeInstance(txn_, e.program(), group[i], remote_group[i]);
       }
     }
 
@@ -603,7 +602,7 @@ bool GroupByMergeExpression::next(SValue* row, size_t row_len) {
           select_exprs_[i].program(),
           select_exprs_[i].program()->method_call,
           &vm_stack_,
-          &groups_iter_->second[i],
+          groups_iter_->second[i],
           0,
           nullptr);
 
@@ -623,7 +622,7 @@ bool GroupByMergeExpression::next(SValue* row, size_t row_len) {
 void GroupByMergeExpression::freeResult() {
   for (auto& group : groups_) {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::freeInstance(txn_, select_exprs_[i].program(), &group.second[i]);
+      VM::freeInstance(txn_, select_exprs_[i].program(), group.second[i]);
     }
   }
 
