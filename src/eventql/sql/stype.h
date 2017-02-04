@@ -54,35 +54,45 @@ std::string getSTypeName(SType type);
 void popBoxed(VMStack* stack, SValue* value);
 void popVector(VMStack* stack, SVector* vector);
 void pushBoxed(VMStack* stack, const SValue* value);
-void pushUnboxed(VMStack* stack, SType type, void* value);
+void pushUnboxed(VMStack* stack, SType type, const void* value);
 
 uint64_t popUInt64(VMStack* stack);
 void popUInt64Boxed(VMStack* stack, SValue* value);
 void popUInt64Vector(VMStack* stack, SVector* vector);
 void pushUInt64(VMStack* stack, uint64_t value);
-void pushUInt64Boxed(VMStack* stack, const SValue* value);
-void pushUInt64Unboxed(VMStack* stack, void* value);
+void pushUInt64Unboxed(VMStack* stack, const void* value);
 
 int64_t popInt64(VMStack* stack);
 void popInt64Boxed(VMStack* stack, SValue* value);
 void popInt64Vector(VMStack* stack, SVector* vector);
 void pushInt64(VMStack* stack, int64_t value);
-void pushInt64Boxed(VMStack* stack, const SValue* value);
-void pushInt64Unboxed(VMStack* stack, void* value);
+void pushInt64Unboxed(VMStack* stack, const void* value);
 
 double popFloat64(VMStack* stack);
+void popFloat64Boxed(VMStack* stack, SValue* value);
+void popFloat64Vector(VMStack* stack, SVector* vector);
 void pushFloat64(VMStack* stack, double value);
+void pushFloat64Unboxed(VMStack* stack, const void* value);
 
 bool popBool(VMStack* stack);
+void popBoolBoxed(VMStack* stack, SValue* value);
+void popBoolVector(VMStack* stack, SVector* vector);
 void pushBool(VMStack* stack, bool value);
+void pushBoolUnboxed(VMStack* stack, const void* value);
 
 void popString(VMStack* stack, char** data, size_t* len);
 std::string popString(VMStack* stack);
+void popStringBoxed(VMStack* stack, SValue* value);
+void popStringVector(VMStack* stack, SVector* vector);
 void pushString(VMStack* stack, const char* data, size_t len);
 void pushString(VMStack* stack, const std::string& str);
+void pushStringUnboxed(VMStack* stack, const void* value);
 
 uint64_t popTimestamp64(VMStack* stack);
+void popTimestamp64Boxed(VMStack* stack, SValue* value);
+void popTimestamp64Vector(VMStack* stack, SVector* vector);
 void pushTimestamp64(VMStack* stack, uint64_t value);
+void pushTimestamp64Unboxed(VMStack* stack, const void* value);
 
 } // namespace csql
 

@@ -121,6 +121,8 @@ public:
   const void* getData() const;
   void* getData();
 
+  void setData(const void* data, size_t size);
+
   size_t getCapacity() const;
   size_t getSize() const;
 
@@ -159,6 +161,7 @@ public:
   void increaseCapacity(size_t min_capacity);
 
   void copyFrom(const SVector* other);
+  void append(const void* data, size_t size);
 
   static size_t next(SType type, void** cursor);
   size_t next(void** cursor) const;
