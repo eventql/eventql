@@ -58,7 +58,7 @@ struct SFunction {
       void (*_init)(sql_txn*, void* self),
       void (*_free)(sql_txn*, void* self),
       void (*_merge)(sql_txn*, void* self, const void* other),
-      void (*_savestate)(sql_txn*, void* self, OutputStream* os),
+      void (*_savestate)(sql_txn*, const void* self, OutputStream* os),
       void (*_loadstate)(sql_txn*, void* self, InputStream* is));
 
   kFunctionType type;
@@ -75,7 +75,7 @@ struct SFunction {
     void (*init)(sql_txn*, void* self);
     void (*free)(sql_txn*, void* self);
     void (*merge)(sql_txn*, void* self, const void* other);
-    void (*savestate)(sql_txn*, void* self, OutputStream* os);
+    void (*savestate)(sql_txn*, const void* self, OutputStream* os);
     void (*loadstate)(sql_txn*, void* self, InputStream* is);
   } vtable;
 };

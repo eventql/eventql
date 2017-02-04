@@ -149,12 +149,10 @@ void VM::evaluateVector(
 
   for (size_t n = 0; n < vlen; ++n) {
     if (!filter || (*filter)[n]) {
-      // evaluate and append to output
       evaluate(ctx, program, entrypoint, stack, instance, argc, argv_cursor);
       popVector(stack, out);
     }
 
-    // increment input iterators
     for (size_t i = 0; i < argc; ++i) {
       if (argv_cursor[i]) {
         argv[i].next(&argv_cursor[i]);
@@ -206,190 +204,59 @@ void VM::evaluatePredicateVector(
   }
 }
 
-//VM::Instance VM::allocInstance(
-//    Transaction* ctx,
-//    const vm::Program* program,
-//    ScratchMemory* scratch) {
-//  Instance that;
-//
-//  that.scratch = scratch->alloc(program->instance_storage_size);
-//  initInstance(ctx, program, program->entry_, &that);
-//
-//  return that;
-//}
-//
-//void VM::freeInstance(
-//    Transaction* ctx,
-//    const vm::Program* program,
-//    Instance* instance) {
-//  freeInstance(ctx, program, program->entry_, instance);
-//}
-//
-//void VM::resetInstance(
-//    Transaction* ctx,
-//    const vm::Program* program,
-//    Instance* instance) {
-//  resetInstance(ctx, program, program->entry_, instance);
-//}
-//
-//void VM::mergeInstance(
-//    Transaction* ctx,
-//    const vm::Program* program,
-//    Instance* dst,
-//    const Instance* src) {
-//  mergeInstance(ctx, program, program->entry_, dst, src);
-//}
-//
-//void VM::mergeInstance(
-//    Transaction* ctx,
-//    const vm::Program* program,
-//    vm::Instruction* e,
-//    Instance* dst,
-//    const Instance* src) {
-//  switch (e->type) {
-//    case X_CALL_AGGREGATE:
-//      e->vtable.merge(
-//          Transaction::get(ctx),
-//          (char *) dst->scratch + (size_t) e->arg0,
-//          (char *) src->scratch + (size_t) e->arg0);
-//      break;
-//
-//    default:
-//      break;
-//  }
-//
-//  for (auto cur = e->child; cur != nullptr; cur = cur->next) {
-//    mergeInstance(ctx, program, cur, dst, src);
-//  }
-//}
-//
-//void VM::initInstance(
-//    Transaction* ctx,
-//    const vm::Program* program,
-//    vm::Instruction* e,
-//    Instance* instance) {
-//  switch (e->type) {
-//    case X_CALL_AGGREGATE:
-//      if (e->vtable.init) {
-//        e->vtable.init(
-//            Transaction::get(ctx),
-//            (char *) instance->scratch + (size_t) e->arg0);
-//      }
-//      break;
-//
-//    default:
-//      break;
-//  }
-//
-//  for (auto cur = e->child; cur != nullptr; cur = cur->next) {
-//    initInstance(ctx, program, cur, instance);
-//  }
-//}
-//
-//void VM::freeInstance(
-//    Transaction* ctx,
-//    const vm::Program* program,
-//    vm::Instruction* e,
-//    Instance* instance) {
-//  switch (e->type) {
-//    case X_CALL_AGGREGATE:
-//      if (e->vtable.free) {
-//        e->vtable.free(
-//            Transaction::get(ctx),
-//            (char *) instance->scratch + (size_t) e->arg0);
-//      }
-//      break;
-//
-//    default:
-//      break;
-//  }
-//
-//  for (auto cur = e->child; cur != nullptr; cur = cur->next) {
-//    freeInstance(ctx, program, cur, instance);
-//  }
-//}
-//
-//void VM::resetInstance(
-//    Transaction* ctx,
-//    const vm::Program* program,
-//    vm::Instruction* e,
-//    Instance* instance) {
-//  switch (e->type) {
-//    case X_CALL_AGGREGATE:
-//      e->vtable.reset(
-//          Transaction::get(ctx),
-//          (char *) instance->scratch + (size_t) e->arg0);
-//      break;
-//
-//    default:
-//      break;
-//  }
-//
-//  for (auto cur = e->child; cur != nullptr; cur = cur->next) {
-//    resetInstance(ctx, program, cur, instance);
-//  }
-//}
-//void VM::saveInstanceState(
-//    Transaction* ctx,
-//    const vm::Program* program,
-//    const Instance* instance,
-//    OutputStream* os) {
-//  saveInstance(ctx, program, program->entry_, instance, os);
-//}
-//
-//void VM::loadInstanceState(
-//    Transaction* ctx,
-//    const vm::Program* program,
-//    Instance* instance,
-//    InputStream* is) {
-//  loadInstance(ctx, program, program->entry_, instance, is);
-//}
-//
-//void VM::saveInstance(
-//    Transaction* ctx,
-//    const vm::Program* program,
-//    vm::Instruction* e,
-//    const Instance* instance,
-//    OutputStream* os) {
-//  switch (e->type) {
-//    case X_CALL_AGGREGATE:
-//      e->vtable.savestate(
-//          Transaction::get(ctx),
-//          (char *) instance->scratch + (size_t) e->arg0,
-//          os);
-//      break;
-//
-//    default:
-//      break;
-//  }
-//
-//  for (auto cur = e->child; cur != nullptr; cur = cur->next) {
-//    saveInstance(ctx, program, cur, instance, os);
-//  }
-//}
-//
-//void VM::loadInstance(
-//    Transaction* ctx,
-//    const vm::Program* program,
-//    vm::Instruction* e,
-//    Instance* instance,
-//    InputStream* os) {
-//  switch (e->type) {
-//    case X_CALL_AGGREGATE:
-//      e->vtable.loadstate(
-//          Transaction::get(ctx),
-//          (char *) instance->scratch + (size_t) e->arg0,
-//          os);
-//      break;
-//
-//    default:
-//      break;
-//  }
-//
-//  for (auto cur = e->child; cur != nullptr; cur = cur->next) {
-//    loadInstance(ctx, program, cur, instance, os);
-//  }
-//}
+VM::Instance VM::allocInstance(
+    Transaction* ctx,
+    const vm::Program* program,
+    ScratchMemory* scratch) {
+  Instance self;
+  self = scratch->alloc(program->instance_storage_size);
+
+  if (program->instance_init) {
+    program->instance_init(Transaction::get(ctx), self);
+  }
+
+  return self;
+}
+
+void VM::freeInstance(
+    Transaction* ctx,
+    const vm::Program* program,
+    Instance* instance) {
+  if (program->instance_free) {
+    program->instance_free(Transaction::get(ctx), instance);
+  }
+}
+
+void VM::resetInstance(
+    Transaction* ctx,
+    const vm::Program* program,
+    Instance* instance) {
+  program->instance_reset(Transaction::get(ctx), instance);
+}
+
+void VM::mergeInstance(
+    Transaction* ctx,
+    const vm::Program* program,
+    Instance* dst,
+    const Instance* src) {
+  program->instance_merge(Transaction::get(ctx), dst, src);
+}
+
+void VM::saveInstanceState(
+    Transaction* ctx,
+    const vm::Program* program,
+    const Instance* instance,
+    OutputStream* os) {
+  program->instance_savestate(Transaction::get(ctx), instance, os);
+}
+
+void VM::loadInstanceState(
+    Transaction* ctx,
+    const vm::Program* program,
+    Instance* instance,
+    InputStream* is) {
+  program->instance_loadstate(Transaction::get(ctx), instance, is);
+}
 
 } // namespace csql
 

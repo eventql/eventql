@@ -74,6 +74,12 @@ struct Program {
   size_t instance_storage_size;
   SType return_type;
   bool has_aggregate;
+  void (*instance_reset)(sql_txn*, void* self);
+  void (*instance_init)(sql_txn*, void* self);
+  void (*instance_free)(sql_txn*, void* self);
+  void (*instance_merge)(sql_txn*, void* self, const void* other);
+  void (*instance_savestate)(sql_txn*, const void* self, OutputStream* os);
+  void (*instance_loadstate)(sql_txn*, void* self, InputStream* is);
 };
 
 } // namespace vm
