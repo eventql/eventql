@@ -55,6 +55,7 @@ ReturnCode CallExpressionNode::newNode(
     RefPtr<ValueExpressionNode>* node) {
   auto fun = symbol->getFunction();
   bool is_pure = fun->type == FN_PURE && !fun->has_side_effects;
+  bool is_aggregate = fun->type == FN_AGGREGATE;
 
   *node = RefPtr<ValueExpressionNode>(
       new CallExpressionNode(
@@ -62,6 +63,7 @@ ReturnCode CallExpressionNode::newNode(
           symbol->getSymbol(),
           fun->return_type,
           is_pure,
+          is_aggregate,
           arguments));
 
   return ReturnCode::success();
@@ -72,11 +74,13 @@ CallExpressionNode::CallExpressionNode(
     const String& symbol,
     SType return_type,
     bool is_pure,
+    bool is_aggregate,
     Vector<RefPtr<ValueExpressionNode>> arguments) :
     function_name_(function_name),
     symbol_(symbol),
     return_type_(return_type),
     is_pure_(is_pure),
+    is_aggregate_(is_aggregate),
     arguments_(arguments) {}
 
 Vector<RefPtr<ValueExpressionNode>> CallExpressionNode::arguments() const {
@@ -95,6 +99,10 @@ bool CallExpressionNode::isPureFunction() const {
   return is_pure_;
 }
 
+bool CallExpressionNode::isAggregateFunction() const {
+  return is_aggregate_;
+}
+
 RefPtr<QueryTreeNode> CallExpressionNode::deepCopy() const {
   Vector<RefPtr<ValueExpressionNode>> args;
   for (const auto& arg : arguments_) {
@@ -106,6 +114,7 @@ RefPtr<QueryTreeNode> CallExpressionNode::deepCopy() const {
       symbol_,
       return_type_,
       is_pure_,
+      is_aggregate_,
       args);
 }
 
@@ -133,6 +142,7 @@ void CallExpressionNode::encode(
   os->appendLenencString(node.getSymbol());
   os->appendVarUInt((uint8_t) node.getReturnType());
   os->appendVarUInt(node.isPureFunction());
+  os->appendVarUInt(node.isAggregateFunction());
   os->appendVarUInt(node.arguments_.size());
   for (auto arg : node.arguments_) {
     coder->encode(arg.get(), os);
@@ -146,6 +156,7 @@ RefPtr<QueryTreeNode> CallExpressionNode::decode (
   auto symbol = is->readLenencString();
   auto return_type = (SType) is->readVarUInt();
   auto is_pure = is->readVarUInt() > 0 ? true : false;
+  auto is_aggregate = is->readVarUInt() > 0 ? true : false;
 
   Vector<RefPtr<ValueExpressionNode>> arguments;
   auto num_arguments = is->readVarUInt();
@@ -158,6 +169,7 @@ RefPtr<QueryTreeNode> CallExpressionNode::decode (
       symbol,
       return_type,
       is_pure,
+      is_aggregate,
       arguments);
 }
 

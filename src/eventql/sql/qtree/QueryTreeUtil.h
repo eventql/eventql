@@ -89,6 +89,9 @@ public:
       const ScanConstraint& constraint,
       RefPtr<ValueExpressionNode>* out);
 
+  static const ValueExpressionNode* findAggregateExpression(
+      const ValueExpressionNode* expr);
+
   /**
    * Extracts all constraints from the provided predicate expression
    */

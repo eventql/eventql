@@ -52,6 +52,7 @@ public:
   const String& getSymbol() const;
   SType getReturnType() const override;
   bool isPureFunction() const;
+  bool isAggregateFunction() const;
   Vector<RefPtr<ValueExpressionNode>> arguments() const override;
 
   RefPtr<QueryTreeNode> deepCopy() const override;
@@ -73,12 +74,14 @@ protected:
       const String& symbol,
       SType return_type,
       bool is_pure,
+      bool is_aggregate,
       Vector<RefPtr<ValueExpressionNode>> arguments);
 
   String function_name_;
   String symbol_;
   SType return_type_;
   bool is_pure_;
+  bool is_aggregate_;
   Vector<RefPtr<ValueExpressionNode>> arguments_;
 };
 
