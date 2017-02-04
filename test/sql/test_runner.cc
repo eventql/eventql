@@ -29,6 +29,7 @@
 #include "eventql/util/stringutil.h"
 #include "eventql/util/io/fileutil.h"
 #include "eventql/util/io/inputstream.h"
+#include "eventql/util/csv/CSVInputStream.h"
 #include "eventql/sql/runtime/defaultruntime.h"
 #include "eventql/sql/CSTableScanProvider.h"
 #include "eventql/sql/result_list.h"
@@ -37,8 +38,29 @@
 using namespace csql;
 
 const auto kTestListPath = "./sql/test.lst";
+const auto kSQLPathEnding = ".sql";
+const auto kResultPathEnding = ".result.txt";
 
-Status executeQuery(const std::string& query) {
+Status runTest(const std::string& test) {
+  auto sql_file_path = StringUtil::format("./sql/$0$1", test, kSQLPathEnding); //FIXME make ./sql constant
+  if (!FileUtil::exists(sql_file_path)) {
+    return Status(
+        eIOError,
+        StringUtil::format("File does not exist: $0", sql_file_path));
+  }
+
+  auto result_file_path = StringUtil::format(
+      "./sql/$0$1",
+      test,
+      kResultPathEnding); //FIXME make ./sql constant
+  if (!FileUtil::exists(result_file_path)) {
+    return Status(
+        eIOError,
+        StringUtil::format("File does not exist: $0", result_file_path));
+  }
+
+  /* execute query */
+  auto query_buf = FileUtil::read(sql_file_path);
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
@@ -47,33 +69,69 @@ Status executeQuery(const std::string& query) {
           "testtable",
           "./sql_testdata/testtbl.cst"));
 
-  auto qplan = runtime->buildQueryPlan(txn.get(), query);
+  auto qplan = runtime->buildQueryPlan(txn.get(), query_buf.toString());
   ResultList result;
   qplan->execute(0, &result);
 
-
-  return Status::success();
-}
-
-Status runTest(const std::string& file) {
-  auto file_path = StringUtil::format("./sql/$0", file); //FIXME make ./sql constant
-  StringUtil::chomp(&file_path);
-
-  if (!FileUtil::exists(file_path)) {
-    return Status(
-        eIOError,
-        StringUtil::format("File does not exist: $0", file_path));
+  /* compare result */
+  auto csv_is = CSVInputStream::openFile(result_file_path);
+  std::vector<std::string> columns;
+  if (!csv_is->readNextRow(&columns)) {
+    return Status(eRuntimeError, "CSV needs a header");
   }
 
-  auto is = FileInputStream::openFile(file_path);
-  std::string line;
-  while (is->readLine(&line)) {
-    auto rc = executeQuery(line);
-    if (!rc.isSuccess()) {
-      return rc;
+  /* compare columns */
+  if (result.getNumColumns() != columns.size()) {
+    return Status(eRuntimeError, StringUtil::format(
+        "wrong number of columns, expected $0 to be $1",
+        result.getNumColumns(),
+        columns.size()));
+  }
+
+  auto returned_columns = result.getColumns();
+  for (size_t i = 0; i < returned_columns.size(); ++i) {
+    if (returned_columns[i] != columns[i]) {
+      return Status(eRuntimeError, StringUtil::format(
+          "wrong columns name, expected $0 to be $1",
+          returned_columns[i],
+          columns[i]));
+    }
+  }
+
+  /* compare rows */
+  auto num_returned_rows = result.getNumRows();
+  size_t count = 0;
+  std::vector<std::string> row;
+  while (csv_is->readNextRow(&row)) {
+    if (count >= num_returned_rows) {
+      return Status(eRuntimeError, "not enough rows returned");
     }
 
-    line.clear();
+    auto returned_row = result.getRow(count);
+    if (returned_row.size() != row.size()) {
+      return Status(eRuntimeError, StringUtil::format(
+          "wrong number of values, expected $0 to be $1",
+          returned_row.size(),
+          row.size()));
+    }
+
+    for (size_t i = 0; i < row.size(); ++i) {
+      if (row[i] != returned_row[i]) {
+        return Status(eRuntimeError, StringUtil::format(
+            "wrong value, expected $0 to be $1",
+            returned_row[i],
+            row[i]));
+      }
+    }
+
+    ++count;
+  }
+
+  if (count < num_returned_rows) {
+    return Status(eRuntimeError, StringUtil::format(
+        "too many rows, expected $0 to be $1",
+        num_returned_rows,
+        count));
   }
 
   return Status::success();
@@ -83,27 +141,24 @@ int main(int argc, const char** argv) {
   int rc = 0;
 
   try {
-
     auto is = FileInputStream::openFile(kTestListPath);
     std::string line;
+    size_t count = 1;
     while (is->readLine(&line)) {
-
       StringUtil::chomp(&line);
-
-      if (StringUtil::endsWith(line, ".sql")) {
-        auto ret = runTest(line);
-        if (!ret.isSuccess()) {
-          iputs("$0", ret.message()); //FIXME better error printing
-          rc = 1;
-          return rc;
-        }
+      auto ret = runTest(line);
+      if (ret.isSuccess()) {
+        std::cout << "ok " << count << std::endl;
+      } else {
+        std::cout << "not ok " << count << " - " << ret.message() << std::endl;
       }
 
       line.clear();
-
+      ++count;
     }
 
   } catch (const std::exception& e) {
+    rc = 1;
     std::cout << e.what();
   }
 
