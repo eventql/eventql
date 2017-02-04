@@ -84,10 +84,10 @@ ReturnCode performOperation_QUERY_PARTIALAGGR(
     for (bool eof = false; !eof; ) {
       QueryPartialAggrResultFrame result_frame;
       auto os = StringOutputStream::fromString(&result_frame.getBody());
-      csql::SValue row[2];
+      csql::SValue row[2] = { csql::SType::STRING, csql::SType::STRING };
       size_t num_rows = 0;
 
-      while ((eof = !execute->next(row, 2)) == false) {
+      while ((eof = !execute->next(row)) == false) {
         ++num_rows;
         os->appendLenencString(row[0].getString());
         os->appendString(row[1].getString());

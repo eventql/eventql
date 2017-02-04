@@ -134,12 +134,14 @@ ReturnCode performOperation_QUERY(
     for (int i = 0; i < num_statements; ++i) {
       /* execute query */
       auto result_cursor = qplan->execute(i);
-      auto result_ncols = result_cursor->getNumColumns();
-
-      /* send response frames */
       QueryResultFrame r_frame(qplan->getStatementgetResultColumns(i));
-      Vector<csql::SValue> row(result_ncols);
-      while (result_cursor->next(row.data(), row.size())) {
+
+      Vector<csql::SValue> row;
+      for (size_t i = 0; i < result_cursor->getColumnCount(); ++i) {
+        row.emplace_back(result_cursor->getColumnType(i));
+      }
+
+      while (result_cursor->next(row.data())) {
         r_frame.addRow(row);
 
         if (r_frame.getRowCount() > q_maxrows ||

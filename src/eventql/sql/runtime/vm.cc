@@ -199,7 +199,6 @@ void VM::evaluateVector(
 
   if (sql_sizeof_static(out->getType())) {
     out->increaseCapacity(sql_sizeof_static(out->getType()) * vlen);
-    out->setSize(sql_sizeof_static(out->getType()) * vlen);
   }
 
   for (size_t n = 0; n < vlen; ++n) {

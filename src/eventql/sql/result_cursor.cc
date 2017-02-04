@@ -29,43 +29,36 @@
 
 namespace csql {
 
-DefaultResultCursor::DefaultResultCursor(
-    size_t num_columns,
-    Function<bool(SValue*, int)> next_fn) :
-    num_columns_(num_columns),
-    next_fn_(next_fn) {};
+ResultCursor::ResultCursor() :
+    started_(false) {}
 
-size_t DefaultResultCursor::getNumColumns() {
-  return num_columns_;
-}
-
-bool DefaultResultCursor::next(SValue* row, int row_len) {
-  return next_fn_(row, row_len);
-}
-
-TableExpressionResultCursor::TableExpressionResultCursor(
+ResultCursor::ResultCursor(
     ScopedPtr<TableExpression> table_expression) :
-    table_expression_(std::move(table_expression)) {
-  auto rc = table_expression_->execute();
-  if (!rc.isSuccess()) {
-    RAISE(kRuntimeError, rc.getMessage());
+    table_expression_(std::move(table_expression)),
+    started_(false) {}
+
+bool ResultCursor::next(SValue* row) {
+  if (!table_expression_) {
+    return false;
   }
+
+  if (!started_) {
+    auto rc = table_expression_->execute();
+    if (!rc.isSuccess()) {
+      RAISE(kRuntimeError, rc.getMessage());
+    }
+  }
+
+  return table_expression_->next(row, table_expression_->getColumnCount());
 }
 
-bool TableExpressionResultCursor::next(SValue* row, int row_len) {
-  return table_expression_->next(row, row_len);
-}
-
-size_t TableExpressionResultCursor::getNumColumns() {
+size_t ResultCursor::getColumnCount() const {
   return table_expression_->getColumnCount();
 }
 
-bool EmptyResultCursor::next(SValue* row, int row_len) {
-  return false;
+SType ResultCursor::getColumnType(size_t idx) const {
+  return table_expression_->getColumnType(idx);
 }
 
-size_t EmptyResultCursor::getNumColumns() {
-  return 0;
-}
+} // namespace csql
 
-}

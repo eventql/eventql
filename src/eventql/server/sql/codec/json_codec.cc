@@ -50,8 +50,12 @@ void JSONCodec::printResultTable(
   json_->addObjectEntry("rows");
   json_->beginArray();
 
-  Vector<csql::SValue> row(cursor->getNumColumns());
-  for (size_t i = 0; cursor->next(row.data(), row.size()); ++i) {
+  Vector<csql::SValue> row;
+  for (size_t i = 0; i < cursor->getColumnCount(); ++i) {
+    row.emplace_back(cursor->getColumnType(i));
+  }
+
+  for (size_t i = 0; cursor->next(row.data()); ++i) {
     if (i > 0) {
       json_->addComma();
     }

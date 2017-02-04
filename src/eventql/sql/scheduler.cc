@@ -338,7 +338,7 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeSelect(
     ExecutionContext* execution_context,
     RefPtr<TableExpressionNode> select) {
   return mkScoped(
-      new TableExpressionResultCursor(
+      new ResultCursor(
           buildTableExpression(
               txn,
               execution_context,
@@ -367,7 +367,7 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeDraw(
   }
 
   return mkScoped(
-      new TableExpressionResultCursor(
+      new ResultCursor(
           mkScoped(
               new ChartExpression(
                   txn,
@@ -386,7 +386,7 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeCreateTable(
   }
 
   // FIXME return result...
-  return mkScoped(new EmptyResultCursor());
+  return mkScoped(new ResultCursor());
 }
 
 ScopedPtr<ResultCursor> DefaultScheduler::executeCreateDatabase(
@@ -400,7 +400,7 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeCreateDatabase(
   }
 
   // FIXME return result...
-  return mkScoped(new EmptyResultCursor());
+  return mkScoped(new ResultCursor());
 }
 
 ScopedPtr<ResultCursor> DefaultScheduler::executeUseDatabase(
@@ -429,7 +429,7 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeUseDatabase(
   }
 
   // FIXME return result...
-  return mkScoped(new EmptyResultCursor());
+  return mkScoped(new ResultCursor());
 }
 
 ScopedPtr<ResultCursor> DefaultScheduler::executeDropTable(
@@ -443,7 +443,7 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeDropTable(
   }
 
   // FIXME return result...
-  return mkScoped(new EmptyResultCursor());
+  return mkScoped(new ResultCursor());
 }
 
 ScopedPtr<ResultCursor> DefaultScheduler::executeInsertInto(
@@ -490,7 +490,7 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeInsertInto(
   }
 
   // FIXME return result...
-  return mkScoped(new EmptyResultCursor());
+  return mkScoped(new ResultCursor());
 }
 
 ScopedPtr<ResultCursor> DefaultScheduler::executeInsertJSON(
@@ -506,7 +506,7 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeInsertJSON(
   }
 
   // FIXME return result...
-  return mkScoped(new EmptyResultCursor());
+  return mkScoped(new ResultCursor());
 }
 
 ScopedPtr<ResultCursor> DefaultScheduler::executeAlterTable(
@@ -519,7 +519,7 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeAlterTable(
   }
 
   // FIXME return result...
-  return mkScoped(new EmptyResultCursor());
+  return mkScoped(new ResultCursor());
 }
 
 ScopedPtr<ResultCursor> DefaultScheduler::execute(

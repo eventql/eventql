@@ -86,14 +86,19 @@ ReturnCode performOperation_QUERY_REMOTE(
 
     /* execute query */
     auto result_cursor = qplan->execute(0);
-    auto result_ncols = result_cursor->getNumColumns();
+    auto result_ncols = result_cursor->getColumnCount();
 
     /* send response frames */
     QueryRemoteResultFrame r_frame;
     r_frame.setColumnCount(result_ncols);
     auto r_frame_data_os = r_frame.getRowDataOutputStream();
-    Vector<csql::SValue> row(result_ncols);
-    while (result_cursor->next(row.data(), row.size())) {
+
+    Vector<csql::SValue> row;
+    for (size_t i = 0; i < result_ncols; ++i) {
+      row.emplace_back(result_cursor->getColumnType(i));
+    }
+
+    while (result_cursor->next(row.data())) {
       r_frame.setRowCount(r_frame.getRowCount() + 1);
       for (size_t i = 0; i < result_ncols; ++i) {
         row[i].encode(r_frame_data_os.get());

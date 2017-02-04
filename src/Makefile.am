@@ -921,8 +921,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/server/server_stats.h \
     eventql/server/sql_service.cc \
     eventql/server/sql_service.h \
-    eventql/server/sql/codec/binary_codec.cc \
-    eventql/server/sql/codec/binary_codec.h \
     eventql/server/sql/codec/json_codec.cc \
     eventql/server/sql/codec/json_codec.h \
     eventql/server/sql/codec/json_sse_codec.cc \

@@ -50,15 +50,19 @@ OrderByExpression::OrderByExpression(
 }
 
 ReturnCode OrderByExpression::execute() {
-  auto rc =input_->execute();
+  auto rc = input_->execute();
   if (!rc.isSuccess()) {
     return rc;
   }
 
   execution_context_->incrementNumTasksRunning();
 
-  Vector<SValue> row(input_cursor_->getNumColumns());
-  while (input_cursor_->next(row.data(), row.size())) {
+  Vector<SValue> row;
+  for (size_t i = 0; i < input_->getColumnCount(); ++i) {
+    row.emplace_back(input_->getColumnType(i));
+  }
+
+  while (input_->next(row.data(), row.size())) {
     rows_.emplace_back(row);
   }
 
@@ -131,7 +135,7 @@ ReturnCode OrderByExpression::nextBatch(
 }
 
 size_t OrderByExpression::getColumnCount() const {
-  return input_cursor_->getNumColumns();
+  return input_->getColumnCount();
 }
 
 SType OrderByExpression::getColumnType(size_t idx) const {
@@ -142,7 +146,7 @@ bool OrderByExpression::next(SValue* out, size_t out_len) {
   if (pos_ >= num_rows_) {
     return false;
   } else {
-    for (size_t i = 0; i < input_cursor_->getNumColumns() && i < out_len; ++i) {
+    for (size_t i = 0; i < input_->getColumnCount() && i < out_len; ++i) {
       out[i] = rows_[pos_][i];
     }
 
