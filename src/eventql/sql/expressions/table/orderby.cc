@@ -76,32 +76,41 @@ ReturnCode OrderByExpression::execute() {
     }
 
     for (const auto& sort : sort_specs_) {
-      SValue args[2];
-
-      VM::evaluate(
+      VM::evaluateBoxed(
           txn_,
           sort.expr.program(),
+          sort.expr.program()->method_call,
+          &vm_stack_,
+          nullptr,
           left.size(),
-          left.data(),
-          &args[0]);
+          left.data());
 
-      VM::evaluate(
+      VM::evaluateBoxed(
           txn_,
           sort.expr.program(),
+          sort.expr.program()->method_call,
+          &vm_stack_,
+          nullptr,
           right.size(),
-          right.data(),
-          &args[1]);
+          right.data());
+
+      std::array<SValue, 2> args = {
+          sort.expr.program()->return_type_,
+          sort.expr.program()->return_type_ };
+
+      popBoxed(&vm_stack_, &args[0]);
+      popBoxed(&vm_stack_, &args[1]);
 
       SValue res(false);
-      expressions::eqExpr(Transaction::get(txn_), 2, args, &res);
+      expressions::eqExpr(Transaction::get(txn_), 2, args.data(), &res);
       if (res.getBool()) {
         continue;
       }
 
       if (sort.descending) {
-        expressions::gtExpr(Transaction::get(txn_), 2, args, &res);
+        expressions::gtExpr(Transaction::get(txn_), 2, args.data(), &res);
       } else {
-        expressions::ltExpr(Transaction::get(txn_), 2, args, &res);
+        expressions::ltExpr(Transaction::get(txn_), 2, args.data(), &res);
       }
 
       return res.getBool();

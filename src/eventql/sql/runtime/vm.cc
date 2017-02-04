@@ -58,12 +58,9 @@ VM::Instance VM::allocInstance(
     ScratchMemory* scratch) {
   Instance that;
 
-  if (program->has_aggregate_) {
-    that.scratch = scratch->alloc(program->dynamic_storage_size_);
-    initInstance(ctx, program, program->entry_, &that);
-  } else {
-    that.scratch = scratch->construct<SValue>();
-  }
+  assert(program->has_aggregate_);
+  that.scratch = scratch->alloc(program->dynamic_storage_size_);
+  initInstance(ctx, program, program->entry_, &that);
 
   return that;
 }
@@ -72,142 +69,43 @@ void VM::freeInstance(
     Transaction* ctx,
     const Program* program,
     Instance* instance) {
-  if (program->has_aggregate_) {
-    freeInstance(ctx, program, program->entry_, instance);
-  } else {
-    ((SValue*) instance->scratch)->~SValue();
-  }
+  assert(program->has_aggregate_);
+  freeInstance(ctx, program, program->entry_, instance);
 }
 
-void VM::reset(
+void VM::resetInstance(
     Transaction* ctx,
     const Program* program,
     Instance* instance) {
-  if (program->has_aggregate_) {
-    resetInstance(ctx, program, program->entry_, instance);
-  } else {
-    *((SValue*) instance->scratch) = SValue();
-  }
-}
-
-void VM::result(
-    Transaction* ctx,
-    const Program* program,
-    const Instance* instance,
-    SValue* out) {
-  *out = SValue::newUInt64(0);
-
-  VMRegister out_reg;
-  out_reg.data = out->getData();
-  out_reg.capacity = out->getCapacity();
-
-  VM::result(ctx, program, instance, &out_reg);
-}
-
-void VM::result(
-    Transaction* ctx,
-    const Program* program,
-    const Instance* instance,
-    VMRegister* out) {
   assert(program->has_aggregate_);
-
-  return evaluate(
-      ctx,
-      program,
-      const_cast<Instance*>(instance),
-      program->entry_,
-      0,
-      nullptr,
-      out);
+  resetInstance(ctx, program, program->entry_, instance);
 }
 
-void VM::accumulate(
+void VM::evaluateBoxed(
     Transaction* ctx,
     const Program* program,
+    const Instruction* entrypoint,
+    VMStack* stack,
     Instance* instance,
     int argc,
     const SValue* argv) {
-  void** stackv = nullptr;
+  void** argv_unboxed = nullptr;
   if (argc > 0) {
-    stackv = reinterpret_cast<void**>(alloca(sizeof(void*) * argc));
+    argv_unboxed = reinterpret_cast<void**>(alloca(sizeof(void*) * argc));
     for (int i = 0; i < argc; ++i) {
-      stackv[i] = (void*) argv[i].getData();
+      argv_unboxed[i] = (void*) argv[i].getData();
     }
   }
 
-  accumulate(ctx, program, instance, argc, stackv);
-}
-
-void VM::accumulate(
-    Transaction* ctx,
-    const Program* program,
-    Instance* instance,
-    int argc,
-    void** argv) {
-  assert(program->has_aggregate_);
-  accumulate(ctx, program, instance, program->entry_, argc, argv);
-}
-
-void VM::evaluate(
-    Transaction* ctx,
-    const Program* program,
-    int argc,
-    const SValue* argv,
-    SValue* out) {
-  void** stackv = nullptr;
-  if (argc > 0) {
-    stackv = reinterpret_cast<void**>(alloca(sizeof(void*) * argc));
-    for (int i = 0; i < argc; ++i) {
-      stackv[i] = (void*) argv[i].getData();
-    }
-  }
-
-  evaluateLegacy(ctx, program, argc, stackv, out);
-}
-
-void VM::evaluateLegacy(
-    Transaction* ctx,
-    const Program* program,
-    int argc,
-    void** argv,
-    SValue* out) {
-  assert(out->getType() == program->return_type_);
-
-  VMRegister out_reg;
-  out_reg.data = out->getData();
-  out_reg.capacity = out->getCapacity();
-
-  evaluate(ctx, program, argc, argv, &out_reg);
-}
-
-void VM::evaluate(
-    Transaction* ctx,
-    const Program* program,
-    int argc,
-    void** argv,
-    VMRegister* out) {
-  switch (program->entry_->type) {
-    case X_INPUT:
-      assert(argv[reinterpret_cast<uint64_t>(program->entry_->arg0)]);
-      copyRegister(
-          program->return_type_,
-          out,
-          argv[reinterpret_cast<uint64_t>(program->entry_->arg0)]);
-      break;
-
-    case X_LITERAL:
-      copyRegister(program->return_type_, out, program->entry_->retval.data);
-      break;
-
-    default:
-      evaluate(ctx, program, nullptr, program->entry_, argc, argv, out);
-      break;
-  }
+  evaluate(ctx, program, entrypoint, stack, instance, argc, argv_unboxed);
 }
 
 void VM::evaluateVector(
     Transaction* ctx,
     const Program* program,
+    const Instruction* entrypoint,
+    VMStack* stack,
+    Instance* instance,
     int argc,
     const SVector* argv,
     size_t vlen,
@@ -224,17 +122,13 @@ void VM::evaluateVector(
     return;
   }
 
-  void** stackv = nullptr;
+  void** argv_cursor = nullptr;
   if (argc > 0) {
-    stackv = reinterpret_cast<void**>(alloca(sizeof(void*) * argc));
+    argv_cursor = reinterpret_cast<void**>(alloca(sizeof(void*) * argc));
   }
 
   for (size_t i = 0; i < argc; ++i) {
-    if (false) { // FIXME only if input required
-      stackv[i] = nullptr;
-    } else {
-      stackv[i] = (void*) argv[i].getData();
-    }
+    argv_cursor[i] = (void*) argv[i].getData();
   }
 
   auto rtype = program->return_type_;
@@ -245,29 +139,17 @@ void VM::evaluateVector(
     out->setSize(sql_sizeof_static(out->getType()) * vlen);
   }
 
-  VMRegister out_reg;
-  out_reg.data = out->getMutableData();
-  out_reg.capacity = out->getCapacity();
-
   for (size_t n = 0; n < vlen; ++n) {
     if (!filter || (*filter)[n]) {
-      evaluate(ctx, program, argc, stackv, &out_reg);
+      // evaluate and append to output
+      evaluate(ctx, program, entrypoint, stack, instance, argc, argv_cursor);
+      popVector(stack, out);
+    }
 
-      // increment input iterators
-      for (size_t i = 0; i < argc; ++i) {
-        if (stackv[i]) {
-          argv[i].next(&stackv[i]);
-        }
-      }
-
-      // increment output iterator
-      out_reg.capacity -= SVector::next(rtype, &out_reg.data);
-    } else {
-      // increment input iterators
-      for (size_t i = 0; i < argc; ++i) {
-        if (stackv[i]) {
-          argv[i].next(&stackv[i]);
-        }
+    // increment input iterators
+    for (size_t i = 0; i < argc; ++i) {
+      if (argv_cursor[i]) {
+        argv[i].next(&argv_cursor[i]);
       }
     }
   }
@@ -276,6 +158,9 @@ void VM::evaluateVector(
 void VM::evaluatePredicateVector(
     Transaction* ctx,
     const Program* program,
+    const Instruction* entrypoint,
+    VMStack* stack,
+    Instance* instance,
     int argc,
     const SVector* argv,
     size_t vlen,
@@ -283,45 +168,37 @@ void VM::evaluatePredicateVector(
     size_t* out_cardinality) {
   assert(program->return_type_ == SType::BOOL);
 
-  void** stackv = nullptr;
+  void** argv_cursor = nullptr;
   if (argc > 0) {
-    stackv = reinterpret_cast<void**>(alloca(sizeof(void*) * argc));
+    argv_cursor = reinterpret_cast<void**>(alloca(sizeof(void*) * argc));
   }
 
   for (size_t i = 0; i < argc; ++i) {
-    if (false) { // FIXME only if input required
-      stackv[i] = nullptr;
-    } else {
-      stackv[i] = (void*) argv[i].getData();
-    }
+    argv_cursor[i] = (void*) argv[i].getData();
   }
 
   out->resize(vlen);
   *out_cardinality = 0;
 
-  VMRegister out_reg;
-  out_reg.data = alloca(1);
-  out_reg.capacity = 1;
-
   auto rtype = program->return_type_;
   for (size_t n = 0; n < vlen; ++n) {
-    evaluate(ctx, program, argc, stackv, &out_reg);
+    evaluate(ctx, program, entrypoint, stack, instance, argc, argv_cursor);
+
+    // store result
+    uint8_t pred = popBool(stack);
+    (*out)[n] = pred;
+    *out_cardinality += pred;
 
     // increment input iterators
     for (size_t i = 0; i < argc; ++i) {
-      if (stackv[i]) {
-        argv[i].next(&stackv[i]);
+      if (argv_cursor[i]) {
+        argv[i].next(&argv_cursor[i]);
       }
     }
-
-    // store result
-    uint8_t pred = *static_cast<uint8_t*>(out_reg.data);
-    (*out)[n] = pred;
-    *out_cardinality += pred;
   }
 }
 
-void VM::merge(
+void VM::mergeInstance(
     Transaction* ctx,
     const Program* program,
     Instance* dst,
@@ -467,176 +344,7 @@ void VM::freeProgram(
   }
 }
 
-void VM::evaluate(
-    Transaction* ctx,
-    const Program* program,
-    Instance* instance,
-    Instruction* expr,
-    int argc,
-    void** argv,
-    VMRegister* out) {
-
-  /* execute expression */
-  switch (expr->type) {
-
-    //case X_IF: {
-    //  SValue cond;
-    //  auto cond_expr = expr->child;
-    //  evaluate(ctx, program, instance, cond_expr, argc, argv, &cond);
-
-    //  auto branch = cond_expr->next;
-    //  if (!cond.getBool()) {
-    //    branch = branch->next;
-    //  }
-
-    //  evaluate(ctx, program, instance, branch, argc, argv, out);
-    //  return;
-    //}
-
-    case X_CALL_PURE: {
-      void** stackv = nullptr;
-      auto stackn = expr->argn;
-      if (stackn > 0) {
-        stackv = reinterpret_cast<void**>(alloca(sizeof(void*) * expr->argn));
-
-        auto stackp = stackv;
-        for (auto cur = expr->child; cur != nullptr; cur = cur->next) {
-          switch (cur->type) {
-            case X_INPUT:
-              *(stackp++) = argv[reinterpret_cast<uint64_t>(cur->arg0)];
-              break;
-
-            case X_LITERAL:
-              *(stackp++) = cur->retval.data;
-              break;
-
-            default:
-              evaluate(
-                  ctx,
-                  program,
-                  instance,
-                  cur,
-                  argc,
-                  argv,
-                  &cur->retval);
-
-              *(stackp++) = cur->retval.data;
-              break;
-          }
-        }
-      }
-
-      expr->vtable.call(Transaction::get(ctx), stackn, stackv, out);
-      return;
-    }
-
-    case X_CALL_AGGREGATE: {
-      assert(instance);
-      auto scratch = (char *) instance->scratch + (size_t) expr->arg0;
-      expr->vtable.get(Transaction::get(ctx), scratch, out);
-      return;
-    }
-
-    case X_INPUT:
-      assert(argv[reinterpret_cast<uint64_t>(expr->arg0)]);
-      copyRegister(
-          expr->rettype,
-          out,
-          argv[reinterpret_cast<uint64_t>(expr->arg0)]);
-      break;
-
-    case X_LITERAL:
-      copyRegister(expr->rettype, out, expr->retval.data);
-      break;
-
-    //case X_REGEX: {
-    //  SValue subj;
-    //  auto subj_expr = expr->child;
-    //  evaluate(ctx, program, instance, subj_expr, argc, argv, &subj);
-
-    //  auto match = ((RegExp*) expr->arg0)->match(subj.getString());
-    //  *out = SValue(SValue::BoolType(match));
-
-    //  return;
-    //}
-
-    //case X_LIKE: {
-    //  SValue subj;
-    //  auto subj_expr = expr->child;
-    //  evaluate(ctx, program, instance, subj_expr, argc, argv, &subj);
-
-    //  auto match = ((LikePattern*) expr->arg0)->match(subj.getString());
-    //  *out = SValue(SValue::BoolType(match));
-
-    //  return;
-    //}
-
-  }
-}
-
-void VM::accumulate(
-    Transaction* ctx,
-    const Program* program,
-    Instance* instance,
-    Instruction* expr,
-    int argc,
-    void** argv) {
-
-  switch (expr->type) {
-
-    case X_CALL_AGGREGATE: {
-      void** stackv = nullptr;
-      auto stackn = expr->argn;
-      if (stackn > 0) {
-        stackv = reinterpret_cast<void**>(alloca(sizeof(void*) * expr->argn));
-
-        auto stackp = stackv;
-        for (auto cur = expr->child; cur != nullptr; cur = cur->next) {
-          switch (cur->type) {
-            case X_INPUT:
-              *(stackp++) = argv[reinterpret_cast<uint64_t>(cur->arg0)];
-              break;
-
-            case X_LITERAL:
-              *(stackp++) = cur->retval.data;
-              break;
-
-            default:
-              evaluate(
-                  ctx,
-                  program,
-                  instance,
-                  cur,
-                  argc,
-                  argv,
-                  &cur->retval);
-
-              *(stackp++) = cur->retval.data;
-          }
-        }
-      }
-
-      auto scratch = (char *) instance->scratch + (size_t) expr->arg0;
-      expr->vtable.accumulate(
-          Transaction::get(ctx),
-          scratch,
-          stackn,
-          stackv);
-      return;
-    }
-
-    default: {
-      for (auto cur = expr->child; cur != nullptr; cur = cur->next) {
-        accumulate(ctx, program, instance, cur, argc, argv);
-      }
-
-      return;
-    }
-
-  }
-}
-
-void VM::saveState(
+void VM::saveInstanceState(
     Transaction* ctx,
     const Program* program,
     const Instance* instance,
@@ -648,7 +356,7 @@ void VM::saveState(
   }
 }
 
-void VM::loadState(
+void VM::loadInstanceState(
     Transaction* ctx,
     const Program* program,
     Instance* instance,
@@ -706,24 +414,5 @@ void VM::loadInstance(
   }
 }
 
-void VM::copyRegister(SType type, VMRegister* dst, void* src) {
-  assert(dst->data);
-  assert(src);
+} // namespace csql
 
-  switch (type) { // FIXME
-    case SType::UINT64:
-    case SType::TIMESTAMP64:
-      memcpy(dst->data, src, sizeof(uint64_t));
-      break;
-
-    case SType::INT64:
-      memcpy(dst->data, src, sizeof(int64_t));
-      break;
-
-    case SType::FLOAT64:
-      memcpy(dst->data, src, sizeof(double));
-      break;
-  }
-}
-
-}

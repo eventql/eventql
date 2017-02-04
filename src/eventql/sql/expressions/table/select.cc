@@ -62,7 +62,16 @@ SType SelectExpression::getColumnType(size_t idx) const {
 bool SelectExpression::next(SValue* row, size_t row_len) {
   if (pos_++ == 0) {
     for (int i = 0; i < select_exprs_.size() && i < row_len; ++i) {
-      VM::evaluate(txn_, select_exprs_[i].program(), 0, nullptr,  &row[i]);
+      VM::evaluate(
+          txn_,
+          select_exprs_[i].program(),
+          select_exprs_[i].program()->method_call,
+          &vm_stack_,
+          nullptr,
+          0,
+          nullptr);
+
+      popBoxed(&vm_stack_, &row[i]);
     }
 
     execution_context_->incrementNumTasksCompleted();

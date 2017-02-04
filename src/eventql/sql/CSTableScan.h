@@ -125,6 +125,7 @@ protected:
   bool cur_filter_pred_;
   Vector<SValue> cur_buf_;
   size_t cur_pos_;
+  VMStack vm_stack_;
 };
 
 class FastCSTableScan : public TableExpression {
@@ -166,6 +167,7 @@ protected:
   std::vector<SType> column_types_;
   std::vector<SVector> column_buffers_;
   std::vector<RefPtr<cstable::ColumnReader>> column_readers_;
+  VMStack vm_stack_;
 };
 
 } // namespace csql

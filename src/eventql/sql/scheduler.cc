@@ -451,17 +451,27 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeInsertInto(
     RefPtr<InsertIntoNode> insert_into) {
   Vector<Pair<String, SValue>> data;
   auto value_specs = insert_into->getValueSpecs();
+  VMStack vm_stack;
   for (auto spec : value_specs) {
     auto expr = txn->getCompiler()->buildValueExpression(txn, spec.expr);
     auto program = expr.program();
     if (program->has_aggregate_) {
       RAISE(
           kRuntimeError,
-          "insert into expression must not contain aggregation"); //FIXME better msg
+          "insert into expression must not contain aggregate expressions");
     }
 
-    SValue value;
-    VM::evaluate(txn, program, 0, nullptr, &value);
+    VM::evaluate(
+        txn,
+        program,
+        program->method_call,
+        &vm_stack,
+        nullptr,
+        0,
+        nullptr);
+
+    SValue value(program->return_type_);
+    popBoxed(&vm_stack, &value);
 
     Pair<String, SValue> result;
     result.first = spec.column;

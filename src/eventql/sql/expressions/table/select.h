@@ -50,6 +50,7 @@ protected:
   ExecutionContext* execution_context_;
   Vector<ValueExpression> select_exprs_;
   size_t pos_;
+  VMStack vm_stack_;
 };
 
 }

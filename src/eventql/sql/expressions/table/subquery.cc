@@ -79,6 +79,9 @@ ReturnCode SubqueryExpression::nextBatch(
       VM::evaluateVector(
           txn_,
           select_exprs_[i].program(),
+          select_exprs_[i].program()->method_call,
+          &vm_stack_,
+          nullptr,
           input_cols_.size(),
           input_cols_.data(),
           input_nrecords,
@@ -97,39 +100,6 @@ size_t SubqueryExpression::getColumnCount() const {
 SType SubqueryExpression::getColumnType(size_t idx) const {
   assert(idx < select_exprs_.size());
   return select_exprs_[idx].getReturnType();
-}
-
-bool SubqueryExpression::next(SValue* row, size_t row_len) {
-  Vector<SValue> buf_(input_->getColumnCount());
-
-  while (input_->next(buf_.data(), buf_.size())) {
-    if (!where_expr_.isEmpty()) {
-      SValue pred;
-      VM::evaluate(
-          txn_,
-          where_expr_.get().program(),
-          buf_.size(),
-          buf_.data(),
-          &pred);
-
-      if (!pred.getBool()) {
-        continue;
-      }
-    }
-
-    for (size_t i = 0; i < select_exprs_.size() && i < row_len; ++i) {
-      VM::evaluate(
-          txn_,
-          select_exprs_[i].program(),
-          buf_.size(),
-          buf_.data(),
-          row + i);
-    }
-
-    return true;
-  }
-
-  return false;
 }
 
 }

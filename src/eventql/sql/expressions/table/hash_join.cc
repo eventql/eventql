@@ -144,12 +144,16 @@ ReturnCode HashJoin::computeInnerJoin(
     for (size_t i = 0; i < conjunction_exprs_.size(); ++i) {
       hkey.emplace_back(conjunction_exprs_[i].first.getReturnType());
 
-      VM::evaluate(
+      VM::evaluateBoxed(
           txn_,
           conjunction_exprs_[i].first.program(),
+          conjunction_exprs_[i].first.program()->method_call,
+          &vm_stack_,
+          nullptr,
           row.size(),
-          row.data(),
-          &hkey[i]);
+          row.data());
+
+      popBoxed(&vm_stack_, &hkey[i]);
     }
 
     auto hash_key = SValue::makeUniqueKey(hkey.data(), hkey.size());
@@ -183,43 +187,47 @@ bool HashJoin::computeOutputRow(
     const std::vector<SValue>& input,
     SVector* output) {
   {
-    SValue pred(SType::BOOL);
-    VM::evaluate(
+    VM::evaluateBoxed(
         txn_,
         join_cond_expr_.get().program(),
+        join_cond_expr_.get().program()->method_call,
+        &vm_stack_,
+        nullptr,
         input.size(),
-        input.data(),
-        &pred);
+        input.data());
 
-    if (!pred.getBool()) {
+    if (!popBool(&vm_stack_)) {
       return false;
     }
   }
 
   if (!where_expr_.isEmpty()) {
-    SValue pred(SType::BOOL);
-    VM::evaluate(
+    VM::evaluateBoxed(
         txn_,
         where_expr_.get().program(),
+        where_expr_.get().program()->method_call,
+        &vm_stack_,
+        nullptr,
         input.size(),
-        input.data(),
-        &pred);
+        input.data());
 
-    if (!pred.getBool()) {
+    if (!popBool(&vm_stack_)) {
       return false;
     }
   }
 
   for (int i = 0; i < select_exprs_.size(); ++i) {
     SValue val(select_exprs_[i].getReturnType());
-    VM::evaluate(
+    VM::evaluateBoxed(
         txn_,
         select_exprs_[i].program(),
+        select_exprs_[i].program()->method_call,
+        &vm_stack_,
+        nullptr,
         input.size(),
-        input.data(),
-        &val);
+        input.data());
 
-    output[i].appendFrom(val.getData());
+    popVector(&vm_stack_, output + i);
   }
 
   return true;
@@ -281,12 +289,16 @@ ReturnCode HashJoin::readJoinedTable() {
       for (size_t i = 0; i < conjunction_exprs_.size(); ++i) {
         hkey.emplace_back(conjunction_exprs_[i].second.getReturnType());
 
-        VM::evaluate(
+        VM::evaluateBoxed(
             txn_,
             conjunction_exprs_[i].second.program(),
+            conjunction_exprs_[i].second.program()->method_call,
+            &vm_stack_,
+            nullptr,
             row.size(),
-            row.data(),
-            &hkey[i]);
+            row.data());
+
+        popBoxed(&vm_stack_, &hkey[i]);
       }
 
       auto hash_key = SValue::makeUniqueKey(hkey.data(), hkey.size());

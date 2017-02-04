@@ -741,6 +741,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/scheduler/execution_context.h \
     eventql/sql/svalue.cc \
     eventql/sql/svalue.h \
+    eventql/sql/stype.cc \
+    eventql/sql/stype.h \
     eventql/sql/table_iterator.h \
     eventql/sql/table_provider.h \
     eventql/sql/table_schema.cc \

@@ -71,6 +71,7 @@ protected:
   ScopedPtr<TableExpression> joined_tbl_;
   std::vector<SVector> base_tbl_cols_;
   std::unordered_multimap<std::string, std::vector<SValue>> joined_tbl_data_;
+  VMStack vm_stack_;
 };
 
 } // namespace csql

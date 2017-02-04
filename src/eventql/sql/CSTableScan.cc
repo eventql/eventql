@@ -423,23 +423,26 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
     bool row_ready = false;
     bool where_pred = cur_filter_pred_;
     if (where_pred && where_expr_.program() != nullptr) {
-      SValue where_tmp;
-      VM::evaluate(
+      VM::evaluateBoxed(
           txn_,
           where_expr_.program(),
+          where_expr_.program()->method_call,
+          &vm_stack_,
+          nullptr,
           cur_buf_.size(),
-          cur_buf_.data(),
-          &where_tmp);
+          cur_buf_.data());
 
-      where_pred = where_tmp.getBool();
+      where_pred = popBool(&vm_stack_);
     }
 
     if (where_pred) {
       for (int i = 0; i < select_list_.size(); ++i) {
         if (select_list_[i].rep_level >= cur_select_level_) {
-          VM::accumulate(
+          VM::evaluateBoxed(
               txn_,
               select_list_[i].compiled.program(),
+              select_list_[i].compiled.program()->method_aggr_acc,
+              &vm_stack_,
               &select_list_[i].instance,
               cur_buf_.size(),
               cur_buf_.data());
@@ -459,13 +462,18 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
 
         case AggregationStrategy::AGGREGATE_WITHIN_RECORD_DEEP:
           for (int i = 0; i < select_list_.size() && i < out_len; ++i) {
-            VM::result(
+            VM::evaluate(
                 txn_,
                 select_list_[i].compiled.program(),
+                select_list_[i].compiled.program()->method_aggr_get,
+                &vm_stack_,
                 &select_list_[i].instance,
-                &out[i]);
+                0,
+                nullptr);
 
-            VM::reset(
+            popBoxed(&vm_stack_, out + i);
+
+            VM::resetInstance(
                 txn_,
                 select_list_[i].compiled.program(),
                 &select_list_[i].instance);
@@ -476,12 +484,16 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
 
         case AggregationStrategy::NO_AGGREGATION:
           for (int i = 0; i < select_list_.size() && i < out_len; ++i) {
-            VM::evaluate(
+            VM::evaluateBoxed(
                 txn_,
                 select_list_[i].compiled.program(),
+                select_list_[i].compiled.program()->method_call,
+                &vm_stack_,
+                nullptr,
                 cur_buf_.size(),
-                cur_buf_.data(),
-                &out[i]);
+                cur_buf_.data());
+
+            popBoxed(&vm_stack_, out + i);
           }
 
           row_ready = true;
@@ -508,11 +520,16 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
   switch (aggr_strategy_) {
     case AggregationStrategy::AGGREGATE_ALL:
       for (int i = 0; i < select_list_.size() && i < out_len; ++i) {
-        VM::result(
+        VM::evaluate(
             txn_,
             select_list_[i].compiled.program(),
+            select_list_[i].compiled.program()->method_aggr_get,
+            &vm_stack_,
             &select_list_[i].instance,
-            &out[i]);
+            0,
+            nullptr);
+
+        popBoxed(&vm_stack_, out + i);
       }
 
       return true;
@@ -534,8 +551,16 @@ bool CSTableScan::fetchNextWithoutColumns(SValue* row, int row_len) {
 
     if (where_expr_.program() != nullptr) {
       SValue where_tmp;
-      VM::evaluate(txn_, where_expr_.program(), 0, nullptr, &where_tmp);
-      if (!where_tmp.getBool()) {
+      VM::evaluate(
+          txn_,
+          where_expr_.program(),
+          where_expr_.program()->method_call,
+          &vm_stack_,
+          nullptr,
+          0,
+          nullptr);
+
+      if (popBool(&vm_stack_)) {
         continue;
       }
     }
@@ -544,9 +569,13 @@ bool CSTableScan::fetchNextWithoutColumns(SValue* row, int row_len) {
       VM::evaluate(
           txn_,
           select_list_[i].compiled.program(),
-          1,
-          &sql_null,
-          &row[i]);
+          select_list_[i].compiled.program()->method_call,
+          &vm_stack_,
+          nullptr,
+          0,
+          nullptr);
+
+      popBoxed(&vm_stack_, row + i);
     }
 
     return true;
@@ -758,6 +787,9 @@ ReturnCode FastCSTableScan::nextBatch(
       VM::evaluatePredicateVector(
           txn_,
           where_expr_.program(),
+          where_expr_.program()->method_call,
+          &vm_stack_,
+          nullptr,
           column_buffers_.size(),
           column_buffers_.data(),
           batch_size,
@@ -774,6 +806,9 @@ ReturnCode FastCSTableScan::nextBatch(
       VM::evaluateVector(
           txn_,
           select_list_[i].program(),
+          where_expr_.program()->method_call,
+          &vm_stack_,
+          nullptr,
           column_buffers_.size(),
           column_buffers_.data(),
           batch_size,

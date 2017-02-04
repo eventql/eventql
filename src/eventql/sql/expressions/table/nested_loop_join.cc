@@ -172,26 +172,31 @@ ReturnCode NestedLoopJoin::executeCartesianJoin() {
         }
 
         if (!where_expr_.isEmpty()) {
-          SValue pred;
-          VM::evaluate(
+          VM::evaluateBoxed(
               txn_,
               where_expr_.get().program(),
+              where_expr_.get().program()->method_call,
+              &vm_stack_,
+              nullptr,
               input_buf_.size(),
-              input_buf_.data(),
-              &pred);
+              input_buf_.data());
 
-          if (!pred.getBool()) {
+          if (!popBool(&vm_stack_)) {
             continue;
           }
         }
 
         for (int i = 0; i < select_exprs_.size() && i < row_len; ++i) {
-          VM::evaluate(
+          VM::evaluateBoxed(
               txn_,
               select_exprs_[i].program(),
+              select_exprs_[i].program()->method_call,
+              &vm_stack_,
+              nullptr,
               input_buf_.size(),
-              input_buf_.data(),
-              &row[i]);
+              input_buf_.data());
+
+          popBoxed(&vm_stack_, &row[i]);
         }
 
         return true;
@@ -240,40 +245,46 @@ ReturnCode NestedLoopJoin::executeInnerJoin() {
         }
 
         {
-          SValue pred;
-          VM::evaluate(
+          VM::evaluateBoxed(
               txn_,
               join_cond_expr_.get().program(),
+              join_cond_expr_.get().program()->method_call,
+              &vm_stack_,
+              nullptr,
               input_buf_.size(),
-              input_buf_.data(),
-              &pred);
+              input_buf_.data());
 
-          if (!pred.getBool()) {
+          if (!popBool(&vm_stack_)) {
             continue;
           }
         }
 
         if (!where_expr_.isEmpty()) {
-          SValue pred;
-          VM::evaluate(
+          VM::evaluateBoxed(
               txn_,
               where_expr_.get().program(),
+              where_expr_.get().program()->method_call,
+              &vm_stack_,
+              nullptr,
               input_buf_.size(),
-              input_buf_.data(),
-              &pred);
+              input_buf_.data());
 
-          if (!pred.getBool()) {
+          if (!popBool(&vm_stack_)) {
             continue;
           }
         }
 
         for (int i = 0; i < select_exprs_.size() && i < row_len; ++i) {
-          VM::evaluate(
+          VM::evaluateBoxed(
               txn_,
               select_exprs_[i].program(),
+              select_exprs_[i].program()->method_call,
+              &vm_stack_,
+              nullptr,
               input_buf_.size(),
-              input_buf_.data(),
-              &row[i]);
+              input_buf_.data());
+
+          popBoxed(&vm_stack_, &row[i]);
         }
 
         return true;
@@ -324,15 +335,16 @@ ReturnCode NestedLoopJoin::executeOuterJoin() {
           }
         }
 
-        SValue pred;
-        VM::evaluate(
+        VM::evaluateBoxed(
             txn_,
             join_cond_expr_.get().program(),
+            join_cond_expr_.get().program()->method_call,
+            &vm_stack_,
+            nullptr,
             input_buf_.size(),
-            input_buf_.data(),
-            &pred);
+            input_buf_.data());
 
-        if (!pred.getBool()) {
+        if (!popBool(&vm_stack_)) {
           continue;
         }
 
@@ -358,26 +370,31 @@ ReturnCode NestedLoopJoin::executeOuterJoin() {
         }
 
         if (!where_expr_.isEmpty()) {
-          SValue pred;
-          VM::evaluate(
+          VM::evaluateBoxed(
               txn_,
               where_expr_.get().program(),
+              where_expr_.get().program()->method_call,
+              &vm_stack_,
+              nullptr,
               input_buf_.size(),
-              input_buf_.data(),
-              &pred);
+              input_buf_.data());
 
-          if (!pred.getBool()) {
+          if (!popBool(&vm_stack_)) {
             continue;
           }
         }
 
         for (int i = 0; i < select_exprs_.size() && i < row_len; ++i) {
-          VM::evaluate(
+          VM::evaluateBoxed(
               txn_,
               select_exprs_[i].program(),
+              select_exprs_[i].program()->method_call,
+              &vm_stack_,
+              nullptr,
               input_buf_.size(),
-              input_buf_.data(),
-              &row[i]);
+              input_buf_.data());
+
+          popBoxed(&vm_stack_, &row[i]);
         }
 
         return true;

@@ -73,6 +73,7 @@ protected:
   size_t joined_tbl_mincols_;
   bool joined_tbl_row_found_;
   std::function<bool (SValue*, int)> cursor_;
+  VMStack vm_stack_;
 };
 
 }

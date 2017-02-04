@@ -64,37 +64,4 @@ SType TableScan::getColumnType(size_t idx) const {
   return SType::NIL;
 }
 
-bool TableScan::next(SValue* out, size_t out_len) {
-  Vector<SValue> buf(iter_->numColumns());
-
-  while (iter_->nextRow(buf.data())) {
-    if (!where_expr_.isEmpty()) {
-      SValue pred;
-      VM::evaluate(
-          txn_,
-          where_expr_.get().program(),
-          buf.size(),
-          buf.data(),
-          &pred);
-
-      if (!pred.getBool()) {
-        continue;
-      }
-    }
-
-    for (int i = 0; i < select_exprs_.size() && i < out_len; ++i) {
-      VM::evaluate(
-          txn_,
-          select_exprs_[i].program(),
-          buf.size(),
-          buf.data(),
-          &out[i]);
-    }
-
-    return true;
-  }
-
-  return false;
-}
-
 }

@@ -26,28 +26,17 @@
 #include <string>
 #include <string.h>
 #include <vector>
+#include "eventql/eventql.h"
 #include <eventql/util/io/inputstream.h>
 #include <eventql/util/io/outputstream.h>
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/UnixTime.h>
 #include <eventql/util/exception.h>
 #include <eventql/sql/csql.h>
-
-#include "eventql/eventql.h"
+#include <eventql/sql/stype.h>
 
 namespace csql {
-
-enum class SType : uint8_t {
-  NIL,
-  UINT64,
-  INT64,
-  FLOAT64,
-  BOOL,
-  STRING,
-  TIMESTAMP64
-};
-
-std::string getSTypeName(SType type);
+class VMStack;
 
 class SValue {
 public:
@@ -169,7 +158,6 @@ public:
   size_t getCapacity() const;
   void increaseCapacity(size_t min_capacity);
 
-  void appendFrom(const void* other);
   void copyFrom(const SVector* other);
 
   static size_t next(SType type, void** cursor);

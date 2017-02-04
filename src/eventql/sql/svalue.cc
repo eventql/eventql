@@ -36,20 +36,6 @@
 
 namespace csql {
 
-std::string getSTypeName(SType type) {
-  switch (type) {
-    case SType::NIL: return "nil";
-    case SType::UINT64: return "uint64";
-    case SType::INT64: return "int64";
-    case SType::FLOAT64: return "float64";
-    case SType::BOOL: return "bool";
-    case SType::STRING: return "string";
-    case SType::TIMESTAMP64: return "timestamp64";
-  }
-
-  return "???";
-}
-
 SValue SValue::newNull() {
   return SValue();
 }
@@ -966,39 +952,6 @@ size_t SVector::getSize() const {
 void SVector::setSize(size_t new_size) {
   assert(new_size <= capacity_);
   size_ = new_size;
-}
-
-void SVector::appendFrom(const void* other) {
-  switch (type_) {
-
-    case SType::NIL:
-      return;
-
-    case SType::STRING:
-      assert(false);
-
-    case SType::FLOAT64:
-    case SType::INT64:
-    case SType::UINT64:
-    case SType::TIMESTAMP64:
-      if (capacity_ < size_ + 8) {
-        increaseCapacity(size_ + 8);
-      }
-
-      memcpy((char*) data_ + size_, other, 8);
-      size_ += 8;
-      break;
-
-    case SType::BOOL:
-      if (capacity_ < size_ + 1) {
-        increaseCapacity(size_ + 1);
-      }
-
-      memcpy((char*) data_ + size_, other, 1);
-      size_++;
-      break;
-
-  }
 }
 
 size_t SVector::getCapacity() const {

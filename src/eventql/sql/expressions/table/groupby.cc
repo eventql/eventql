@@ -103,12 +103,16 @@ ReturnCode GroupByExpression::execute() {
     for (size_t n = 0; n < nrecords; n++) {
       Vector<SValue> gkey(group_exprs_.size(), SValue{});
       for (size_t i = 0; i < group_exprs_.size(); ++i) {
-        VM::evaluateLegacy(
+        VM::evaluate(
             txn_,
             group_exprs_[i].program(),
+            group_exprs_[i].program()->method_call,
+            &vm_stack_,
+            nullptr,
             input_col_cursor.size(),
-            input_col_cursor.data(),
-            &gkey[i]);
+            input_col_cursor.data());
+
+        popBoxed(&vm_stack_, &gkey[i]);
       }
 
       auto group_key = SValue::makeUniqueKey(gkey.data(), gkey.size());
@@ -121,9 +125,11 @@ ReturnCode GroupByExpression::execute() {
       }
 
       for (size_t i = 0; i < select_exprs_.size(); ++i) {
-        VM::accumulate(
+        VM::evaluate(
             txn_,
             select_exprs_[i].program(),
+            select_exprs_[i].program()->method_aggr_acc,
+            &vm_stack_,
             &group[i],
             input_col_cursor.size(),
             input_col_cursor.data());
@@ -160,11 +166,14 @@ SType GroupByExpression::getColumnType(size_t idx) const {
 bool GroupByExpression::next(SValue* row, size_t row_len) {
   if (groups_iter_ != groups_.end()) {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::result(
+      VM::evaluate(
           txn_,
           select_exprs_[i].program(),
+          select_exprs_[i].program()->method_aggr_get,
+          &vm_stack_,
           &groups_iter_->second[i],
-          &row[i]);
+          0,
+          nullptr);
     }
 
     if (++groups_iter_ == groups_.end()) {
@@ -230,7 +239,7 @@ ReturnCode PartialGroupByExpression::execute() {
         }
 
         for (size_t i = 0; i < select_exprs_.size(); ++i) {
-          VM::loadState(
+          VM::loadInstanceState(
               txn_,
               select_exprs_[i].program(),
               &group[i],
@@ -283,12 +292,16 @@ ReturnCode PartialGroupByExpression::execute() {
       for (size_t n = 0; n < nrecords; n++) {
         Vector<SValue> gkey(group_exprs_.size(), SValue{});
         for (size_t i = 0; i < group_exprs_.size(); ++i) {
-          VM::evaluateLegacy(
+          VM::evaluate(
               txn_,
               group_exprs_[i].program(),
+              group_exprs_[i].program()->method_call,
+              &vm_stack_,
+              nullptr,
               input_col_cursor.size(),
-              input_col_cursor.data(),
-              &gkey[i]);
+              input_col_cursor.data());
+
+          popBoxed(&vm_stack_, &gkey[i]);
         }
 
         auto group_key = SValue::makeUniqueKey(gkey.data(), gkey.size());
@@ -301,9 +314,11 @@ ReturnCode PartialGroupByExpression::execute() {
         }
 
         for (size_t i = 0; i < select_exprs_.size(); ++i) {
-          VM::accumulate(
+          VM::evaluate(
               txn_,
               select_exprs_[i].program(),
+              select_exprs_[i].program()->method_aggr_acc,
+              &vm_stack_,
               &group[i],
               input_col_cursor.size(),
               input_col_cursor.data());
@@ -328,7 +343,7 @@ ReturnCode PartialGroupByExpression::execute() {
         os->write(g.first.data(), g.first.size());
 
         for (size_t i = 0; i < select_exprs_.size(); ++i) {
-          VM::saveState(
+          VM::saveInstanceState(
               txn_,
               select_exprs_[i].program(),
               &g.second[i],
@@ -373,7 +388,7 @@ bool PartialGroupByExpression::next(SValue* row, size_t row_len) {
     String group_data;
     auto group_data_os = StringOutputStream::fromString(&group_data);
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::saveState(
+      VM::saveInstanceState(
           txn_,
           select_exprs_[i].program(),
           &groups_iter_->second[i],
@@ -501,8 +516,8 @@ ReturnCode GroupByMergeExpression::execute() {
 
       for (size_t i = 0; i < select_exprs_.size(); ++i) {
         const auto& e = select_exprs_[i];
-        VM::loadState(txn_, e.program(), &remote_group[i], &is);
-        VM::merge(txn_, e.program(), &group[i], &remote_group[i]);
+        VM::loadInstanceState(txn_, e.program(), &remote_group[i], &is);
+        VM::mergeInstance(txn_, e.program(), &group[i], &remote_group[i]);
       }
     }
 
@@ -583,11 +598,16 @@ void GroupByMergeExpression::addPart(
 bool GroupByMergeExpression::next(SValue* row, size_t row_len) {
   if (groups_iter_ != groups_.end()) {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::result(
+      VM::evaluate(
           txn_,
           select_exprs_[i].program(),
+          select_exprs_[i].program()->method_aggr_get,
+          &vm_stack_,
           &groups_iter_->second[i],
-          &row[i]);
+          0,
+          nullptr);
+
+      popBoxed(&vm_stack_, &row[i]);
     }
 
     if (++groups_iter_ == groups_.end()) {

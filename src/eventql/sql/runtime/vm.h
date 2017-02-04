@@ -35,6 +35,15 @@ struct VMRegister {
   size_t capacity;
 };
 
+struct VMStack {
+  VMStack();
+  char* data;
+  size_t size;
+  char* top;
+};
+
+void resizeStack(VMStack* stack);
+
 class VM {
 public:
 
@@ -71,6 +80,9 @@ public:
 
     Transaction* ctx_;
     Instruction* entry_;
+    Instruction* method_call;
+    Instruction* method_aggr_acc;
+    Instruction* method_aggr_get;
     ScratchMemory static_storage_;
     size_t dynamic_storage_size_;
     SType return_type_;
@@ -84,27 +96,27 @@ public:
   static void evaluate(
       Transaction* ctx,
       const Program* program,
+      const Instruction* entrypoint,
+      VMStack* stack,
+      Instance* instance,
       int argc,
-      const SValue* argv,
-      SValue* out);
+      void** argv);
 
-  static void evaluateLegacy(
+  static void evaluateBoxed(
       Transaction* ctx,
       const Program* program,
+      const Instruction* entrypoint,
+      VMStack* stack,
+      Instance* instance,
       int argc,
-      void** argv,
-      SValue* out);
-
-  static void evaluate(
-      Transaction* ctx,
-      const Program* program,
-      int argc,
-      void** argv,
-      VMRegister* out);
+      const SValue* argv);
 
   static void evaluateVector(
       Transaction* ctx,
       const Program* program,
+      const Instruction* entrypoint,
+      VMStack* stack,
+      Instance* instance,
       int argc,
       const SVector* argv,
       size_t vlen,
@@ -114,6 +126,9 @@ public:
   static void evaluatePredicateVector(
       Transaction* ctx,
       const Program* program,
+      const Instruction* entrypoint,
+      VMStack* stack,
+      Instance* instance,
       int argc,
       const SVector* argv,
       size_t vlen,
@@ -130,76 +145,40 @@ public:
       const Program* program,
       Instance* instance);
 
-  static void accumulate(
-      Transaction* ctx,
-      const Program* program,
-      Instance* instance,
-      int argc,
-      void** argv);
-
-  static void accumulate(
-      Transaction* ctx,
-      const Program* program,
-      Instance* instance,
-      int argc,
-      const SValue* argv);
-
-  static void result(
-      Transaction* ctx,
-      const Program* program,
-      const Instance* instance,
-      VMRegister* out);
-
-  static void result(
-      Transaction* ctx,
-      const Program* program,
-      const Instance* instance,
-      SValue* out);
-
-  static void reset(
+  static void resetInstance(
       Transaction* ctx,
       const Program* program,
       Instance* instance);
 
-  // rename to mergeStat
-  static void merge(
+  static void mergeInstance(
       Transaction* ctx,
       const Program* program,
       Instance* dst,
       const Instance* src);
 
-  static void saveState(
+  static void saveInstanceState(
       Transaction* ctx,
       const Program* program,
       const Instance* instance,
       OutputStream* os);
 
-  static void loadState(
+  static void loadInstanceState(
       Transaction* ctx,
       const Program* program,
       Instance* instance,
       InputStream* os);
 
-  static void copyRegister(SType type, VMRegister* dst, void* src);
-
 protected:
 
-  static void evaluate(
+  static void initProgram(
       Transaction* ctx,
-      const Program* program,
-      Instance* instance,
-      Instruction* expr,
-      int argc,
-      void** argv,
-      VMRegister* out);
+      Program* program,
+      Instruction* e);
 
-  static void accumulate(
+  static void freeProgram(
       Transaction* ctx,
       const Program* program,
-      Instance* instance,
-      Instruction* expr,
-      int argc,
-      void** argv);
+      Instruction* e);
 
   static void initInstance(
       Transaction* ctx,
@@ -218,16 +197,6 @@ protected:
       const Program* program,
       Instruction* e,
       Instance* instance);
-
-  static void initProgram(
-      Transaction* ctx,
-      Program* program,
-      Instruction* e);
-
-  static void freeProgram(
-      Transaction* ctx,
-      const Program* program,
-      Instruction* e);
 
   static void mergeInstance(
       Transaction* ctx,

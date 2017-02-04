@@ -64,6 +64,7 @@ protected:
   size_t num_rows_;
   size_t pos_;
   size_t cnt_;
+  VMStack vm_stack_;
 };
 
 }

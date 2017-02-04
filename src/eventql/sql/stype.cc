@@ -2,7 +2,6 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
- *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -22,38 +21,23 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include <eventql/util/stdtypes.h>
-#include <eventql/sql/runtime/defaultruntime.h>
-#include <eventql/sql/expressions/table_expression.h>
+#include <eventql/sql/stype.h>
 
 namespace csql {
 
-class SubqueryExpression : public TableExpression {
-public:
+std::string getSTypeName(SType type) {
+  switch (type) {
+    case SType::NIL: return "nil";
+    case SType::UINT64: return "uint64";
+    case SType::INT64: return "int64";
+    case SType::FLOAT64: return "float64";
+    case SType::BOOL: return "bool";
+    case SType::STRING: return "string";
+    case SType::TIMESTAMP64: return "timestamp64";
+  }
 
-  SubqueryExpression(
-      Transaction* txn,
-      ExecutionContext* execution_context,
-      Vector<ValueExpression> select_expressions,
-      Option<ValueExpression> where_expr,
-      ScopedPtr<TableExpression> input);
-
-  ReturnCode execute() override;
-  ReturnCode nextBatch(size_t limit, SVector* columns, size_t* len) override;
-
-  size_t getColumnCount() const override;
-  SType getColumnType(size_t idx) const override;
-
-protected:
-  Transaction* txn_;
-  ExecutionContext* execution_context_;
-  Vector<ValueExpression> select_exprs_;
-  Option<ValueExpression> where_expr_;
-  ScopedPtr<TableExpression> input_;
-  Vector<SVector> input_cols_;
-  Vector<SValue> buf_;
-  VMStack vm_stack_;
-};
-
+  return "???";
 }
+
+} // namespace csql
+
