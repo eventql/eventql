@@ -1,2 +1,2 @@
-0001_test_column_reference_with_table_name_prefix.sql
-0001_test_column_reference_with_table_name_prefix.result.txt
+0001_test_column_reference_with_table_name_prefix
+0002_test_simple_cstable_aggregate
