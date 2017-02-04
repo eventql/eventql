@@ -33,6 +33,19 @@
 
 namespace csql {
 
+ScopedPtr<vm::Program> Compiler::compile(
+    Transaction* ctx,
+    RefPtr<ValueExpressionNode> node,
+    SymbolTable* symbol_table) {
+  std::unique_ptr<vm::Program> output;
+  auto rc = compile(ctx, node, symbol_table, &output);
+  if (!rc.isSuccess()) {
+    RAISE(kRuntimeError, rc.getMessage());
+  }
+
+  return std::move(output);
+}
+
 ReturnCode Compiler::compile(
     Transaction* ctx,
     RefPtr<ValueExpressionNode> node,
