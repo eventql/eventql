@@ -35,8 +35,8 @@ namespace csql {
 
 VMStack::VMStack() :
   data(nullptr),
-  size(0),
-  top(nullptr) {}
+  top(nullptr),
+  limit(nullptr) {}
 
 namespace vm {
 
@@ -67,6 +67,25 @@ Program::Program() :
     instance_merge(nullptr),
     instance_savestate(nullptr),
     instance_loadstate(nullptr) {}
+
+void growStack(VMStack* stack, size_t bytes) {
+  auto grow_bytes =
+      (bytes + (kStackBlockSize - 1) / kStackBlockSize) * kStackBlockSize;
+
+  if (stack->data) {
+    auto old_size = stack->limit - stack->data;
+    auto old_top = stack->limit - stack->top;
+    auto new_size = old_size + grow_bytes;
+
+    stack->data = (char*) realloc(stack->data, new_size);
+    stack->limit = stack->data + new_size;
+    stack->top = stack->limit - old_top;
+  } else {
+    stack->data = (char*) malloc(grow_bytes);
+    stack->limit = stack->data + grow_bytes;
+    stack->top = stack->limit;
+  }
+}
 
 } // namespace vm
 

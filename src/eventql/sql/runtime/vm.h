@@ -29,15 +29,14 @@
 namespace csql {
 class SValue;
 class ScratchMemory;
+class Transaction;
 
 struct VMStack {
   VMStack();
   char* data;
-  size_t size;
   char* top;
+  char* limit;
 };
-
-void growStack(VMStack* stack, size_t bytes);
 
 namespace vm {
 
@@ -80,6 +79,10 @@ struct Program {
   void (*instance_savestate)(sql_txn*, const void* self, OutputStream* os);
   void (*instance_loadstate)(sql_txn*, void* self, InputStream* is);
 };
+
+static const size_t kStackBlockSize = 512 * 1024; // 512k
+
+void growStack(VMStack* stack, size_t bytes);
 
 } // namespace vm
 
