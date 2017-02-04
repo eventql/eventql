@@ -90,10 +90,9 @@ The EventQL configuration options are grouped in three sections: `client`, `serv
   </tr>
   <tr>
     <td><b>cluster.allow_drop_table</b></td>
-    <td>false</td>
+    <td>true</td>
     <td>
-      If false (the default), DROP TABLE is globally forbidden, regardless of
-      ACLs.
+      If false, DROP TABLE is globally forbidden, regardless ACLs.
     </td>
   </tr>
   <tr>
