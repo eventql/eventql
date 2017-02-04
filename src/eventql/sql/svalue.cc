@@ -979,6 +979,15 @@ void SVector::copyFrom(const SVector* other) {
   memcpy(data_, other->data_, size_);
 }
 
+void SVector::append(const void* data, size_t size) {
+  if (size_ + size > capacity_) {
+    increaseCapacity(size_ + size);
+  }
+
+  memcpy(data_ + size_, data, size);
+  size_ += size;
+}
+
 size_t SVector::next(SType type, void** cursor) {
   switch (type) {
     case SType::STRING:
