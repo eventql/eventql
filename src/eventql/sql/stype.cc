@@ -403,14 +403,14 @@ uint64_t popTimestamp64(VMStack* stack) {
 }
 
 void popTimestamp64Boxed(VMStack* stack, SValue* value) {
-  assert(value->getType() == SType::UINT64);
+  assert(value->getType() == SType::TIMESTAMP64);
   assert(stack->limit - stack->top >= sizeof(uint64_t));
   memcpy(value->getData(), stack->top, sizeof(uint64_t));
   stack->top += sizeof(uint64_t);
 }
 
 void popTimestamp64Vector(VMStack* stack, SVector* vector) {
-  assert(vector->getType() == SType::UINT64);
+  assert(vector->getType() == SType::TIMESTAMP64);
   assert(stack->limit - stack->top >= sizeof(uint64_t));
   vector->append(stack->top, sizeof(uint64_t));
   stack->top += sizeof(uint64_t);

@@ -806,7 +806,7 @@ ReturnCode FastCSTableScan::nextBatch(
       VM::evaluateVector(
           txn_,
           select_list_[i].program(),
-          where_expr_.program()->method_call,
+          select_list_[i].program()->method_call,
           &vm_stack_,
           nullptr,
           column_buffers_.size(),

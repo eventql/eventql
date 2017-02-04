@@ -41,13 +41,13 @@ struct VMStack {
 namespace vm {
 
 enum InstructionType {
-  X_CALL_PURE,
-  X_CALL_INSTANCE,
-  X_LITERAL,
-  X_INPUT,
-  X_JUMP,
-  X_CJUMP,
-  X_RETURN
+  X_CALL_PURE = 1,
+  X_CALL_INSTANCE = 2,
+  X_LITERAL = 3,
+  X_INPUT = 4,
+  X_JUMP = 5,
+  X_CJUMP = 6,
+  X_RETURN = 7
 };
 
 struct Instruction {
@@ -165,57 +165,6 @@ public:
       const vm::Program* program,
       Instance* instance,
       InputStream* os);
-
-protected:
-
-  static void initProgram(
-      Transaction* ctx,
-      vm::Program* program,
-      vm::Instruction* e);
-
-  static void freeProgram(
-      Transaction* ctx,
-      const vm::Program* program,
-      vm::Instruction* e);
-
-  static void initInstance(
-      Transaction* ctx,
-      const vm::Program* program,
-      vm::Instruction* e,
-      Instance* instance);
-
-  static void freeInstance(
-      Transaction* ctx,
-      const vm::Program* program,
-      vm::Instruction* e,
-      Instance* instance);
-
-  static void resetInstance(
-      Transaction* ctx,
-      const vm::Program* program,
-      vm::Instruction* e,
-      Instance* instance);
-
-  static void mergeInstance(
-      Transaction* ctx,
-      const vm::Program* program,
-      vm::Instruction* e,
-      Instance* dst,
-      const Instance* src);
-
-  static void saveInstance(
-      Transaction* ctx,
-      const vm::Program* program,
-      vm::Instruction* e,
-      const Instance* instance,
-      OutputStream* os);
-
-  static void loadInstance(
-      Transaction* ctx,
-      const vm::Program* program,
-      vm::Instruction* e,
-      Instance* instance,
-      InputStream* is);
 
 };
 

@@ -786,7 +786,7 @@ void SValue::decode(InputStream* is) {
   }
 }
 
-void SValue::copyFrom(void* data) {
+void SValue::copyFrom(const void* data) {
   switch (data_.type) {
 
     case SType::NIL:
@@ -1044,8 +1044,8 @@ size_t SVector::next(void** cursor) const {
   return next(type_, cursor);
 }
 
-size_t sql_strlen(void* str) {
-  return *((uint32_t*) str);
+size_t sql_strlen(const void* str) {
+  return *((const uint32_t*) str);
 }
 
 char* sql_cstr(void* str) {

@@ -56,7 +56,7 @@ Instruction::Instruction(
     argt(_argt) {}
 
 EntryPoint::EntryPoint() : offset(0) {}
-EntryPoint::EntryPoint(size_t _offset) : offset(offset) {}
+EntryPoint::EntryPoint(size_t _offset) : offset(_offset) {}
 
 Program::Program() :
     instance_storage_size(0),
@@ -104,6 +104,8 @@ void VM::evaluate(
   auto instructions = program->instructions.data();
 
   for (size_t pc = entrypoint.offset; ;) {
+    assert(pc < program->instructions.size());
+
     const auto& op = instructions[pc];
     switch (op.type) {
 

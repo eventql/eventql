@@ -116,7 +116,7 @@ public:
 
   static std::string makeUniqueKey(SValue* arr, size_t len);
 
-  void copyFrom(void* data);
+  void copyFrom(const void* data);
 
   const void* getData() const;
   void* getData();
@@ -175,7 +175,7 @@ protected:
 
 String sql_escape(const String& str);
 
-size_t sql_strlen(void* str);
+size_t sql_strlen(const void* str);
 char* sql_cstr(void* str);
 size_t sql_sizeof_static(SType type);
 

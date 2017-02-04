@@ -125,7 +125,7 @@ void Runtime::setQueryCache(QueryCache* cache) {
 
 SValue Runtime::evaluateConstExpression(Transaction* txn, ASTNode* expr) {
   auto val_expr = query_plan_builder_->buildValueExpression(txn,expr);
-  evaluateConstExpression(txn, val_expr);
+  return evaluateConstExpression(txn, val_expr);
 }
 
 SValue Runtime::evaluateConstExpression(

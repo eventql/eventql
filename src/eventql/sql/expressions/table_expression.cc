@@ -51,31 +51,8 @@ bool TableExpression::next(SValue* out, size_t out_len) {
       break;
     }
 
-    switch (getColumnType(i)) {
-
-      case SType::UINT64:
-        out[i] = SValue::newUInt64(
-            *((const uint64_t*) column_buffers[i].getData()));
-        break;
-
-      case SType::TIMESTAMP64:
-        out[i] = SValue::newTimestamp(
-            *((const uint64_t*) column_buffers[i].getData()));
-        break;
-
-      case SType::INT64:
-        out[i] = SValue::newInt64(
-            *((const int64_t*) column_buffers[i].getData()));
-        break;
-
-      case SType::FLOAT64:
-        out[i] = SValue::newFloat(
-            *((const double*) column_buffers[i].getData()));
-        break;
-
-      default:
-        assert(false);
-    }
+    *out = SValue(getColumnType(i));
+    out->copyFrom(column_buffers[i].getData());
   }
 
   return true;
