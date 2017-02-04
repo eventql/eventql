@@ -204,6 +204,7 @@ ReturnCode DatabaseImpl::start() {
   /* database context */
   database_context_.reset(new DatabaseContext());
   database_context_->db_path = tsdb_dir;
+  database_context_->db_node_id = server_name.isEmpty() ? "localhost" : server_name.get();
   database_context_->config = cfg_;
 
   /* config dir */

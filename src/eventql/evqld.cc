@@ -253,7 +253,7 @@ int main(int argc, const char** argv) {
   if (flags.isSet("standalone")) {
     evql_conf_set(conf, "cluster.coordinator", "standalone");
     evql_conf_set(conf, "cluster.allowed_hosts", "0.0.0.0/0");
-    evql_conf_set(conf, "server.name", "standalone");
+    evql_conf_set(conf, "server.name", "localhost");
     evql_conf_set(conf, "server.client_auth_backend", "trust");
     evql_conf_set(conf, "server.noleader", "true");
   }

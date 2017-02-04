@@ -57,6 +57,7 @@ class TCPConnectionPool;
 
 struct DatabaseContext {
   std::string db_path;
+  std::string db_node_id;
   ProcessConfig* config;
   PartitionMap* partition_map;
   FileTracker* file_tracker;

@@ -98,7 +98,17 @@ ReturnCode TableScan::nextBatch(
 
 ScopedPtr<csql::TableExpression> TableScan::openPartition(
     const PartitionLocation& partition) {
-  if (partition.servers.empty()) {
+  auto dbctx = static_cast<Session*>(txn_->getUserData())->getDatabaseContext();
+
+  bool has_local_copy = false;
+  for (const auto& s : partition.servers) {
+    if (s.is_local || s.name == dbctx->db_node_id) {
+      has_local_copy = true;
+      break;
+    }
+  }
+
+  if (has_local_copy || partition.servers.empty()) {
     return openLocalPartition(partition.partition_id, partition.qtree);
   } else {
     return openRemotePartition(

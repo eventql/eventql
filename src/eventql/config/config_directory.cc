@@ -94,10 +94,7 @@ Status ConfigDirectoryFactory::getConfigDirectoryForServer(
           "missing config option: server.listen");
     }
 
-    auto server_dir_ext = FileUtil::joinPaths(
-        server_dir.get(),
-        "data/standalone");
-
+    auto server_dir_ext =server_dir.get();
     cdir->reset(
         new StandaloneConfigDirectory(
             server_dir_ext,
