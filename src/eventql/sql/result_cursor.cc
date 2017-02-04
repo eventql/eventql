@@ -55,6 +55,10 @@ bool ResultCursor::next(SValue* row) {
 }
 
 size_t ResultCursor::getColumnCount() const {
+  if (!table_expression_) {
+    return 0;
+  }
+
   return table_expression_->getColumnCount();
 }
 
