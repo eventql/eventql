@@ -85,7 +85,7 @@ void sum_int64_reset(sql_txn* ctx, void* self) {
 }
 
 void sum_int64_merge(sql_txn* ctx, void* self, const void* other) {
-  *static_cast<int64_t*>(self) = *static_cast<const int64_t*>(other);
+  *static_cast<int64_t*>(self) += *static_cast<const int64_t*>(other);
 }
 
 void sum_int64_save(sql_txn* ctx, const void* self, OutputStream* os) {
@@ -126,7 +126,7 @@ void sum_uint64_reset(sql_txn* ctx, void* self) {
 }
 
 void sum_uint64_merge(sql_txn* ctx, void* self, const void* other) {
-  *static_cast<uint64_t*>(self) = *static_cast<const uint64_t*>(other);
+  *static_cast<uint64_t*>(self) += *static_cast<const uint64_t*>(other);
 }
 
 void sum_uint64_save(sql_txn* ctx, const void* self, OutputStream* os) {
