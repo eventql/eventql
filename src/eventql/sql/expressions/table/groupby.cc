@@ -128,7 +128,7 @@ ReturnCode GroupByExpression::execute() {
         VM::evaluate(
             txn_,
             select_exprs_[i].program(),
-            select_exprs_[i].program()->method_aggr_acc,
+            select_exprs_[i].program()->method_accumulate,
             &vm_stack_,
             &group[i],
             input_col_cursor.size(),
@@ -169,7 +169,7 @@ bool GroupByExpression::next(SValue* row, size_t row_len) {
       VM::evaluate(
           txn_,
           select_exprs_[i].program(),
-          select_exprs_[i].program()->method_aggr_get,
+          select_exprs_[i].program()->method_call,
           &vm_stack_,
           &groups_iter_->second[i],
           0,
@@ -317,7 +317,7 @@ ReturnCode PartialGroupByExpression::execute() {
           VM::evaluate(
               txn_,
               select_exprs_[i].program(),
-              select_exprs_[i].program()->method_aggr_acc,
+              select_exprs_[i].program()->method_accumulate,
               &vm_stack_,
               &group[i],
               input_col_cursor.size(),
@@ -601,7 +601,7 @@ bool GroupByMergeExpression::next(SValue* row, size_t row_len) {
       VM::evaluate(
           txn_,
           select_exprs_[i].program(),
-          select_exprs_[i].program()->method_aggr_get,
+          select_exprs_[i].program()->method_call,
           &vm_stack_,
           &groups_iter_->second[i],
           0,

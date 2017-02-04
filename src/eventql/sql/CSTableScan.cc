@@ -441,7 +441,7 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
           VM::evaluateBoxed(
               txn_,
               select_list_[i].compiled.program(),
-              select_list_[i].compiled.program()->method_aggr_acc,
+              select_list_[i].compiled.program()->method_accumulate,
               &vm_stack_,
               &select_list_[i].instance,
               cur_buf_.size(),
@@ -465,7 +465,7 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
             VM::evaluate(
                 txn_,
                 select_list_[i].compiled.program(),
-                select_list_[i].compiled.program()->method_aggr_get,
+                select_list_[i].compiled.program()->method_call,
                 &vm_stack_,
                 &select_list_[i].instance,
                 0,
@@ -523,7 +523,7 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
         VM::evaluate(
             txn_,
             select_list_[i].compiled.program(),
-            select_list_[i].compiled.program()->method_aggr_get,
+            select_list_[i].compiled.program()->method_call,
             &vm_stack_,
             &select_list_[i].instance,
             0,

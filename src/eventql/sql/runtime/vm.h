@@ -44,24 +44,29 @@ namespace vm {
 enum InstructionType {
   X_CALL,
   X_LITERAL,
-  X_INPUT
+  X_INPUT,
+  X_JUMP,
+  X_CJUMP,
+  X_RETURN
 };
 
 struct Instruction {
-  vm::InstructionType type;
-  void* arg0;
+  Instruction(InstructionType _type, intptr_t _arg0);
+  InstructionType type;
+  intptr_t arg0;
 };
 
 struct EntryPoint {
+  EntryPoint();
+  EntryPoint(size_t offset);
   size_t offset;
 };
 
 struct Program {
-  Transaction* ctx_;
-  std::vector<vm::Instruction> instructions_;
+  Program();
+  std::vector<vm::Instruction> instructions;
   vm::EntryPoint method_call;
-  vm::EntryPoint method_aggr_acc;
-  vm::EntryPoint method_aggr_get;
+  vm::EntryPoint method_accumulate;
   ScratchMemory static_storage;
   size_t instance_storage_size;
   SType return_type;

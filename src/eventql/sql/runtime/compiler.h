@@ -49,6 +49,34 @@ public:
       RefPtr<ValueExpressionNode> node,
       SymbolTable* symbol_table);
 
+  static ReturnCode compile(
+      Transaction* ctx,
+      RefPtr<ValueExpressionNode> input,
+      SymbolTable* symbol_table,
+      std::unique_ptr<vm::Program>* output);
+
+protected:
+
+  static ReturnCode compileExpression(
+      RefPtr<ValueExpressionNode> node,
+      vm::Program* program,
+      SymbolTable* symbol_table);
+
+  static ReturnCode compileColumnReference(
+      const ColumnReferenceNode* node,
+      vm::Program* program,
+      SymbolTable* symbol_table);
+
+  static ReturnCode compileIfExpression(
+      const IfExpressionNode* node,
+      vm::Program* program,
+      SymbolTable* symbol_table);
+
+  static ReturnCode compileMethodCall(
+      const CallExpressionNode* node,
+      vm::Program* program,
+      SymbolTable* symbol_table);
+
 };
 
 } // namespace csql
