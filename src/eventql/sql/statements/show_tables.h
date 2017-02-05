@@ -29,25 +29,17 @@
 
 namespace csql {
 
-class ShowTablesExpression : public TableExpression {
+class ShowTablesExpression : public SimpleTableExpression {
 public:
 
-  static const size_t kNumColumns = 2;
+  static const std::vector<std::pair<std::string, SType>> kOutputColumns;
 
   ShowTablesExpression(Transaction* txn);
 
   ReturnCode execute() override;
-  ReturnCode nextBatch(size_t limit, SVector* columns, size_t* len) override;
-
-  size_t getColumnCount() const override;
-  SType getColumnType(size_t idx) const override;
-
-  bool next(SValue* row, size_t row_len) override;
 
 protected:
   Transaction* txn_;
-  size_t counter_;
-  Vector<Vector<SValue>> buf_;
 };
 
 }

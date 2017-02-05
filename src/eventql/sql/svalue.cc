@@ -743,9 +743,13 @@ void SValue::copyFrom(const void* data) {
         free(data_.u.t_string);
       }
 
-      auto len = sql_strlen(data) + sizeof(uint32_t);
-      data_.u.t_string = malloc(len);
-      memcpy(data_.u.t_string, data, len);
+      if (data) {
+        auto len = sql_strlen(data) + sizeof(uint32_t);
+        data_.u.t_string = malloc(len);
+        memcpy(data_.u.t_string, data, len);
+      } else {
+        data_.u.t_string = nullptr;
+      }
       break;
     }
 

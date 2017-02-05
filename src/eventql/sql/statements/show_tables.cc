@@ -27,55 +27,25 @@
 
 namespace csql {
 
+const std::vector<std::pair<std::string, SType>> ShowTablesExpression::kOutputColumns = {
+  { "table_name", SType::STRING },
+  { "description", SType::STRING }
+};
+
 ShowTablesExpression::ShowTablesExpression(
     Transaction* txn) :
-    txn_(txn),
-    counter_(0) {}
+    SimpleTableExpression(kOutputColumns),
+    txn_(txn) {}
 
 ReturnCode ShowTablesExpression::execute() {
   txn_->getTableProvider()->listTables([this] (const TableInfo& table) {
     Vector<SValue> row;
-    row.emplace_back(table.table_name);
-
-    if (table.description.isEmpty()) {
-      row.emplace_back();
-    } else {
-      row.emplace_back(table.description.get());
-    }
-
-    buf_.emplace_back(row);
+    row.emplace_back(SValue::newString(table.table_name));
+    row.emplace_back("");
+    addRow(row.data());
   });
 
   return ReturnCode::success();
-}
-
-ReturnCode ShowTablesExpression::nextBatch(
-    size_t limit,
-    SVector* columns,
-    size_t* nrecords) {
-  return ReturnCode::error("ERUNTIME", "ShowTablesExpression::nextBatch not yet implemented");
-}
-
-size_t ShowTablesExpression::getColumnCount() const {
-  return kNumColumns;
-}
-
-SType ShowTablesExpression::getColumnType(size_t idx) const {
-  assert(idx < kNumColumns);
-  return SType::STRING;
-}
-
-bool ShowTablesExpression::next(SValue* row, size_t row_len) {
-  if (counter_ < buf_.size()) {
-    for (size_t i = 0; i < kNumColumns && i < row_len; ++i) {
-      row[i] = buf_[counter_][i];
-    }
-
-    ++counter_;
-    return true;
-  } else {
-    return false;
-  }
 }
 
 }
