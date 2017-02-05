@@ -142,7 +142,7 @@ void CSTableScan::open() {
         type = SQL_TIMESTAMP;
         break;
       case cstable::ColumnType::SUBRECORD:
-        RAISE(kIllegalStateError);
+        RAISE(kIllegalStateError, "illegal column type: SUBRECORD");
     }
 
     columns_.emplace(col, ColumnRef(reader, colindex_++, type));
@@ -396,7 +396,7 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
                   cur_buf_[col.second.index] = SValue::newTimestamp(v);
                   break;
                 default:
-                  RAISE(kIllegalStateError);
+                  RAISE(kIllegalStateError, "illegal column type: SUBRECORD");
               }
             }
 
@@ -404,7 +404,7 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
           }
 
           case cstable::ColumnType::SUBRECORD:
-            RAISE(kIllegalStateError);
+            RAISE(kIllegalStateError, "illegal column type: SUBRECORD");
 
         }
       }
@@ -527,7 +527,7 @@ bool CSTableScan::fetchNextWithoutColumns(SValue* row, int row_len) {
   while (cur_pos_ < num_records_) {
     ++cur_pos_;
 
-    if (!filter_fn_()) {
+    if (filter_fn_ && !filter_fn_()) {
       continue;
     }
 
