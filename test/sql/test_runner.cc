@@ -64,17 +64,34 @@ Status runTest(const std::string& test) {
         StringUtil::format("File does not exist: $0", result_file_path));
   }
 
+  /* input table path */
+  auto sql_is = FileInputStream::openFile(sql_file_path);
+  std::string input_table_path;
+  if (!sql_is->readLine(&input_table_path) ||
+      !StringUtil::beginsWith(input_table_path, "--")) {
+    return Status(eRuntimeError, "no input table provided");
+  }
+
+  StringUtil::replaceAll(&input_table_path, "--");
+  StringUtil::ltrim(&input_table_path);
+  StringUtil::chomp(&input_table_path);
+
+  if (!FileUtil::exists(input_table_path)) {
+    return Status(
+        eRuntimeError,
+        StringUtil::format("file does not exist: $0", input_table_path));
+  }
+
+  std::string query;
+  while (sql_is->readLine(&query)) { }
+
   /* execute query */
-  auto query_buf = FileUtil::read(sql_file_path);
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->setTableProvider(
-      new CSTableScanProvider(
-          "testtable",
-          "./sql_testdata/testtbl.cst"));
+  txn->setTableProvider(new CSTableScanProvider("testtable", input_table_path));
 
-  auto qplan = runtime->buildQueryPlan(txn.get(), query_buf.toString());
+  auto qplan = runtime->buildQueryPlan(txn.get(), query);
   ResultList result;
   qplan->execute(0, &result);
 
