@@ -1,2 +1,3 @@
 0001_test_column_reference_with_table_name_prefix
 0002_test_simple_cstable_aggregate
+0003_test_error_message

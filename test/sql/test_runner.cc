@@ -41,6 +41,86 @@ const auto kTestListFile = "test.lst";
 const auto kSQLPathEnding = ".sql";
 const auto kResultPathEnding = ".result.txt";
 
+Status compareResult(ResultList* result, const std::string& result_file_path) {
+  auto csv_is = CSVInputStream::openFile(result_file_path);
+  std::vector<std::string> columns;
+  if (!csv_is->readNextRow(&columns)) {
+    return Status(eRuntimeError, "CSV needs a header");
+  }
+
+  /* compare columns */
+  if (result->getNumColumns() != columns.size()) {
+    return Status(eRuntimeError, StringUtil::format(
+        "wrong number of columns, expected $0 to be $1",
+        result->getNumColumns(),
+        columns.size()));
+  }
+
+  auto returned_columns = result->getColumns();
+  for (size_t i = 0; i < returned_columns.size(); ++i) {
+    if (returned_columns[i] != columns[i]) {
+      return Status(eRuntimeError, StringUtil::format(
+          "wrong columns name, expected $0 to be $1",
+          returned_columns[i],
+          columns[i]));
+    }
+  }
+
+  /* compare rows */
+  auto num_returned_rows = result->getNumRows();
+  size_t count = 0;
+  std::vector<std::string> row;
+  while (csv_is->readNextRow(&row)) {
+    if (count >= num_returned_rows) {
+      return Status(eRuntimeError, "not enough rows returned");
+    }
+
+    auto returned_row = result->getRow(count);
+    if (returned_row.size() != row.size()) {
+      return Status(eRuntimeError, StringUtil::format(
+          "wrong number of values, expected $0 to be $1",
+          returned_row.size(),
+          row.size()));
+    }
+
+    for (size_t i = 0; i < row.size(); ++i) {
+      if (row[i] != returned_row[i]) {
+        return Status(eRuntimeError, StringUtil::format(
+            "wrong value, expected $0 to be $1",
+            returned_row[i],
+            row[i]));
+      }
+    }
+
+    ++count;
+  }
+
+  if (count < num_returned_rows) {
+    return Status(eRuntimeError, StringUtil::format(
+        "too many rows, expected $0 to be $1",
+        num_returned_rows,
+        count));
+  }
+
+  return Status::success();
+}
+
+Status compareError(
+    const std::string& error_msg,
+    const std::string& result_file_path) {
+  auto result = FileUtil::read(result_file_path).toString();
+  StringUtil::chomp(&result);
+
+  if (result == error_msg) {
+    return Status::success();
+  } else {
+    return Status(eRuntimeError, StringUtil::format(
+        "wrong result, expected $0 to be $1",
+        error_msg,
+        result));
+  }
+}
+
 Status runTest(const std::string& test) {
   auto sql_file_path = StringUtil::format(
       "$0$1$2",
@@ -91,72 +171,18 @@ Status runTest(const std::string& test) {
 
   txn->setTableProvider(new CSTableScanProvider("testtable", input_table_path));
 
-  auto qplan = runtime->buildQueryPlan(txn.get(), query);
   ResultList result;
-  qplan->execute(0, &result);
+  try {
+    auto qplan = runtime->buildQueryPlan(txn.get(), query);
+    qplan->execute(0, &result);
+  } catch (const std::exception& e) {
+
+    /* compare error */
+    return compareError(e.what(), result_file_path);
+  }
 
   /* compare result */
-  auto csv_is = CSVInputStream::openFile(result_file_path);
-  std::vector<std::string> columns;
-  if (!csv_is->readNextRow(&columns)) {
-    return Status(eRuntimeError, "CSV needs a header");
-  }
-
-  /* compare columns */
-  if (result.getNumColumns() != columns.size()) {
-    return Status(eRuntimeError, StringUtil::format(
-        "wrong number of columns, expected $0 to be $1",
-        result.getNumColumns(),
-        columns.size()));
-  }
-
-  auto returned_columns = result.getColumns();
-  for (size_t i = 0; i < returned_columns.size(); ++i) {
-    if (returned_columns[i] != columns[i]) {
-      return Status(eRuntimeError, StringUtil::format(
-          "wrong columns name, expected $0 to be $1",
-          returned_columns[i],
-          columns[i]));
-    }
-  }
-
-  /* compare rows */
-  auto num_returned_rows = result.getNumRows();
-  size_t count = 0;
-  std::vector<std::string> row;
-  while (csv_is->readNextRow(&row)) {
-    if (count >= num_returned_rows) {
-      return Status(eRuntimeError, "not enough rows returned");
-    }
-
-    auto returned_row = result.getRow(count);
-    if (returned_row.size() != row.size()) {
-      return Status(eRuntimeError, StringUtil::format(
-          "wrong number of values, expected $0 to be $1",
-          returned_row.size(),
-          row.size()));
-    }
-
-    for (size_t i = 0; i < row.size(); ++i) {
-      if (row[i] != returned_row[i]) {
-        return Status(eRuntimeError, StringUtil::format(
-            "wrong value, expected $0 to be $1",
-            returned_row[i],
-            row[i]));
-      }
-    }
-
-    ++count;
-  }
-
-  if (count < num_returned_rows) {
-    return Status(eRuntimeError, StringUtil::format(
-        "too many rows, expected $0 to be $1",
-        num_returned_rows,
-        count));
-  }
-
-  return Status::success();
+  return compareResult(&result, result_file_path);
 }
 
 int main(int argc, const char** argv) {
