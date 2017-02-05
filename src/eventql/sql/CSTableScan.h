@@ -33,7 +33,14 @@
 
 namespace csql {
 
-class CSTableScan : public TableExpression {
+class AbstractCSTableScan : public TableExpression {
+public:
+
+  virtual void setFilter(std::vector<bool>&& filter) = 0;
+
+};
+
+class CSTableScan : public AbstractCSTableScan {
 public:
 
   CSTableScan(
@@ -59,7 +66,7 @@ public:
 
   size_t rowsScanned() const;
 
-  void setFilter(Function<bool ()> filter_fn);
+  void setFilter(std::vector<bool>&& filter) override;
   void setColumnType(String column, SType type);
 
 protected:
@@ -117,7 +124,9 @@ protected:
   Option<SHA1Hash> cache_key_;
   size_t rows_scanned_;
   size_t num_records_;
-  Function<bool ()> filter_fn_;
+  std::vector<bool> filter_;
+  bool filter_enabled_;
+  size_t filter_pos_;
   bool opened_;
   uint64_t cur_select_level_;
   uint64_t cur_fetch_level_;
@@ -127,8 +136,10 @@ protected:
   VMStack vm_stack_;
 };
 
-class FastCSTableScan : public TableExpression {
+class FastCSTableScan : public AbstractCSTableScan {
 public:
+
+  static const size_t kOutputBatchSize = 1024;
 
   FastCSTableScan(
       Transaction* txn,
@@ -151,6 +162,8 @@ public:
   size_t getColumnCount() const override;
   SType getColumnType(size_t idx) const override;
 
+  void setFilter(std::vector<bool>&& filter) override;
+
 protected:
 
   ReturnCode fetchColumnUInt64(size_t idx, size_t batch_size);
@@ -162,11 +175,14 @@ protected:
   RefPtr<cstable::CSTableReader> cstable_;
   std::vector<ValueExpression> select_list_;
   ValueExpression where_expr_;
-  size_t num_records_;
+  size_t records_remaining_;
+  size_t records_consumed_;
   std::vector<SType> column_types_;
   std::vector<SVector> column_buffers_;
   std::vector<RefPtr<cstable::ColumnReader>> column_readers_;
   VMStack vm_stack_;
+  std::vector<bool> filter_;
+  bool filter_enabled_;
 };
 
 } // namespace csql

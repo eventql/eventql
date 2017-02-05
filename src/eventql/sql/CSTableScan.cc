@@ -46,6 +46,8 @@ CSTableScan::CSTableScan(
     aggr_strategy_(stmt_->aggregationStrategy()),
     rows_scanned_(0),
     num_records_(0),
+    filter_enabled_(false),
+    filter_pos_(0),
     opened_(false),
     cur_select_level_(0),
     cur_fetch_level_(0),
@@ -191,8 +193,8 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
     uint64_t next_level = 0;
 
     if (cur_fetch_level_ == 0) {
-      if (cur_pos_ < num_records_ && filter_fn_) {
-        cur_filter_pred_ = filter_fn_();
+      if (cur_pos_ < num_records_ && filter_enabled_) {
+        cur_filter_pred_ = filter_[filter_pos_++];
       }
     }
 
@@ -544,7 +546,7 @@ bool CSTableScan::fetchNextWithoutColumns(SValue* row, int row_len) {
   while (cur_pos_ < num_records_) {
     ++cur_pos_;
 
-    if (!filter_fn_()) {
+    if (filter_enabled_ && !filter_[filter_pos_++]) {
       continue;
     }
 
@@ -639,8 +641,9 @@ size_t CSTableScan::rowsScanned() const {
   return rows_scanned_;
 }
 
-void CSTableScan::setFilter(Function<bool ()> filter_fn) {
-  filter_fn_ = filter_fn;
+void CSTableScan::setFilter(std::vector<bool>&& filter) {
+  filter_ = filter;
+  filter_enabled_ = true;
 }
 
 void CSTableScan::setColumnType(String column, SType type) {
@@ -704,7 +707,10 @@ FastCSTableScan::FastCSTableScan(
     execution_context_(execution_context),
     stmt_(stmt->deepCopyAs<SequentialScanNode>()),
     cstable_(cstable),
-    cstable_filename_(cstable_filename) {}
+    cstable_filename_(cstable_filename),
+    records_remaining_(0),
+    records_consumed_(0),
+    filter_enabled_(false) {}
 
 FastCSTableScan::~FastCSTableScan() {}
 
@@ -723,7 +729,7 @@ ReturnCode FastCSTableScan::execute() {
     cstable_ = cstable::CSTableReader::openFile(cstable_filename_);
   }
 
-  num_records_ = cstable_->numRecords();
+  records_remaining_ = cstable_->numRecords();
 
   for (const auto& c : stmt_->selectedColumns()) {
     auto colinfo = stmt_->getComputedColumnInfo(c);
@@ -744,13 +750,13 @@ ReturnCode FastCSTableScan::nextBatch(
     SVector* out,
     size_t* nrecords) {
   for (;;) {
-    if (num_records_ == 0) {
+    if (records_remaining_ == 0) {
       *nrecords = 0;
       return ReturnCode::success();
     }
 
     /* calculate batch size */
-    size_t batch_size = size_t(1024);
+    size_t batch_size = std::min(records_remaining_, kOutputBatchSize);
 
     /* fetch input columns */
     for (size_t i = 0; i < column_buffers_.size(); ++i) {
@@ -770,7 +776,9 @@ ReturnCode FastCSTableScan::nextBatch(
       }
     }
 
-    num_records_ -= batch_size;
+    auto batch_offset = records_consumed_;
+    records_remaining_ -= batch_size;
+    records_consumed_ += batch_size;
 
     /* evalute where expression */
     std::vector<bool> filter_set;
@@ -791,6 +799,15 @@ ReturnCode FastCSTableScan::nextBatch(
           batch_size,
           &filter_set,
           &filter_set_count);
+    }
+
+    if (filter_enabled_) {
+      for (size_t i = batch_offset; i < batch_offset + batch_size; ++i) {
+        if (!filter_[i] && filter_set[i]) {
+          filter_set[i] = false;
+          --filter_set_count;
+        }
+      }
     }
 
     if (filter_set_count == 0) {
@@ -842,6 +859,11 @@ size_t FastCSTableScan::getColumnCount() const {
 SType FastCSTableScan::getColumnType(size_t idx) const {
   assert(idx < select_list_.size());
   return select_list_[idx].getReturnType();
+}
+
+void FastCSTableScan::setFilter(std::vector<bool>&& filter) {
+  filter_ = filter;
+  filter_enabled_ = true;
 }
 
 } // namespace csql

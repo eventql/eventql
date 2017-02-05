@@ -143,8 +143,41 @@ bool PartitionCursor::openNextTable() {
     }
   }
 
+  /* read filter */
+  std::vector<bool> filter(cstable->numRecords(), true);
   auto id_col = cstable->getColumnReader("__lsm_id");
   auto is_update_col = cstable->getColumnReader("__lsm_is_update");
+  for (size_t i = 0; i < filter.size(); ++i) {
+    uint64_t rlvl;
+    uint64_t dlvl;
+
+    String id_str;
+    id_col->readString(&rlvl, &dlvl, &id_str);
+    SHA1Hash id(id_str.data(), id_str.size());
+
+    bool is_update;
+    is_update_col->readBoolean(&rlvl, &dlvl, &is_update);
+
+    bool skip = false;
+    if (skip_col.get()) {
+      skip_col->readBoolean(&rlvl, &dlvl, &skip);
+    }
+
+    if (cur_skiplist_) {
+      skip = cur_skiplist_->readNext();
+    }
+
+    if (skip || id_set_.count(id) > 0) {
+      filter[i] = false;
+    } else {
+      if (is_update) {
+        id_set_.emplace(id);
+      }
+
+      filter[i] = true;
+    }
+  }
+
   cur_scan_.reset(
       new csql::FastCSTableScan(
           txn_,
@@ -153,60 +186,7 @@ bool PartitionCursor::openNextTable() {
           cstable,
           cstable_filename));
 
-  //cur_scan_->setFilter([this, id_col, is_update_col, skip_col] () -> bool {
-  //  uint64_t rlvl;
-  //  uint64_t dlvl;
-
-  //  String id_str;
-  //  id_col->readString(&rlvl, &dlvl, &id_str);
-  //  SHA1Hash id(id_str.data(), id_str.size());
-
-  //  bool is_update;
-  //  is_update_col->readBoolean(&rlvl, &dlvl, &is_update);
-
-  //  bool skip = false;
-  //  if (skip_col.get()) {
-  //    skip_col->readBoolean(&rlvl, &dlvl, &skip);
-  //  }
-
-  //  if (cur_skiplist_) {
-  //    skip = cur_skiplist_->readNext();
-  //  }
-
-  //  if (skip || id_set_.count(id) > 0) {
-  //    return false;
-  //  } else {
-  //    if (is_update) {
-  //      id_set_.emplace(id);
-  //    }
-  //    return true;
-  //  }
-  //});
-
-  //for (const auto& col : table_->schema()->columns()) {
-  //  switch (col.second.type) {
-  //    case msg::FieldType::BOOLEAN:
-  //      cur_scan_->setColumnType(col.first, csql::SType::BOOL);
-  //      break;
-  //    case msg::FieldType::UINT32:
-  //      cur_scan_->setColumnType(col.first, csql::SType::INT64);
-  //      break;
-  //    case msg::FieldType::UINT64:
-  //      cur_scan_->setColumnType(col.first, csql::SType::INT64);
-  //      break;
-  //    case msg::FieldType::STRING:
-  //      cur_scan_->setColumnType(col.first, csql::SType::STRING);
-  //      break;
-  //    case msg::FieldType::DOUBLE:
-  //      cur_scan_->setColumnType(col.first, csql::SType::FLOAT64);
-  //      break;
-  //    case msg::FieldType::DATETIME:
-  //      cur_scan_->setColumnType(col.first, csql::SType::TIMESTAMP64);
-  //      break;
-  //    case msg::FieldType::OBJECT:
-  //      break;
-  //  }
-  //}
+  cur_scan_->setFilter(std::move(filter));
 
   ++cur_table_;
 
