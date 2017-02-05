@@ -29,28 +29,20 @@
 
 namespace csql {
 
-class DescribeTableStatement : public TableExpression {
+class DescribeTableStatement : public SimpleTableExpression {
 public:
 
-  static const size_t kNumColumns = 6;
+  static const std::vector<std::pair<std::string, SType>> kOutputColumns;
 
   DescribeTableStatement(
       Transaction* txn,
       const String& table_name);
 
   ReturnCode execute() override;
-  ReturnCode nextBatch(size_t limit, SVector* columns, size_t* len) override;
-
-  size_t getColumnCount() const override;
-  SType getColumnType(size_t idx) const override;
-
-  bool next(SValue* row, size_t row_len) override;
 
 protected:
   Transaction* txn_;
   String table_name_;
-  Vector<ColumnInfo> rows_;
-  size_t counter_;
 };
 
 }

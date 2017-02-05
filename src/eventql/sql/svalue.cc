@@ -165,6 +165,7 @@ SValue::SValue(const SValue& copy) {
         data_.u.t_string = malloc(len);
         memcpy(data_.u.t_string, copy.data_.u.t_string, len);
       } else {
+        data_.type = SType::STRING;
         data_.u.t_string = nullptr;
       }
       break;
@@ -175,7 +176,6 @@ SValue::SValue(const SValue& copy) {
       break;
 
   }
-
 }
 
 SValue& SValue::operator=(const SValue& copy) {
@@ -191,6 +191,7 @@ SValue& SValue::operator=(const SValue& copy) {
       memcpy(data_.u.t_string, copy.data_.u.t_string, len);
     } else {
       data_.u.t_string = nullptr;
+      data_.type = SType::STRING;
     }
   } else {
     memcpy(&data_, &copy.data_, sizeof(data_));
@@ -449,63 +450,8 @@ SValue SValue::toString() const {
   }
 }
 
-
 std::string SValue::getString() const {
-  if (data_.type == SType::STRING) {
-    return std::string(
-        sql_cstr(data_.u.t_string),
-        sql_strlen(data_.u.t_string));
-  }
-
-  char buf[512];
-  const char* str;
-  size_t len;
-
-  switch (data_.type) {
-
-    case SType::INT64:
-    case SType::UINT64: {
-      len = snprintf(buf, sizeof(buf), "%" PRId64, getInteger());
-      str = buf;
-      break;
-    }
-
-    case SType::TIMESTAMP64: {
-      return getTimestamp().toString("%Y-%m-%d %H:%M:%S");
-    }
-
-    case SType::FLOAT64: {
-      len = snprintf(buf, sizeof(buf), "%f", getFloat());
-      str = buf;
-      break;
-    }
-
-    case SType::BOOL: {
-      static const auto true_str = "true";
-      static const auto false_str = "false";
-      if (getBool()) {
-        str = true_str;
-        len = strlen(true_str);
-      } else {
-        str = false_str;
-        len = strlen(false_str);
-      }
-      break;
-    }
-
-    case SType::STRING: {
-      return getString();
-    }
-
-    case SType::NIL: {
-      static const char undef_str[] = "NULL";
-      str = undef_str;
-      len = sizeof(undef_str) - 1;
-    }
-
-  }
-
-  return std::string(str, len);
+  return sql_tostring(data_.type, getData());
 }
 
 String SValue::toSQL() const {
@@ -1102,7 +1048,7 @@ std::string sql_tostring(SType type, const void* value) {
       return std::to_string(*static_cast<const double*>(value));
 
     case SType::STRING:
-      return std::string(sql_cstr(value), sql_strlen(value));
+      return value ? std::string(sql_cstr(value), sql_strlen(value)) : "";
 
     case SType::TIMESTAMP64:
       return UnixTime(*static_cast<const uint64_t*>(value)).toString();
