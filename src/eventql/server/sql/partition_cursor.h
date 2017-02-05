@@ -46,6 +46,7 @@ public:
       RefPtr<PartitionSnapshot> snap,
       RefPtr<csql::SequentialScanNode> stmt);
 
+  ReturnCode execute() override;
   ReturnCode nextBatch(size_t limit, csql::SVector* columns, size_t* len) override;
 
   size_t getColumnCount() const override;
@@ -77,6 +78,7 @@ public:
       RefPtr<csql::SequentialScanNode> stmt,
       const std::vector<std::string>& servers);
 
+  ReturnCode execute() override;
   bool next(csql::SValue* row, size_t row_len) override;
 
   ReturnCode nextBatch(size_t limit, csql::SVector* columns, size_t* len) override;

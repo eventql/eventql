@@ -163,6 +163,7 @@ public:
 
   void copyFrom(const SVector* other);
   void append(const void* data, size_t size);
+  void append(const SValue& svalue);
 
   static size_t next(SType type, void** cursor);
   size_t next(void** cursor) const;

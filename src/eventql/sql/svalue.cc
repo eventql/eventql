@@ -1027,6 +1027,10 @@ void SVector::append(const void* data, size_t size) {
   size_ += size;
 }
 
+void SVector::append(const SValue& svalue) {
+  append(svalue.getData(), svalue.getSize());
+}
+
 size_t SVector::next(SType type, void** cursor) {
   auto elen = sql_sizeof(type, *cursor);
   *cursor = (char*) *cursor + elen;

@@ -37,7 +37,7 @@ public:
 
   virtual ~TableExpression() = default;
 
-  virtual ReturnCode execute();
+  virtual ReturnCode execute() = 0;
 
   virtual bool next(SValue* row, size_t row_len); // legacy
 
@@ -50,6 +50,27 @@ public:
     return None<SHA1Hash>();
   }
 
+};
+
+class SimpleTableExpression : public TableExpression {
+public:
+  using ColumnDefinition = std::pair<std::string, SType>;
+
+  SimpleTableExpression(const std::vector<ColumnDefinition>& columns);
+
+  ReturnCode nextBatch(size_t limit, SVector* columns, size_t* len) override;
+
+  size_t getColumnCount() const override;
+  SType getColumnType(size_t idx) const override;
+
+protected:
+
+  void addRow(const SValue* row);
+
+private:
+  std::vector<ColumnDefinition> columns_;
+  std::vector<SVector> row_data_;
+  size_t row_count_;
 };
 
 }

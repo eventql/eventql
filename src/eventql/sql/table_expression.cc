@@ -26,10 +26,6 @@
 
 namespace csql {
 
-ReturnCode TableExpression::execute() {
-  return ReturnCode::success();
-}
-
 bool TableExpression::next(SValue* out, size_t out_len) {
   std::vector<SVector> column_buffers;
   for (size_t i = 0; i < getColumnCount(); ++i) {
@@ -56,6 +52,46 @@ bool TableExpression::next(SValue* out, size_t out_len) {
   }
 
   return true;
+}
+
+SimpleTableExpression::SimpleTableExpression(
+    const std::vector<ColumnDefinition>& columns) :
+    columns_(columns),
+    row_count_(0) {
+  for (const auto& c : columns_) {
+    row_data_.emplace_back(c.second);
+  }
+}
+
+ReturnCode SimpleTableExpression::nextBatch(size_t limit, SVector* columns, size_t* len) {
+  if (row_count_ > 0) {
+    for (size_t i = 0; i < columns_.size(); ++i) {
+      columns[i].copyFrom(&row_data_[i]);
+    }
+
+    *len = row_count_;
+    row_count_ = 0;
+  } else {
+    *len = 0;
+  }
+
+  return ReturnCode::success();
+}
+
+size_t SimpleTableExpression::getColumnCount() const {
+  return columns_.size();
+}
+
+SType SimpleTableExpression::getColumnType(size_t idx) const {
+  assert(idx < columns_.size());
+  return columns_[idx].second;
+}
+
+void SimpleTableExpression::addRow(const SValue* row) {
+  ++row_count_;
+  for (size_t i = 0; i < columns_.size(); ++i) {
+    row_data_[i].append(row[i]);
+  }
 }
 
 } // namespace csql

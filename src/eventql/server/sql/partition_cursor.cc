@@ -44,6 +44,10 @@ PartitionCursor::PartitionCursor(
     stmt_(stmt),
     cur_table_(0) {};
 
+ReturnCode PartitionCursor::execute() {
+  return ReturnCode::success();
+}
+
 ReturnCode PartitionCursor::nextBatch(
     size_t limit,
     csql::SVector* columns,
@@ -251,6 +255,10 @@ RemotePartitionCursor::RemotePartitionCursor(
         session->getDatabaseContext()->config->getInt(
             "server.s2s_idle_timeout",
             0)) {}
+
+ReturnCode RemotePartitionCursor::execute() {
+  return ReturnCode::success();
+}
 
 bool RemotePartitionCursor::next(csql::SValue* row, size_t row_len) {
   if (row_buf_pos_ == row_buf_.size() && !done_) {
