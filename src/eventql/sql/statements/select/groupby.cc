@@ -26,7 +26,7 @@
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/logging.h>
 #include <eventql/util/random.h>
-#include <eventql/sql/expressions/table/groupby.h>
+#include <eventql/sql/statements/select/groupby.h>
 #include <eventql/sql/runtime/query_cache.h>
 #include <eventql/util/freeondestroy.h>
 #include <eventql/util/logging.h>

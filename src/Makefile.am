@@ -579,32 +579,32 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/expressions/datetime.h \
     eventql/sql/expressions/math.cc \
     eventql/sql/expressions/math.h \
-    eventql/sql/expressions/table/describe_table.cc \
-    eventql/sql/expressions/table/describe_table.h \
-    eventql/sql/expressions/table/describe_partitions.cc \
-    eventql/sql/expressions/table/describe_partitions.h \
-    eventql/sql/expressions/table/cluster_show_servers.cc \
-    eventql/sql/expressions/table/cluster_show_servers.h \
-    eventql/sql/expressions/table/groupby.cc \
-    eventql/sql/expressions/table/groupby.h \
-    eventql/sql/expressions/table/hash_join.cc \
-    eventql/sql/expressions/table/hash_join.h \
-    eventql/sql/expressions/table/limit.cc \
-    eventql/sql/expressions/table/limit.h \
-    eventql/sql/expressions/table/nested_loop_join.cc \
-    eventql/sql/expressions/table/nested_loop_join.h \
-    eventql/sql/expressions/table/orderby.cc \
-    eventql/sql/expressions/table/orderby.h \
-    eventql/sql/expressions/table/select.cc \
-    eventql/sql/expressions/table/select.h \
-    eventql/sql/expressions/table/show_tables.cc \
-    eventql/sql/expressions/table/show_tables.h \
-    eventql/sql/expressions/table/subquery.cc \
-    eventql/sql/expressions/table/subquery.h \
-    eventql/sql/expressions/table/tablescan.cc \
-    eventql/sql/expressions/table/tablescan.h \
-    eventql/sql/expressions/table_expression.cc \
-    eventql/sql/expressions/table_expression.h \
+    eventql/sql/statements/describe_table.cc \
+    eventql/sql/statements/describe_table.h \
+    eventql/sql/statements/describe_partitions.cc \
+    eventql/sql/statements/describe_partitions.h \
+    eventql/sql/statements/cluster_show_servers.cc \
+    eventql/sql/statements/cluster_show_servers.h \
+    eventql/sql/statements/select/groupby.cc \
+    eventql/sql/statements/select/groupby.h \
+    eventql/sql/statements/select/hash_join.cc \
+    eventql/sql/statements/select/hash_join.h \
+    eventql/sql/statements/select/limit.cc \
+    eventql/sql/statements/select/limit.h \
+    eventql/sql/statements/select/nested_loop_join.cc \
+    eventql/sql/statements/select/nested_loop_join.h \
+    eventql/sql/statements/select/orderby.cc \
+    eventql/sql/statements/select/orderby.h \
+    eventql/sql/statements/select/select.cc \
+    eventql/sql/statements/select/select.h \
+    eventql/sql/statements/show_tables.cc \
+    eventql/sql/statements/show_tables.h \
+    eventql/sql/statements/select/subquery.cc \
+    eventql/sql/statements/select/subquery.h \
+    eventql/sql/statements/select/tablescan.cc \
+    eventql/sql/statements/select/tablescan.h \
+    eventql/sql/table_expression.cc \
+    eventql/sql/table_expression.h \
     eventql/sql/extensions/chartsql/areachartbuilder.cc \
     eventql/sql/extensions/chartsql/areachartbuilder.h \
     eventql/sql/extensions/chartsql/barchartbuilder.cc \

@@ -2,7 +2,6 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
- *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -22,35 +21,42 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include <eventql/util/stdtypes.h>
-#include <eventql/sql/runtime/defaultruntime.h>
-#include <eventql/sql/expressions/table_expression.h>
+#include <assert.h>
+#include "eventql/sql/table_expression.h"
 
 namespace csql {
 
-class SelectExpression : public TableExpression {
-public:
-
-  SelectExpression(
-      Transaction* txn,
-      ExecutionContext* execution_context,
-      Vector<ValueExpression> select_expressions);
-
-  ReturnCode execute() override;
-  ReturnCode nextBatch(size_t limit, SVector* columns, size_t* len) override;
-
-  size_t getColumnCount() const override;
-  SType getColumnType(size_t idx) const override;
-
-  bool next(SValue* row, size_t row_len);
-
-protected:
-  Transaction* txn_;
-  ExecutionContext* execution_context_;
-  Vector<ValueExpression> select_exprs_;
-  size_t pos_;
-  VMStack vm_stack_;
-};
-
+ReturnCode TableExpression::execute() {
+  return ReturnCode::success();
 }
+
+bool TableExpression::next(SValue* out, size_t out_len) {
+  std::vector<SVector> column_buffers;
+  for (size_t i = 0; i < getColumnCount(); ++i) {
+    column_buffers.emplace_back(getColumnType(i));
+  }
+
+  size_t nrecords = 0;
+  auto rc = nextBatch(1, column_buffers.data(), &nrecords);
+  if (!rc.isSuccess()) {
+    RAISE(kRuntimeError, rc.getMessage());
+  }
+
+  if (nrecords == 0) {
+    return false;
+  }
+
+  for (size_t i = 0; i < getColumnCount(); ++i) {
+    if (i >= out_len) {
+      break;
+    }
+
+    *out = SValue(getColumnType(i));
+    out->copyFrom(column_buffers[i].getData());
+  }
+
+  return true;
+}
+
+} // namespace csql
+

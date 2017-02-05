@@ -2,7 +2,7 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
- *   - Christian Parpart <trapni@dawanda.com>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -22,49 +22,35 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/sql/result_cursor.h>
+#pragma once
+#include <eventql/util/stdtypes.h>
+#include <eventql/sql/runtime/defaultruntime.h>
 #include <eventql/sql/table_expression.h>
-
-#include "eventql/eventql.h"
 
 namespace csql {
 
-ResultCursor::ResultCursor() :
-    started_(false) {}
+class SelectExpression : public TableExpression {
+public:
 
-ResultCursor::ResultCursor(
-    ScopedPtr<TableExpression> table_expression) :
-    table_expression_(std::move(table_expression)),
-    started_(false) {}
+  SelectExpression(
+      Transaction* txn,
+      ExecutionContext* execution_context,
+      Vector<ValueExpression> select_expressions);
 
-bool ResultCursor::next(SValue* row) {
-  if (!table_expression_) {
-    return false;
-  }
+  ReturnCode execute() override;
+  ReturnCode nextBatch(size_t limit, SVector* columns, size_t* len) override;
 
-  if (!started_) {
-    auto rc = table_expression_->execute();
-    if (!rc.isSuccess()) {
-      RAISE(kRuntimeError, rc.getMessage());
-    }
+  size_t getColumnCount() const override;
+  SType getColumnType(size_t idx) const override;
 
-    started_ = true;
-  }
+  bool next(SValue* row, size_t row_len);
 
-  return table_expression_->next(row, table_expression_->getColumnCount());
+protected:
+  Transaction* txn_;
+  ExecutionContext* execution_context_;
+  Vector<ValueExpression> select_exprs_;
+  size_t pos_;
+  VMStack vm_stack_;
+};
+
 }
-
-size_t ResultCursor::getColumnCount() const {
-  if (!table_expression_) {
-    return 0;
-  }
-
-  return table_expression_->getColumnCount();
-}
-
-SType ResultCursor::getColumnType(size_t idx) const {
-  return table_expression_->getColumnType(idx);
-}
-
-} // namespace csql
-

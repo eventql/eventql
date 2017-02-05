@@ -22,7 +22,7 @@
  * code of your own applications
  */
 #include <eventql/sql/backends/csv/CSVTableProvider.h>
-#include <eventql/sql/expressions/table/tablescan.h>
+#include <eventql/sql/statements/select/tablescan.h>
 
 #include "eventql/eventql.h"
 

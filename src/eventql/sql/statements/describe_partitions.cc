@@ -22,7 +22,7 @@
  * code of your own applications
  */
 #include <assert.h>
-#include <eventql/sql/expressions/table/describe_partitions.h>
+#include <eventql/sql/statements/describe_partitions.h>
 #include <eventql/sql/transaction.h>
 
 namespace csql {

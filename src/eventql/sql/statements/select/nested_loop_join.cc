@@ -22,7 +22,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/sql/expressions/table/nested_loop_join.h>
+#include <eventql/sql/statements/select/nested_loop_join.h>
 
 namespace csql {
 

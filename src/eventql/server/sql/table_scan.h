@@ -25,7 +25,7 @@
 #pragma once
 #include "eventql/eventql.h"
 #include "eventql/sql/svalue.h"
-#include <eventql/sql/expressions/table_expression.h>
+#include <eventql/sql/table_expression.h>
 #include <eventql/auth/internal_auth.h>
 #include <eventql/db/partition_map.h>
 #include <eventql/sql/transaction.h>

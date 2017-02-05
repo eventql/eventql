@@ -24,19 +24,26 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
-#include <eventql/sql/runtime/defaultruntime.h>
-#include <eventql/sql/expressions/table_expression.h>
+#include <eventql/sql/transaction.h>
+#include <eventql/sql/runtime/ValueExpression.h>
+#include <eventql/sql/qtree/OrderByNode.h>
+#include <eventql/sql/table_expression.h>
+#include <eventql/sql/scheduler/execution_context.h>
 
 namespace csql {
 
-class SubqueryExpression : public TableExpression {
+class OrderByExpression : public TableExpression {
 public:
 
-  SubqueryExpression(
+  struct SortExpr {
+    ValueExpression expr;
+    bool descending; // false == ASCENDING, true == DESCENDING
+  };
+
+  OrderByExpression(
       Transaction* txn,
       ExecutionContext* execution_context,
-      Vector<ValueExpression> select_expressions,
-      Option<ValueExpression> where_expr,
+      Vector<SortExpr> sort_specs,
       ScopedPtr<TableExpression> input);
 
   ReturnCode execute() override;
@@ -45,14 +52,17 @@ public:
   size_t getColumnCount() const override;
   SType getColumnType(size_t idx) const override;
 
+  bool next(SValue* row, size_t row_len);
+
 protected:
   Transaction* txn_;
   ExecutionContext* execution_context_;
-  Vector<ValueExpression> select_exprs_;
-  Option<ValueExpression> where_expr_;
+  Vector<SortExpr> sort_specs_;
   ScopedPtr<TableExpression> input_;
-  Vector<SVector> input_cols_;
-  Vector<SValue> buf_;
+  Vector<Vector<SValue>> rows_;
+  size_t num_rows_;
+  size_t pos_;
+  size_t cnt_;
   VMStack vm_stack_;
 };
 

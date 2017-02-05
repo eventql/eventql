@@ -22,7 +22,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/sql/expressions/table/cluster_show_servers.h"
+#include "eventql/sql/statements/cluster_show_servers.h"
 #include "eventql/sql/transaction.h"
 
 namespace csql {

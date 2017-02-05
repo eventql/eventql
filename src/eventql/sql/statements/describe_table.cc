@@ -22,53 +22,63 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/sql/expressions/table/show_tables.h>
+#include <eventql/sql/statements/describe_table.h>
 #include <eventql/sql/transaction.h>
 
 namespace csql {
 
-ShowTablesExpression::ShowTablesExpression(
-    Transaction* txn) :
+DescribeTableStatement::DescribeTableStatement(
+    Transaction* txn,
+    const String& table_name) :
     txn_(txn),
+    table_name_(table_name),
     counter_(0) {}
 
-ReturnCode ShowTablesExpression::execute() {
-  txn_->getTableProvider()->listTables([this] (const TableInfo& table) {
-    Vector<SValue> row;
-    row.emplace_back(table.table_name);
+ReturnCode DescribeTableStatement::execute() {
+  auto table_info = txn_->getTableProvider()->describe(table_name_);
+  if (table_info.isEmpty()) {
+    RAISEF(kNotFoundError, "table not found: $0", table_name_);
+  }
 
-    if (table.description.isEmpty()) {
-      row.emplace_back();
-    } else {
-      row.emplace_back(table.description.get());
-    }
-
-    buf_.emplace_back(row);
-  });
-
+  rows_ = table_info.get().columns;
   return ReturnCode::success();
 }
 
-ReturnCode ShowTablesExpression::nextBatch(
+ReturnCode DescribeTableStatement::nextBatch(
     size_t limit,
     SVector* columns,
     size_t* nrecords) {
-  return ReturnCode::error("ERUNTIME", "ShowTablesExpression::nextBatch not yet implemented");
+  return ReturnCode::error("ERUNTIME", "DescribeTableExpression::nextBatch not yet implemented");
 }
 
-size_t ShowTablesExpression::getColumnCount() const {
+size_t DescribeTableStatement::getColumnCount() const {
   return kNumColumns;
 }
 
-SType ShowTablesExpression::getColumnType(size_t idx) const {
+SType DescribeTableStatement::getColumnType(size_t idx) const {
   assert(idx < kNumColumns);
   return SType::STRING;
 }
 
-bool ShowTablesExpression::next(SValue* row, size_t row_len) {
-  if (counter_ < buf_.size()) {
-    for (size_t i = 0; i < kNumColumns && i < row_len; ++i) {
-      row[i] = buf_[counter_][i];
+bool DescribeTableStatement::next(SValue* row, size_t row_len) {
+  if (counter_ < rows_.size()) {
+    const auto& col = rows_[counter_];
+    switch (row_len) {
+      default:
+      case 6:
+        row[5] = SValue::newString(col.encoding); //Encoding
+      case 5:
+        row[4] = SValue::newNull(); //Description
+      case 4:
+        row[3] = col.is_primary_key ? SValue::newString("YES") : SValue::newString("NO"); //Primary Key
+      case 3:
+        row[2] = col.is_nullable ? SValue::newString("YES") : SValue::newString("NO"); //Null
+      case 2:
+        //row[1] = SValue::newString(col.type); //Type FIXME
+      case 1:
+        row[0] = SValue::newString(col.column_name); //Field
+      case 0:
+        break;
     }
 
     ++counter_;

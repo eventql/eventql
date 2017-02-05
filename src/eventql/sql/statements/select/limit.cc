@@ -1,4 +1,4 @@
- /**
+/**
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
@@ -22,46 +22,64 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/sql/parser/astutil.h>
-#include <eventql/sql/qtree/QueryTreeUtil.h>
-#include <eventql/sql/runtime/QueryBuilder.h>
-#include <eventql/sql/runtime/runtime.h>
-#include <eventql/sql/expressions/table/tablescan.h>
+#include <eventql/sql/statements/select/limit.h>
 
 namespace csql {
 
-TableScan::TableScan(
-    Transaction* txn,
+LimitExpression::LimitExpression(
     ExecutionContext* execution_context,
-    RefPtr<SequentialScanNode> stmt,
-    ScopedPtr<TableIterator> iter) :
-    txn_(txn),
+    size_t limit,
+    size_t offset,
+    ScopedPtr<TableExpression> input) :
     execution_context_(execution_context),
-    iter_(std::move(iter)) {
-  auto qbuilder = txn->getCompiler();
+    limit_(limit),
+    offset_(offset),
+    input_(std::move(input)),
+    counter_(0) {}
 
-  for (const auto& slnode : stmt->selectList()) {
-    select_exprs_.emplace_back(
-        qbuilder->buildValueExpression(txn, slnode->expression()));
+ReturnCode LimitExpression::execute() {
+  auto rc = input_->execute();
+  if (!rc.isSuccess()) {
+    return rc;
   }
 
-  if (!stmt->whereExpression().isEmpty()) {
-    where_expr_ = std::move(Option<ValueExpression>(
-        qbuilder->buildValueExpression(txn, stmt->whereExpression().get())));
-  }
-}
-
-ReturnCode TableScan::execute() {
+  buf_.resize(input_->getColumnCount());
   return ReturnCode::success();
 }
 
-size_t TableScan::getColumnCount() const {
-  return iter_->numColumns();
+ReturnCode LimitExpression::nextBatch(
+    size_t limit,
+    SVector* columns,
+    size_t* nrecords) {
+  return ReturnCode::error("ERUNTIME", "LimitExpression::nextBatch not yet implemented");
 }
 
-SType TableScan::getColumnType(size_t idx) const {
-  RAISE(kNotYetImplementedError);
-  return SType::NIL;
+size_t LimitExpression::getColumnCount() const {
+  return input_->getColumnCount();
 }
+
+SType LimitExpression::getColumnType(size_t idx) const {
+  return input_->getColumnType(idx);
+}
+
+bool LimitExpression::next(SValue* row, size_t row_len) {
+  if (limit_ == 0 || counter_ >= offset_ + limit_) {
+    return false;
+  }
+
+  while (input_->next(buf_.data(), buf_.size())) {
+    if (counter_++ < offset_) {
+      continue;
+    } else {
+      for (size_t i = 0; i < row_len && i < buf_.size(); ++i) {
+        row[i] = buf_[i];
+      }
+      return true;
+    }
+  }
+
+  return false;
+}
+
 
 }

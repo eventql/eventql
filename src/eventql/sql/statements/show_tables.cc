@@ -22,64 +22,60 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/sql/expressions/table/limit.h>
+#include <eventql/sql/statements/show_tables.h>
+#include <eventql/sql/transaction.h>
 
 namespace csql {
 
-LimitExpression::LimitExpression(
-    ExecutionContext* execution_context,
-    size_t limit,
-    size_t offset,
-    ScopedPtr<TableExpression> input) :
-    execution_context_(execution_context),
-    limit_(limit),
-    offset_(offset),
-    input_(std::move(input)),
+ShowTablesExpression::ShowTablesExpression(
+    Transaction* txn) :
+    txn_(txn),
     counter_(0) {}
 
-ReturnCode LimitExpression::execute() {
-  auto rc = input_->execute();
-  if (!rc.isSuccess()) {
-    return rc;
-  }
+ReturnCode ShowTablesExpression::execute() {
+  txn_->getTableProvider()->listTables([this] (const TableInfo& table) {
+    Vector<SValue> row;
+    row.emplace_back(table.table_name);
 
-  buf_.resize(input_->getColumnCount());
+    if (table.description.isEmpty()) {
+      row.emplace_back();
+    } else {
+      row.emplace_back(table.description.get());
+    }
+
+    buf_.emplace_back(row);
+  });
+
   return ReturnCode::success();
 }
 
-ReturnCode LimitExpression::nextBatch(
+ReturnCode ShowTablesExpression::nextBatch(
     size_t limit,
     SVector* columns,
     size_t* nrecords) {
-  return ReturnCode::error("ERUNTIME", "LimitExpression::nextBatch not yet implemented");
+  return ReturnCode::error("ERUNTIME", "ShowTablesExpression::nextBatch not yet implemented");
 }
 
-size_t LimitExpression::getColumnCount() const {
-  return input_->getColumnCount();
+size_t ShowTablesExpression::getColumnCount() const {
+  return kNumColumns;
 }
 
-SType LimitExpression::getColumnType(size_t idx) const {
-  return input_->getColumnType(idx);
+SType ShowTablesExpression::getColumnType(size_t idx) const {
+  assert(idx < kNumColumns);
+  return SType::STRING;
 }
 
-bool LimitExpression::next(SValue* row, size_t row_len) {
-  if (limit_ == 0 || counter_ >= offset_ + limit_) {
+bool ShowTablesExpression::next(SValue* row, size_t row_len) {
+  if (counter_ < buf_.size()) {
+    for (size_t i = 0; i < kNumColumns && i < row_len; ++i) {
+      row[i] = buf_[counter_][i];
+    }
+
+    ++counter_;
+    return true;
+  } else {
     return false;
   }
-
-  while (input_->next(buf_.data(), buf_.size())) {
-    if (counter_++ < offset_) {
-      continue;
-    } else {
-      for (size_t i = 0; i < row_len && i < buf_.size(); ++i) {
-        row[i] = buf_[i];
-      }
-      return true;
-    }
-  }
-
-  return false;
 }
-
 
 }

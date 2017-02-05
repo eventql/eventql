@@ -21,7 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/sql/expressions/table/hash_join.h>
+#include <eventql/sql/statements/select/hash_join.h>
 
 namespace csql {
 

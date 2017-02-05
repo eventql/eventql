@@ -22,7 +22,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/sql/expressions/table/select.h>
+#include <eventql/sql/statements/select/select.h>
 
 namespace csql {
 

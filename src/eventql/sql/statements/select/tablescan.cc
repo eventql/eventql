@@ -1,4 +1,4 @@
-/**
+ /**
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
@@ -22,48 +22,46 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include <eventql/util/stdtypes.h>
-#include <eventql/sql/transaction.h>
-#include <eventql/sql/runtime/ValueExpression.h>
-#include <eventql/sql/qtree/OrderByNode.h>
-#include <eventql/sql/expressions/table_expression.h>
-#include <eventql/sql/scheduler/execution_context.h>
+#include <eventql/sql/parser/astutil.h>
+#include <eventql/sql/qtree/QueryTreeUtil.h>
+#include <eventql/sql/runtime/QueryBuilder.h>
+#include <eventql/sql/runtime/runtime.h>
+#include <eventql/sql/statements/select/tablescan.h>
 
 namespace csql {
 
-class OrderByExpression : public TableExpression {
-public:
+TableScan::TableScan(
+    Transaction* txn,
+    ExecutionContext* execution_context,
+    RefPtr<SequentialScanNode> stmt,
+    ScopedPtr<TableIterator> iter) :
+    txn_(txn),
+    execution_context_(execution_context),
+    iter_(std::move(iter)) {
+  auto qbuilder = txn->getCompiler();
 
-  struct SortExpr {
-    ValueExpression expr;
-    bool descending; // false == ASCENDING, true == DESCENDING
-  };
+  for (const auto& slnode : stmt->selectList()) {
+    select_exprs_.emplace_back(
+        qbuilder->buildValueExpression(txn, slnode->expression()));
+  }
 
-  OrderByExpression(
-      Transaction* txn,
-      ExecutionContext* execution_context,
-      Vector<SortExpr> sort_specs,
-      ScopedPtr<TableExpression> input);
+  if (!stmt->whereExpression().isEmpty()) {
+    where_expr_ = std::move(Option<ValueExpression>(
+        qbuilder->buildValueExpression(txn, stmt->whereExpression().get())));
+  }
+}
 
-  ReturnCode execute() override;
-  ReturnCode nextBatch(size_t limit, SVector* columns, size_t* len) override;
+ReturnCode TableScan::execute() {
+  return ReturnCode::success();
+}
 
-  size_t getColumnCount() const override;
-  SType getColumnType(size_t idx) const override;
+size_t TableScan::getColumnCount() const {
+  return iter_->numColumns();
+}
 
-  bool next(SValue* row, size_t row_len);
-
-protected:
-  Transaction* txn_;
-  ExecutionContext* execution_context_;
-  Vector<SortExpr> sort_specs_;
-  ScopedPtr<TableExpression> input_;
-  Vector<Vector<SValue>> rows_;
-  size_t num_rows_;
-  size_t pos_;
-  size_t cnt_;
-  VMStack vm_stack_;
-};
+SType TableScan::getColumnType(size_t idx) const {
+  RAISE(kNotYetImplementedError);
+  return SType::NIL;
+}
 
 }

@@ -23,7 +23,7 @@
  * code of your own applications
  */
 #include <assert.h>
-#include <eventql/sql/expressions/table/subquery.h>
+#include <eventql/sql/statements/select/subquery.h>
 #include <eventql/sql/runtime/vm.h>
 
 namespace csql {
