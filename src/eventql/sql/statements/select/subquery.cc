@@ -77,6 +77,31 @@ ReturnCode SubqueryExpression::nextBatch(
       return ReturnCode::success();
     }
 
+    /* evalute where expression */
+    std::vector<bool> filter_set;
+    size_t filter_set_count = 0;
+    if (where_expr_.isEmpty()) {
+      filter_set = std::vector<bool>(input_nrecords, true);
+      filter_set_count = input_nrecords;
+    } else {
+      SValue pref(SType::BOOL);
+      VM::evaluatePredicateVector(
+          txn_,
+          where_expr_.get().program(),
+          where_expr_.get().program()->method_call,
+          &vm_stack_,
+          nullptr,
+          input_cols_.size(),
+          input_cols_.data(),
+          input_nrecords,
+          &filter_set,
+          &filter_set_count);
+    }
+
+    if (filter_set_count == 0) {
+      continue;
+    }
+
     /* compute output columns */
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
       VM::evaluateVector(
@@ -88,10 +113,11 @@ ReturnCode SubqueryExpression::nextBatch(
           input_cols_.size(),
           input_cols_.data(),
           input_nrecords,
-          out + i);
+          out + i,
+          filter_set_count < input_nrecords ? &filter_set : nullptr);
     }
 
-    *nrecords = input_nrecords;
+    *nrecords = filter_set_count;
     return ReturnCode::success();
   }
 }
