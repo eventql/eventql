@@ -47,7 +47,7 @@ public:
       RefPtr<csql::SequentialScanNode> stmt);
 
   ReturnCode execute() override;
-  ReturnCode nextBatch(size_t limit, csql::SVector* columns, size_t* len) override;
+  ReturnCode nextBatch(csql::SVector* columns, size_t* len) override;
 
   size_t getColumnCount() const override;
   csql::SType getColumnType(size_t idx) const override;
@@ -79,17 +79,12 @@ public:
       const std::vector<std::string>& servers);
 
   ReturnCode execute() override;
-  bool next(csql::SValue* row, size_t row_len) override;
-
-  ReturnCode nextBatch(size_t limit, csql::SVector* columns, size_t* len) override;
+  ReturnCode nextBatch(csql::SVector* columns, size_t* len) override;
 
   size_t getColumnCount() const override;
   csql::SType getColumnType(size_t idx) const override;
 
 protected:
-
-  ReturnCode fetchRows();
-
   csql::Transaction* txn_;
   csql::ExecutionContext* execution_context_;
   std::string database_;

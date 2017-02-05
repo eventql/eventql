@@ -75,7 +75,7 @@ ReturnCode ResultCursor::next() {
     b.clear();
   }
 
-  auto rc = table_expression_->nextBatch(0, buffer_.data(), &buffer_len_);
+  auto rc = table_expression_->nextBatch(buffer_.data(), &buffer_len_);
   if (!rc.isSuccess()) {
     return rc;
   }

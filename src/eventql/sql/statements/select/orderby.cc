@@ -69,7 +69,7 @@ ReturnCode OrderByExpression::execute() {
 
     size_t nrecords = 0;
     {
-      auto rc = input_->nextBatch(0, input_cols.data(), &nrecords);
+      auto rc = input_->nextBatch(input_cols.data(), &nrecords);
       if (!rc.isSuccess()) {
         RAISE(kRuntimeError, rc.getMessage());
       }
@@ -165,7 +165,6 @@ ReturnCode OrderByExpression::execute() {
 }
 
 ReturnCode OrderByExpression::nextBatch(
-    size_t limit,
     SVector* output,
     size_t* nrecords) {
   *nrecords = 0;

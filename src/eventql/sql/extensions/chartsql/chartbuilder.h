@@ -114,6 +114,7 @@ public:
 
     bool first = true;
     Vector<SValue> row(result_cursor->getColumnCount());
+    /*
     while (result_cursor->next(row.data(), row.size())) {
       if (first) {
         first = false;
@@ -138,6 +139,7 @@ public:
 
       adapter_->nextRow(row.data(), row.size());
     }
+    */
   }
 
   virtual util::chart::Drawable* getChart() const = 0;

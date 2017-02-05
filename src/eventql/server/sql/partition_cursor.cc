@@ -49,7 +49,6 @@ ReturnCode PartitionCursor::execute() {
 }
 
 ReturnCode PartitionCursor::nextBatch(
-    size_t limit,
     csql::SVector* columns,
     size_t* nrows) {
   for (;;) {
@@ -59,7 +58,7 @@ ReturnCode PartitionCursor::nextBatch(
       }
     }
 
-    auto rc = cur_scan_->nextBatch(limit, columns, nrows);
+    auto rc = cur_scan_->nextBatch(columns, nrows);
     if (!rc.isSuccess()) {
       return rc;
     }
@@ -260,6 +259,7 @@ ReturnCode RemotePartitionCursor::execute() {
   return ReturnCode::success();
 }
 
+/*
 bool RemotePartitionCursor::next(csql::SValue* row, size_t row_len) {
   if (row_buf_pos_ == row_buf_.size() && !done_) {
     auto rc = fetchRows();
@@ -281,9 +281,9 @@ bool RemotePartitionCursor::next(csql::SValue* row, size_t row_len) {
     return true;
   }
 }
+*/
 
 ReturnCode RemotePartitionCursor::nextBatch(
-    size_t limit,
     csql::SVector* columns,
     size_t* nrecords) {
   return ReturnCode::error("ERUNTIME", "RemotePartitionCursor::nextBatch not yet implemented");
@@ -297,6 +297,7 @@ csql::SType RemotePartitionCursor::getColumnType(size_t idx) const {
   return stmt_->getColumnType(idx);
 }
 
+/*
 ReturnCode RemotePartitionCursor::fetchRows() {
   if (running_) {
     auto rc = client_.sendFrame(EVQL_OP_QUERY_CONTINUE, 0, nullptr, 0);
@@ -398,5 +399,6 @@ ReturnCode RemotePartitionCursor::fetchRows() {
 
   return ReturnCode::success();
 }
+*/
 
 }

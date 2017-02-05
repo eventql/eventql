@@ -38,10 +38,7 @@ public:
   virtual ~TableExpression() = default;
 
   virtual ReturnCode execute() = 0;
-
-  virtual bool next(SValue* row, size_t row_len); // legacy
-
-  virtual ReturnCode nextBatch(size_t limit, SVector* columns, size_t* len) = 0;
+  virtual ReturnCode nextBatch(SVector* columns, size_t* len) = 0;
 
   virtual size_t getColumnCount() const = 0;
   virtual SType getColumnType(size_t idx) const = 0;
@@ -58,7 +55,7 @@ public:
 
   SimpleTableExpression(const std::vector<ColumnDefinition>& columns);
 
-  ReturnCode nextBatch(size_t limit, SVector* columns, size_t* len) override;
+  ReturnCode nextBatch(SVector* columns, size_t* len) override;
 
   size_t getColumnCount() const override;
   SType getColumnType(size_t idx) const override;

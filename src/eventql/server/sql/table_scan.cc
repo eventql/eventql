@@ -63,7 +63,6 @@ csql::SType TableScan::getColumnType(size_t idx) const {
 }
 
 ReturnCode TableScan::nextBatch(
-    size_t limit,
     csql::SVector* columns,
     size_t* nrows) {
   while (cur_partition_ < partitions_.size()) {
@@ -78,7 +77,7 @@ ReturnCode TableScan::nextBatch(
       continue;
     }
 
-    auto rc = cur_cursor_->nextBatch(limit, columns, nrows);
+    auto rc = cur_cursor_->nextBatch(columns, nrows);
     if (!rc.isSuccess()) {
       return rc;
     }

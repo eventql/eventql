@@ -26,34 +26,6 @@
 
 namespace csql {
 
-bool TableExpression::next(SValue* out, size_t out_len) {
-  std::vector<SVector> column_buffers;
-  for (size_t i = 0; i < getColumnCount(); ++i) {
-    column_buffers.emplace_back(getColumnType(i));
-  }
-
-  size_t nrecords = 0;
-  auto rc = nextBatch(1, column_buffers.data(), &nrecords);
-  if (!rc.isSuccess()) {
-    RAISE(kRuntimeError, rc.getMessage());
-  }
-
-  if (nrecords == 0) {
-    return false;
-  }
-
-  for (size_t i = 0; i < getColumnCount(); ++i) {
-    if (i >= out_len) {
-      break;
-    }
-
-    *out = SValue(getColumnType(i));
-    out->copyFrom(column_buffers[i].getData());
-  }
-
-  return true;
-}
-
 SimpleTableExpression::SimpleTableExpression(
     const std::vector<ColumnDefinition>& columns) :
     columns_(columns),
@@ -63,7 +35,7 @@ SimpleTableExpression::SimpleTableExpression(
   }
 }
 
-ReturnCode SimpleTableExpression::nextBatch(size_t limit, SVector* columns, size_t* len) {
+ReturnCode SimpleTableExpression::nextBatch(SVector* columns, size_t* len) {
   if (row_count_ > 0) {
     for (size_t i = 0; i < columns_.size(); ++i) {
       columns[i].copyFrom(&row_data_[i]);

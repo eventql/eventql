@@ -71,7 +71,7 @@ public:
   size_t getColumnCount() const override;
   csql::SType getColumnType(size_t idx) const override;
 
-  ReturnCode nextBatch(size_t limit, csql::SVector* columns, size_t* len) override;
+  ReturnCode nextBatch(csql::SVector* columns, size_t* len) override;
 
   Option<SHA1Hash> getCacheKey() const override;
 

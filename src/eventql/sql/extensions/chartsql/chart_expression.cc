@@ -60,7 +60,6 @@ ReturnCode ChartExpression::execute() {
 }
 
 ReturnCode ChartExpression::nextBatch(
-    size_t limit,
     SVector* columns,
     size_t* len) {
   return ReturnCode::error("ERUNTIME", "ChartExpression::nextBatch not yet implemented");

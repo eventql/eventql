@@ -70,7 +70,7 @@ ReturnCode NestedLoopJoin::execute() {
   if (!joined_rc.isSuccess()) {
     return joined_rc;
   }
-
+/*
   Vector<SValue> row(joined_tbl_->getColumnCount());
   while (joined_tbl_->next(row.data(), row.size())) {
     if (row.size() < joined_tbl_mincols_) {
@@ -95,13 +95,12 @@ ReturnCode NestedLoopJoin::execute() {
   }
 
   base_tbl_row_.resize(base_tbl_->getColumnCount());
-
   switch (join_type_) {
     case JoinType::OUTER:
       return executeOuterJoin();
     case JoinType::INNER:
       if (join_cond_expr_.isEmpty()) {
-        /* fallthrough */
+        /\* fallthrough *\/
       } else {
         return executeInnerJoin();
       }
@@ -111,6 +110,7 @@ ReturnCode NestedLoopJoin::execute() {
       RAISE(kIllegalStateError);
   }
 
+*/
   return ReturnCode::success();
 }
 
@@ -123,17 +123,13 @@ SType NestedLoopJoin::getColumnType(size_t idx) const {
   return select_exprs_[idx].getReturnType();
 }
 
-bool NestedLoopJoin::next(SValue* row, size_t row_len) {
-  return cursor_(row, row_len);
-}
-
 ReturnCode NestedLoopJoin::nextBatch(
-    size_t limit,
     SVector* columns,
     size_t* nrecords) {
   return ReturnCode::error("ERUNTIME", "NestedLoopJoin::nextBatch not yet implemented");
 }
 
+/*
 ReturnCode NestedLoopJoin::executeCartesianJoin() {
   cursor_ = [this] (SValue* row, int row_len) -> bool {
     for (;;) {
@@ -404,6 +400,7 @@ ReturnCode NestedLoopJoin::executeOuterJoin() {
 
   return ReturnCode::success();
 }
+*/
 
 } // namespace csql
 

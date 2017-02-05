@@ -83,7 +83,7 @@ ReturnCode GroupByExpression::execute() {
 
     size_t nrecords = 0;
     {
-      auto rc = input_->nextBatch(0, input_cols.data(), &nrecords);
+      auto rc = input_->nextBatch(input_cols.data(), &nrecords);
       if (!rc.isSuccess()) {
         RAISE(kRuntimeError, rc.getMessage());
       }
@@ -153,7 +153,6 @@ ReturnCode GroupByExpression::execute() {
 }
 
 ReturnCode GroupByExpression::nextBatch(
-    size_t limit,
     SVector* columns,
     size_t* nrecords) {
   *nrecords = 0;
@@ -268,7 +267,7 @@ ReturnCode PartialGroupByExpression::execute() {
 
       size_t nrecords = 0;
       {
-        auto rc = input_->nextBatch(0, input_cols.data(), &nrecords);
+        auto rc = input_->nextBatch(input_cols.data(), &nrecords);
         if (!rc.isSuccess()) {
           RAISE(kRuntimeError, rc.getMessage());
         }
@@ -359,7 +358,6 @@ ReturnCode PartialGroupByExpression::execute() {
 }
 
 ReturnCode PartialGroupByExpression::nextBatch(
-    size_t limit,
     SVector* columns,
     size_t* nrecords) {
   *nrecords = 0;
@@ -529,7 +527,6 @@ ReturnCode GroupByMergeExpression::execute() {
 }
 
 ReturnCode GroupByMergeExpression::nextBatch(
-    size_t limit,
     SVector* columns,
     size_t* nrecords) {
   *nrecords = 0;

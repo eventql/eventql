@@ -50,10 +50,7 @@ ReturnCode LimitExpression::execute() {
   return ReturnCode::success();
 }
 
-ReturnCode LimitExpression::nextBatch(
-    size_t limitx,
-    SVector* output,
-    size_t* nrecords) {
+ReturnCode LimitExpression::nextBatch(SVector* output, size_t* nrecords) {
   *nrecords = 0;
 
   auto limit_abs = limit_ + offset_;
@@ -65,7 +62,7 @@ ReturnCode LimitExpression::nextBatch(
 
     size_t input_nrecords = 0;
     {
-      auto rc = input_->nextBatch(0, input_buffer_.data(), &input_nrecords);
+      auto rc = input_->nextBatch(input_buffer_.data(), &input_nrecords);
       if (!rc.isSuccess()) {
         RAISE(kRuntimeError, rc.getMessage());
       }

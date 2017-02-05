@@ -44,7 +44,6 @@ ReturnCode SelectExpression::execute() {
 }
 
 ReturnCode SelectExpression::nextBatch(
-    size_t limit,
     SVector* columns,
     size_t* nrecords) {
   if (pos_++ == 0) {
