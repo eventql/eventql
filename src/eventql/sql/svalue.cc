@@ -1052,6 +1052,10 @@ char* sql_cstr(void* str) {
   return (char*) str + sizeof(uint32_t);
 }
 
+const char* sql_cstr(const void* str) {
+  return (const char*) str + sizeof(uint32_t);
+}
+
 size_t sql_sizeof_static(SType type) {
   switch (type) {
     case SType::STRING:
@@ -1064,6 +1068,33 @@ size_t sql_sizeof_static(SType type) {
       return 8;
     case SType::BOOL:
       return 1;
+  }
+}
+
+std::string sql_tostring(SType type, const void* value) {
+  switch (type) {
+
+    case SType::NIL:
+      return "NULL";
+
+    case SType::INT64:
+      return std::to_string(*static_cast<const int64_t*>(value));
+
+    case SType::UINT64:
+      return std::to_string(*static_cast<const uint64_t*>(value));
+
+    case SType::FLOAT64:
+      return std::to_string(*static_cast<const double*>(value));
+
+    case SType::STRING:
+      return std::string(sql_cstr(value), sql_strlen(value));
+
+    case SType::TIMESTAMP64:
+      return UnixTime(*static_cast<const uint64_t*>(value)).toString();
+
+    case SType::BOOL:
+      return *static_cast<const uint8_t*>(value) ? "true" : "false";
+
   }
 }
 
