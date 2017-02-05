@@ -22,6 +22,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <assert.h>
 #include "eventql/transport/native/frames/query_remote_result.h"
 #include "eventql/util/util/binarymessagereader.h"
 
@@ -34,6 +35,11 @@ QueryRemoteResultFrame::QueryRemoteResultFrame() :
 
 size_t QueryRemoteResultFrame::getColumnCount() const {
   return column_data_.size();
+}
+
+const std::string& QueryRemoteResultFrame::getColumnData(size_t idx) const {
+  assert(idx < column_data_.size());
+  return column_data_[idx];
 }
 
 void QueryRemoteResultFrame::addColumnData(const char* data, size_t size) {

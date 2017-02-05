@@ -259,46 +259,14 @@ ReturnCode RemotePartitionCursor::execute() {
   return ReturnCode::success();
 }
 
-/*
-bool RemotePartitionCursor::next(csql::SValue* row, size_t row_len) {
-  if (row_buf_pos_ == row_buf_.size() && !done_) {
-    auto rc = fetchRows();
-    if (!rc.isSuccess()) {
-      RAISE(kRuntimeError, rc.getMessage());
-    }
-  }
-
-  if (row_buf_pos_ == row_buf_.size()) {
-    return false;
-  } else {
-    assert(row_buf_pos_ + ncols_ <= row_buf_.size());
-    auto n = std::min(ncols_, (size_t) row_len);
-    for (size_t i = 0; i < n; ++i) {
-      row[i] = row_buf_[row_buf_pos_ + i];
-    }
-
-    row_buf_pos_ += ncols_;
-    return true;
-  }
-}
-*/
-
 ReturnCode RemotePartitionCursor::nextBatch(
-    csql::SVector* columns,
-    size_t* nrecords) {
-  return ReturnCode::error("ERUNTIME", "RemotePartitionCursor::nextBatch not yet implemented");
-}
+    csql::SVector* output,
+    size_t* output_len) {
+  if (done_) {
+    *output_len = 0;
+    return ReturnCode::success();
+  }
 
-size_t RemotePartitionCursor::getColumnCount() const {
-  return stmt_->getNumComputedColumns();
-}
-
-csql::SType RemotePartitionCursor::getColumnType(size_t idx) const {
-  return stmt_->getColumnType(idx);
-}
-
-/*
-ReturnCode RemotePartitionCursor::fetchRows() {
   if (running_) {
     auto rc = client_.sendFrame(EVQL_OP_QUERY_CONTINUE, 0, nullptr, 0);
     if (!rc.isSuccess()) {
@@ -384,21 +352,21 @@ ReturnCode RemotePartitionCursor::fetchRows() {
     return ReturnCode::error("ERUNTIME", "invalid column count");
   }
 
-  auto is = r_frame.getRowDataInputStream();
-  auto n = r_frame.getRowCount() * ncols_;
-  row_buf_.clear();
-  row_buf_.resize(n);
-  row_buf_pos_ = 0;
-  try {
-    for (size_t i = 0; i < n; ++i) {
-        row_buf_[i].decode(is.get());
-    }
-  } catch (const std::exception& e) {
-    return ReturnCode::error("ERUNTIME", e.what());
+  for (size_t i = 0; i < ncols_; ++i) {
+    const auto& coldata = r_frame.getColumnData(i);
+    output[i].append(coldata.data(), coldata.size());
   }
 
+  *output_len = r_frame.getRowCount();
   return ReturnCode::success();
 }
-*/
+
+size_t RemotePartitionCursor::getColumnCount() const {
+  return stmt_->getNumComputedColumns();
+}
+
+csql::SType RemotePartitionCursor::getColumnType(size_t idx) const {
+  return stmt_->getColumnType(idx);
+}
 
 }
