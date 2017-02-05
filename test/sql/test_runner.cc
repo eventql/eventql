@@ -40,6 +40,7 @@ const auto kDirectoryPath = "./sql/";
 const auto kTestListFile = "test.lst";
 const auto kSQLPathEnding = ".sql";
 const auto kResultPathEnding = ".result.txt";
+const auto kChartColumnName = "__chart";
 
 Status compareResult(ResultList* result, const std::string& result_file_path) {
   auto csv_is = CSVInputStream::openFile(result_file_path);
@@ -105,10 +106,32 @@ Status compareResult(ResultList* result, const std::string& result_file_path) {
   return Status::success();
 }
 
+Status compareChart(ResultList* result, const std::string& result_file_path) {
+  auto num_returned_rows = result->getNumRows();
+  if (num_returned_rows != 1) {
+    return Status(eRuntimeError, StringUtil::format(
+        "wrong number of rows returned, expected $0 to be 1",
+        num_returned_rows));
+  }
+
+  auto is = FileInputStream::openFile(result_file_path);
+  std::string expected_result;
+  is->readUntilEOF(&expected_result);
+
+  auto returned_result = result->getRow(0)[0];
+  if (expected_result != returned_result) {
+    return Status(eRuntimeError, "wrong result");
+  }
+
+  return Status::success();
+}
+
 Status compareError(
     const std::string& error_msg,
     const std::string& result_file_path) {
-  auto result = FileUtil::read(result_file_path).toString();
+  auto result_is = FileInputStream::openFile(result_file_path);
+  std::string result;
+  result_is->readUntilEOF(&result);
   StringUtil::chomp(&result);
 
   if (result == error_msg) {
@@ -163,7 +186,7 @@ Status runTest(const std::string& test) {
   }
 
   std::string query;
-  while (sql_is->readLine(&query)) { }
+  sql_is->readUntilEOF(&query);
 
   /* execute query */
   auto runtime = Runtime::getDefaultRuntime();
@@ -179,6 +202,12 @@ Status runTest(const std::string& test) {
 
     /* compare error */
     return compareError(e.what(), result_file_path);
+  }
+
+  /* compare chart */
+  if (result.getNumColumns() == 1 &&
+      result.getColumns()[0] == kChartColumnName) {
+    return compareChart(&result, result_file_path);
   }
 
   /* compare result */
