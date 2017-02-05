@@ -50,14 +50,15 @@ GroupByExpression::GroupByExpression(
     execution_context_(execution_context),
     select_exprs_(std::move(select_expressions)),
     group_exprs_(std::move(group_expressions)),
-    input_(std::move(input)),
-    freed_(false) {
+    input_(std::move(input)) {
   execution_context_->incrementNumTasks();
 }
 
 GroupByExpression::~GroupByExpression() {
-  if (!freed_) {
-    freeResult();
+  for (auto& group : groups_) {
+    for (size_t i = 0; i < select_exprs_.size(); ++i) {
+      VM::freeInstance(txn_, select_exprs_[i].program(), group.second[i]);
+    }
   }
 }
 
@@ -155,20 +156,9 @@ ReturnCode GroupByExpression::nextBatch(
     size_t limit,
     SVector* columns,
     size_t* nrecords) {
-  return ReturnCode::error("ERUNTIME", "GroupByExpression::nextBatch not yet implemented");
-}
+  *nrecords = 0;
 
-size_t GroupByExpression::getColumnCount() const {
-  return select_exprs_.size();
-}
-
-SType GroupByExpression::getColumnType(size_t idx) const {
-  assert(idx < select_exprs_.size());
-  return select_exprs_[idx].getReturnType();
-}
-
-bool GroupByExpression::next(SValue* row, size_t row_len) {
-  if (groups_iter_ != groups_.end()) {
+  while (groups_iter_ != groups_.end()) {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
       VM::evaluate(
           txn_,
@@ -178,27 +168,29 @@ bool GroupByExpression::next(SValue* row, size_t row_len) {
           groups_iter_->second[i],
           0,
           nullptr);
+
+      popVector(&vm_stack_, columns + i);
     }
 
     if (++groups_iter_ == groups_.end()) {
       execution_context_->incrementNumTasksCompleted();
-      freeResult();
     }
-    return true;
-  } else {
-    return false;
+
+    if (++(*nrecords) == kOutputBatchSize) {
+      break;
+    }
   }
+
+  return ReturnCode::success();
 }
 
-void GroupByExpression::freeResult() {
-  for (auto& group : groups_) {
-    for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::freeInstance(txn_, select_exprs_[i].program(), group.second[i]);
-    }
-  }
+size_t GroupByExpression::getColumnCount() const {
+  return select_exprs_.size();
+}
 
-  groups_.clear();
-  freed_ = true;
+SType GroupByExpression::getColumnType(size_t idx) const {
+  assert(idx < select_exprs_.size());
+  return select_exprs_[idx].getReturnType();
 }
 
 PartialGroupByExpression::PartialGroupByExpression(
@@ -211,12 +203,13 @@ PartialGroupByExpression::PartialGroupByExpression(
     select_exprs_(std::move(select_expressions)),
     group_exprs_(std::move(group_expressions)),
     expression_fingerprint_(expression_fingerprint),
-    input_(std::move(input)),
-    freed_(false) {}
+    input_(std::move(input)) {}
 
 PartialGroupByExpression::~PartialGroupByExpression() {
-  if (!freed_) {
-    freeResult();
+  for (auto& group : groups_) {
+    for (size_t i = 0; i < select_exprs_.size(); ++i) {
+      VM::freeInstance(txn_, select_exprs_[i].program(), group.second[i]);
+    }
   }
 }
 
@@ -369,7 +362,29 @@ ReturnCode PartialGroupByExpression::nextBatch(
     size_t limit,
     SVector* columns,
     size_t* nrecords) {
-  return ReturnCode::error("ERUNTIME", "PartialGroupByExpression::nextBatch not yet implemented");
+  *nrecords = 0;
+
+  while (groups_iter_ != groups_.end()) {
+    String group_data;
+    auto group_data_os = StringOutputStream::fromString(&group_data);
+    for (size_t i = 0; i < select_exprs_.size(); ++i) {
+      VM::saveInstanceState(
+          txn_,
+          select_exprs_[i].program(),
+          groups_iter_->second[i],
+          group_data_os.get());
+    }
+
+    copyString(groups_iter_->first, columns + 0);
+    copyString(group_data, columns + 1);
+    ++groups_iter_;
+
+    if (++(*nrecords) == kOutputBatchSize) {
+      break;
+    }
+  }
+
+  return ReturnCode::success();
 }
 
 Option<SHA1Hash> PartialGroupByExpression::getCacheKey() const {
@@ -391,47 +406,6 @@ SType PartialGroupByExpression::getColumnType(size_t idx) const {
   return SType::STRING;
 }
 
-bool PartialGroupByExpression::next(SValue* row, size_t row_len) {
-  if (groups_iter_ != groups_.end()) {
-    String group_data;
-    auto group_data_os = StringOutputStream::fromString(&group_data);
-    for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::saveInstanceState(
-          txn_,
-          select_exprs_[i].program(),
-          groups_iter_->second[i],
-          group_data_os.get());
-    }
-
-    switch (row_len) {
-      case 2:
-        row[1] = SValue::newString(group_data);
-      case 1:
-        row[0] = SValue::newString(groups_iter_->first);
-      default:
-        break;
-    }
-
-    if (++groups_iter_ == groups_.end()) {
-      freeResult();
-    }
-    return true;
-  } else {
-    return false;
-  }
-}
-
-void PartialGroupByExpression::freeResult() {
-  for (auto& group : groups_) {
-    for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::freeInstance(txn_, select_exprs_[i].program(), group.second[i]);
-    }
-  }
-
-  groups_.clear();
-  freed_ = true;
-}
-
 GroupByMergeExpression::GroupByMergeExpression(
     Transaction* txn,
     ExecutionContext* execution_context,
@@ -451,14 +425,15 @@ GroupByMergeExpression::GroupByMergeExpression(
         max_concurrent_tasks,
         max_concurrent_tasks_per_host,
         config->getString("server.query_failed_shard_policy").get() == "tolerate"),
-    freed_(false),
     num_parts_(0) {
   execution_context_->incrementNumTasks();
 }
 
 GroupByMergeExpression::~GroupByMergeExpression() {
-  if (!freed_) {
-    freeResult();
+  for (auto& group : groups_) {
+    for (size_t i = 0; i < select_exprs_.size(); ++i) {
+      VM::freeInstance(txn_, select_exprs_[i].program(), group.second[i]);
+    }
   }
 }
 
@@ -557,7 +532,32 @@ ReturnCode GroupByMergeExpression::nextBatch(
     size_t limit,
     SVector* columns,
     size_t* nrecords) {
-  return ReturnCode::error("ERUNTIME", "GroupByMergeExpression::nextBatch not yet implemented");
+  *nrecords = 0;
+
+  while (groups_iter_ != groups_.end()) {
+    for (size_t i = 0; i < select_exprs_.size(); ++i) {
+      VM::evaluate(
+          txn_,
+          select_exprs_[i].program(),
+          select_exprs_[i].program()->method_call,
+          &vm_stack_,
+          groups_iter_->second[i],
+          0,
+          nullptr);
+
+      popVector(&vm_stack_, columns + i);
+    }
+
+    if (++groups_iter_ == groups_.end()) {
+      execution_context_->incrementNumTasksCompleted();
+    }
+
+    if (++(*nrecords) == kOutputBatchSize) {
+      break;
+    }
+  }
+
+  return ReturnCode::success();
 }
 
 size_t GroupByMergeExpression::getColumnCount() const {
@@ -600,42 +600,6 @@ void GroupByMergeExpression::addPart(
       hosts);
 
   ++num_parts_;
-}
-
-bool GroupByMergeExpression::next(SValue* row, size_t row_len) {
-  if (groups_iter_ != groups_.end()) {
-    for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::evaluate(
-          txn_,
-          select_exprs_[i].program(),
-          select_exprs_[i].program()->method_call,
-          &vm_stack_,
-          groups_iter_->second[i],
-          0,
-          nullptr);
-
-      popBoxed(&vm_stack_, &row[i]);
-    }
-
-    if (++groups_iter_ == groups_.end()) {
-      execution_context_->incrementNumTasksCompleted();
-      freeResult();
-    }
-    return true;
-  } else {
-    return false;
-  }
-}
-
-void GroupByMergeExpression::freeResult() {
-  for (auto& group : groups_) {
-    for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::freeInstance(txn_, select_exprs_[i].program(), group.second[i]);
-    }
-  }
-
-  groups_.clear();
-  freed_ = true;
 }
 
 } // namespace csql

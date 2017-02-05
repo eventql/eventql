@@ -33,6 +33,8 @@ namespace csql {
 class GroupByExpression : public TableExpression {
 public:
 
+  static const size_t kOutputBatchSize = 1024;
+
   GroupByExpression(
       Transaction* txn,
       ExecutionContext* execution_context,
@@ -48,12 +50,7 @@ public:
   size_t getColumnCount() const override;
   SType getColumnType(size_t idx) const override;
 
-  bool next(SValue* row, size_t row_len) override;
-
 protected:
-
-  void freeResult();
-
   Transaction* txn_;
   ExecutionContext* execution_context_;
   Vector<ValueExpression> select_exprs_;
@@ -63,11 +60,12 @@ protected:
   HashMap<String, Vector<VM::Instance>>::iterator groups_iter_;
   ScratchMemory scratch_;
   VMStack vm_stack_;
-  bool freed_;
 };
 
 class PartialGroupByExpression : public TableExpression {
 public:
+
+  static const size_t kOutputBatchSize = 1024;
 
   PartialGroupByExpression(
       Transaction* txn,
@@ -87,11 +85,6 @@ public:
   Option<SHA1Hash> getCacheKey() const override;
 
 protected:
-
-  bool next(SValue* row, size_t row_len);
-
-  void freeResult();
-
   Transaction* txn_;
   Vector<ValueExpression> select_exprs_;
   Vector<ValueExpression> group_exprs_;
@@ -101,11 +94,12 @@ protected:
   HashMap<String, Vector<VM::Instance>>::iterator groups_iter_;
   ScratchMemory scratch_;
   VMStack vm_stack_;
-  bool freed_;
 };
 
 class GroupByMergeExpression : public TableExpression {
 public:
+
+  static const size_t kOutputBatchSize = 1024;
 
   GroupByMergeExpression(
       Transaction* txn,
@@ -127,10 +121,6 @@ public:
   void addPart(GroupByNode* node, std::vector<std::string> hosts);
 
 protected:
-
-  bool next(SValue* row, size_t row_len);
-  void freeResult();
-
   Transaction* txn_;
   ExecutionContext* execution_context_;
   Vector<ValueExpression> select_exprs_;
@@ -139,7 +129,6 @@ protected:
   HashMap<String, Vector<VM::Instance>>::iterator groups_iter_;
   ScratchMemory scratch_;
   VMStack vm_stack_;
-  bool freed_;
   size_t num_parts_;
 };
 
