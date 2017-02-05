@@ -27,65 +27,37 @@
 
 namespace csql {
 
+const std::vector<std::pair<std::string, SType>> DescribePartitionsExpression::kOutputColumns = {
+  { "partition_id", SType::STRING },
+  { "servers", SType::STRING },
+  { "keyrange_begin", SType::STRING },
+  { "keyrange_end", SType::STRING },
+  { "extra info", SType::STRING }
+};
+
 DescribePartitionsExpression::DescribePartitionsExpression(
     Transaction* txn,
     const String& table_name) :
+    SimpleTableExpression(kOutputColumns),
     txn_(txn),
-    table_name_(table_name),
-    counter_(0) {}
+    table_name_(table_name) {}
 
 ReturnCode DescribePartitionsExpression::execute() {
   txn_->getTableProvider()->listPartitions(
       table_name_,
       [this] (const eventql::TablePartitionInfo& p_info) {
-    rows_.emplace_back(p_info);
+    std::vector<SValue> row;
+    row.emplace_back(SValue::newString(p_info.partition_id)); //Partition id
+    row.emplace_back(SValue::newString(
+        StringUtil::join(p_info.server_ids, ","))); //Server id
+    row.emplace_back(SValue::newString(p_info.keyrange_begin)); //Keyrange begin
+    row.emplace_back(SValue::newString(p_info.keyrange_end)); //Keyrange end
+    row.emplace_back(SValue::newString(p_info.extra_info)); //Extra info
+    addRow(row.data());
   });
 
   return ReturnCode::success();
 }
 
-ReturnCode DescribePartitionsExpression::nextBatch(
-    size_t limit,
-    SVector* columns,
-    size_t* nrecords) {
-  return ReturnCode::error("ERUNTIME", "DescribePartitionsExpression::nextBatch not yet implemented");
-}
-
-size_t DescribePartitionsExpression::getColumnCount() const {
-  return kNumColumns;
-}
-
-SType DescribePartitionsExpression::getColumnType(size_t idx) const {
-  assert(idx < kNumColumns);
-  return SType::STRING;
-}
-
-bool DescribePartitionsExpression::next(SValue* row, size_t row_len) {
-  if (counter_ < rows_.size()) {
-    const auto& partition = rows_[counter_];
-    switch (row_len) {
-      default:
-      case 5:
-        row[4] = SValue::newString(partition.extra_info); //Extra info
-      case 4:
-        row[3] = SValue::newString(partition.keyrange_end); //Keyrange end
-      case 3:
-        row[2] = SValue::newString(partition.keyrange_begin); //Keyrange begin
-      case 2:
-        row[1] = SValue::newString(
-            StringUtil::join(partition.server_ids, ",")); //Server id
-      case 1:
-        row[0] = SValue::newString(partition.partition_id); //Partition id
-      case 0:
-        break;
-    }
-
-    ++counter_;
-    return true;
-  } else {
-    return false;
-  }
-}
-
-} //csql
+} // namespace csql
 
