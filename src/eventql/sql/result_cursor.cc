@@ -22,10 +22,10 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <assert.h>
+#include "eventql/eventql.h"
 #include <eventql/sql/result_cursor.h>
 #include <eventql/sql/table_expression.h>
-
-#include "eventql/eventql.h"
 
 namespace csql {
 
@@ -69,6 +69,14 @@ ReturnCode ResultCursor::next() {
     }
 
     return ReturnCode::success();
+  } else {
+    return nextBatch();
+  }
+}
+
+ReturnCode ResultCursor::nextBatch() {
+  if (eof_) {
+    return ReturnCode::error("EIO", "end of result reached");
   }
 
   for (auto& b : buffer_) {
@@ -108,7 +116,22 @@ std::string ResultCursor::getColumnString(size_t idx) const {
 }
 
 const void* ResultCursor::getColumnData(size_t idx) const {
+  assert(idx < buffer_cur_.size());
   return buffer_cur_[idx];
+}
+
+const void* ResultCursor::getColumnBuffer(size_t idx) const {
+  assert(idx < buffer_.size());
+  return buffer_[idx].getData();
+}
+
+size_t ResultCursor::getColumnBufferSize(size_t idx) const {
+  assert(idx < buffer_.size());
+  return buffer_[idx].getSize();
+}
+
+size_t ResultCursor::getBufferCount() const {
+  return buffer_len_;
 }
 
 } // namespace csql

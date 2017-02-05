@@ -49,12 +49,18 @@ public:
    */
   ReturnCode next();
 
+  ReturnCode nextBatch();
+
   size_t getColumnCount() const;
   SType getColumnType(size_t idx) const;
   const std::string& getColumnName(size_t idx) const;
 
   std::string getColumnString(size_t idx) const;
   const void* getColumnData(size_t idx) const;
+
+  size_t getBufferCount() const;
+  const void* getColumnBuffer(size_t idx) const;
+  size_t getColumnBufferSize(size_t idx) const;
 
 protected:
   ScopedPtr<TableExpression> table_expression_;

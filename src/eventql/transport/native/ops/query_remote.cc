@@ -89,94 +89,68 @@ ReturnCode performOperation_QUERY_REMOTE(
     auto result_ncols = result_cursor->getColumnCount();
 
     /* send response frames */
-    QueryRemoteResultFrame r_frame;
-    r_frame.setColumnCount(result_ncols);
-    auto r_frame_data_os = r_frame.getRowDataOutputStream();
-
-    Vector<csql::SValue> row;
-    for (size_t i = 0; i < result_ncols; ++i) {
-      row.emplace_back(result_cursor->getColumnType(i));
-    }
-
     while (result_cursor->isValid()) {
-      r_frame.setRowCount(r_frame.getRowCount() + 1);
+      QueryRemoteResultFrame r_frame;
+      r_frame.setRowCount(result_cursor->getBufferCount());
 
       for (size_t i = 0; i < result_ncols; ++i) {
-        row[i].copyFrom(result_cursor->getColumnData(i)); // FIXME
-        row[i].encode(r_frame_data_os.get());
+        r_frame.addColumnData(
+            (const char*) result_cursor->getColumnBuffer(i),
+            result_cursor->getColumnBufferSize(i));
       }
 
-      auto rc = result_cursor->next();
+      auto rc = result_cursor->nextBatch();
       if (!rc.isSuccess()) {
         return conn->sendErrorFrame(rc.getMessage());
       }
 
-      if (r_frame.getRowBytes() > NativeConnection::kMaxFrameSizeSoft) {
-        {
-          std::string r_payload;
-          auto payload_os = StringOutputStream::fromString(&r_payload);
-          r_frame.writeTo(payload_os.get());
+      {
+        std::string r_payload;
+        auto payload_os = StringOutputStream::fromString(&r_payload);
+        r_frame.writeTo(payload_os.get());
 
-          auto rc = conn->sendFrame(
-              EVQL_OP_QUERY_REMOTE_RESULT,
-              0,
-              r_payload.data(),
-              r_payload.size());
+        auto rc = conn->sendFrame(
+            EVQL_OP_QUERY_REMOTE_RESULT,
+            result_cursor->isValid() ? 0 : EVQL_ENDOFREQUEST,
+            r_payload.data(),
+            r_payload.size());
 
-          if (!rc.isSuccess()) {
-            return rc;
-          }
-        }
-
-        r_frame.clear();
-        r_frame.setColumnCount(result_ncols);
-
-        /* wait for discard or continue */
-        uint16_t n_opcode;
-        uint16_t n_flags;
-        std::string n_payload;
-        {
-          auto rc = conn->recvFrame(
-              &n_opcode,
-              &n_flags,
-              &n_payload,
-              session->getIdleTimeout());
-
-          if (!rc.isSuccess()) {
-            return rc;
-          }
-        }
-
-        bool cont = true;
-        switch (n_opcode) {
-          case EVQL_OP_QUERY_CONTINUE:
-            break;
-          case EVQL_OP_QUERY_DISCARD:
-            cont = false;
-            break;
-          default:
-            conn->close();
-            return ReturnCode::error("ERUNTIME", "unexpected opcode");
-        }
-
-        if (!cont) {
-          break;
+        if (!rc.isSuccess()) {
+          return rc;
         }
       }
-    }
 
-    std::string r_payload;
-    auto payload_os = StringOutputStream::fromString(&r_payload);
-    r_frame.writeTo(payload_os.get());
+      /* wait for discard or continue */
+      uint16_t n_opcode;
+      uint16_t n_flags;
+      std::string n_payload;
+      {
+        auto rc = conn->recvFrame(
+            &n_opcode,
+            &n_flags,
+            &n_payload,
+            session->getIdleTimeout());
 
-    auto rc = conn->sendFrame(
-        EVQL_OP_QUERY_REMOTE_RESULT,
-        EVQL_ENDOFREQUEST,
-        r_payload.data(),
-        r_payload.size());
+        if (!rc.isSuccess()) {
+          return rc;
+        }
+      }
 
-    if (!rc.isSuccess()) {
-      return rc;
+      bool cont = true;
+      switch (n_opcode) {
+        case EVQL_OP_QUERY_CONTINUE:
+          break;
+        case EVQL_OP_QUERY_DISCARD:
+          cont = false;
+          break;
+        default:
+          conn->close();
+          return ReturnCode::error("ERUNTIME", "unexpected opcode");
+      }
+
+      if (!cont) {
+        break;
+      }
     }
   } catch (const StandardException& e) {
     return conn->sendErrorFrame(e.what());

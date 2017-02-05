@@ -30,35 +30,22 @@ namespace native_transport {
 
 QueryRemoteResultFrame::QueryRemoteResultFrame() :
     flags_(0),
-    column_count_(0),
     row_count_(0) {}
 
 size_t QueryRemoteResultFrame::getColumnCount() const {
-  return column_count_;
+  return column_data_.size();
 }
 
-void QueryRemoteResultFrame::setColumnCount(size_t column_count) {
-  column_count_ = column_count;
+void QueryRemoteResultFrame::addColumnData(const char* data, size_t size) {
+  column_data_.emplace_back(data, size);
 }
 
 size_t QueryRemoteResultFrame::getRowCount() const {
   return row_count_;
 }
 
-size_t QueryRemoteResultFrame::getRowBytes() const {
-  return row_data_.size();
-}
-
 void QueryRemoteResultFrame::setRowCount(size_t row_count) {
   row_count_ = row_count;
-}
-
-std::unique_ptr<InputStream> QueryRemoteResultFrame::getRowDataInputStream() {
-  return StringInputStream::fromString(row_data_);
-}
-
-std::unique_ptr<OutputStream> QueryRemoteResultFrame::getRowDataOutputStream() {
-  return StringOutputStream::fromString(&row_data_);
 }
 
 ReturnCode QueryRemoteResultFrame::parseFrom(const char* data, size_t size) {
@@ -68,9 +55,13 @@ ReturnCode QueryRemoteResultFrame::parseFrom(const char* data, size_t size) {
 
 ReturnCode QueryRemoteResultFrame::parseFrom(InputStream* is) {
   flags_ = is->readVarUInt();
-  column_count_ = is->readVarUInt();
   row_count_ = is->readVarUInt();
-  row_data_ = is->readLenencString();
+
+  auto column_count = is->readVarUInt();
+  for (size_t i = 0; i < column_count; ++i) {
+    column_data_.emplace_back(is->readLenencString());
+  }
+
   return ReturnCode::success();
 }
 
@@ -81,16 +72,17 @@ void QueryRemoteResultFrame::writeToString(std::string* string) const {
 
 void QueryRemoteResultFrame::writeTo(OutputStream* os) const {
   os->appendVarUInt(flags_);
-  os->appendVarUInt(column_count_);
   os->appendVarUInt(row_count_);
-  os->appendLenencString(row_data_);
+  os->appendVarUInt(column_data_.size());
+  for (const auto& d : column_data_) {
+    os->appendLenencString(d);
+  }
 }
 
 void QueryRemoteResultFrame::clear() {
   flags_ = 0;
-  column_count_ = 0;
   row_count_ = 0;
-  row_data_.clear();
+  column_data_.clear();
 }
 
 } // namespace native_transport
