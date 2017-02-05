@@ -149,6 +149,10 @@ bool PartitionCursor::openNextTable() {
       if (!tbl->has_skiplist() && tblidx == 0 && id_set_.empty()) {
         needs_filter = false;
       }
+
+      if (!tbl->has_skiplist() && !tbl->has_updates() && id_set_.empty()) {
+        needs_filter = false;
+      }
       break;
     }
   }
