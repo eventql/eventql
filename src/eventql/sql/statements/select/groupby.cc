@@ -76,6 +76,10 @@ ReturnCode GroupByExpression::execute() {
 
   size_t cnt = 0;
   for (;;) {
+    for (auto& c : input_cols) {
+      c.clear();
+    }
+
     size_t nrecords = 0;
     {
       auto rc = input_->nextBatch(0, input_cols.data(), &nrecords);
@@ -265,6 +269,10 @@ ReturnCode PartialGroupByExpression::execute() {
 
     size_t cnt = 0;
     for (;;) {
+      for (auto& c : input_cols) {
+        c.clear();
+      }
+
       size_t nrecords = 0;
       {
         auto rc = input_->nextBatch(0, input_cols.data(), &nrecords);

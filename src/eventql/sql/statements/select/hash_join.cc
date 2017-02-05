@@ -77,6 +77,10 @@ ReturnCode HashJoin::nextBatch(
     *nrecords = 0;
 
     /* fetch base table input columns */
+    for (auto& c : base_tbl_cols_) {
+      c.clear();
+    }
+
     size_t base_nrecords = 0;
     {
       auto rc = base_tbl_->nextBatch(0, base_tbl_cols_.data(), &base_nrecords);
@@ -246,6 +250,10 @@ ReturnCode HashJoin::readJoinedTable() {
 
   size_t cnt = 0;
   for (;;) {
+    for (auto& c : input_cols) {
+      c.clear();
+    }
+
     size_t nrecords = 0;
     {
       auto rc = joined_tbl_->nextBatch(0, input_cols.data(), &nrecords);
