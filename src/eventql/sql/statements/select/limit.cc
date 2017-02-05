@@ -43,15 +43,91 @@ ReturnCode LimitExpression::execute() {
     return rc;
   }
 
-  buf_.resize(input_->getColumnCount());
+  for (size_t i = 0; i < input_->getColumnCount(); ++i) {
+    input_buffer_.emplace_back(input_->getColumnType(i));
+  }
+
   return ReturnCode::success();
 }
 
 ReturnCode LimitExpression::nextBatch(
-    size_t limit,
-    SVector* columns,
+    size_t limitx,
+    SVector* output,
     size_t* nrecords) {
-  return ReturnCode::error("ERUNTIME", "LimitExpression::nextBatch not yet implemented");
+  *nrecords = 0;
+
+  auto limit_abs = limit_ + offset_;
+
+  while (limit_ > 0 && counter_ < offset_ + limit_) {
+    for (auto& c : input_buffer_) {
+      c.clear();
+    }
+
+    size_t input_nrecords = 0;
+    {
+      auto rc = input_->nextBatch(0, input_buffer_.data(), &input_nrecords);
+      if (!rc.isSuccess()) {
+        RAISE(kRuntimeError, rc.getMessage());
+      }
+    }
+
+    if (input_nrecords == 0) {
+      *nrecords = 0;
+      break;
+    }
+
+    // copy full batch
+    if (counter_ >= offset_ && counter_ + input_nrecords <= limit_abs) {
+      for (size_t i = 0; i < input_buffer_.size(); ++i) {
+        output[i].copyFrom(&input_buffer_[i]);
+      }
+
+      counter_ += input_nrecords;
+      *nrecords = input_nrecords;
+      break;
+    }
+
+    // skip full batch
+    if (counter_ + input_nrecords <= offset_) {
+      counter_ += input_nrecords;
+      continue;
+    }
+
+    // copy partial batch
+    size_t cpy_off = counter_ < offset_ ? offset_ - counter_ : 0;
+    size_t cpy_len =
+        std::min(input_nrecords - cpy_off, limit_abs - counter_ - cpy_off);
+
+    for (size_t i = 0; i < input_buffer_.size(); ++i) {
+      const auto& input_col = input_buffer_[i];
+
+      const void* begin = input_col.getData();
+      if (cpy_off > 0) {
+        for (size_t n = 0; n < cpy_off; ++n) {
+          input_col.next(const_cast<void**>(&begin));
+        }
+      }
+
+      const void* end = begin;
+      if (cpy_len + cpy_off == input_nrecords) {
+        end = (const char*) input_col.getData() + input_col.getSize();
+      } else {
+        for (size_t n = 0; n < cpy_len; ++n) {
+          input_col.next(const_cast<void**>(&end));
+        }
+      }
+
+      output[i].append(
+          (const char*) begin,
+          (const char*) end - (const char*) begin);
+    }
+
+    counter_ += cpy_len + cpy_off;
+    *nrecords = cpy_len;
+    break;
+  }
+
+  return ReturnCode::success();
 }
 
 size_t LimitExpression::getColumnCount() const {
@@ -62,24 +138,5 @@ SType LimitExpression::getColumnType(size_t idx) const {
   return input_->getColumnType(idx);
 }
 
-bool LimitExpression::next(SValue* row, size_t row_len) {
-  if (limit_ == 0 || counter_ >= offset_ + limit_) {
-    return false;
-  }
+} // namespace csql
 
-  while (input_->next(buf_.data(), buf_.size())) {
-    if (counter_++ < offset_) {
-      continue;
-    } else {
-      for (size_t i = 0; i < row_len && i < buf_.size(); ++i) {
-        row[i] = buf_[i];
-      }
-      return true;
-    }
-  }
-
-  return false;
-}
-
-
-}

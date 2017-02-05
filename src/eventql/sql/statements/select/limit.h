@@ -43,15 +43,13 @@ public:
   size_t getColumnCount() const override;
   SType getColumnType(size_t idx) const override;
 
-  bool next(SValue* row, size_t row_len) override;
-
 protected:
   ExecutionContext* execution_context_;
   size_t limit_;
   size_t offset_;
   ScopedPtr<TableExpression> input_;
+  std::vector<SVector> input_buffer_;
   size_t counter_;
-  Vector<SValue> buf_;
 };
 
 }
