@@ -98,10 +98,17 @@ ReturnCode performOperation_QUERY_REMOTE(
       row.emplace_back(result_cursor->getColumnType(i));
     }
 
-    while (result_cursor->next(row.data())) {
+    while (result_cursor->isValid()) {
       r_frame.setRowCount(r_frame.getRowCount() + 1);
+
       for (size_t i = 0; i < result_ncols; ++i) {
+        row[i].copyFrom(result_cursor->getColumnData(i)); // FIXME
         row[i].encode(r_frame_data_os.get());
+      }
+
+      auto rc = result_cursor->next();
+      if (!rc.isSuccess()) {
+        return conn->sendErrorFrame(rc.getMessage());
       }
 
       if (r_frame.getRowBytes() > NativeConnection::kMaxFrameSizeSoft) {

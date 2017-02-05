@@ -22,12 +22,12 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
 #include <eventql/util/SHA1.h>
+#include <eventql/util/return_code.h>
 #include <eventql/sql/svalue.h>
-
-#include "eventql/eventql.h"
 
 namespace csql {
 class TableExpression;
@@ -39,21 +39,29 @@ public:
   ResultCursor(ScopedPtr<TableExpression> table_expression);
 
   /**
-   * Fetch the next row from the cursor. Returns true if a row was returned
-   * into the provided storage and false if the last row of the query has been
-   * read (EOF). If this method returns false the provided storage will remain
-   * unchanged.
-   *
-   * This method will block until the next row is available.
+   * Returns true if the cursor is pointing to a valid row
    */
-  bool next(SValue* row);
+  bool isValid() const;
+
+  /**
+   * Fetch the next row from the cursor. This method will block until the next
+   * row is available.
+   */
+  ReturnCode next();
 
   size_t getColumnCount() const;
   SType getColumnType(size_t idx) const;
+  const std::string& getColumnName(size_t idx) const;
+
+  std::string getColumnString(size_t idx) const;
+  void* getColumnData(size_t idx) const;
 
 protected:
   ScopedPtr<TableExpression> table_expression_;
   bool started_;
+  bool eof_;
+  std::vector<SVector> buffer_;
+  size_t buffer_len_;
 };
 
 } // namespace csql

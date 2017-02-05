@@ -79,18 +79,22 @@ ReturnCode performOperation_QUERY_PARTIALAGGR(
     auto req_body_is = StringInputStream::fromString(frame.getEncodedQTree());
     auto qtree = coder.decode(req_body_is.get());
     auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), { qtree });
-    auto execute = qplan->execute(0);
+    auto cursor = qplan->execute(0);
 
     for (bool eof = false; !eof; ) {
       QueryPartialAggrResultFrame result_frame;
       auto os = StringOutputStream::fromString(&result_frame.getBody());
-      csql::SValue row[2] = { csql::SType::STRING, csql::SType::STRING };
       size_t num_rows = 0;
 
-      while ((eof = !execute->next(row)) == false) {
+      while ((eof = !cursor->isValid()) == false) {
         ++num_rows;
-        os->appendLenencString(row[0].getString());
-        os->appendString(row[1].getString());
+        os->appendLenencString(cursor->getColumnString(0));
+        os->appendString(cursor->getColumnString(1));
+
+        auto rc = cursor->next();
+        if (!rc.isSuccess()) {
+          return conn->sendErrorFrame(rc.getMessage());
+        }
 
         auto body_len = result_frame.getBody().size();
         if (body_len > kPartialAggrResponseSoftMaxSize) {

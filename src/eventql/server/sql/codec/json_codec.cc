@@ -55,20 +55,26 @@ void JSONCodec::printResultTable(
     row.emplace_back(cursor->getColumnType(i));
   }
 
-  for (size_t i = 0; cursor->next(row.data()); ++i) {
-    if (i > 0) {
+  for (size_t n = 0; cursor->isValid(); ++n) {
+    if (n > 0) {
       json_->addComma();
     }
 
     json_->beginArray();
-    auto n_max = std::min(row.size(), header.size());
-    for (size_t n = 0; n < n_max; ++n) {
-      if (n > 0) {
+
+    for (size_t i = 0; i < cursor->getColumnCount(); ++i) {
+      if (i > 0) {
         json_->addComma();
       }
 
-      json_->addString(row[n].getString());
+      json_->addString(cursor->getColumnString(i));
     }
+
+    auto rc = cursor->next();
+    if (!rc.isSuccess()) {
+      RAISE(kRuntimeError, rc.getMessage());
+    }
+
     json_->endArray();
   }
 

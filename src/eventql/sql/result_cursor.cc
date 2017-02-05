@@ -37,23 +37,6 @@ ResultCursor::ResultCursor(
     table_expression_(std::move(table_expression)),
     started_(false) {}
 
-bool ResultCursor::next(SValue* row) {
-  if (!table_expression_) {
-    return false;
-  }
-
-  if (!started_) {
-    auto rc = table_expression_->execute();
-    if (!rc.isSuccess()) {
-      RAISE(kRuntimeError, rc.getMessage());
-    }
-
-    started_ = true;
-  }
-
-  return table_expression_->next(row, table_expression_->getColumnCount());
-}
-
 size_t ResultCursor::getColumnCount() const {
   if (!table_expression_) {
     return 0;
