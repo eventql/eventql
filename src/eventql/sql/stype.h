@@ -80,6 +80,7 @@ void popBoolVector(VMStack* stack, SVector* vector);
 void pushBool(VMStack* stack, bool value);
 void pushBoolUnboxed(VMStack* stack, const void* value);
 
+void copyString(const std::string& str, SVector* vector);
 void popString(VMStack* stack, const char** data, size_t* len);
 std::string popString(VMStack* stack);
 void popStringBoxed(VMStack* stack, SValue* value);

@@ -330,6 +330,12 @@ void pushBoolUnboxed(VMStack* stack, const void* value) {
   memcpy(stack->top, value, sizeof(uint8_t));
 }
 
+void copyString(const std::string& str, SVector* vector) {
+  uint32_t strlen = str.size();
+  vector->append((const char*) &strlen, sizeof(uint32_t));
+  vector->append(str.data(), strlen);
+}
+
 void popString(VMStack* stack, const char** data, size_t* len) {
   assert(stack->limit - stack->top >= sizeof(uint32_t));
   *len = *reinterpret_cast<uint32_t*>(stack->top);
