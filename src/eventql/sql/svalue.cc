@@ -989,6 +989,10 @@ void SVector::setSize(size_t new_size) {
   size_ = new_size;
 }
 
+void SVector::clear() {
+  size_ = 0;
+}
+
 size_t SVector::getCapacity() const {
   return capacity_;
 }
@@ -1024,20 +1028,9 @@ void SVector::append(const void* data, size_t size) {
 }
 
 size_t SVector::next(SType type, void** cursor) {
-  switch (type) {
-    case SType::STRING:
-    case SType::NIL:
-      assert(false);
-    case SType::FLOAT64:
-    case SType::INT64:
-    case SType::UINT64:
-    case SType::TIMESTAMP64:
-      *cursor = (char*) *cursor + 8;
-      return 8;
-    case SType::BOOL:
-      *cursor = (char*) *cursor + 1;
-      return 1;
-  }
+  auto elen = sql_sizeof(type, *cursor);
+  *cursor = (char*) *cursor + elen;
+  return elen;
 }
 
 size_t SVector::next(void** cursor) const {
@@ -1056,9 +1049,27 @@ const char* sql_cstr(const void* str) {
   return (const char*) str + sizeof(uint32_t);
 }
 
+size_t sql_sizeof(SType type, const void* data) {
+  switch (type) {
+    case SType::STRING:
+      return sizeof(uint32_t) + sql_strlen(data);
+    case SType::NIL:
+      return 0;
+    case SType::FLOAT64:
+    case SType::INT64:
+    case SType::UINT64:
+    case SType::TIMESTAMP64:
+      return 8;
+    case SType::BOOL:
+      return 1;
+  }
+}
+
 size_t sql_sizeof_static(SType type) {
   switch (type) {
     case SType::STRING:
+      assert(false);
+      return 0;
     case SType::NIL:
       return 0;
     case SType::FLOAT64:

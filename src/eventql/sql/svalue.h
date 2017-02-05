@@ -156,6 +156,7 @@ public:
 
   size_t getSize() const;
   void setSize(size_t new_size);
+  void clear();
 
   size_t getCapacity() const;
   void increaseCapacity(size_t min_capacity);
@@ -178,6 +179,8 @@ String sql_escape(const String& str);
 size_t sql_strlen(const void* str);
 char* sql_cstr(void* str);
 const char* sql_cstr(const void* str);
+
+size_t sql_sizeof(SType type, const void* value);
 size_t sql_sizeof_static(SType type);
 
 std::string sql_tostring(SType type, const void* value);

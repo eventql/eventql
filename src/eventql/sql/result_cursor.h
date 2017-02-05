@@ -54,13 +54,13 @@ public:
   const std::string& getColumnName(size_t idx) const;
 
   std::string getColumnString(size_t idx) const;
-  void* getColumnData(size_t idx) const;
+  const void* getColumnData(size_t idx) const;
 
 protected:
   ScopedPtr<TableExpression> table_expression_;
-  bool started_;
   bool eof_;
   std::vector<SVector> buffer_;
+  std::vector<const void*> buffer_cur_;
   size_t buffer_len_;
 };
 

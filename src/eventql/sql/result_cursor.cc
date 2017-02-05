@@ -29,13 +29,67 @@
 
 namespace csql {
 
-ResultCursor::ResultCursor() :
-    started_(false) {}
+ResultCursor::ResultCursor() : eof_(true), buffer_len_(0) {}
 
 ResultCursor::ResultCursor(
     ScopedPtr<TableExpression> table_expression) :
     table_expression_(std::move(table_expression)),
-    started_(false) {}
+    eof_(false),
+    buffer_len_(0) {
+  for (size_t i = 0; i < table_expression_->getColumnCount(); ++i) {
+    buffer_.emplace_back(table_expression_->getColumnType(i));
+    buffer_cur_.emplace_back(nullptr);
+  }
+
+  auto rc = table_expression_->execute();
+  if (!rc.isSuccess()) {
+    RAISE(kRuntimeError, rc.getMessage());
+  }
+
+  rc = next();
+  if (!rc.isSuccess()) {
+    RAISE(kRuntimeError, rc.getMessage());
+  }
+}
+
+bool ResultCursor::isValid() const {
+  return !eof_;
+}
+
+ReturnCode ResultCursor::next() {
+  if (eof_) {
+    return ReturnCode::error("EIO", "end of result reached");
+  }
+
+  if (buffer_len_ > 1) {
+    --buffer_len_;
+
+    for (size_t i = 0; i < buffer_.size(); ++i) {
+      buffer_[i].next(const_cast<void**>(&buffer_cur_[i]));
+    }
+
+    return ReturnCode::success();
+  }
+
+  for (auto& b : buffer_) {
+    b.clear();
+  }
+
+  auto rc = table_expression_->nextBatch(0, buffer_.data(), &buffer_len_);
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  if (buffer_len_ == 0) {
+    eof_ = true;
+  }
+
+  for (size_t i = 0; i < buffer_.size(); ++i) {
+    buffer_cur_[i] = buffer_[i].getData();
+  }
+
+  return ReturnCode::success();
+}
 
 size_t ResultCursor::getColumnCount() const {
   if (!table_expression_) {
@@ -47,6 +101,14 @@ size_t ResultCursor::getColumnCount() const {
 
 SType ResultCursor::getColumnType(size_t idx) const {
   return table_expression_->getColumnType(idx);
+}
+
+std::string ResultCursor::getColumnString(size_t idx) const {
+  return sql_tostring(buffer_[idx].getType(), buffer_cur_[idx]);
+}
+
+const void* ResultCursor::getColumnData(size_t idx) const {
+  return buffer_cur_[idx];
 }
 
 } // namespace csql
