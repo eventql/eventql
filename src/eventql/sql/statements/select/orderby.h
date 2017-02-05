@@ -35,6 +35,8 @@ namespace csql {
 class OrderByExpression : public TableExpression {
 public:
 
+  static const size_t kOutputBatchSize = 1024;
+
   struct SortExpr {
     ValueExpression expr;
     bool descending; // false == ASCENDING, true == DESCENDING
@@ -51,8 +53,6 @@ public:
 
   size_t getColumnCount() const override;
   SType getColumnType(size_t idx) const override;
-
-  bool next(SValue* row, size_t row_len);
 
 protected:
   Transaction* txn_;

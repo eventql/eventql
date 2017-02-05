@@ -57,13 +57,50 @@ ReturnCode OrderByExpression::execute() {
 
   execution_context_->incrementNumTasksRunning();
 
-  Vector<SValue> row;
+  Vector<SVector> input_cols;
   for (size_t i = 0; i < input_->getColumnCount(); ++i) {
-    row.emplace_back(input_->getColumnType(i));
+    input_cols.emplace_back(input_->getColumnType(i));
   }
 
-  while (input_->next(row.data(), row.size())) {
-    rows_.emplace_back(row);
+  for (;;) {
+    for (auto& c : input_cols) {
+      c.clear();
+    }
+
+    size_t nrecords = 0;
+    {
+      auto rc = input_->nextBatch(0, input_cols.data(), &nrecords);
+      if (!rc.isSuccess()) {
+        RAISE(kRuntimeError, rc.getMessage());
+      }
+    }
+
+    if (nrecords == 0) {
+      break;
+    }
+
+    {
+      auto rc = txn_->triggerHeartbeat();
+      if (!rc.isSuccess()) {
+        RAISE(kRuntimeError, rc.getMessage());
+      }
+    }
+
+    Vector<void*> input_col_cursor;
+    for (const auto& c : input_cols) {
+      input_col_cursor.emplace_back((void*) c.getData());
+    }
+
+
+    for (size_t n = 0; n < nrecords; n++) {
+      rows_.emplace_back();
+      auto& row = rows_.back();
+
+      for (size_t i = 0; i < input_->getColumnCount(); ++i) {
+        row.emplace_back(input_->getColumnType(i));
+        row[i].copyFrom(input_col_cursor[i]);
+      }
+    }
   }
 
   num_rows_ = rows_.size();
@@ -129,9 +166,30 @@ ReturnCode OrderByExpression::execute() {
 
 ReturnCode OrderByExpression::nextBatch(
     size_t limit,
-    SVector* columns,
+    SVector* output,
     size_t* nrecords) {
-  return ReturnCode::error("ERUNTIME", "OrderByExpression::nextBatch not yet implemented");
+  *nrecords = 0;
+
+  if (pos_ < num_rows_) {
+    auto batch_len = std::min(num_rows_ - pos_, kOutputBatchSize);
+    auto ncols = input_->getColumnCount();
+
+    for (size_t n = 0; n < batch_len; ++n) {
+      for (size_t i = 0; i < ncols; ++i) {
+        output[i].append(
+            rows_[pos_][i].getData(),
+            rows_[pos_][i].getSize());
+      }
+    }
+
+    *nrecords += batch_len;
+    pos_ += batch_len;
+    if (pos_ == num_rows_) {
+      execution_context_->incrementNumTasksCompleted();
+    }
+  }
+
+  return ReturnCode::success();
 }
 
 size_t OrderByExpression::getColumnCount() const {
@@ -140,23 +198,6 @@ size_t OrderByExpression::getColumnCount() const {
 
 SType OrderByExpression::getColumnType(size_t idx) const {
   return input_->getColumnType(idx);
-}
-
-bool OrderByExpression::next(SValue* out, size_t out_len) {
-  if (pos_ >= num_rows_) {
-    return false;
-  } else {
-    for (size_t i = 0; i < input_->getColumnCount() && i < out_len; ++i) {
-      out[i] = rows_[pos_][i];
-    }
-
-    if (++pos_ == num_rows_) {
-      execution_context_->incrementNumTasksCompleted();
-      rows_.clear();
-    }
-
-    return true;
-  }
 }
 
 } // namespace csql
