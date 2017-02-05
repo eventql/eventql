@@ -38,79 +38,40 @@ NestedLoopJoin::NestedLoopJoin(
     txn_(txn),
     join_type_(join_type),
     input_map_(input_map),
-    input_buf_(input_map.size()),
     select_exprs_(std::move(select_expressions)),
     join_cond_expr_(std::move(join_cond_expr)),
     where_expr_(std::move(where_expr)),
     base_tbl_(std::move(base_tbl)),
-    base_tbl_mincols_(0),
     joined_tbl_(std::move(joined_tbl)),
+    joined_tbl_size_(0),
     joined_tbl_pos_(0),
-    joined_tbl_mincols_(0) {
-  for (size_t i = 0; i < input_map_.size(); ++i) {
-    const auto& m = input_map_[i];
-
-    switch (m.table_idx) {
-      case 0:
-        base_tbl_mincols_ = std::max(base_tbl_mincols_, m.column_idx + 1);
-        break;
-      case 1:
-        joined_tbl_mincols_ = std::max(joined_tbl_mincols_, m.column_idx + 1);
-        break;
-      default:
-        RAISE(kRuntimeError, "invalid table index");
-    }
-  }
-}
+    joined_tbl_row_found_(false),
+    base_tbl_buffer_size_(0) {}
 
 static const size_t kMaxInMemoryRows = 1000000;
 
 ReturnCode NestedLoopJoin::execute() {
-  auto joined_rc = joined_tbl_->execute();
-  if (!joined_rc.isSuccess()) {
-    return joined_rc;
-  }
-/*
-  Vector<SValue> row(joined_tbl_->getColumnCount());
-  while (joined_tbl_->next(row.data(), row.size())) {
-    if (row.size() < joined_tbl_mincols_) {
-      RAISE(
-          kRuntimeError,
-          "INTERNAL ERROR: Nested Loop JOIN joined input row is too small");
-    }
-
-    joined_tbl_data_.emplace_back(row);
-
-    if (joined_tbl_data_.size() >= kMaxInMemoryRows) {
-      RAISE(
-          kRuntimeError,
-          "Nested Loop JOIN intermediate result set is too large, try using an"
-          " equi-join instead.");
+  /* read joined table into hash map */
+  {
+    auto rc = readJoinedTable();
+    if (!rc.isSuccess()) {
+      return rc;
     }
   }
 
-  auto base_rc = base_tbl_->execute();
-  if (!base_rc.isSuccess()) {
-    return base_rc;
+  /* start base table execution */
+  {
+    auto rc = base_tbl_->execute();
+    if (!rc.isSuccess()) {
+      return rc;
+    }
   }
 
-  base_tbl_row_.resize(base_tbl_->getColumnCount());
-  switch (join_type_) {
-    case JoinType::OUTER:
-      return executeOuterJoin();
-    case JoinType::INNER:
-      if (join_cond_expr_.isEmpty()) {
-        /\* fallthrough *\/
-      } else {
-        return executeInnerJoin();
-      }
-    case JoinType::CARTESIAN:
-      return executeCartesianJoin();
-    default:
-      RAISE(kIllegalStateError);
+  for (size_t i = 0; i < base_tbl_->getColumnCount(); ++i) {
+    base_tbl_buffer_.emplace_back(base_tbl_->getColumnType(i));
+    base_tbl_cur_.emplace_back(nullptr);
   }
 
-*/
   return ReturnCode::success();
 }
 
@@ -126,281 +87,453 @@ SType NestedLoopJoin::getColumnType(size_t idx) const {
 ReturnCode NestedLoopJoin::nextBatch(
     SVector* columns,
     size_t* nrecords) {
-  return ReturnCode::error("ERUNTIME", "NestedLoopJoin::nextBatch not yet implemented");
+  *nrecords = 0;
+
+  switch (join_type_) {
+    case JoinType::OUTER:
+      return executeOuterJoin(columns, nrecords);
+    case JoinType::INNER:
+      if (join_cond_expr_.isEmpty()) {
+        /* fallthrough */
+      } else {
+        return executeInnerJoin(columns, nrecords);
+      }
+    case JoinType::CARTESIAN:
+      return executeCartesianJoin(columns, nrecords);
+    default:
+      return ReturnCode::error("EARG", "invalid join type");
+  }
 }
 
-/*
-ReturnCode NestedLoopJoin::executeCartesianJoin() {
-  cursor_ = [this] (SValue* row, int row_len) -> bool {
-    for (;;) {
-      if (joined_tbl_pos_ == 0 || joined_tbl_pos_ == joined_tbl_data_.size()) {
-        joined_tbl_pos_ = 0;
+ReturnCode NestedLoopJoin::executeCartesianJoin(
+    SVector* output,
+    size_t* output_len) {
+  std::vector<const void*> input_buf(input_map_.size());
 
-        if (!base_tbl_->next(
-              base_tbl_row_.data(),
-              base_tbl_row_.size())) {
-          return false;
-        }
+  if (joined_tbl_size_ == 0) {
+    return ReturnCode::success();
+  }
 
-        if (base_tbl_row_.size() < base_tbl_mincols_) {
-          RAISE(
-              kRuntimeError,
-              "INTERNAL ERROR: Nested Loop JOIN base input row is too small");
-        }
+  for (;;) {
+    if (joined_tbl_pos_ == joined_tbl_size_) {
+      --base_tbl_buffer_size_;
+      for (size_t i = 0; i < base_tbl_cur_.size(); ++i) {
+        base_tbl_buffer_[i].next(const_cast<void**>(&base_tbl_cur_[i]));
       }
 
-      while (joined_tbl_pos_ < joined_tbl_data_.size()) {
-        const auto& joined_table_row = joined_tbl_data_[joined_tbl_pos_++];
-
-        for (size_t i = 0; i < input_map_.size(); ++i) {
-          const auto& m = input_map_[i];
-
-          switch (m.table_idx) {
-            case 0:
-              input_buf_[i] = base_tbl_row_[m.column_idx];
-              break;
-            case 1:
-              input_buf_[i] = joined_table_row[m.column_idx];
-              break;
-            default:
-              RAISE(kRuntimeError, "invalid table index");
-          }
-        }
-
-        if (!where_expr_.isEmpty()) {
-          VM::evaluateBoxed(
-              txn_,
-              where_expr_.get().program(),
-              where_expr_.get().program()->method_call,
-              &vm_stack_,
-              nullptr,
-              input_buf_.size(),
-              input_buf_.data());
-
-          if (!popBool(&vm_stack_)) {
-            continue;
-          }
-        }
-
-        for (int i = 0; i < select_exprs_.size() && i < row_len; ++i) {
-          VM::evaluateBoxed(
-              txn_,
-              select_exprs_[i].program(),
-              select_exprs_[i].program()->method_call,
-              &vm_stack_,
-              nullptr,
-              input_buf_.size(),
-              input_buf_.data());
-
-          popBoxed(&vm_stack_, &row[i]);
-        }
-
-        return true;
+      joined_tbl_pos_ = 0;
+      for (size_t i = 0; i < joined_tbl_->getColumnCount(); ++i) {
+        joined_tbl_cur_[i] = joined_tbl_data_[i].getData();
+        assert(joined_tbl_cur_[i]);
       }
     }
-  };
 
-  return ReturnCode::success();
-}
-
-ReturnCode NestedLoopJoin::executeInnerJoin() {
-  cursor_ = [this] (SValue* row, int row_len) -> bool {
-    for (;;) {
-      if (joined_tbl_pos_ == 0 || joined_tbl_pos_ == joined_tbl_data_.size()) {
-        joined_tbl_pos_ = 0;
-
-        if (!base_tbl_->next(
-              base_tbl_row_.data(),
-              base_tbl_row_.size())) {
-          return false;
-        }
-
-        if (base_tbl_row_.size() < base_tbl_mincols_) {
-          RAISE(
-              kRuntimeError,
-              "INTERNAL ERROR: Nested Loop JOIN base input row is too small");
-        }
-      }
-
-      while (joined_tbl_pos_ < joined_tbl_data_.size()) {
-        const auto& joined_table_row = joined_tbl_data_[joined_tbl_pos_++];
-
-        for (size_t i = 0; i < input_map_.size(); ++i) {
-          const auto& m = input_map_[i];
-
-          switch (m.table_idx) {
-            case 0:
-              input_buf_[i] = base_tbl_row_[m.column_idx];
-              break;
-            case 1:
-              input_buf_[i] = joined_table_row[m.column_idx];
-              break;
-            default:
-              RAISE(kRuntimeError, "invalid table index");
-          }
-        }
-
-        {
-          VM::evaluateBoxed(
-              txn_,
-              join_cond_expr_.get().program(),
-              join_cond_expr_.get().program()->method_call,
-              &vm_stack_,
-              nullptr,
-              input_buf_.size(),
-              input_buf_.data());
-
-          if (!popBool(&vm_stack_)) {
-            continue;
-          }
-        }
-
-        if (!where_expr_.isEmpty()) {
-          VM::evaluateBoxed(
-              txn_,
-              where_expr_.get().program(),
-              where_expr_.get().program()->method_call,
-              &vm_stack_,
-              nullptr,
-              input_buf_.size(),
-              input_buf_.data());
-
-          if (!popBool(&vm_stack_)) {
-            continue;
-          }
-        }
-
-        for (int i = 0; i < select_exprs_.size() && i < row_len; ++i) {
-          VM::evaluateBoxed(
-              txn_,
-              select_exprs_[i].program(),
-              select_exprs_[i].program()->method_call,
-              &vm_stack_,
-              nullptr,
-              input_buf_.size(),
-              input_buf_.data());
-
-          popBoxed(&vm_stack_, &row[i]);
-        }
-
-        return true;
+    if (base_tbl_buffer_size_ == 0) {
+      auto rc = readBaseTableBatch();
+      if (!rc.isSuccess()) {
+        return rc;
       }
     }
-  };
 
-  return ReturnCode::success();
-}
+    if (base_tbl_buffer_size_ == 0) {
+      break;
+    }
 
-ReturnCode NestedLoopJoin::executeOuterJoin() {
-  cursor_ = [this] (SValue* row, int row_len) -> bool {
-    for (;;) {
-      if (joined_tbl_pos_ == 0 ||
-          joined_tbl_pos_ == joined_tbl_data_.size()) {
-        joined_tbl_pos_ = 0;
-        joined_tbl_row_found_ = false;
+    while (joined_tbl_pos_ < joined_tbl_size_) {
+      for (size_t i = 0; i < input_map_.size(); ++i) {
+        const auto& m = input_map_[i];
 
-        if (!base_tbl_->next(
-              base_tbl_row_.data(),
-              base_tbl_row_.size())) {
-          return false;
-        }
-
-        if (base_tbl_row_.size() < base_tbl_mincols_) {
-          RAISE(
-              kRuntimeError,
-              "INTERNAL ERROR: Nested Loop JOIN base input row is too small");
+        switch (m.table_idx) {
+          case 0:
+            assert(m.column_idx < base_tbl_cur_.size());
+            input_buf[i] = base_tbl_cur_[m.column_idx];
+            break;
+          case 1:
+            assert(m.column_idx < joined_tbl_cur_.size());
+            input_buf[i] = joined_tbl_cur_[m.column_idx];
+            break;
+          default:
+            RAISE(kRuntimeError, "invalid table index");
         }
       }
 
-      bool match = false;
-      while (joined_tbl_pos_ < joined_tbl_data_.size()) {
-        const auto& joined_table_row = joined_tbl_data_[joined_tbl_pos_++];
+      ++joined_tbl_pos_;
+      for (size_t i = 0; i < joined_tbl_cur_.size(); ++i) {
+        joined_tbl_data_[i].next(const_cast<void**>(&joined_tbl_cur_[i]));
+      }
 
-        for (size_t i = 0; i < input_map_.size(); ++i) {
-          const auto& m = input_map_[i];
-
-          switch (m.table_idx) {
-            case 0:
-              input_buf_[i] = base_tbl_row_[m.column_idx];
-              break;
-            case 1:
-              input_buf_[i] = joined_table_row[m.column_idx];
-              break;
-            default:
-              RAISE(kRuntimeError, "invalid table index");
-          }
-        }
-
-        VM::evaluateBoxed(
+      if (!where_expr_.isEmpty()) {
+        VM::evaluate(
             txn_,
-            join_cond_expr_.get().program(),
-            join_cond_expr_.get().program()->method_call,
+            where_expr_.get().program(),
+            where_expr_.get().program()->method_call,
             &vm_stack_,
             nullptr,
-            input_buf_.size(),
-            input_buf_.data());
+            input_buf.size(),
+            const_cast<void**>(input_buf.data()));
 
         if (!popBool(&vm_stack_)) {
           continue;
         }
-
-        joined_tbl_row_found_ = true;
-        match = true;
-        break;
       }
 
-      if (match || !joined_tbl_row_found_) {
-        if (!joined_tbl_row_found_) {
-          for (size_t i = 0; i < input_map_.size(); ++i) {
-            switch (input_map_[i].table_idx) {
-              case 0:
-                input_buf_[i] = base_tbl_row_[input_map_[i].column_idx];
-                break;
-              case 1:
-                input_buf_[i] = SValue{};
-                break;
-              default:
-                RAISE(kRuntimeError, "invalid table index");
-            }
-          }
-        }
+      for (int i = 0; i < select_exprs_.size(); ++i) {
+        VM::evaluate(
+            txn_,
+            select_exprs_[i].program(),
+            select_exprs_[i].program()->method_call,
+            &vm_stack_,
+            nullptr,
+            input_buf.size(),
+            const_cast<void**>(input_buf.data()));
 
-        if (!where_expr_.isEmpty()) {
-          VM::evaluateBoxed(
-              txn_,
-              where_expr_.get().program(),
-              where_expr_.get().program()->method_call,
-              &vm_stack_,
-              nullptr,
-              input_buf_.size(),
-              input_buf_.data());
+        popVector(&vm_stack_, &output[i]);
+      }
 
-          if (!popBool(&vm_stack_)) {
-            continue;
-          }
-        }
-
-        for (int i = 0; i < select_exprs_.size() && i < row_len; ++i) {
-          VM::evaluateBoxed(
-              txn_,
-              select_exprs_[i].program(),
-              select_exprs_[i].program()->method_call,
-              &vm_stack_,
-              nullptr,
-              input_buf_.size(),
-              input_buf_.data());
-
-          popBoxed(&vm_stack_, &row[i]);
-        }
-
-        return true;
+      if (++(*output_len) >= kOutputBatchSize) {
+        return ReturnCode::success();
       }
     }
-  };
+  }
 
   return ReturnCode::success();
 }
-*/
+
+ReturnCode NestedLoopJoin::executeInnerJoin(
+    SVector* output,
+    size_t* output_len) {
+  std::vector<const void*> input_buf(input_map_.size());
+
+  if (joined_tbl_size_ == 0) {
+    return ReturnCode::success();
+  }
+
+  for (;;) {
+    if (joined_tbl_pos_ == joined_tbl_size_) {
+      --base_tbl_buffer_size_;
+      for (size_t i = 0; i < base_tbl_cur_.size(); ++i) {
+        base_tbl_buffer_[i].next(const_cast<void**>(&base_tbl_cur_[i]));
+      }
+
+      joined_tbl_pos_ = 0;
+      for (size_t i = 0; i < joined_tbl_->getColumnCount(); ++i) {
+        joined_tbl_cur_[i] = joined_tbl_data_[i].getData();
+        assert(joined_tbl_cur_[i]);
+      }
+    }
+
+    if (base_tbl_buffer_size_ == 0) {
+      auto rc = readBaseTableBatch();
+      if (!rc.isSuccess()) {
+        return rc;
+      }
+    }
+
+    if (base_tbl_buffer_size_ == 0) {
+      break;
+    }
+
+    while (joined_tbl_pos_ < joined_tbl_size_) {
+      for (size_t i = 0; i < input_map_.size(); ++i) {
+        const auto& m = input_map_[i];
+
+        switch (m.table_idx) {
+          case 0:
+            assert(m.column_idx < base_tbl_cur_.size());
+            input_buf[i] = base_tbl_cur_[m.column_idx];
+            break;
+          case 1:
+            assert(m.column_idx < joined_tbl_cur_.size());
+            input_buf[i] = joined_tbl_cur_[m.column_idx];
+            break;
+          default:
+            RAISE(kRuntimeError, "invalid table index");
+        }
+      }
+
+      ++joined_tbl_pos_;
+      for (size_t i = 0; i < joined_tbl_cur_.size(); ++i) {
+        joined_tbl_data_[i].next(const_cast<void**>(&joined_tbl_cur_[i]));
+      }
+
+      if (!where_expr_.isEmpty()) {
+        VM::evaluate(
+            txn_,
+            where_expr_.get().program(),
+            where_expr_.get().program()->method_call,
+            &vm_stack_,
+            nullptr,
+            input_buf.size(),
+            const_cast<void**>(input_buf.data()));
+
+        if (!popBool(&vm_stack_)) {
+          continue;
+        }
+      }
+
+      VM::evaluate(
+          txn_,
+          join_cond_expr_.get().program(),
+          join_cond_expr_.get().program()->method_call,
+          &vm_stack_,
+          nullptr,
+          input_buf.size(),
+          const_cast<void**>(input_buf.data()));
+
+      if (!popBool(&vm_stack_)) {
+        continue;
+      }
+
+      for (int i = 0; i < select_exprs_.size(); ++i) {
+        VM::evaluate(
+            txn_,
+            select_exprs_[i].program(),
+            select_exprs_[i].program()->method_call,
+            &vm_stack_,
+            nullptr,
+            input_buf.size(),
+            const_cast<void**>(input_buf.data()));
+
+        popVector(&vm_stack_, &output[i]);
+      }
+
+      if (++(*output_len) >= kOutputBatchSize) {
+        return ReturnCode::success();
+      }
+    }
+  }
+
+  return ReturnCode::success();
+}
+
+ReturnCode NestedLoopJoin::executeOuterJoin(
+    SVector* output,
+    size_t* output_len) {
+  std::vector<const void*> input_buf(input_map_.size());
+  uint64_t null = 0;
+
+  if (joined_tbl_size_ == 0) {
+    return ReturnCode::success();
+  }
+
+  for (;;) {
+    if (joined_tbl_pos_ == joined_tbl_size_) {
+      --base_tbl_buffer_size_;
+      for (size_t i = 0; i < base_tbl_cur_.size(); ++i) {
+        base_tbl_buffer_[i].next(const_cast<void**>(&base_tbl_cur_[i]));
+      }
+
+      joined_tbl_pos_ = 0;
+      joined_tbl_row_found_ = false;
+      for (size_t i = 0; i < joined_tbl_->getColumnCount(); ++i) {
+        joined_tbl_cur_[i] = joined_tbl_data_[i].getData();
+        assert(joined_tbl_cur_[i]);
+      }
+    }
+
+    if (base_tbl_buffer_size_ == 0) {
+      auto rc = readBaseTableBatch();
+      if (!rc.isSuccess()) {
+        return rc;
+      }
+    }
+
+    if (base_tbl_buffer_size_ == 0) {
+      break;
+    }
+
+    bool match = false;
+    while (joined_tbl_pos_ < joined_tbl_size_) {
+      for (size_t i = 0; i < input_map_.size(); ++i) {
+        const auto& m = input_map_[i];
+
+        switch (m.table_idx) {
+          case 0:
+            assert(m.column_idx < base_tbl_cur_.size());
+            input_buf[i] = base_tbl_cur_[m.column_idx];
+            break;
+          case 1:
+            assert(m.column_idx < joined_tbl_cur_.size());
+            input_buf[i] = joined_tbl_cur_[m.column_idx];
+            break;
+          default:
+            RAISE(kRuntimeError, "invalid table index");
+        }
+      }
+
+      ++joined_tbl_pos_;
+      for (size_t i = 0; i < joined_tbl_cur_.size(); ++i) {
+        joined_tbl_data_[i].next(const_cast<void**>(&joined_tbl_cur_[i]));
+      }
+
+      VM::evaluate(
+          txn_,
+          join_cond_expr_.get().program(),
+          join_cond_expr_.get().program()->method_call,
+          &vm_stack_,
+          nullptr,
+          input_buf.size(),
+          const_cast<void**>(input_buf.data()));
+
+      if (!popBool(&vm_stack_)) {
+        continue;
+      }
+
+      joined_tbl_row_found_ = true;
+      match = true;
+      break;
+    }
+
+    if (match || !joined_tbl_row_found_) {
+      if (!joined_tbl_row_found_) {
+        for (size_t i = 0; i < input_map_.size(); ++i) {
+          const auto& m = input_map_[i];
+
+          switch (m.table_idx) {
+            case 0:
+              assert(m.column_idx < base_tbl_cur_.size());
+              input_buf[i] = base_tbl_cur_[m.column_idx];
+              break;
+            case 1:
+              assert(m.column_idx < joined_tbl_cur_.size());
+              input_buf[i] = &null;
+              break;
+            default:
+              RAISE(kRuntimeError, "invalid table index");
+          }
+        }
+      }
+
+      if (!where_expr_.isEmpty()) {
+        VM::evaluate(
+            txn_,
+            where_expr_.get().program(),
+            where_expr_.get().program()->method_call,
+            &vm_stack_,
+            nullptr,
+            input_buf.size(),
+            const_cast<void**>(input_buf.data()));
+
+        if (!popBool(&vm_stack_)) {
+          continue;
+        }
+      }
+
+      for (int i = 0; i < select_exprs_.size(); ++i) {
+        VM::evaluate(
+            txn_,
+            select_exprs_[i].program(),
+            select_exprs_[i].program()->method_call,
+            &vm_stack_,
+            nullptr,
+            input_buf.size(),
+            const_cast<void**>(input_buf.data()));
+
+        popVector(&vm_stack_, &output[i]);
+      }
+
+      if (++(*output_len) >= kOutputBatchSize) {
+        return ReturnCode::success();
+      }
+    }
+  }
+
+  return ReturnCode::success();
+}
+
+ReturnCode NestedLoopJoin::readJoinedTable() {
+  auto joined_rc = joined_tbl_->execute();
+  if (!joined_rc.isSuccess()) {
+    return joined_rc;
+  }
+
+  Vector<SVector> input_cols;
+  for (size_t i = 0; i < joined_tbl_->getColumnCount(); ++i) {
+    input_cols.emplace_back(joined_tbl_->getColumnType(i));
+    joined_tbl_data_.emplace_back(joined_tbl_->getColumnType(i));
+  }
+
+  for (;;) {
+    for (auto& c : input_cols) {
+      c.clear();
+    }
+
+    size_t nrecords = 0;
+    {
+      auto rc = joined_tbl_->nextBatch(input_cols.data(), &nrecords);
+      if (!rc.isSuccess()) {
+        RAISE(kRuntimeError, rc.getMessage());
+      }
+    }
+
+    if (nrecords == 0) {
+      break;
+    }
+
+    {
+      auto rc = txn_->triggerHeartbeat();
+      if (!rc.isSuccess()) {
+        RAISE(kRuntimeError, rc.getMessage());
+      }
+    }
+
+    if (joined_tbl_size_ + nrecords >= kMaxInMemoryRows) {
+      RAISE(
+          kRuntimeError,
+          "Nested Loop JOIN intermediate result set is too large, try using an"
+          " equi-join instead.");
+    }
+
+    for (size_t i = 0; i < input_cols.size(); ++i) {
+      joined_tbl_data_[i].append(
+          input_cols[i].getData(),
+          input_cols[i].getSize());
+    }
+
+    joined_tbl_size_ += nrecords;
+  }
+
+  for (size_t i = 0; i < joined_tbl_->getColumnCount(); ++i) {
+    joined_tbl_cur_.emplace_back(joined_tbl_data_[i].getData());
+    assert(joined_tbl_cur_[i]);
+  }
+
+  return ReturnCode::success();
+}
+
+ReturnCode NestedLoopJoin::readBaseTableBatch() {
+  for (auto& c : base_tbl_buffer_) {
+    c.clear();
+  }
+
+  {
+    auto rc = base_tbl_->nextBatch(
+        base_tbl_buffer_.data(),
+        &base_tbl_buffer_size_);
+
+    if (!rc.isSuccess()) {
+      RAISE(kRuntimeError, rc.getMessage());
+    }
+  }
+
+  if (base_tbl_buffer_size_ == 0) {
+    return ReturnCode::success();
+  }
+
+  {
+    auto rc = txn_->triggerHeartbeat();
+    if (!rc.isSuccess()) {
+      RAISE(kRuntimeError, rc.getMessage());
+    }
+  }
+
+  for (size_t i = 0; i < base_tbl_->getColumnCount(); ++i) {
+    base_tbl_cur_[i] = base_tbl_buffer_[i].getData();
+    assert(base_tbl_cur_[i]);
+  }
+
+  return ReturnCode::success();
+}
 
 } // namespace csql
 

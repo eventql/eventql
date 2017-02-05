@@ -32,6 +32,8 @@ namespace csql {
 class NestedLoopJoin : public TableExpression {
 public:
 
+  static const size_t kOutputBatchSize = 1024;
+
   NestedLoopJoin(
       Transaction* txn,
       JoinType join_type,
@@ -51,27 +53,30 @@ public:
 
 protected:
 
-  ReturnCode executeCartesianJoin();
-  ReturnCode executeInnerJoin();
-  ReturnCode executeOuterJoin();
+  ReturnCode executeCartesianJoin(SVector* output, size_t* output_len);
+  ReturnCode executeInnerJoin(SVector* output, size_t* output_len);
+  ReturnCode executeOuterJoin(SVector* output, size_t* output_len);
+
+  ReturnCode readJoinedTable();
+  ReturnCode readBaseTableBatch();
 
   Transaction* txn_;
   JoinType join_type_;
   Vector<JoinNode::InputColumnRef> input_map_;
-  Vector<SValue> input_buf_;
   Vector<String> column_names_;
   Vector<ValueExpression> select_exprs_;
   Option<ValueExpression> join_cond_expr_;
   Option<ValueExpression> where_expr_;
   ScopedPtr<TableExpression> base_tbl_;
-  Vector<SValue> base_tbl_row_;
-  size_t base_tbl_mincols_;
   ScopedPtr<TableExpression> joined_tbl_;
-  Vector<Vector<SValue>> joined_tbl_data_;
+  std::vector<SVector> joined_tbl_data_;
+  std::vector<const void*> joined_tbl_cur_;
+  size_t joined_tbl_size_;
   size_t joined_tbl_pos_;
-  size_t joined_tbl_mincols_;
   bool joined_tbl_row_found_;
-  std::function<bool (SValue*, int)> cursor_;
+  std::vector<SVector> base_tbl_buffer_;
+  std::vector<const void*> base_tbl_cur_;
+  size_t base_tbl_buffer_size_;
   VMStack vm_stack_;
 };
 
