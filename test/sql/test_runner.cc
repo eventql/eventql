@@ -24,7 +24,6 @@
 #include <iostream>
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/exception.h"
-#include "eventql/util/inspect.h"
 #include "eventql/util/status.h"
 #include "eventql/util/stringutil.h"
 #include "eventql/util/io/fileutil.h"
@@ -37,12 +36,17 @@
 #include "eventql/eventql.h"
 using namespace csql;
 
-const auto kTestListPath = "./sql/test.lst";
+const auto kDirectoryPath = "./sql/";
+const auto kTestListFile = "test.lst";
 const auto kSQLPathEnding = ".sql";
 const auto kResultPathEnding = ".result.txt";
 
 Status runTest(const std::string& test) {
-  auto sql_file_path = StringUtil::format("./sql/$0$1", test, kSQLPathEnding); //FIXME make ./sql constant
+  auto sql_file_path = StringUtil::format(
+      "$0$1$2",
+      kDirectoryPath,
+      test,
+      kSQLPathEnding);
   if (!FileUtil::exists(sql_file_path)) {
     return Status(
         eIOError,
@@ -50,9 +54,10 @@ Status runTest(const std::string& test) {
   }
 
   auto result_file_path = StringUtil::format(
-      "./sql/$0$1",
+      "$0$1$2",
+      kDirectoryPath,
       test,
-      kResultPathEnding); //FIXME make ./sql constant
+      kResultPathEnding);
   if (!FileUtil::exists(result_file_path)) {
     return Status(
         eIOError,
@@ -141,7 +146,11 @@ int main(int argc, const char** argv) {
   int rc = 0;
 
   try {
-    auto is = FileInputStream::openFile(kTestListPath);
+    auto is = FileInputStream::openFile(StringUtil::format(
+        "$0$1",
+        kDirectoryPath,
+        kTestListFile));
+
     std::string line;
     size_t count = 1;
     while (is->readLine(&line)) {
