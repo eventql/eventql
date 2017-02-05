@@ -47,7 +47,27 @@ ReturnCode SelectExpression::nextBatch(
     size_t limit,
     SVector* columns,
     size_t* nrecords) {
-  return ReturnCode::error("ERUNTIME", "SelectExpression::nextBatch not yet implemented");
+  if (pos_++ == 0) {
+    for (int i = 0; i < select_exprs_.size(); ++i) {
+      VM::evaluate(
+          txn_,
+          select_exprs_[i].program(),
+          select_exprs_[i].program()->method_call,
+          &vm_stack_,
+          nullptr,
+          0,
+          nullptr);
+
+      popVector(&vm_stack_, &columns[i]);
+    }
+
+    execution_context_->incrementNumTasksCompleted();
+    *nrecords = 1;
+  } else {
+    *nrecords = 0;
+  }
+
+  return ReturnCode::success();
 }
 
 size_t SelectExpression::getColumnCount() const {
@@ -59,57 +79,5 @@ SType SelectExpression::getColumnType(size_t idx) const {
   return select_exprs_[idx].getReturnType();
 }
 
-bool SelectExpression::next(SValue* row, size_t row_len) {
-  if (pos_++ == 0) {
-    for (int i = 0; i < select_exprs_.size() && i < row_len; ++i) {
-      VM::evaluate(
-          txn_,
-          select_exprs_[i].program(),
-          select_exprs_[i].program()->method_call,
-          &vm_stack_,
-          nullptr,
-          0,
-          nullptr);
+} // namespace csql
 
-      popBoxed(&vm_stack_, &row[i]);
-    }
-
-    execution_context_->incrementNumTasksCompleted();
-
-    return true;
-  } else {
-    return false;
-  }
-}
-
-//bool Select::nextRow(SValue* out, int out_len) {
-//  if (pos_ == 0) {
-//    for (int i = 0; i < select_exprs_.size() && i < out_len; ++i) {
-//      VM::evaluate(txn_, select_exprs_[i].program(), 0, nullptr,  &out[i]);
-//    }
-//
-//    ++pos_;
-//    return true;
-//  } else {
-//    return false;
-//  }
-//}
-
-//SelectFactory::SelectFactory(
-//    Vector<RefPtr<SelectListNode>> select_exprs) :
-//    select_exprs_(select_exprs) {}
-//
-//RefPtr<Task> SelectFactory::build(
-//    Transaction* txn,
-//    HashMap<TaskID, ScopedPtr<ResultCursor>> input) const {
-//  Vector<ValueExpression> select_expressions;
-//  auto qbuilder = txn->getRuntime()->queryBuilder();
-//  for (const auto& slnode : select_exprs_) {
-//    select_expressions.emplace_back(
-//        qbuilder->buildValueExpression(txn, slnode->expression()));
-//  }
-//
-//  return new Select(txn, std::move(select_expressions));
-//}
-//
-}

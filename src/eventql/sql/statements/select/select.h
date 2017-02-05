@@ -43,8 +43,6 @@ public:
   size_t getColumnCount() const override;
   SType getColumnType(size_t idx) const override;
 
-  bool next(SValue* row, size_t row_len);
-
 protected:
   Transaction* txn_;
   ExecutionContext* execution_context_;
