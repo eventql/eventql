@@ -43,6 +43,8 @@ public:
 class CSTableScan : public AbstractCSTableScan {
 public:
 
+  static const size_t kOutputBatchSize = 1024;
+
   CSTableScan(
       Transaction* txn,
       ExecutionContext* execution_context,
@@ -71,9 +73,6 @@ public:
 
 protected:
 
-  void open();
-  bool next(SValue* out, size_t out_len);
-
   struct ColumnRef {
     ColumnRef(RefPtr<cstable::ColumnReader> r, size_t i, SType t);
     RefPtr<cstable::ColumnReader> reader;
@@ -97,16 +96,17 @@ protected:
     VM::Instance instance;
   };
 
-  bool fetchNext(SValue* out, int out_len);
-  bool fetchNextWithoutColumns(SValue* out, int out_len);
+  void open();
+  void fetch();
+  bool next(SVector* out);
+  bool fetchNext(SVector* out);
+  bool fetchNextWithoutColumns(SVector* out);
 
   void findColumns(
       RefPtr<ValueExpressionNode> expr,
       Set<String>* column_names) const;
 
   uint64_t findMaxRepetitionLevel(RefPtr<ValueExpressionNode> expr) const;
-
-  void fetch();
 
   Transaction* txn_;
   ExecutionContext* execution_context_;

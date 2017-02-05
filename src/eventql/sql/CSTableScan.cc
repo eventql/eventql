@@ -22,7 +22,6 @@
  * code of your own applications
  */
 #include <assert.h>
-#include <iostream>
 #include "eventql/eventql.h"
 #include <eventql/sql/CSTableScan.h>
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
@@ -47,7 +46,6 @@ CSTableScan::CSTableScan(
     rows_scanned_(0),
     num_records_(0),
     filter_enabled_(false),
-    filter_pos_(0),
     opened_(false),
     cur_select_level_(0),
     cur_fetch_level_(0),
@@ -102,7 +100,16 @@ ReturnCode CSTableScan::execute() {
 ReturnCode CSTableScan::nextBatch(
     SVector* columns,
     size_t* nrecords) {
-  return ReturnCode::error("ERUNTIME", "CSTableScan::nextBatch not yet implemented");
+  *nrecords = 0;
+  while (*nrecords < kOutputBatchSize) {
+    if (next(columns)) {
+      ++(*nrecords);
+    } else {
+      break;
+    }
+  }
+
+  return ReturnCode::success();
 }
 
 void CSTableScan::open() {
@@ -161,12 +168,12 @@ void CSTableScan::open() {
   }
 }
 
-bool CSTableScan::next(SValue* out, size_t out_len) {
+bool CSTableScan::next(SVector* out) {
   try {
     if (columns_.empty()) {
-      return fetchNextWithoutColumns(out, out_len);
+      return fetchNextWithoutColumns(out);
     } else {
-      return fetchNext(out, out_len);
+      return fetchNext(out);
     }
   } catch (const std::exception& e) {
     RAISEF(
@@ -177,7 +184,7 @@ bool CSTableScan::next(SValue* out, size_t out_len) {
   }
 }
 
-bool CSTableScan::fetchNext(SValue* out, int out_len) {
+bool CSTableScan::fetchNext(SVector* out) {
   if (cur_pos_ >= num_records_) {
     return false;
   }
@@ -194,7 +201,7 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
 
     if (cur_fetch_level_ == 0) {
       if (cur_pos_ < num_records_ && filter_enabled_) {
-        cur_filter_pred_ = filter_[filter_pos_++];
+        cur_filter_pred_ = filter_[cur_pos_];
       }
     }
 
@@ -462,7 +469,7 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
           }
 
         case AggregationStrategy::AGGREGATE_WITHIN_RECORD_DEEP:
-          for (int i = 0; i < select_list_.size() && i < out_len; ++i) {
+          for (int i = 0; i < select_list_.size(); ++i) {
             VM::evaluate(
                 txn_,
                 select_list_[i].compiled.program(),
@@ -472,7 +479,7 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
                 0,
                 nullptr);
 
-            popBoxed(&vm_stack_, out + i);
+            popVector(&vm_stack_, out + i);
 
             VM::resetInstance(
                 txn_,
@@ -484,7 +491,7 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
           break;
 
         case AggregationStrategy::NO_AGGREGATION:
-          for (int i = 0; i < select_list_.size() && i < out_len; ++i) {
+          for (int i = 0; i < select_list_.size(); ++i) {
             VM::evaluateBoxed(
                 txn_,
                 select_list_[i].compiled.program(),
@@ -494,7 +501,7 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
                 cur_buf_.size(),
                 cur_buf_.data());
 
-            popBoxed(&vm_stack_, out + i);
+            popVector(&vm_stack_, out + i);
           }
 
           row_ready = true;
@@ -520,7 +527,7 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
 
   switch (aggr_strategy_) {
     case AggregationStrategy::AGGREGATE_ALL:
-      for (int i = 0; i < select_list_.size() && i < out_len; ++i) {
+      for (int i = 0; i < select_list_.size(); ++i) {
         VM::evaluate(
             txn_,
             select_list_[i].compiled.program(),
@@ -530,7 +537,7 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
             0,
             nullptr);
 
-        popBoxed(&vm_stack_, out + i);
+        popVector(&vm_stack_, out + i);
       }
 
       return true;
@@ -539,16 +546,14 @@ bool CSTableScan::fetchNext(SValue* out, int out_len) {
   return false;
 }
 
-bool CSTableScan::fetchNextWithoutColumns(SValue* row, int row_len) {
-  csql::SValue sql_null;
-  Vector<SValue> out_row(select_list_.size(), SValue{});
-
+bool CSTableScan::fetchNextWithoutColumns(SVector* out) {
   while (cur_pos_ < num_records_) {
-    ++cur_pos_;
-
-    if (filter_enabled_ && !filter_[filter_pos_++]) {
+    assert(cur_pos_ < filter_.size());
+    if (filter_enabled_ && !filter_[cur_pos_]) {
       continue;
     }
+
+    ++cur_pos_;
 
     if (where_expr_.program() != nullptr) {
       SValue where_tmp;
@@ -566,7 +571,7 @@ bool CSTableScan::fetchNextWithoutColumns(SValue* row, int row_len) {
       }
     }
 
-    for (int i = 0; i < select_list_.size() && i < row_len; ++i) {
+    for (int i = 0; i < select_list_.size(); ++i) {
       VM::evaluate(
           txn_,
           select_list_[i].compiled.program(),
@@ -576,7 +581,7 @@ bool CSTableScan::fetchNextWithoutColumns(SValue* row, int row_len) {
           0,
           nullptr);
 
-      popBoxed(&vm_stack_, row + i);
+      popVector(&vm_stack_, out + i);
     }
 
     return true;
