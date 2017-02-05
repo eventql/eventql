@@ -87,6 +87,7 @@ bool PartitionCursor::openNextTable() {
 
   cur_skiplist_.reset();
 
+  bool needs_filter = true;
   switch (cur_table_) {
     case 0: {
       if (snap_->head_arena.get() &&
@@ -134,8 +135,8 @@ bool PartitionCursor::openNextTable() {
       if (cur_table_ >= snap_->state.lsm_tables().size() + 2) {
         return false;
       }
-      const auto& tbl = (snap_->state.lsm_tables().data())[
-          snap_->state.lsm_tables().size() - (cur_table_ - 1)];
+      auto tblidx = snap_->state.lsm_tables().size() - (cur_table_ - 1);
+      const auto& tbl = (snap_->state.lsm_tables().data())[tblidx];
       auto cstable_file = FileUtil::joinPaths(
           snap_->base_path,
           tbl->filename() + ".cst");
@@ -144,42 +145,48 @@ bool PartitionCursor::openNextTable() {
       if (tbl->has_skiplist()) {
         skip_col = cstable->getColumnReader("__lsm_skip");
       }
+
+      if (!tbl->has_skiplist() && tblidx == 0 && id_set_.empty()) {
+        needs_filter = false;
+      }
       break;
     }
   }
 
   /* read filter */
   std::vector<bool> filter(cstable->numRecords(), true);
-  auto id_col = cstable->getColumnReader("__lsm_id");
-  auto is_update_col = cstable->getColumnReader("__lsm_is_update");
-  for (size_t i = 0; i < filter.size(); ++i) {
-    uint64_t rlvl;
-    uint64_t dlvl;
+  if (needs_filter) {
+    auto id_col = cstable->getColumnReader("__lsm_id");
+    auto is_update_col = cstable->getColumnReader("__lsm_is_update");
+    for (size_t i = 0; i < filter.size(); ++i) {
+      uint64_t rlvl;
+      uint64_t dlvl;
 
-    String id_str;
-    id_col->readString(&rlvl, &dlvl, &id_str);
-    SHA1Hash id(id_str.data(), id_str.size());
+      String id_str;
+      id_col->readString(&rlvl, &dlvl, &id_str);
+      SHA1Hash id(id_str.data(), id_str.size());
 
-    bool is_update;
-    is_update_col->readBoolean(&rlvl, &dlvl, &is_update);
+      bool is_update;
+      is_update_col->readBoolean(&rlvl, &dlvl, &is_update);
 
-    bool skip = false;
-    if (skip_col.get()) {
-      skip_col->readBoolean(&rlvl, &dlvl, &skip);
-    }
-
-    if (cur_skiplist_) {
-      skip = cur_skiplist_->readNext();
-    }
-
-    if (skip || id_set_.count(id) > 0) {
-      filter[i] = false;
-    } else {
-      if (is_update) {
-        id_set_.emplace(id);
+      bool skip = false;
+      if (skip_col.get()) {
+        skip_col->readBoolean(&rlvl, &dlvl, &skip);
       }
 
-      filter[i] = true;
+      if (cur_skiplist_) {
+        skip = cur_skiplist_->readNext();
+      }
+
+      if (skip || id_set_.count(id) > 0) {
+        filter[i] = false;
+      } else {
+        if (is_update) {
+          id_set_.emplace(id);
+        }
+
+        filter[i] = true;
+      }
     }
   }
 
@@ -201,7 +208,9 @@ bool PartitionCursor::openNextTable() {
             cstable_filename));
   }
 
-  cur_scan_->setFilter(std::move(filter));
+  if (needs_filter) {
+    cur_scan_->setFilter(std::move(filter));
+  }
 
   ++cur_table_;
 
