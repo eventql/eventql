@@ -29,25 +29,17 @@
 
 namespace csql {
 
-class ClusterShowServersExpression : public TableExpression {
+class ClusterShowServersExpression : public SimpleTableExpression {
 public:
 
-  static const size_t kNumColumns = 8;
+  static const std::vector<std::pair<std::string, SType>> kOutputColumns;
 
   ClusterShowServersExpression(Transaction* txn);
 
   ReturnCode execute() override;
-  ReturnCode nextBatch(size_t limit, SVector* columns, size_t* len) override;
-
-  size_t getColumnCount() const override;
-  SType getColumnType(size_t idx) const override;
-
-  bool next(SValue* row, size_t row_len) override;
 
 protected:
   Transaction* txn_;
-  Vector<eventql::ServerConfig> rows_;
-  size_t counter_;
 };
 
 } //csql

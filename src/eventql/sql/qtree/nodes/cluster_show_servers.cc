@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #include <eventql/sql/qtree/nodes/cluster_show_servers.h>
+#include <eventql/sql/statements/cluster_show_servers.h>
 
 namespace csql {
 
@@ -34,23 +35,18 @@ RefPtr<QueryTreeNode> ClusterShowServersNode::deepCopy() const {
 }
 
 Vector<String> ClusterShowServersNode::getResultColumns() const {
-  return Vector<String> {
-    "Name",
-    "Status",
-    "ListenAddr",
-    "BuildInfo",
-    "Load",
-    "Disk Used",
-    "Disk Free",
-    "Partitions"
-  };
+  std::vector<std::string> list;
+  for (const auto& e : ClusterShowServersExpression::kOutputColumns) {
+    list.emplace_back(e.first);
+  }
+  return list;
 }
 
 Vector<QualifiedColumn> ClusterShowServersNode::getAvailableColumns() const {
   Vector<QualifiedColumn> cols;
 
-  for (const auto& c : getResultColumns()) {
-    cols.emplace_back(c, c, SType::STRING);
+  for (const auto& e : ClusterShowServersExpression::kOutputColumns) {
+    cols.emplace_back(e.first, e.first, e.second);
   }
 
   return cols;
@@ -63,7 +59,7 @@ size_t ClusterShowServersNode::getComputedColumnIndex(
 }
 
 size_t ClusterShowServersNode::getNumComputedColumns() const {
-  return 4;
+  return ClusterShowServersExpression::kOutputColumns.size();
 }
 
 String ClusterShowServersNode::toString() const {
@@ -71,7 +67,8 @@ String ClusterShowServersNode::toString() const {
 }
 
 SType ClusterShowServersNode::getColumnType(size_t idx) const {
-  return SType::STRING;
+  assert(idx < ClusterShowServersExpression::kOutputColumns.size());
+  return ClusterShowServersExpression::kOutputColumns[idx].second;
 }
 
 void ClusterShowServersNode::encode(

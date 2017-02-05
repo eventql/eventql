@@ -27,15 +27,54 @@
 
 namespace csql {
 
+const std::vector<std::pair<std::string, SType>> ClusterShowServersExpression::kOutputColumns = {
+  { "name", SType::STRING },
+  { "status", SType::STRING },
+  { "listenaddr", SType::STRING },
+  { "buildinfo", SType::STRING },
+  { "load", SType::STRING },
+  { "disk_used", SType::STRING },
+  { "disk_free", SType::STRING },
+  { "partitions", SType::STRING }
+};
+
 ClusterShowServersExpression::ClusterShowServersExpression(
     Transaction* txn) :
-    txn_(txn),
-    counter_(0) {}
+    SimpleTableExpression(kOutputColumns),
+    txn_(txn) {}
 
 ReturnCode ClusterShowServersExpression::execute() {
   auto rc = txn_->getTableProvider()->listServers(
       [this] (const eventql::ServerConfig& server) {
-    rows_.emplace_back(server);
+    const auto& sstats = server.server_stats();
+    auto partitions = StringUtil::format(
+        "$0/$1",
+        sstats.has_partitions_loaded() ?
+            StringUtil::toString(sstats.partitions_loaded()) :
+            "-",
+        sstats.has_partitions_assigned() ?
+            StringUtil::toString(sstats.partitions_assigned()) :
+            "-");
+    auto disk_available = sstats.has_disk_available() ?
+        StringUtil::format("$0MB", sstats.disk_available() / 0x100000) :
+        "-";
+    auto disk_used = sstats.has_disk_used() ?
+        StringUtil::format("$0MB", sstats.disk_used() / 0x100000) :
+        "-";
+    auto load = sstats.has_load_factor() ?
+        StringUtil::toString(sstats.load_factor()) :
+        "-";
+
+    std::vector<SValue> row;
+    row.emplace_back(SValue::newString(server.server_id())); //server name
+    row.emplace_back(SValue::newString(ServerStatus_Name(server.server_status()))); //status
+    row.emplace_back(SValue::newString(sstats.buildinfo())); //buildinfo
+    row.emplace_back(SValue::newString(server.server_addr())); //listen_addr
+    row.emplace_back(SValue::newString(load)); //load
+    row.emplace_back(SValue::newString(disk_used));
+    row.emplace_back(SValue::newString(disk_available));
+    row.emplace_back(SValue::newString(partitions));
+    addRow(row.data());
   });
 
   if (!rc.isSuccess()) {
@@ -45,75 +84,5 @@ ReturnCode ClusterShowServersExpression::execute() {
   return ReturnCode::success();
 }
 
-ReturnCode ClusterShowServersExpression::nextBatch(
-    size_t limit,
-    SVector* columns,
-    size_t* nrecords) {
-  return ReturnCode::error("ERUNTIME", "ClusterShowServersExpression::nextBatch not yet implemented");
-}
-
-size_t ClusterShowServersExpression::getColumnCount() const {
-  return kNumColumns;
-}
-
-SType ClusterShowServersExpression::getColumnType(size_t idx) const {
-  assert(idx < kNumColumns);
-  return SType::STRING;
-}
-
-bool ClusterShowServersExpression::next(SValue* row, size_t row_len) {
-  if (counter_ < rows_.size()) {
-    const auto& server = rows_[counter_];
-    const auto& sstats = server.server_stats();
-    switch (row_len) {
-      default:
-      case 8: {
-        auto partitions = StringUtil::format(
-            "$0/$1",
-            sstats.has_partitions_loaded() ?
-                StringUtil::toString(sstats.partitions_loaded()) :
-                "-",
-            sstats.has_partitions_assigned() ?
-                StringUtil::toString(sstats.partitions_assigned()) :
-                "-");
-        row[7] = SValue::newString(partitions);
-      }
-      case 7: {
-        auto disk_available = sstats.has_disk_available() ?
-            StringUtil::format("$0MB", sstats.disk_available() / 0x100000) :
-            "-";
-        row[6] = SValue::newString(disk_available);
-      }
-      case 6: {
-        auto disk_used = sstats.has_disk_used() ?
-            StringUtil::format("$0MB", sstats.disk_used() / 0x100000) :
-            "-";
-        row[5] = SValue::newString(disk_used);
-      }
-      case 5: {
-        auto load = sstats.has_load_factor() ?
-            StringUtil::toString(sstats.load_factor()) :
-            "-";
-        row[4] = SValue::newString(load); //load
-      }
-      case 4:
-        row[3] = SValue::newString(sstats.buildinfo()); //buildinfo
-      case 3:
-        row[2] = SValue::newString(server.server_addr()); //listen_addr
-      case 2:
-        row[1] = SValue::newString(ServerStatus_Name(server.server_status())); //status
-      case 1:
-        row[0] = SValue::newString(server.server_id()); //server name
-      case 0:
-        break;
-    }
-
-    ++counter_;
-    return true;
-  } else {
-    return false;
-  }
-}
-
-} //csql
+} // namespace csql
 
