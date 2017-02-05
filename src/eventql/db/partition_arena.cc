@@ -33,6 +33,8 @@ PartitionArena::PartitionArena(
     const msg::MessageSchema& schema) :
     schema_(schema),
     num_records_(0),
+    has_update_(false),
+    has_skiplist_(false),
     cstable_schema_(cstable::TableSchema::fromProtobuf(schema)),
     cstable_schema_ext_(cstable_schema_),
     opened_(false) {
@@ -88,11 +90,14 @@ Set<SHA1Hash> PartitionArena::insertRecords(
     } else if (old->second.version < record_version) {
       // record does exist in arena, but the one we're inserting is newer
       skiplist_[old->second.position] = true;
+      has_skiplist_ = true;
     } else {
       // record in arena is newer or equal to the one we're inserting, skip
       skip_flags[i] = true;
       continue;
     }
+
+    has_update_ = has_update_ || update_flags[i];
 
     is_update_col_->writeBoolean(0, 0, update_flags[i]);
     id_col_->writeString(0, 0, (const char*) record_id.data(), record_id.size());
@@ -210,6 +215,14 @@ bool PartitionArena::SkiplistReader::readNext() {
 
 size_t PartitionArena::SkiplistReader::size() const {
   return skiplist.size();
+}
+
+bool PartitionArena::hasUpdate() const {
+  return has_update_;
+}
+
+bool PartitionArena::hasSkiplist() const {
+  return has_skiplist_;
 }
 
 } // namespace eventql
