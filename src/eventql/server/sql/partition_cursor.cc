@@ -42,7 +42,12 @@ PartitionCursor::PartitionCursor(
     table_(table),
     snap_(snap),
     stmt_(stmt),
-    cur_table_(0) {};
+    cur_table_(0),
+    fast_scan_enabled_(true) {
+  if (stmt_->aggregationStrategy() != csql::AggregationStrategy::NO_AGGREGATION) {
+    fast_scan_enabled_ = false;
+  }
+}
 
 ReturnCode PartitionCursor::execute() {
   return ReturnCode::success();
@@ -178,13 +183,23 @@ bool PartitionCursor::openNextTable() {
     }
   }
 
-  cur_scan_.reset(
-      new csql::FastCSTableScan(
-          txn_,
-          execution_context_,
-          stmt_,
-          cstable,
-          cstable_filename));
+  if (fast_scan_enabled_) {
+    cur_scan_.reset(
+        new csql::FastCSTableScan(
+            txn_,
+            execution_context_,
+            stmt_,
+            cstable,
+            cstable_filename));
+  } else {
+    cur_scan_.reset(
+        new csql::CSTableScan(
+            txn_,
+            execution_context_,
+            stmt_,
+            cstable,
+            cstable_filename));
+  }
 
   cur_scan_->setFilter(std::move(filter));
 

@@ -63,8 +63,9 @@ protected:
   RefPtr<csql::SequentialScanNode> stmt_;
   Set<SHA1Hash> id_set_;
   size_t cur_table_;
-  ScopedPtr<csql::FastCSTableScan> cur_scan_;
+  ScopedPtr<csql::AbstractCSTableScan> cur_scan_;
   ScopedPtr<PartitionArena::SkiplistReader> cur_skiplist_;
+  bool fast_scan_enabled_;
 };
 
 class RemotePartitionCursor : public csql::TableExpression {
