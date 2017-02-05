@@ -189,7 +189,7 @@ ReturnCode HashJoin::computeInnerJoin(
 bool HashJoin::computeOutputRow(
     const std::vector<SValue>& input,
     SVector* output) {
-  {
+  if (!join_cond_expr_.isEmpty()) {
     VM::evaluateBoxed(
         txn_,
         join_cond_expr_.get().program(),

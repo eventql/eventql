@@ -131,6 +131,7 @@ void VM::evaluate(
         continue;
 
       case vm::X_INPUT:
+        assert(op.arg0 < argc);
         pushUnboxed(stack, op.argt, argv[op.arg0]);
         ++pc;
         continue;
