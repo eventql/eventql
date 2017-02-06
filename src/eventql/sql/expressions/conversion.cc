@@ -26,6 +26,68 @@
 namespace csql {
 namespace expressions {
 
+void to_nil_uint64_call(sql_txn* ctx, VMStack* stack) {
+  popUInt64(stack);
+  pushNil(stack);
+}
+
+const SFunction to_nil_uint64(
+    { SType::UINT64 },
+    SType::NIL,
+    &to_nil_uint64_call);
+
+void to_nil_int64_call(sql_txn* ctx, VMStack* stack) {
+  popInt64(stack);
+  pushNil(stack);
+}
+
+const SFunction to_nil_int64(
+    { SType::INT64 },
+    SType::NIL,
+    &to_nil_int64_call);
+
+void to_nil_float64_call(sql_txn* ctx, VMStack* stack) {
+  popFloat64(stack);
+  pushNil(stack);
+}
+
+const SFunction to_nil_float64(
+    { SType::FLOAT64 },
+    SType::NIL,
+    &to_nil_float64_call);
+
+void to_nil_bool_call(sql_txn* ctx, VMStack* stack) {
+  popBool(stack);
+  pushNil(stack);
+}
+
+const SFunction to_nil_bool(
+    { SType::BOOL },
+    SType::NIL,
+    &to_nil_bool_call);
+
+void to_nil_string_call(sql_txn* ctx, VMStack* stack) {
+  const char* _1;
+  size_t _2;
+  popString(stack, &_1, &_2);
+  pushNil(stack);
+}
+
+const SFunction to_nil_string(
+    { SType::BOOL },
+    SType::NIL,
+    &to_nil_string_call);
+
+void to_nil_timestamp64_call(sql_txn* ctx, VMStack* stack) {
+  popTimestamp64(stack);
+  pushNil(stack);
+}
+
+const SFunction to_nil_timestamp64(
+    { SType::TIMESTAMP64 },
+    SType::NIL,
+    &to_nil_timestamp64_call);
+
 void toStringExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   if (argc != 1) {
     RAISE(

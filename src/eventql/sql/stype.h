@@ -62,6 +62,14 @@ void popVector(VMStack* stack, SVector* vector);
 void pushBoxed(VMStack* stack, const SValue* value);
 void pushUnboxed(VMStack* stack, SType type, const void* value);
 
+void popNil();
+void popNil(STag* tag);
+void popNilBoxed(VMStack* stack, SValue* value);
+void popNilVector(VMStack* stack, SVector* vector);
+void pushNil(VMStack* stack);
+void pushNil(VMStack* stack, STag tag);
+void pushNilUnboxed(VMStack* stack, const void* value);
+
 uint64_t popUInt64(VMStack* stack);
 void popUInt64(VMStack* stack, uint64_t* value, STag* tag);
 void popUInt64Boxed(VMStack* stack, SValue* value);

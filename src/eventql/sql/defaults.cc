@@ -25,6 +25,7 @@
 #include <eventql/sql/defaults.h>
 #include <eventql/sql/expressions/aggregate.h>
 #include <eventql/sql/expressions/boolean.h>
+#include <eventql/sql/expressions/conversion.h>
 #include <eventql/sql/expressions/datetime.h>
 #include <eventql/sql/expressions/math.h>
 
@@ -35,15 +36,20 @@ namespace csql {
 void installDefaultSymbols(SymbolTable* rt) {
   /* implicit conversions */
   rt->registerImplicitConversion(SType::UINT64, SType::NIL);
+  rt->registerImplicitConversion(SType::INT64, SType::NIL);
+  rt->registerImplicitConversion(SType::FLOAT64, SType::NIL);
+  rt->registerImplicitConversion(SType::BOOL, SType::NIL);
+  rt->registerImplicitConversion(SType::STRING, SType::NIL);
+  rt->registerImplicitConversion(SType::TIMESTAMP64, SType::NIL);
 
-  ///* expressions/aggregate.h */
+  /* expressions/aggregate.h */
   rt->registerFunction("count", expressions::count);
   rt->registerFunction("sum", expressions::sum_int64);
   rt->registerFunction("sum", expressions::sum_uint64);
   //rt->registerFunction("max", expressions::kMaxExpr);
   //rt->registerFunction("min", expressions::kMinExpr);
 
-  ///* expressions/boolean.h */
+  /* expressions/boolean.h */
   rt->registerFunction("eq",  expressions::eq_uint64);
   rt->registerFunction("eq",  expressions::eq_timestamp64);
 
@@ -61,15 +67,20 @@ void installDefaultSymbols(SymbolTable* rt) {
   rt->registerFunction("gte", expressions::gte_timestamp64);
   //rt->registerFunction("isnull", PureFunction(&expressions::isNullExpr));
 
-  ///* expressions/conversion.h */
-  //rt->registerFunction("to_string", PureFunction(&expressions::toStringExpr));
+  /* expressions/conversion.h */
+  rt->registerFunction("to_nil", expressions::to_nil_uint64);
+  rt->registerFunction("to_nil", expressions::to_nil_int64);
+  rt->registerFunction("to_nil", expressions::to_nil_float64);
+  rt->registerFunction("to_nil", expressions::to_nil_bool);
+  rt->registerFunction("to_nil", expressions::to_nil_string);
+  rt->registerFunction("to_nil", expressions::to_nil_timestamp64);
   //rt->registerFunction("to_str", PureFunction(&expressions::toStringExpr));
   //rt->registerFunction("to_integer", PureFunction(&expressions::toIntExpr));
   //rt->registerFunction("to_int", PureFunction(&expressions::toIntExpr));
   //rt->registerFunction("to_float", PureFunction(&expressions::toFloatExpr));
   //rt->registerFunction("to_bool", PureFunction(&expressions::toBoolExpr));
 
-  ///* expressions/datetime.h */
+  /* expressions/datetime.h */
   //rt->registerFunction("now", PureFunction(&expressions::nowExpr));
   //rt->registerFunction(
   //    "FROM_TIMESTAMP",
@@ -79,7 +90,7 @@ void installDefaultSymbols(SymbolTable* rt) {
   //rt->registerFunction("date_sub", PureFunction(&expressions::dateAddExpr));
   rt->registerFunction("time_at", expressions::time_at);
 
-  ///* expressions/math.h */
+  /* expressions/math.h */
   rt->registerFunction("add", expressions::add_uint64);
   rt->registerFunction("add", expressions::add_int64);
   rt->registerFunction("add", expressions::add_float64);
@@ -99,7 +110,7 @@ void installDefaultSymbols(SymbolTable* rt) {
   rt->registerFunction("pow", expressions::pow_int64);
   rt->registerFunction("pow", expressions::pow_float64);
 
-  ///* expressions/string.h */
+  /* expressions/string.h */
   //rt->registerFunction("startswith", PureFunction(&expressions::startsWithExpr));
   //rt->registerFunction("endswith", PureFunction(&expressions::endsWithExpr));
   //rt->registerFunction("uppercase", PureFunction(&expressions::upperCaseExpr));
@@ -112,11 +123,11 @@ void installDefaultSymbols(SymbolTable* rt) {
   //rt->registerFunction("rtrim", PureFunction(&expressions::rtrimExpr));
   //rt->registerFunction("concat", PureFunction(&expressions::concatExpr));
 
-  ///* expressions/miscellaneous.h */
+  /* expressions/miscellaneous.h */
   //rt->registerFunction("usleep", PureFunction(&expressions::usleepExpr, true));
   //rt->registerFunction("fnv32", PureFunction(&expressions::fnv32Expr));
 
-  ///* expressions/internal.h */
+  /* expressions/internal.h */
   //rt->registerFunction("repeat_value", expressions::kRepeatValueExpr);
 
 }

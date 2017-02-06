@@ -174,6 +174,45 @@ void pushUnboxed(VMStack* stack, SType type, const void* value) {
   }
 }
 
+void popNil(VMStack* stack) {
+  assert(stack->limit - stack->top >= sizeof(STag));
+  stack->top += sizeof(STag);
+}
+
+void popNilBoxed(VMStack* stack, SValue* value) {
+  assert(value->getType() == SType::NIL);
+  assert(stack->limit - stack->top >= sizeof(STag));
+  STag tag;
+  memcpy(&tag, stack->top, sizeof(STag));
+  value->setTag(tag);
+  stack->top += sizeof(STag);
+}
+
+void popNilVector(VMStack* stack, SVector* vector) {
+  assert(vector->getType() == SType::NIL);
+  assert(stack->limit - stack->top >= sizeof(STag));
+  vector->append(stack->top, sizeof(STag));
+  stack->top += sizeof(STag);
+}
+
+void pushNil(VMStack* stack) {
+  if (stack->top - stack->data < sizeof(STag)) {
+    vm::growStack(stack, sizeof(STag));
+  }
+
+  stack->top -= sizeof(STag);
+  memset(stack->top, 0, sizeof(STag));
+}
+
+void pushNilUnboxed(VMStack* stack, const void* value) {
+  if (stack->top - stack->data < sizeof(STag)) {
+    vm::growStack(stack, sizeof(STag));
+  }
+
+  stack->top -= sizeof(STag);
+  memcpy(stack->top, value, sizeof(STag));
+}
+
 uint64_t popUInt64(VMStack* stack) {
   assert(stack->limit - stack->top >= sizeof(uint64_t) + sizeof(STag));
   uint64_t value;
