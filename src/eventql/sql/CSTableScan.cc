@@ -760,7 +760,8 @@ ReturnCode FastCSTableScan::nextBatch(
     }
 
     /* calculate batch size */
-    size_t batch_size = std::min(records_remaining_, kOutputBatchSize);
+    auto batch_size_default = kOutputBatchSize;
+    size_t batch_size = std::min(records_remaining_, batch_size_default);
 
     /* fetch input columns */
     for (size_t i = 0; i < column_buffers_.size(); ++i) {

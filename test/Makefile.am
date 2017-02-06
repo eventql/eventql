@@ -28,7 +28,7 @@ TESTS = \
   unit_partition_discovery \
   unit_sql_parser \
   unit_sql_qtree \
-  evql_test_sql
+  evql-test-sql
 
 check_PROGRAMS = $(TESTS)
 
@@ -104,7 +104,7 @@ unit_sql_qtree_LDADD = \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD)
 
-evql_test_sql_SOURCES = sql/test_runner.cc
+evql_test_sql_SOURCES = sql_test_runner.cc
 evql_test_sql_LDADD = \
     @top_builddir@/src/libevqlcore.a \
     @top_builddir@/src/libevqlclient.la \
