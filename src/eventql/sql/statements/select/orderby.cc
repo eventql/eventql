@@ -23,6 +23,7 @@
  * code of your own applications
  */
 #include <algorithm>
+#include <array>
 #include <eventql/sql/statements/select/orderby.h>
 #include <eventql/sql/expressions/boolean.h>
 #include <eventql/sql/runtime/runtime.h>
