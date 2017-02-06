@@ -167,6 +167,9 @@ public:
 protected:
 
   ReturnCode fetchColumnUInt64(size_t idx, size_t batch_size);
+  ReturnCode fetchColumnFloat64(size_t idx, size_t batch_size);
+  ReturnCode fetchColumnBool(size_t idx, size_t batch_size);
+  ReturnCode fetchColumnString(size_t idx, size_t batch_size);
 
   Transaction* txn_;
   ExecutionContext* execution_context_;

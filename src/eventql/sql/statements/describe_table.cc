@@ -56,6 +56,7 @@ ReturnCode DescribeTableStatement::execute() {
     row.emplace_back(col.is_nullable ? SValue::newString("YES") : SValue::newString("NO")); //Null
     row.emplace_back(col.is_primary_key ? SValue::newString("YES") : SValue::newString("NO")); //Primary Key
     row.emplace_back(SValue::newString("")); //Description
+    row.back().setTag(STAG_NULL);
     row.emplace_back(SValue::newString(col.encoding)); //Encoding
     addRow(row.data());
   }

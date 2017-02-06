@@ -43,7 +43,7 @@ public:
   size_t getRowCount() const;
   size_t getRowBytes() const;
 
-  void addRow(const std::vector<csql::SValue>& row);
+  void addRow(const std::vector<std::string>& row);
   void setIsLast(bool is_last);
   void setHasPendingStatement(bool has_pending_stmt);
 
