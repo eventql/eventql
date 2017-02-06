@@ -238,9 +238,22 @@ int main(int argc, const char** argv) {
       StringUtil::chomp(&line);
       auto ret = runTest(line);
       if (ret.isSuccess()) {
-        std::cout << "ok " << count << " - test passed" << std::endl;
+        std::cout
+          << "ok "
+          << count
+          << " - "
+          << "[" << line << "] "
+          << "Test passed"
+          << std::endl;
+
       } else {
-        std::cout << "not ok " << count << " - " << ret.message() << std::endl;
+        std::cout
+          << "not ok "
+          << count
+          << " - "
+          << "[" << line << "] "
+          << ret.message()
+          << std::endl;
       }
 
       line.clear();
