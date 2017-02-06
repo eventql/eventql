@@ -97,11 +97,13 @@ SValue SValue::newTimestamp(const String& value) {
 SValue::SValue() {
   memset(&data_, 0, sizeof(data_));
   data_.type = SType::NIL;
+  tag_ = 0;
 }
 
 SValue::SValue(SType type) {
   memset(&data_, 0, sizeof(data_));
   data_.type = type;
+  tag_ = 0;
 }
 
 SValue::~SValue() {
@@ -129,6 +131,8 @@ SValue::SValue(const SValue::StringType& string_value) {
       ((char*) data_.u.t_string) + sizeof(uint32_t),
       string_value.data(),
       string_value.size());
+
+  tag_ = 0;
 }
 
 SValue::SValue(
@@ -138,24 +142,28 @@ SValue::SValue(
 SValue::SValue(SValue::IntegerType integer_value) {
   data_.type = SType::UINT64;
   data_.u.t_int64 = integer_value;
+  tag_ = 0;
 }
 
 SValue::SValue(SValue::FloatType float_value) {
   data_.type = SType::FLOAT64;
   data_.u.t_float = float_value;
+  tag_ = 0;
 }
 
 SValue::SValue(SValue::BoolType bool_value) {
   data_.type = SType::BOOL;
   data_.u.t_bool = bool_value;
+  tag_ = 0;
 }
 
 SValue::SValue(SValue::TimeType time_value) {
   data_.type = SType::TIMESTAMP64;
   data_.u.t_timestamp = static_cast<uint64_t>(time_value);
+  tag_ = 0;
 }
 
-SValue::SValue(const SValue& copy) {
+SValue::SValue(const SValue& copy) : tag_(copy.tag_) {
   switch (copy.data_.type) {
 
     case SType::STRING: {
@@ -179,6 +187,8 @@ SValue::SValue(const SValue& copy) {
 }
 
 SValue& SValue::operator=(const SValue& copy) {
+  tag_ = copy.tag_;
+
   if (data_.type == SType::STRING && data_.u.t_string) {
     free(data_.u.t_string);
   }
@@ -866,6 +876,14 @@ size_t SValue::getSize() const {
   }
 }
 
+void SValue::setTag(STag tag) {
+  tag_ = tag;
+}
+
+STag SValue::getTag() const {
+  return tag_;
+}
+
 String sql_escape(const String& orig_str) {
   auto str = orig_str;
   StringUtil::replaceAll(&str, "\\", "\\\\");
@@ -979,6 +997,8 @@ void SVector::append(const void* data, size_t size) {
 
 void SVector::append(const SValue& svalue) {
   append(svalue.getData(), svalue.getSize());
+  auto tag = svalue.getTag();
+  append(&tag, sizeof(STag));
 }
 
 size_t SVector::next(SType type, void** cursor) {
@@ -1008,14 +1028,14 @@ size_t sql_sizeof(SType type, const void* data) {
     case SType::STRING:
       return sizeof(uint32_t) + sql_strlen(data);
     case SType::NIL:
-      return 0;
+      return 0 + sizeof(STag);
     case SType::FLOAT64:
     case SType::INT64:
     case SType::UINT64:
     case SType::TIMESTAMP64:
-      return 8;
+      return 8 + sizeof(STag);
     case SType::BOOL:
-      return 1;
+      return 1 + sizeof(STag);
   }
 }
 
@@ -1025,14 +1045,14 @@ size_t sql_sizeof_static(SType type) {
       assert(false);
       return 0;
     case SType::NIL:
-      return 0;
+      return 0 + sizeof(STag);
     case SType::FLOAT64:
     case SType::INT64:
     case SType::UINT64:
     case SType::TIMESTAMP64:
-      return 8;
+      return 8 + sizeof(STag);
     case SType::BOOL:
-      return 1;
+      return 1 + sizeof(STag);
   }
 }
 

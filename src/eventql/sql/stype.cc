@@ -175,269 +175,308 @@ void pushUnboxed(VMStack* stack, SType type, const void* value) {
 }
 
 uint64_t popUInt64(VMStack* stack) {
-  assert(stack->limit - stack->top >= sizeof(uint64_t));
-  auto value = *reinterpret_cast<uint64_t*>(stack->top);
-  stack->top += sizeof(uint64_t);
+  assert(stack->limit - stack->top >= sizeof(uint64_t) + sizeof(STag));
+  uint64_t value;
+  memcpy(&value, stack->top, sizeof(uint64_t));
+  stack->top += sizeof(uint64_t) + sizeof(STag);
   return value;
 }
 
 void popUInt64Boxed(VMStack* stack, SValue* value) {
   assert(value->getType() == SType::UINT64);
-  assert(stack->limit - stack->top >= sizeof(uint64_t));
+  assert(stack->limit - stack->top >= sizeof(uint64_t) + sizeof(STag));
   memcpy(value->getData(), stack->top, sizeof(uint64_t));
-  stack->top += sizeof(uint64_t);
+  STag tag;
+  memcpy(&tag, stack->top + sizeof(uint64_t), sizeof(STag));
+  value->setTag(tag);
+  stack->top += sizeof(uint64_t) + sizeof(STag);
 }
 
 void popUInt64Vector(VMStack* stack, SVector* vector) {
   assert(vector->getType() == SType::UINT64);
-  assert(stack->limit - stack->top >= sizeof(uint64_t));
-  vector->append(stack->top, sizeof(uint64_t));
-  stack->top += sizeof(uint64_t);
+  assert(stack->limit - stack->top >= sizeof(uint64_t) + sizeof(STag));
+  vector->append(stack->top, sizeof(uint64_t) + sizeof(STag));
+  stack->top += sizeof(uint64_t) + sizeof(STag);
 }
 
 void pushUInt64(VMStack* stack, uint64_t value) {
-  if (stack->top - stack->data < sizeof(uint64_t)) {
-    vm::growStack(stack, sizeof(uint64_t));
+  if (stack->top - stack->data < sizeof(uint64_t) + sizeof(STag)) {
+    vm::growStack(stack, sizeof(uint64_t) + sizeof(STag));
   }
 
-  stack->top -= sizeof(uint64_t);
-  *reinterpret_cast<uint64_t*>(stack->top) = value;
+  stack->top -= sizeof(uint64_t) + sizeof(STag);
+  memcpy(stack->top, &value, sizeof(uint64_t));
+  memset(stack->top + sizeof(uint64_t), 0, sizeof(STag));
 }
 
 void pushUInt64Unboxed(VMStack* stack, const void* value) {
-  if (stack->top - stack->data < sizeof(uint64_t)) {
-    vm::growStack(stack, sizeof(uint64_t));
+  if (stack->top - stack->data < sizeof(uint64_t) + sizeof(STag)) {
+    vm::growStack(stack, sizeof(uint64_t) + sizeof(STag));
   }
 
-  stack->top -= sizeof(uint64_t);
-  memcpy(stack->top, value, sizeof(uint64_t));
+  stack->top -= sizeof(uint64_t) + sizeof(STag);
+  memcpy(stack->top, value, sizeof(uint64_t) + sizeof(STag));
 }
 
 int64_t popInt64(VMStack* stack) {
-  assert(stack->limit - stack->top >= sizeof(int64_t));
-  auto value = *reinterpret_cast<int64_t*>(stack->top);
-  stack->top += sizeof(int64_t);
+  assert(stack->limit - stack->top >= sizeof(int64_t) + sizeof(STag));
+  int64_t value;
+  memcpy(&value, stack->top, sizeof(int64_t));
+  stack->top += sizeof(int64_t) + sizeof(STag);
   return value;
 }
 
 void popInt64Boxed(VMStack* stack, SValue* value) {
-  assert(value->getType() == SType::INT64);
-  assert(stack->limit - stack->top >= sizeof(int64_t));
+  assert(value->getType() == SType::UINT64);
+  assert(stack->limit - stack->top >= sizeof(int64_t) + sizeof(STag));
   memcpy(value->getData(), stack->top, sizeof(int64_t));
-  stack->top += sizeof(int64_t);
+  STag tag;
+  memcpy(&tag, stack->top + sizeof(int64_t), sizeof(STag));
+  value->setTag(tag);
+  stack->top += sizeof(int64_t) + sizeof(STag);
 }
 
 void popInt64Vector(VMStack* stack, SVector* vector) {
-  assert(vector->getType() == SType::INT64);
-  assert(stack->limit - stack->top >= sizeof(int64_t));
-  vector->append(stack->top, sizeof(int64_t));
-  stack->top += sizeof(int64_t);
+  assert(vector->getType() == SType::UINT64);
+  assert(stack->limit - stack->top >= sizeof(int64_t) + sizeof(STag));
+  vector->append(stack->top, sizeof(int64_t) + sizeof(STag));
+  stack->top += sizeof(int64_t) + sizeof(STag);
 }
 
 void pushInt64(VMStack* stack, int64_t value) {
-  if (stack->top - stack->data < sizeof(int64_t)) {
-    vm::growStack(stack, sizeof(int64_t));
+  if (stack->top - stack->data < sizeof(int64_t) + sizeof(STag)) {
+    vm::growStack(stack, sizeof(int64_t) + sizeof(STag));
   }
 
-  stack->top -= sizeof(int64_t);
-  *reinterpret_cast<int64_t*>(stack->top) = value;
+  stack->top -= sizeof(int64_t) + sizeof(STag);
+  memcpy(stack->top, &value, sizeof(int64_t));
+  memset(stack->top + sizeof(int64_t), 0, sizeof(STag));
 }
 
 void pushInt64Unboxed(VMStack* stack, const void* value) {
-  if (stack->top - stack->data < sizeof(int64_t)) {
-    vm::growStack(stack, sizeof(int64_t));
+  if (stack->top - stack->data < sizeof(int64_t) + sizeof(STag)) {
+    vm::growStack(stack, sizeof(int64_t) + sizeof(STag));
   }
 
-  stack->top -= sizeof(int64_t);
-  memcpy(stack->top, value, sizeof(int64_t));
+  stack->top -= sizeof(int64_t) + sizeof(STag);
+  memcpy(stack->top, value, sizeof(int64_t) + sizeof(STag));
 }
 
 double popFloat64(VMStack* stack) {
-  assert(stack->limit - stack->top >= sizeof(double));
-  auto value = *reinterpret_cast<double*>(stack->top);
-  stack->top += sizeof(double);
+  assert(stack->limit - stack->top >= sizeof(double) + sizeof(STag));
+  double value;
+  memcpy(&value, stack->top, sizeof(double));
+  stack->top += sizeof(double) + sizeof(STag);
   return value;
 }
 
 void popFloat64Boxed(VMStack* stack, SValue* value) {
-  assert(value->getType() == SType::FLOAT64);
-  assert(stack->limit - stack->top >= sizeof(double));
+  assert(value->getType() == SType::UINT64);
+  assert(stack->limit - stack->top >= sizeof(double) + sizeof(STag));
   memcpy(value->getData(), stack->top, sizeof(double));
-  stack->top += sizeof(double);
+  STag tag;
+  memcpy(&tag, stack->top + sizeof(double), sizeof(STag));
+  value->setTag(tag);
+  stack->top += sizeof(double) + sizeof(STag);
 }
 
 void popFloat64Vector(VMStack* stack, SVector* vector) {
-  assert(vector->getType() == SType::FLOAT64);
-  assert(stack->limit - stack->top >= sizeof(double));
-  vector->append(stack->top, sizeof(double));
-  stack->top += sizeof(double);
+  assert(vector->getType() == SType::UINT64);
+  assert(stack->limit - stack->top >= sizeof(double) + sizeof(STag));
+  vector->append(stack->top, sizeof(double) + sizeof(STag));
+  stack->top += sizeof(double) + sizeof(STag);
 }
 
 void pushFloat64(VMStack* stack, double value) {
-  if (stack->top - stack->data < sizeof(double)) {
-    vm::growStack(stack, sizeof(double));
+  if (stack->top - stack->data < sizeof(double) + sizeof(STag)) {
+    vm::growStack(stack, sizeof(double) + sizeof(STag));
   }
 
-  stack->top -= sizeof(double);
-  *reinterpret_cast<double*>(stack->top) = value;
+  stack->top -= sizeof(double) + sizeof(STag);
+  memcpy(stack->top, &value, sizeof(double));
+  memset(stack->top + sizeof(double), 0, sizeof(STag));
 }
 
 void pushFloat64Unboxed(VMStack* stack, const void* value) {
-  if (stack->top - stack->data < sizeof(double)) {
-    vm::growStack(stack, sizeof(double));
+  if (stack->top - stack->data < sizeof(double) + sizeof(STag)) {
+    vm::growStack(stack, sizeof(double) + sizeof(STag));
   }
 
-  stack->top -= sizeof(double);
-  memcpy(stack->top, value, sizeof(double));
+  stack->top -= sizeof(double) + sizeof(STag);
+  memcpy(stack->top, value, sizeof(double) + sizeof(STag));
 }
 
 bool popBool(VMStack* stack) {
-  assert(stack->limit - stack->top >= sizeof(uint8_t));
-  auto value = *reinterpret_cast<uint8_t*>(stack->top);
-  stack->top += sizeof(uint8_t);
+  assert(stack->limit - stack->top >= sizeof(uint8_t) + sizeof(STag));
+  uint8_t value;
+  memcpy(&value, stack->top, sizeof(uint8_t));
+  stack->top += sizeof(uint8_t) + sizeof(STag);
   return value;
 }
 
 void popBoolBoxed(VMStack* stack, SValue* value) {
-  assert(value->getType() == SType::BOOL);
-  assert(stack->limit - stack->top >= sizeof(uint8_t));
+  assert(value->getType() == SType::UINT64);
+  assert(stack->limit - stack->top >= sizeof(uint8_t) + sizeof(STag));
   memcpy(value->getData(), stack->top, sizeof(uint8_t));
-  stack->top += sizeof(uint8_t);
+  STag tag;
+  memcpy(&tag, stack->top + sizeof(uint8_t), sizeof(STag));
+  value->setTag(tag);
+  stack->top += sizeof(uint8_t) + sizeof(STag);
 }
 
 void popBoolVector(VMStack* stack, SVector* vector) {
-  assert(vector->getType() == SType::BOOL);
-  assert(stack->limit - stack->top >= sizeof(uint8_t));
-  vector->append(stack->top, sizeof(uint8_t));
-  stack->top += sizeof(uint8_t);
+  assert(vector->getType() == SType::UINT64);
+  assert(stack->limit - stack->top >= sizeof(uint8_t) + sizeof(STag));
+  vector->append(stack->top, sizeof(uint8_t) + sizeof(STag));
+  stack->top += sizeof(uint8_t) + sizeof(STag);
 }
 
-void pushBool(VMStack* stack, bool value) {
-  if (stack->top - stack->data < sizeof(uint8_t)) {
-    vm::growStack(stack, sizeof(uint8_t));
+void pushBool(VMStack* stack, bool value_bool) {
+  if (stack->top - stack->data < sizeof(uint8_t) + sizeof(STag)) {
+    vm::growStack(stack, sizeof(uint8_t) + sizeof(STag));
   }
 
-  stack->top -= sizeof(uint8_t);
-  *reinterpret_cast<uint8_t*>(stack->top) = uint8_t(value);
+  uint8_t value = value_bool;
+  stack->top -= sizeof(uint8_t) + sizeof(STag);
+  memcpy(stack->top, &value, sizeof(uint8_t));
+  memset(stack->top + sizeof(uint8_t), 0, sizeof(STag));
 }
 
 void pushBoolUnboxed(VMStack* stack, const void* value) {
-  if (stack->top - stack->data < sizeof(uint8_t)) {
-    vm::growStack(stack, sizeof(uint8_t));
+  if (stack->top - stack->data < sizeof(uint8_t) + sizeof(STag)) {
+    vm::growStack(stack, sizeof(uint8_t) + sizeof(STag));
   }
 
-  stack->top -= sizeof(uint8_t);
-  memcpy(stack->top, value, sizeof(uint8_t));
+  stack->top -= sizeof(uint8_t) + sizeof(STag);
+  memcpy(stack->top, value, sizeof(uint8_t) + sizeof(STag));
 }
 
 void copyString(const std::string& str, SVector* vector) {
   uint32_t strlen = str.size();
   vector->append((const char*) &strlen, sizeof(uint32_t));
   vector->append(str.data(), strlen);
+  STag tag = 0;
+  vector->append(&tag, sizeof(tag));
 }
 
 void popString(VMStack* stack, const char** data, size_t* len) {
   assert(stack->limit - stack->top >= sizeof(uint32_t));
   *len = *reinterpret_cast<uint32_t*>(stack->top);
   *data = stack->top + sizeof(uint32_t);
-  assert(stack->limit - stack->top >= sizeof(uint32_t) + *len);
-  stack->top += sizeof(uint32_t) + *len;
+  assert(stack->limit - stack->top >= sizeof(uint32_t) + *len + sizeof(STag));
+  stack->top += sizeof(uint32_t) + *len + sizeof(STag);
 }
 
 std::string popString(VMStack* stack) {
   assert(stack->limit - stack->top >= sizeof(uint32_t));
   size_t len = *reinterpret_cast<uint32_t*>(stack->top);
   auto data = stack->top + sizeof(uint32_t);
-  assert(stack->limit - stack->top >= sizeof(uint32_t) + len);
-  stack->top += len + sizeof(uint32_t);
+  assert(stack->limit - stack->top >= sizeof(uint32_t) + len + sizeof(STag));
+  stack->top += sizeof(uint32_t) + len + sizeof(STag);
   return std::string(data, len);
 }
 
 void popStringBoxed(VMStack* stack, SValue* value) {
   assert(stack->limit - stack->top >= sizeof(uint32_t));
   size_t len = *reinterpret_cast<uint32_t*>(stack->top);
+  assert(stack->limit - stack->top >= sizeof(uint32_t) + len + sizeof(STag));
   value->setData(stack->top, sizeof(uint32_t) + len);
-  assert(stack->limit - stack->top >= sizeof(uint32_t) + len);
-  stack->top += sizeof(uint32_t) + len;
+  STag tag;
+  memcpy(&tag, stack->top + sizeof(uint32_t) + len, sizeof(STag));
+  value->setTag(tag);
+  stack->top += sizeof(uint32_t) + len + sizeof(STag);
 }
 
 void popStringVector(VMStack* stack, SVector* vector) {
   assert(stack->limit - stack->top >= sizeof(uint32_t));
   size_t len = *reinterpret_cast<uint32_t*>(stack->top);
-  vector->append(stack->top, sizeof(uint32_t) + len);
-  assert(stack->limit - stack->top >= sizeof(uint32_t) + len);
-  stack->top += sizeof(uint32_t) + len;
+  assert(stack->limit - stack->top >= sizeof(uint32_t) + len + sizeof(STag));
+  vector->append(stack->top, sizeof(uint32_t) + len + sizeof(STag));
+  stack->top += sizeof(uint32_t) + len + sizeof(STag);
 }
 
 void pushString(VMStack* stack, const char* data, size_t len) {
-  if (stack->top - stack->data < sizeof(uint32_t) + len) {
-    vm::growStack(stack, sizeof(uint32_t) + len);
+  if (stack->top - stack->data < sizeof(uint32_t) + len + sizeof(STag)) {
+    vm::growStack(stack, sizeof(uint32_t) + len + sizeof(STag));
   }
 
-  *reinterpret_cast<uint32_t*>(stack->top - len - sizeof(uint32_t)) = len;
-  memcpy(stack->top - len, data, len);
-  stack->top -= sizeof(uint32_t) + len;
+  *reinterpret_cast<uint32_t*>(stack->top - len - sizeof(uint32_t) - sizeof(STag)) = len;
+  memcpy(stack->top - len - sizeof(STag), data, len);
+  STag tag = 0;
+  memcpy(stack->top - sizeof(STag), &tag, sizeof(STag));
+  stack->top -= sizeof(uint32_t) + len + sizeof(STag);
 }
 
 void pushString(VMStack* stack, const std::string& str) {
   auto len = str.size();
 
-  if (stack->top - stack->data < sizeof(uint32_t) + len) {
-    vm::growStack(stack, sizeof(uint32_t) + len);
+  if (stack->top - stack->data < sizeof(uint32_t) + len + sizeof(STag)) {
+    vm::growStack(stack, sizeof(uint32_t) + len + sizeof(STag));
   }
 
-  *reinterpret_cast<uint32_t*>(stack->top - sizeof(uint32_t) - len) = len;
-  memcpy(stack->top - len, str.data(), len);
-  stack->top -= sizeof(uint32_t) + len;
+  *reinterpret_cast<uint32_t*>(stack->top - sizeof(uint32_t) - len - sizeof(STag)) = len;
+  memcpy(stack->top - len - sizeof(STag), str.data(), len);
+  STag tag = 0;
+  memcpy(stack->top - sizeof(STag), &tag, sizeof(STag));
+  stack->top -= sizeof(uint32_t) + len + sizeof(STag);
 }
 
 void pushStringUnboxed(VMStack* stack, const void* value) {
-  auto len = *static_cast<const uint32_t*>(value);
-  if (stack->top - stack->data < sizeof(uint32_t) + len) {
-    vm::growStack(stack, sizeof(uint32_t) + len);
+  auto len = *reinterpret_cast<const uint32_t*>(value);
+  if (stack->top - stack->data < sizeof(uint32_t) + len + sizeof(STag)) {
+    vm::growStack(stack, sizeof(uint32_t) + len + sizeof(STag));
   }
 
-  memcpy(stack->top - sizeof(uint32_t) - len, value, len + sizeof(uint32_t));
-  stack->top -= sizeof(uint32_t) + len;
+  memcpy(
+      stack->top - sizeof(uint32_t) - len - sizeof(STag), 
+      value,
+      len + sizeof(uint32_t) + sizeof(STag));
+
+  stack->top -= sizeof(uint32_t) + len + sizeof(STag);
 }
 
 uint64_t popTimestamp64(VMStack* stack) {
-  assert(stack->limit - stack->top >= sizeof(uint64_t));
-  auto value = *reinterpret_cast<uint64_t*>(stack->top);
-  stack->top += sizeof(uint64_t);
+  assert(stack->limit - stack->top >= sizeof(uint64_t) + sizeof(STag));
+  uint64_t value;
+  memcpy(&value, stack->top, sizeof(uint64_t));
+  stack->top += sizeof(uint64_t) + sizeof(STag);
   return value;
 }
 
 void popTimestamp64Boxed(VMStack* stack, SValue* value) {
-  assert(value->getType() == SType::TIMESTAMP64);
-  assert(stack->limit - stack->top >= sizeof(uint64_t));
+  assert(value->getType() == SType::UINT64);
+  assert(stack->limit - stack->top >= sizeof(uint64_t) + sizeof(STag));
   memcpy(value->getData(), stack->top, sizeof(uint64_t));
-  stack->top += sizeof(uint64_t);
+  STag tag;
+  memcpy(&tag, stack->top + sizeof(uint64_t), sizeof(STag));
+  value->setTag(tag);
+  stack->top += sizeof(uint64_t) + sizeof(STag);
 }
 
 void popTimestamp64Vector(VMStack* stack, SVector* vector) {
-  assert(vector->getType() == SType::TIMESTAMP64);
-  assert(stack->limit - stack->top >= sizeof(uint64_t));
-  vector->append(stack->top, sizeof(uint64_t));
-  stack->top += sizeof(uint64_t);
+  assert(vector->getType() == SType::UINT64);
+  assert(stack->limit - stack->top >= sizeof(uint64_t) + sizeof(STag));
+  vector->append(stack->top, sizeof(uint64_t) + sizeof(STag));
+  stack->top += sizeof(uint64_t) + sizeof(STag);
 }
 
 void pushTimestamp64(VMStack* stack, uint64_t value) {
-  if (stack->top - stack->data < sizeof(uint64_t)) {
-    vm::growStack(stack, sizeof(uint64_t));
+  if (stack->top - stack->data < sizeof(uint64_t) + sizeof(STag)) {
+    vm::growStack(stack, sizeof(uint64_t) + sizeof(STag));
   }
 
-  stack->top -= sizeof(uint64_t);
-  *reinterpret_cast<uint64_t*>(stack->top) = value;
+  stack->top -= sizeof(uint64_t) + sizeof(STag);
+  memcpy(stack->top, &value, sizeof(uint64_t));
+  memset(stack->top + sizeof(uint64_t), 0, sizeof(STag));
 }
 
 void pushTimestamp64Unboxed(VMStack* stack, const void* value) {
-  if (stack->top - stack->data < sizeof(uint64_t)) {
-    vm::growStack(stack, sizeof(uint64_t));
+  if (stack->top - stack->data < sizeof(uint64_t) + sizeof(STag)) {
+    vm::growStack(stack, sizeof(uint64_t) + sizeof(STag));
   }
 
-  stack->top -= sizeof(uint64_t);
-  memcpy(stack->top, value, sizeof(uint64_t));
+  stack->top -= sizeof(uint64_t) + sizeof(STag);
+  memcpy(stack->top, value, sizeof(uint64_t) + sizeof(STag));
 }
 
 } // namespace csql

@@ -126,6 +126,9 @@ public:
   size_t getCapacity() const;
   size_t getSize() const;
 
+  void setTag(STag tag);
+  STag getTag() const;
+
 protected:
   struct {
     SType type;
@@ -138,6 +141,7 @@ protected:
       void* t_string;
     } u;
   } data_;
+  STag tag_;
 };
 
 class SVector {
