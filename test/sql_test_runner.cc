@@ -86,7 +86,14 @@ Status compareResult(ResultList* result, const std::string& result_file_path) {
 
     for (size_t i = 0; i < row.size(); ++i) {
       if (row[i] != returned_row[i]) {
-        return Status(eRuntimeError, "wrong result");
+        return Status(
+            eRuntimeError,
+            StringUtil::format(
+                "result mismatch at row $0, column $1; expected: >$2<, got: >$3<",
+                count,
+                i,
+                row[i],
+                returned_row[i]));
       }
     }
 
@@ -117,7 +124,7 @@ Status compareChart(ResultList* result, const std::string& result_file_path) {
 
   auto returned_result = result->getRow(0)[0];
   if (expected_result != returned_result) {
-    return Status(eRuntimeError, "wrong result");
+    return Status(eRuntimeError, "result charts don't match");
   }
 
   return Status::success();
@@ -134,7 +141,9 @@ Status compareError(
   if (result == error_msg) {
     return Status::success();
   } else {
-    return Status(eRuntimeError, "wrong result");
+    return Status(
+        eRuntimeError,
+        StringUtil::format("unexpected error: $0", error_msg));
   }
 }
 
