@@ -40,22 +40,6 @@ bool ColumnReader::readDateTime(
   }
 }
 
-void ColumnReader::readValues(
-    size_t n,
-    ColumnStorage* dst,
-    std::vector<uint32_t>* dlevels /* = nullptr */,
-    std::vector<uint32_t>* rlevels /* = nullptr */) {
-  RAISE(kNotYetImplementedError, "not yet implemented");
-}
-
-void ColumnReader::readValues(
-    size_t n,
-    ColumnStorage* dst,
-    std::vector<bool>* null_set,
-    std::vector<uint32_t>* rlevels /* = nullptr */) {
-  RAISE(kNotYetImplementedError, "not yet implemented");
-}
-
 DefaultColumnReader::DefaultColumnReader(
     ColumnConfig config,
     ScopedPtr<UnsignedIntPageReader> rlevel_reader,

@@ -75,24 +75,6 @@ UnsignedIntColumnReader::UnsignedIntColumnReader(
   }
 }
 
-void UnsignedIntColumnReader::readValues(
-    size_t n,
-    ColumnStorage* dst,
-    std::vector<uint32_t>* dlevels /* = nullptr */,
-    std::vector<uint32_t>* rlevels /* = nullptr */) {
-  dst->resize(n * sizeof(uint64_t));
-  uint64_t* data = (uint64_t*) dst->data();
-  assert(data);
-
-  uint64_t rlvl;
-  uint64_t dlvl;
-  for (size_t i = 0; i < n; ++i) {
-    if (!readUnsignedInt(&rlvl, &dlvl, data + i)) {
-      data[i] = 0;
-    }
-  }
-}
-
 bool UnsignedIntColumnReader::readBoolean(
     uint64_t* rlvl,
     uint64_t* dlvl,

@@ -702,7 +702,11 @@ FastCSTableScan::FastCSTableScan(
     cstable_filename_(cstable_filename),
     records_remaining_(0),
     records_consumed_(0),
-    filter_enabled_(false)  {}
+    filter_enabled_(false)  {
+  for (const auto& sl : stmt_->selectList()) {
+    column_types_.emplace_back(sl->expression()->getReturnType());
+  }
+}
 
 FastCSTableScan::FastCSTableScan(
     Transaction* txn,
@@ -717,7 +721,11 @@ FastCSTableScan::FastCSTableScan(
     cstable_filename_(cstable_filename),
     records_remaining_(0),
     records_consumed_(0),
-    filter_enabled_(false) {}
+    filter_enabled_(false) {
+  for (const auto& sl : stmt_->selectList()) {
+    column_types_.emplace_back(sl->expression()->getReturnType());
+  }
+}
 
 FastCSTableScan::~FastCSTableScan() {}
 
@@ -740,7 +748,6 @@ ReturnCode FastCSTableScan::execute() {
 
   for (const auto& c : stmt_->selectedColumns()) {
     auto colinfo = stmt_->getComputedColumnInfo(c);
-    column_types_.emplace_back(colinfo.second);
     column_buffers_.emplace_back(colinfo.second);
 
     if (cstable_->hasColumn(c)) {
@@ -845,28 +852,47 @@ ReturnCode FastCSTableScan::nextBatch(
 
 ReturnCode FastCSTableScan::fetchColumnUInt64(size_t idx, size_t batch_size) {
   auto buffer = &column_buffers_[idx];
-  size_t buffer_len = batch_size * sizeof(uint64_t);
+  const size_t buffer_elen = sizeof(STag) + sizeof(uint64_t);
+  size_t buffer_len = batch_size * buffer_elen;
   if (buffer->getCapacity() < buffer_len) {
     buffer->increaseCapacity(buffer_len);
   }
 
-  cstable::FixedColumnStorage col_storage(buffer->getMutableData(), &buffer_len);
-  auto reader = column_readers_[idx];
-  reader->readValues(batch_size, &col_storage);
-
-  assert(buffer_len == batch_size * sizeof(uint64_t));
   buffer->setSize(buffer_len);
+  char* buffer_data = (char*) buffer->getData();
+
+  auto reader = column_readers_[idx];
+  uint64_t rlvl;
+  uint64_t dlvl;
+  uint64_t val;
+  STag tag_present = 0;
+  STag tag_null = STAG_NULL;
+  for (size_t i = 0; i < batch_size; ++i) {
+    if (reader->readUnsignedInt(&rlvl, &dlvl, &val)) {
+      memcpy(buffer_data + i * buffer_elen, &val, sizeof(uint64_t));
+      memcpy(
+          buffer_data + i * buffer_elen + sizeof(uint64_t),
+          &tag_present,
+          sizeof(STag));
+    } else {
+      memset(buffer_data + i * buffer_elen, 0, sizeof(uint64_t));
+      memcpy(
+          buffer_data + i * buffer_elen + sizeof(uint64_t),
+          &tag_null,
+          sizeof(STag));
+    }
+  }
 
   return ReturnCode::success();
 }
 
 size_t FastCSTableScan::getColumnCount() const {
-  return select_list_.size();
+  return column_types_.size();
 }
 
 SType FastCSTableScan::getColumnType(size_t idx) const {
-  assert(idx < select_list_.size());
-  return select_list_[idx].getReturnType();
+  assert(idx < column_types_.size());
+  return column_types_[idx];
 }
 
 void FastCSTableScan::setFilter(std::vector<bool>&& filter) {

@@ -67,18 +67,6 @@ public:
       uint64_t* dlvl,
       UnixTime* value);
 
-  virtual void readValues(
-      size_t n,
-      ColumnStorage* dst,
-      std::vector<uint32_t>* dlevels = nullptr,
-      std::vector<uint32_t>* rlevels = nullptr);
-
-  virtual void readValues(
-      size_t n,
-      ColumnStorage* dst,
-      std::vector<bool>* null_set,
-      std::vector<uint32_t>* rlevels = nullptr);
-
   virtual void skipValue() = 0;
   virtual void copyValue(ColumnWriter* writer) = 0;
 
