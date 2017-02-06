@@ -36,8 +36,8 @@
 #include "eventql/eventql.h"
 using namespace csql;
 
-const auto kDirectoryPath = "./sql/";
-const auto kTestListFile = "test.lst";
+const auto kTestListFile = "./sql_tests.lst";
+const auto kDirectoryPath = "./sql";
 const auto kSQLPathEnding = ".sql";
 const auto kResultPathEnding = ".result.txt";
 const auto kChartColumnName = "__chart";
@@ -86,10 +86,7 @@ Status compareResult(ResultList* result, const std::string& result_file_path) {
 
     for (size_t i = 0; i < row.size(); ++i) {
       if (row[i] != returned_row[i]) {
-        return Status(eRuntimeError, StringUtil::format(
-            "wrong value, expected $0 to be $1",
-            returned_row[i],
-            row[i]));
+        return Status(eRuntimeError, "wrong result");
       }
     }
 
@@ -137,30 +134,25 @@ Status compareError(
   if (result == error_msg) {
     return Status::success();
   } else {
-    return Status(eRuntimeError, StringUtil::format(
-        "wrong result, expected $0 to be $1",
-        error_msg,
-        result));
+    return Status(eRuntimeError, "wrong result");
   }
 }
 
 Status runTest(const std::string& test) {
-  auto sql_file_path = StringUtil::format(
-      "$0$1$2",
+  auto sql_file_path = FileUtil::joinPaths(
       kDirectoryPath,
-      test,
-      kSQLPathEnding);
+      StringUtil::format("$0$1", test, kSQLPathEnding));
+
   if (!FileUtil::exists(sql_file_path)) {
     return Status(
         eIOError,
         StringUtil::format("File does not exist: $0", sql_file_path));
   }
 
-  auto result_file_path = StringUtil::format(
-      "$0$1$2",
+  auto result_file_path = FileUtil::joinPaths(
       kDirectoryPath,
-      test,
-      kResultPathEnding);
+      StringUtil::format("$0$1", test, kResultPathEnding));
+
   if (!FileUtil::exists(result_file_path)) {
     return Status(
         eIOError,
@@ -218,10 +210,7 @@ int main(int argc, const char** argv) {
   int rc = 0;
 
   try {
-    auto is = FileInputStream::openFile(StringUtil::format(
-        "$0$1",
-        kDirectoryPath,
-        kTestListFile));
+    auto is = FileInputStream::openFile(kTestListFile);
 
     std::string line;
     size_t count = 1;
@@ -229,7 +218,7 @@ int main(int argc, const char** argv) {
       StringUtil::chomp(&line);
       auto ret = runTest(line);
       if (ret.isSuccess()) {
-        std::cout << "ok " << count << std::endl;
+        std::cout << "ok " << count << " - test passed" << std::endl;
       } else {
         std::cout << "not ok " << count << " - " << ret.message() << std::endl;
       }
