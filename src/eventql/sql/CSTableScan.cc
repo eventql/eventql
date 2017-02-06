@@ -778,12 +778,23 @@ ReturnCode FastCSTableScan::nextBatch(
       auto rc = ReturnCode::success();
 
       switch (column_types_[i]) {
+        case SType::NIL:
+          return ReturnCode::error("EARG", "illegal column type: NIL");
         case SType::UINT64:
         case SType::TIMESTAMP64:
           rc = fetchColumnUInt64(i, batch_size);
           break;
-        default:
-          assert(0);
+        case SType::INT64:
+          return ReturnCode::error("EARG", "illegal column type: INT64");
+        case SType::FLOAT64:
+          rc = fetchColumnFloat64(i, batch_size);
+          break;
+        case SType::BOOL:
+          rc = fetchColumnBool(i, batch_size);
+          break;
+        case SType::STRING:
+          rc = fetchColumnString(i, batch_size);
+          break;
       }
 
       if (!rc.isSuccess()) {
@@ -880,6 +891,107 @@ ReturnCode FastCSTableScan::fetchColumnUInt64(size_t idx, size_t batch_size) {
           buffer_data + i * buffer_elen + sizeof(uint64_t),
           &tag_null,
           sizeof(STag));
+    }
+  }
+
+  return ReturnCode::success();
+}
+
+ReturnCode FastCSTableScan::fetchColumnFloat64(size_t idx, size_t batch_size) {
+  auto buffer = &column_buffers_[idx];
+  const size_t buffer_elen = sizeof(STag) + sizeof(double);
+  size_t buffer_len = batch_size * buffer_elen;
+  if (buffer->getCapacity() < buffer_len) {
+    buffer->increaseCapacity(buffer_len);
+  }
+
+  buffer->setSize(buffer_len);
+  char* buffer_data = (char*) buffer->getData();
+
+  auto reader = column_readers_[idx];
+  uint64_t rlvl;
+  uint64_t dlvl;
+  double val;
+  STag tag_present = 0;
+  STag tag_null = STAG_NULL;
+  for (size_t i = 0; i < batch_size; ++i) {
+    if (reader->readFloat(&rlvl, &dlvl, &val)) {
+      memcpy(buffer_data + i * buffer_elen, &val, sizeof(double));
+      memcpy(
+          buffer_data + i * buffer_elen + sizeof(double),
+          &tag_present,
+          sizeof(STag));
+    } else {
+      memset(buffer_data + i * buffer_elen, 0, sizeof(double));
+      memcpy(
+          buffer_data + i * buffer_elen + sizeof(double),
+          &tag_null,
+          sizeof(STag));
+    }
+  }
+
+  return ReturnCode::success();
+}
+
+ReturnCode FastCSTableScan::fetchColumnBool(size_t idx, size_t batch_size) {
+  auto buffer = &column_buffers_[idx];
+  const size_t buffer_elen = sizeof(STag) + sizeof(uint8_t);
+  size_t buffer_len = batch_size * buffer_elen;
+  if (buffer->getCapacity() < buffer_len) {
+    buffer->increaseCapacity(buffer_len);
+  }
+
+  buffer->setSize(buffer_len);
+  char* buffer_data = (char*) buffer->getData();
+
+  auto reader = column_readers_[idx];
+  uint64_t rlvl;
+  uint64_t dlvl;
+  bool val;
+  uint8_t val_uint;
+  STag tag_present = 0;
+  STag tag_null = STAG_NULL;
+  for (size_t i = 0; i < batch_size; ++i) {
+    if (reader->readBoolean(&rlvl, &dlvl, &val)) {
+      val_uint = val;
+      memcpy(buffer_data + i * buffer_elen, &val_uint, sizeof(uint8_t));
+      memcpy(
+          buffer_data + i * buffer_elen + sizeof(uint8_t),
+          &tag_present,
+          sizeof(STag));
+    } else {
+      memset(buffer_data + i * buffer_elen, 0, sizeof(uint8_t));
+      memcpy(
+          buffer_data + i * buffer_elen + sizeof(uint8_t),
+          &tag_null,
+          sizeof(STag));
+    }
+  }
+
+  return ReturnCode::success();
+}
+
+ReturnCode FastCSTableScan::fetchColumnString(size_t idx, size_t batch_size) {
+  auto& buffer = column_buffers_[idx];
+  auto reader = column_readers_[idx];
+  uint64_t rlvl;
+  uint64_t dlvl;
+  std::string val;
+  STag tag_present = 0;
+  STag tag_null = STAG_NULL;
+
+  char nullstring[sizeof(uint32_t) + sizeof(STag)];
+  memset(nullstring, 0, sizeof(uint32_t));
+  memcpy(nullstring + sizeof(uint32_t), &tag_null, sizeof(STag));
+
+  for (size_t i = 0; i < batch_size; ++i) {
+    if (reader->readString(&rlvl, &dlvl, &val)) {
+      uint32_t strlen = val.size();
+      buffer.append(&strlen, sizeof(strlen));
+      buffer.append(val.data(), val.size());
+      buffer.append(&tag_present, sizeof(STag));
+    } else {
+      buffer.append(&nullstring, sizeof(uint32_t) + sizeof(STag));
     }
   }
 
