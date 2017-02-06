@@ -15,7 +15,7 @@
   margin: 0;
 }
 
-.evql_database_list button.btn {
+.evql_database_list .section_title button.btn {
   right: 0;
   position: absolute;
   top: 50%;
@@ -28,4 +28,15 @@
 
 .evql_database_list table.evql_table th {
   background: transparent;
+}
+
+.evql_database_list .evql_modal .body {
+  font-size: 13px;
+  line-height: 28px;
+}
+
+.evql_database_list .evql_modal .body label {
+  margin-right: 10px;
+  display: inline-block;
+  vertical-align: top;
 }

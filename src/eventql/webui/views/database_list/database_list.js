@@ -39,7 +39,8 @@ EventQL.DatabaseList = function(elem, params) {
     var modal_elem = elem.querySelector(".evql_modal");
     var modal = new EventQL.Modal(modal_elem);
     modal.onSubmit(function() {
-      console.log("create database");
+      var db_name = modal_elem.querySelector("input[name='database']").value;
+      createDatabase(db_name);
     });
 
     var control = elem.querySelector("button[data-control='create_database']");
@@ -94,6 +95,37 @@ EventQL.DatabaseList = function(elem, params) {
       }, false);
 
       tbody_elem.appendChild(tr_elem);
+    });
+  }
+
+  function createDatabase(db_name) {
+    var query_str = "CREATE DATABASE " + db_name + ";";
+    var query_id = "create_database";
+
+    var query = query_mgr.add(
+        query_id,
+         params.app.api_stubs.evql.executeSQLSSE(query_str));
+
+    query.addEventListener('result', function(e) {
+      query_mgr.close(query_id);
+      var data = JSON.parse(e.data);
+      console.log(data);
+      fetchData();
+    });
+
+    query.addEventListener('query_error', function(e) {
+      query_mgr.close(query_id);
+      console.log("error", JSON.parse(e.data).error);
+      //renderQueryError(JSON.parse(e.data).error);
+    });
+
+    query.addEventListener('error', function(e) {
+      query_mgr.close(query_id);
+      //renderQueryError("Server Error");
+    });
+
+    query.addEventListener('status', function(e) {
+      ///renderQueryProgress(JSON.parse(e.data));
     });
   }
 

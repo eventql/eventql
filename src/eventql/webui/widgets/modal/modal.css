@@ -27,3 +27,20 @@
   vertical-align: center;
   padding: 10px 50px;
 }
+
+.evql_modal .modal_window .header {
+  line-height: 54px;
+  border-bottom: 1px solid #ddd;
+}
+
+.evql_modal .modal_window .body {
+  padding-top: 25px;
+}
+
+.evql_modal .modal_window .footer {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  padding: inherit;
+}
+
