@@ -1,4 +1,4 @@
 smoketest1
 .libs
 unit_*
-evql_*
+evql_test_sql
