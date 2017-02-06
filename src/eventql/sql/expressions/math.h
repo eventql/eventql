@@ -21,8 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _FNORDMETRIC_SQL_EXPRESSIONS_MATH_H
-#define _FNORDMETRIC_SQL_EXPRESSIONS_MATH_H
+#pragma once
 #include <eventql/sql/svalue.h>
 #include <eventql/sql/SFunction.h>
 #include <eventql/sql/transaction.h>
@@ -35,15 +34,26 @@ extern const SFunction add_uint64;
 extern const SFunction add_int64;
 extern const SFunction add_float64;
 
-//void subExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
-//void mulExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
-//void divExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
-//void modExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
-//void powExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
-//
-//void roundExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
-//void truncateExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
+extern const SFunction sub_uint64;
+extern const SFunction sub_int64;
+extern const SFunction sub_float64;
 
-}
-}
-#endif
+extern const SFunction mul_uint64;
+extern const SFunction mul_int64;
+extern const SFunction mul_float64;
+
+extern const SFunction div_uint64;
+extern const SFunction div_int64;
+extern const SFunction div_float64;
+
+extern const SFunction mod_uint64;
+extern const SFunction mod_int64;
+extern const SFunction mod_float64;
+
+extern const SFunction pow_uint64;
+extern const SFunction pow_int64;
+extern const SFunction pow_float64;
+
+} // namespace expressions
+} // namespace csql
+

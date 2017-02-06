@@ -40,36 +40,6 @@ void installDefaultSymbols(SymbolTable* rt) {
   //rt->registerFunction("max", expressions::kMaxExpr);
   //rt->registerFunction("min", expressions::kMinExpr);
 
-  ////rt->registerSymbol(
-  ////    "mean",
-  ////    &expressions::meanExpr,
-  ////    expressions::meanExprScratchpadSize(),
-  ////    &expressions::meanExprFree);
-
-  ////rt->registerSymbol(
-  ////    "avg",
-  ////    &expressions::meanExpr,
-  ////    expressions::meanExprScratchpadSize(),
-  ////    &expressions::meanExprFree);
-
-  ////rt->registerSymbol(
-  ////    "average",
-  ////    &expressions::meanExpr,
-  ////    expressions::meanExprScratchpadSize(),
-  ////    &expressions::meanExprFree);
-
-  ////rt->registerSymbol(
-  ////    "min",
-  ////    &expressions::minExpr,
-  ////    expressions::minExprScratchpadSize(),
-  ////    &expressions::minExprFree);
-
-  ////rt->registerSymbol(
-  ////    "max",
-  ////    &expressions::maxExpr,
-  ////    expressions::maxExprScratchpadSize(),
-  ////    &expressions::maxExprFree);
-
   ///* expressions/boolean.h */
   rt->registerFunction("eq",  expressions::eq_uint64);
   rt->registerFunction("eq",  expressions::eq_timestamp64);
@@ -110,14 +80,21 @@ void installDefaultSymbols(SymbolTable* rt) {
   rt->registerFunction("add", expressions::add_uint64);
   rt->registerFunction("add", expressions::add_int64);
   rt->registerFunction("add", expressions::add_float64);
-  //rt->registerFunction("sub", PureFunction(&expressions::subExpr));
-  //rt->registerFunction("mul", PureFunction(&expressions::mulExpr));
-  //rt->registerFunction("div", PureFunction(&expressions::divExpr));
-  //rt->registerFunction("mod", PureFunction(&expressions::modExpr));
-  //rt->registerFunction("pow", PureFunction(&expressions::powExpr));
-
-  //rt->registerFunction("round", PureFunction(&expressions::roundExpr));
-  //rt->registerFunction("truncate", PureFunction(&expressions::truncateExpr));
+  rt->registerFunction("sub", expressions::sub_uint64);
+  rt->registerFunction("sub", expressions::sub_int64);
+  rt->registerFunction("sub", expressions::sub_float64);
+  rt->registerFunction("mul", expressions::mul_uint64);
+  rt->registerFunction("mul", expressions::mul_int64);
+  rt->registerFunction("mul", expressions::mul_float64);
+  rt->registerFunction("div", expressions::div_uint64);
+  rt->registerFunction("div", expressions::div_int64);
+  rt->registerFunction("div", expressions::div_float64);
+  rt->registerFunction("mod", expressions::mod_uint64);
+  rt->registerFunction("mod", expressions::mod_int64);
+  rt->registerFunction("mod", expressions::mod_float64);
+  rt->registerFunction("pow", expressions::pow_uint64);
+  rt->registerFunction("pow", expressions::pow_int64);
+  rt->registerFunction("pow", expressions::pow_float64);
 
   ///* expressions/string.h */
   //rt->registerFunction("startswith", PureFunction(&expressions::startsWithExpr));
