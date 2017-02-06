@@ -973,7 +973,7 @@ void SVector::append(const void* data, size_t size) {
     increaseCapacity(size_ + size);
   }
 
-  memcpy(data_ + size_, data, size);
+  memcpy((char*) data_ + size_, data, size);
   size_ += size;
 }
 
