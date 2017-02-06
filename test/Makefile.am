@@ -27,7 +27,8 @@ TESTS = \
   unit_metadata_operation_createpartition \
   unit_partition_discovery \
   unit_sql_parser \
-  unit_sql_qtree
+  unit_sql_qtree \
+  evql_test_sql
 
 check_PROGRAMS = $(TESTS)
 
@@ -96,6 +97,15 @@ unit_sql_parser_LDADD = \
 
 unit_sql_qtree_SOURCES = unit/sql_qtree.cc
 unit_sql_qtree_LDADD = \
+    @top_builddir@/src/libevqlcore.a \
+    @top_builddir@/src/libevqlclient.la \
+    $(INIH_LDADD) \
+    $(SIMDCOMP_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD)
+
+evql_test_sql_SOURCES = sql/test_runner.cc
+evql_test_sql_LDADD = \
     @top_builddir@/src/libevqlcore.a \
     @top_builddir@/src/libevqlclient.la \
     $(INIH_LDADD) \
