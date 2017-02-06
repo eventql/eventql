@@ -1057,28 +1057,75 @@ size_t sql_sizeof_static(SType type) {
 }
 
 std::string sql_tostring(SType type, const void* value) {
+  if (!value) {
+    return "NULL";
+  }
+
   switch (type) {
 
     case SType::NIL:
       return "NULL";
 
-    case SType::INT64:
-      return std::to_string(*static_cast<const int64_t*>(value));
+    case SType::INT64: {
+      STag tag;
+      memcpy(&tag, (const char*) value + sizeof(int64_t), sizeof(STag));
+      if (tag & STAG_NULL) {
+        return "NULL";
+      } else {
+        return std::to_string(*static_cast<const int64_t*>(value));
+      }
+    }
 
-    case SType::UINT64:
-      return std::to_string(*static_cast<const uint64_t*>(value));
+    case SType::UINT64: {
+      STag tag;
+      memcpy(&tag, (const char*) value + sizeof(uint64_t), sizeof(STag));
+      if (tag & STAG_NULL) {
+        return "NULL";
+      } else {
+        return std::to_string(*static_cast<const uint64_t*>(value));
+      }
+    }
 
-    case SType::FLOAT64:
-      return std::to_string(*static_cast<const double*>(value));
+    case SType::FLOAT64: {
+      STag tag;
+      memcpy(&tag, (const char*) value + sizeof(double), sizeof(STag));
+      if (tag & STAG_NULL) {
+        return "NULL";
+      } else {
+        return std::to_string(*static_cast<const double*>(value));
+      }
+    }
 
-    case SType::STRING:
-      return value ? std::string(sql_cstr(value), sql_strlen(value)) : "";
+    case SType::STRING: {
+      auto strlen = sql_strlen(value);
+      STag tag;
+      memcpy(&tag, (const char*) value + sizeof(uint32_t) + strlen, sizeof(STag));
+      if (tag & STAG_NULL) {
+        return "NULL";
+      } else {
+        return std::string(sql_cstr(value), strlen);
+      }
+    }
 
-    case SType::TIMESTAMP64:
-      return UnixTime(*static_cast<const uint64_t*>(value)).toString();
+    case SType::TIMESTAMP64: {
+      STag tag;
+      memcpy(&tag, (const char*) value + sizeof(uint64_t), sizeof(STag));
+      if (tag & STAG_NULL) {
+        return "NULL";
+      } else {
+        return UnixTime(*static_cast<const uint64_t*>(value)).toString();
+      }
+    }
 
-    case SType::BOOL:
-      return *static_cast<const uint8_t*>(value) ? "true" : "false";
+    case SType::BOOL: {
+      STag tag;
+      memcpy(&tag, (const char*) value + sizeof(uint8_t), sizeof(STag));
+      if (tag & STAG_NULL) {
+        return "NULL";
+      } else {
+        return *static_cast<const uint8_t*>(value) ? "true" : "false";
+      }
+    }
 
   }
 }

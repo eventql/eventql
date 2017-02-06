@@ -136,14 +136,10 @@ ReturnCode performOperation_QUERY(
       auto result_cursor = qplan->execute(i);
       QueryResultFrame r_frame(qplan->getStatementgetResultColumns(i));
 
-      std::vector<csql::SValue> row;
-      for (size_t i = 0; i < result_cursor->getColumnCount(); ++i) {
-        row.emplace_back(result_cursor->getColumnType(i));
-      }
-
+      std::vector<std::string> row(result_cursor->getColumnCount());
       while (result_cursor->isValid()) {
         for (size_t i = 0; i < result_cursor->getColumnCount(); ++i) {
-          row[i].copyFrom(result_cursor->getColumnData(i)); // FIXME
+          row[i] = result_cursor->getColumnString(i);
         }
 
         r_frame.addRow(row);
