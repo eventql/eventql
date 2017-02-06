@@ -57,6 +57,8 @@ enum STagFlag : uint8_t {
 
 std::string getSTypeName(SType type);
 
+void copyBoxed(const SValue* val, SVector* vector);
+
 void popBoxed(VMStack* stack, SValue* value);
 void popVector(VMStack* stack, SVector* vector);
 void pushBoxed(VMStack* stack, const SValue* value);

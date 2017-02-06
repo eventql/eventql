@@ -42,6 +42,12 @@ std::string getSTypeName(SType type) {
   return "???";
 }
 
+void copyBoxed(const SValue* val, SVector* vector) {
+  vector->append(val->getData(), val->getSize());
+  auto tag = val->getTag();
+  vector->append(&tag, sizeof(STag));
+}
+
 void popBoxed(VMStack* stack, SValue* value) {
   switch (value->getType()) {
 
@@ -266,7 +272,7 @@ int64_t popInt64(VMStack* stack) {
 }
 
 void popInt64Boxed(VMStack* stack, SValue* value) {
-  assert(value->getType() == SType::UINT64);
+  assert(value->getType() == SType::INT64);
   assert(stack->limit - stack->top >= sizeof(int64_t) + sizeof(STag));
   memcpy(value->getData(), stack->top, sizeof(int64_t));
   STag tag;
@@ -276,7 +282,7 @@ void popInt64Boxed(VMStack* stack, SValue* value) {
 }
 
 void popInt64Vector(VMStack* stack, SVector* vector) {
-  assert(vector->getType() == SType::UINT64);
+  assert(vector->getType() == SType::INT64);
   assert(stack->limit - stack->top >= sizeof(int64_t) + sizeof(STag));
   vector->append(stack->top, sizeof(int64_t) + sizeof(STag));
   stack->top += sizeof(int64_t) + sizeof(STag);
@@ -310,7 +316,7 @@ double popFloat64(VMStack* stack) {
 }
 
 void popFloat64Boxed(VMStack* stack, SValue* value) {
-  assert(value->getType() == SType::UINT64);
+  assert(value->getType() == SType::FLOAT64);
   assert(stack->limit - stack->top >= sizeof(double) + sizeof(STag));
   memcpy(value->getData(), stack->top, sizeof(double));
   STag tag;
@@ -320,7 +326,7 @@ void popFloat64Boxed(VMStack* stack, SValue* value) {
 }
 
 void popFloat64Vector(VMStack* stack, SVector* vector) {
-  assert(vector->getType() == SType::UINT64);
+  assert(vector->getType() == SType::FLOAT64);
   assert(stack->limit - stack->top >= sizeof(double) + sizeof(STag));
   vector->append(stack->top, sizeof(double) + sizeof(STag));
   stack->top += sizeof(double) + sizeof(STag);
@@ -354,7 +360,7 @@ bool popBool(VMStack* stack) {
 }
 
 void popBoolBoxed(VMStack* stack, SValue* value) {
-  assert(value->getType() == SType::UINT64);
+  assert(value->getType() == SType::BOOL);
   assert(stack->limit - stack->top >= sizeof(uint8_t) + sizeof(STag));
   memcpy(value->getData(), stack->top, sizeof(uint8_t));
   STag tag;
@@ -364,7 +370,7 @@ void popBoolBoxed(VMStack* stack, SValue* value) {
 }
 
 void popBoolVector(VMStack* stack, SVector* vector) {
-  assert(vector->getType() == SType::UINT64);
+  assert(vector->getType() == SType::BOOL);
   assert(stack->limit - stack->top >= sizeof(uint8_t) + sizeof(STag));
   vector->append(stack->top, sizeof(uint8_t) + sizeof(STag));
   stack->top += sizeof(uint8_t) + sizeof(STag);
@@ -416,6 +422,7 @@ std::string popString(VMStack* stack) {
 }
 
 void popStringBoxed(VMStack* stack, SValue* value) {
+  assert(value->getType() == SType::STRING);
   assert(stack->limit - stack->top >= sizeof(uint32_t));
   size_t len = *reinterpret_cast<uint32_t*>(stack->top);
   assert(stack->limit - stack->top >= sizeof(uint32_t) + len + sizeof(STag));
@@ -427,6 +434,7 @@ void popStringBoxed(VMStack* stack, SValue* value) {
 }
 
 void popStringVector(VMStack* stack, SVector* vector) {
+  assert(vector->getType() == SType::STRING);
   assert(stack->limit - stack->top >= sizeof(uint32_t));
   size_t len = *reinterpret_cast<uint32_t*>(stack->top);
   assert(stack->limit - stack->top >= sizeof(uint32_t) + len + sizeof(STag));
@@ -483,7 +491,7 @@ uint64_t popTimestamp64(VMStack* stack) {
 }
 
 void popTimestamp64Boxed(VMStack* stack, SValue* value) {
-  assert(value->getType() == SType::UINT64);
+  assert(value->getType() == SType::TIMESTAMP64);
   assert(stack->limit - stack->top >= sizeof(uint64_t) + sizeof(STag));
   memcpy(value->getData(), stack->top, sizeof(uint64_t));
   STag tag;
@@ -493,7 +501,7 @@ void popTimestamp64Boxed(VMStack* stack, SValue* value) {
 }
 
 void popTimestamp64Vector(VMStack* stack, SVector* vector) {
-  assert(vector->getType() == SType::UINT64);
+  assert(vector->getType() == SType::TIMESTAMP64);
   assert(stack->limit - stack->top >= sizeof(uint64_t) + sizeof(STag));
   vector->append(stack->top, sizeof(uint64_t) + sizeof(STag));
   stack->top += sizeof(uint64_t) + sizeof(STag);

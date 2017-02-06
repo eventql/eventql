@@ -57,7 +57,11 @@ GroupByExpression::GroupByExpression(
 GroupByExpression::~GroupByExpression() {
   for (auto& group : groups_) {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::freeInstance(txn_, select_exprs_[i].program(), group.second[i]);
+      if (select_exprs_[i].program()->method_accumulate.offset > 0) {
+        VM::freeInstance(txn_, select_exprs_[i].program(), group.second[i]);
+      } else {
+        delete static_cast<SValue*>(group.second[i]);
+      }
     }
   }
 }
@@ -105,8 +109,12 @@ ReturnCode GroupByExpression::execute() {
       input_col_cursor.emplace_back((void*) c.getData());
     }
 
+    Vector<SValue> gkey;
+    for (const auto& e : group_exprs_) {
+      gkey.emplace_back(e.getReturnType());
+    }
+
     for (size_t n = 0; n < nrecords; n++) {
-      Vector<SValue> gkey(group_exprs_.size(), SValue{});
       for (size_t i = 0; i < group_exprs_.size(); ++i) {
         VM::evaluate(
             txn_,
@@ -122,22 +130,42 @@ ReturnCode GroupByExpression::execute() {
 
       auto group_key = SValue::makeUniqueKey(gkey.data(), gkey.size());
 
+      bool group_new = false;
       auto& group = groups_[group_key];
       if (group.size() == 0) {
+        group_new = true;
+
         for (const auto& e : select_exprs_) {
-          group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch_));
+          if (e.program()->method_accumulate.offset > 0) {
+            group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch_));
+          } else {
+            group.emplace_back(new SValue(e.program()->return_type));
+          }
         }
       }
 
       for (size_t i = 0; i < select_exprs_.size(); ++i) {
-        VM::evaluate(
-            txn_,
-            select_exprs_[i].program(),
-            select_exprs_[i].program()->method_accumulate,
-            &vm_stack_,
-            group[i],
-            input_col_cursor.size(),
-            input_col_cursor.data());
+        if (select_exprs_[i].program()->method_accumulate.offset > 0) {
+          VM::evaluate(
+              txn_,
+              select_exprs_[i].program(),
+              select_exprs_[i].program()->method_accumulate,
+              &vm_stack_,
+              group[i],
+              input_col_cursor.size(),
+              input_col_cursor.data());
+        } else if (group_new) {
+          VM::evaluate(
+              txn_,
+              select_exprs_[i].program(),
+              select_exprs_[i].program()->method_call,
+              &vm_stack_,
+              nullptr,
+              input_col_cursor.size(),
+              input_col_cursor.data());
+
+          popBoxed(&vm_stack_, static_cast<SValue*>(group[i]));
+        }
       }
 
       for (size_t i = 0; i < input_col_cursor.size(); ++i) {
@@ -159,16 +187,20 @@ ReturnCode GroupByExpression::nextBatch(
 
   while (groups_iter_ != groups_.end()) {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::evaluate(
-          txn_,
-          select_exprs_[i].program(),
-          select_exprs_[i].program()->method_call,
-          &vm_stack_,
-          groups_iter_->second[i],
-          0,
-          nullptr);
+      if (select_exprs_[i].program()->method_accumulate.offset > 0) {
+        VM::evaluate(
+            txn_,
+            select_exprs_[i].program(),
+            select_exprs_[i].program()->method_call,
+            &vm_stack_,
+            groups_iter_->second[i],
+            0,
+            nullptr);
 
-      popVector(&vm_stack_, columns + i);
+        popVector(&vm_stack_, columns + i);
+      } else {
+        copyBoxed(static_cast<SValue*>(groups_iter_->second[i]), columns + i);
+      }
     }
 
     if (++groups_iter_ == groups_.end()) {
@@ -207,7 +239,11 @@ PartialGroupByExpression::PartialGroupByExpression(
 PartialGroupByExpression::~PartialGroupByExpression() {
   for (auto& group : groups_) {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::freeInstance(txn_, select_exprs_[i].program(), group.second[i]);
+      if (select_exprs_[i].program()->method_accumulate.offset > 0) {
+        VM::freeInstance(txn_, select_exprs_[i].program(), group.second[i]);
+      } else {
+        delete static_cast<SValue*>(group.second[i]);
+      }
     }
   }
 }
@@ -230,16 +266,24 @@ ReturnCode PartialGroupByExpression::execute() {
 
         if (group.size() == 0) {
           for (const auto& e : select_exprs_) {
-            group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch_));
+            if (e.program()->method_accumulate.offset > 0) {
+              group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch_));
+            } else {
+              group.emplace_back(new SValue(e.program()->return_type));
+            }
           }
         }
 
         for (size_t i = 0; i < select_exprs_.size(); ++i) {
-          VM::loadInstanceState(
-              txn_,
-              select_exprs_[i].program(),
-              group[i],
-              is);
+          if (select_exprs_[i].program()->method_accumulate.offset > 0) {
+            VM::loadInstanceState(
+                txn_,
+                select_exprs_[i].program(),
+                group[i],
+                is);
+          } else {
+            static_cast<SValue*>(group[i])->decode(is);
+          }
         }
       }
 
@@ -289,8 +333,12 @@ ReturnCode PartialGroupByExpression::execute() {
         input_col_cursor.emplace_back((void*) c.getData());
       }
 
+      Vector<SValue> gkey;
+      for (const auto& e : group_exprs_) {
+        gkey.emplace_back(e.getReturnType());
+      }
+
       for (size_t n = 0; n < nrecords; n++) {
-        Vector<SValue> gkey(group_exprs_.size(), SValue{});
         for (size_t i = 0; i < group_exprs_.size(); ++i) {
           VM::evaluate(
               txn_,
@@ -306,22 +354,42 @@ ReturnCode PartialGroupByExpression::execute() {
 
         auto group_key = SValue::makeUniqueKey(gkey.data(), gkey.size());
 
+        bool group_new = false;
         auto& group = groups_[group_key];
         if (group.size() == 0) {
+          group_new = true;
+
           for (const auto& e : select_exprs_) {
-            group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch_));
+            if (e.program()->method_accumulate.offset > 0) {
+              group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch_));
+            } else {
+              group.emplace_back(new SValue(e.program()->return_type));
+            }
           }
         }
 
         for (size_t i = 0; i < select_exprs_.size(); ++i) {
-          VM::evaluate(
-              txn_,
-              select_exprs_[i].program(),
-              select_exprs_[i].program()->method_accumulate,
-              &vm_stack_,
-              group[i],
-              input_col_cursor.size(),
-              input_col_cursor.data());
+          if (select_exprs_[i].program()->method_accumulate.offset > 0) {
+            VM::evaluate(
+                txn_,
+                select_exprs_[i].program(),
+                select_exprs_[i].program()->method_accumulate,
+                &vm_stack_,
+                group[i],
+                input_col_cursor.size(),
+                input_col_cursor.data());
+          } else if (group_new) {
+            VM::evaluate(
+                txn_,
+                select_exprs_[i].program(),
+                select_exprs_[i].program()->method_call,
+                &vm_stack_,
+                nullptr,
+                input_col_cursor.size(),
+                input_col_cursor.data());
+
+            popBoxed(&vm_stack_, static_cast<SValue*>(group[i]));
+          }
         }
 
         for (size_t i = 0; i < input_col_cursor.size(); ++i) {
@@ -343,11 +411,15 @@ ReturnCode PartialGroupByExpression::execute() {
         os->write(g.first.data(), g.first.size());
 
         for (size_t i = 0; i < select_exprs_.size(); ++i) {
-          VM::saveInstanceState(
-              txn_,
-              select_exprs_[i].program(),
-              g.second[i],
-              os);
+          if (select_exprs_[i].program()->method_accumulate.offset > 0) {
+            VM::saveInstanceState(
+                txn_,
+                select_exprs_[i].program(),
+                g.second[i],
+                os);
+           } else {
+            static_cast<SValue*>(g.second[i])->encode(os);
+          }
         }
       }
     });
@@ -366,11 +438,15 @@ ReturnCode PartialGroupByExpression::nextBatch(
     String group_data;
     auto group_data_os = StringOutputStream::fromString(&group_data);
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::saveInstanceState(
-          txn_,
-          select_exprs_[i].program(),
-          groups_iter_->second[i],
-          group_data_os.get());
+      if (select_exprs_[i].program()->method_accumulate.offset > 0) {
+        VM::saveInstanceState(
+            txn_,
+            select_exprs_[i].program(),
+            groups_iter_->second[i],
+            group_data_os.get());
+      } else {
+        static_cast<SValue*>(groups_iter_->second[i])->encode(group_data_os.get());
+      }
     }
 
     copyString(groups_iter_->first, columns + 0);
@@ -430,7 +506,11 @@ GroupByMergeExpression::GroupByMergeExpression(
 GroupByMergeExpression::~GroupByMergeExpression() {
   for (auto& group : groups_) {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::freeInstance(txn_, select_exprs_[i].program(), group.second[i]);
+      if (select_exprs_[i].program()->method_accumulate.offset > 0) {
+        VM::freeInstance(txn_, select_exprs_[i].program(), group.second[i]);
+      } else {
+        delete static_cast<SValue*>(group.second[i]);
+      }
     }
   }
 }
@@ -442,12 +522,20 @@ ReturnCode GroupByMergeExpression::execute() {
   Vector<VM::Instance> remote_group;
   for (size_t i = 0; i < select_exprs_.size(); ++i) {
     const auto& e = select_exprs_[i];
-    remote_group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch));
+    if (e.program()->method_accumulate.offset > 0) {
+      remote_group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch_));
+    } else {
+      remote_group.emplace_back(new SValue(e.program()->return_type));
+    }
   }
 
   RunOnDestroy remote_group_finalizer([this, &remote_group] {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::freeInstance(txn_, select_exprs_[i].program(), remote_group[i]);
+      if (select_exprs_[i].program()->method_accumulate.offset > 0) {
+        VM::freeInstance(txn_, select_exprs_[i].program(), remote_group[i]);
+      } else {
+        delete static_cast<SValue*>(remote_group[i]);
+      }
     }
   });
 
@@ -488,16 +576,27 @@ ReturnCode GroupByMergeExpression::execute() {
       }
 
       auto& group = groups_[std::string(key, key_len)];
+      bool group_new = false;
       if (group.size() == 0) {
+        group_new = true;
+
         for (const auto& e : select_exprs_) {
-          group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch_));
+          if (e.program()->method_accumulate.offset > 0) {
+            group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch_));
+          } else {
+            group.emplace_back(new SValue(e.program()->return_type));
+          }
         }
       }
 
       for (size_t i = 0; i < select_exprs_.size(); ++i) {
         const auto& e = select_exprs_[i];
-        VM::loadInstanceState(txn_, e.program(), remote_group[i], &is);
-        VM::mergeInstance(txn_, e.program(), group[i], remote_group[i]);
+        if (e.program()->method_accumulate.offset > 0) {
+          VM::loadInstanceState(txn_, e.program(), remote_group[i], &is);
+          VM::mergeInstance(txn_, e.program(), group[i], remote_group[i]);
+        } else if (group_new) {
+          static_cast<SValue*>(group[i])->decode(&is);
+        }
       }
     }
 
@@ -533,16 +632,20 @@ ReturnCode GroupByMergeExpression::nextBatch(
 
   while (groups_iter_ != groups_.end()) {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::evaluate(
-          txn_,
-          select_exprs_[i].program(),
-          select_exprs_[i].program()->method_call,
-          &vm_stack_,
-          groups_iter_->second[i],
-          0,
-          nullptr);
+      if (select_exprs_[i].program()->method_accumulate.offset > 0) {
+        VM::evaluate(
+            txn_,
+            select_exprs_[i].program(),
+            select_exprs_[i].program()->method_call,
+            &vm_stack_,
+            groups_iter_->second[i],
+            0,
+            nullptr);
 
-      popVector(&vm_stack_, columns + i);
+        popVector(&vm_stack_, columns + i);
+      } else {
+        copyBoxed(static_cast<SValue*>(groups_iter_->second[i]), columns + i);
+      }
     }
 
     if (++groups_iter_ == groups_.end()) {
