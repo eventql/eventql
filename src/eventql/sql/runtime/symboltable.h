@@ -45,6 +45,7 @@ class SymbolTable : public RefCounted {
 public:
 
   void registerFunction(const std::string& function_name, SFunction fn);
+  void registerImplicitConversion(SType source_type, SType target_type);
 
   ReturnCode resolve(
       const std::string& function_name,
@@ -54,11 +55,13 @@ public:
   const SymbolTableEntry* lookup(const std::string& symbol) const;
 
   bool isAggregateFunction(const std::string& function_name) const;
+  bool hasImplicitConversion(SType source, SType target) const;
 
 protected:
   mutable std::mutex mutex_;
   std::map<std::string, std::vector<const SymbolTableEntry*>> functions_;
   std::map<std::string, std::unique_ptr<SymbolTableEntry>> symbols_;
+  std::map<SType, std::set<SType>> implicit_conversions_;
 };
 
 }

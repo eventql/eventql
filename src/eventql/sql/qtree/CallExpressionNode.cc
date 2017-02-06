@@ -45,10 +45,16 @@ ReturnCode CallExpressionNode::newNode(
     return rc;
   }
 
-  return CallExpressionNode::newNode(function_name, symbol, arguments, node);
+  return CallExpressionNode::newNode(
+      txn,
+      function_name,
+      symbol,
+      arguments,
+      node);
 }
 
 ReturnCode CallExpressionNode::newNode(
+    Transaction* txn,
     const std::string& function_name,
     const SymbolTableEntry* symbol,
     Vector<RefPtr<ValueExpressionNode>> arguments,
@@ -57,6 +63,30 @@ ReturnCode CallExpressionNode::newNode(
   bool is_pure = fun->type == FN_PURE && !fun->has_side_effects;
   bool is_aggregate = fun->type == FN_AGGREGATE;
 
+  Vector<RefPtr<ValueExpressionNode>> arguments_converted;
+  for (size_t i = 0; i < arguments.size(); ++i) {
+    if (arguments[i]->getReturnType() == fun->arg_types[i]) {
+      arguments_converted.emplace_back(arguments[i]);
+      continue;
+    }
+
+    std::string conversion_fn = "to_";
+    conversion_fn += getSTypeName(fun->arg_types[i]);
+
+    RefPtr<ValueExpressionNode> argument_converted;
+    auto rc = CallExpressionNode::newNode(
+        txn,
+        conversion_fn,
+        { arguments[i] },
+        &argument_converted);
+
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+
+    arguments_converted.emplace_back(argument_converted);
+  }
+
   *node = RefPtr<ValueExpressionNode>(
       new CallExpressionNode(
           function_name,
@@ -64,7 +94,7 @@ ReturnCode CallExpressionNode::newNode(
           fun->return_type,
           is_pure,
           is_aggregate,
-          arguments));
+          arguments_converted));
 
   return ReturnCode::success();
 }

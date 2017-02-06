@@ -43,6 +43,7 @@ public:
       RefPtr<ValueExpressionNode>* node);
 
   static ReturnCode newNode (
+      Transaction* txn,
       const std::string& function_name,
       const SymbolTableEntry* symbol,
       Vector<RefPtr<ValueExpressionNode>> arguments,

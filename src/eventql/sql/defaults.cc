@@ -33,6 +33,9 @@
 namespace csql {
 
 void installDefaultSymbols(SymbolTable* rt) {
+  /* implicit conversions */
+  rt->registerImplicitConversion(SType::UINT64, SType::NIL);
+
   ///* expressions/aggregate.h */
   rt->registerFunction("count", expressions::count);
   rt->registerFunction("sum", expressions::sum_int64);

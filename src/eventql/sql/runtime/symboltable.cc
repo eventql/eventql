@@ -61,6 +61,13 @@ void SymbolTable::registerFunction(
   symbols_.emplace(symbol, std::move(entry));
 }
 
+void SymbolTable::registerImplicitConversion(
+    SType source_type,
+    SType target_type) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  implicit_conversions_[source_type].insert(target_type);
+}
+
 ReturnCode SymbolTable::resolve(
     const std::string& function_name,
     const std::vector<SType>& arguments,
@@ -80,6 +87,8 @@ ReturnCode SymbolTable::resolve(
   }
 
   const SymbolTableEntry* match = nullptr;
+
+  /* scan the candidates looking for an exact match */
   for (const auto& candidate : candidates) {
     auto candidate_fn = candidate->getFunction();
     if (candidate_fn->arg_types.size() != arguments.size()) {
@@ -96,6 +105,28 @@ ReturnCode SymbolTable::resolve(
 
     if (match) {
       break;
+    }
+  }
+
+  /* scan the candidates looking for a match using implicit conversions */
+  if (!match) {
+    for (const auto& candidate : candidates) {
+      auto candidate_fn = candidate->getFunction();
+      if (candidate_fn->arg_types.size() != arguments.size()) {
+        continue;
+      }
+
+      match = candidate;
+      for (size_t i = 0; i < arguments.size(); ++i) {
+        if (!hasImplicitConversion(arguments[i], candidate_fn->arg_types[i])) {
+          match = nullptr;
+          break;
+        }
+      }
+
+      if (match) {
+        break;
+      }
     }
   }
 
@@ -161,4 +192,16 @@ bool SymbolTable::isAggregateFunction(const std::string& function_name) const {
   return false;
 }
 
+bool SymbolTable::hasImplicitConversion(SType source, SType target) const {
+  std::unique_lock<std::mutex> lk(mutex_);
+
+  auto iter = implicit_conversions_.find(source);
+  if (iter == implicit_conversions_.end()) {
+    return false;
+  } else {
+    return iter->second.count(target) > 0;
+  }
 }
+
+} // namespace csql
+
