@@ -522,12 +522,20 @@ ReturnCode GroupByMergeExpression::execute() {
   Vector<VM::Instance> remote_group;
   for (size_t i = 0; i < select_exprs_.size(); ++i) {
     const auto& e = select_exprs_[i];
-    remote_group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch));
+    if (e.program()->method_accumulate.offset > 0) {
+      remote_group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch_));
+    } else {
+      remote_group.emplace_back(new SValue(e.program()->return_type));
+    }
   }
 
   RunOnDestroy remote_group_finalizer([this, &remote_group] {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::freeInstance(txn_, select_exprs_[i].program(), remote_group[i]);
+      if (select_exprs_[i].program()->method_accumulate.offset > 0) {
+        VM::freeInstance(txn_, select_exprs_[i].program(), remote_group[i]);
+      } else {
+        delete static_cast<SValue*>(remote_group[i]);
+      }
     }
   });
 
@@ -568,7 +576,10 @@ ReturnCode GroupByMergeExpression::execute() {
       }
 
       auto& group = groups_[std::string(key, key_len)];
+      bool group_new = false;
       if (group.size() == 0) {
+        group_new = true;
+
         for (const auto& e : select_exprs_) {
           if (e.program()->method_accumulate.offset > 0) {
             group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch_));
@@ -583,8 +594,8 @@ ReturnCode GroupByMergeExpression::execute() {
         if (e.program()->method_accumulate.offset > 0) {
           VM::loadInstanceState(txn_, e.program(), remote_group[i], &is);
           VM::mergeInstance(txn_, e.program(), group[i], remote_group[i]);
-        } else {
-          static_cast<SValue*>(remote_group[i])->decode(&is);
+        } else if (group_new) {
+          static_cast<SValue*>(group[i])->decode(&is);
         }
       }
     }
