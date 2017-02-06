@@ -171,7 +171,8 @@ ReturnCode OrderByExpression::nextBatch(
   *nrecords = 0;
 
   if (pos_ < num_rows_) {
-    auto batch_len = std::min(num_rows_ - pos_, kOutputBatchSize);
+    auto batch_len_default = kOutputBatchSize;
+    auto batch_len = std::min(num_rows_ - pos_, batch_len_default);
     auto ncols = input_->getColumnCount();
 
     for (size_t n = 0; n < batch_len; ++n) {
