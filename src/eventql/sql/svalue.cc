@@ -1026,7 +1026,7 @@ const char* sql_cstr(const void* str) {
 size_t sql_sizeof(SType type, const void* data) {
   switch (type) {
     case SType::STRING:
-      return sizeof(uint32_t) + sql_strlen(data);
+      return sizeof(uint32_t) + sql_strlen(data) + sizeof(STag);
     case SType::NIL:
       return 0 + sizeof(STag);
     case SType::FLOAT64:
