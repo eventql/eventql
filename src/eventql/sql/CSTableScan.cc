@@ -699,7 +699,10 @@ FastCSTableScan::FastCSTableScan(
     txn_(txn),
     execution_context_(execution_context),
     stmt_(stmt->deepCopyAs<SequentialScanNode>()),
-    cstable_filename_(cstable_filename) {}
+    cstable_filename_(cstable_filename),
+    records_remaining_(0),
+    records_consumed_(0),
+    filter_enabled_(false)  {}
 
 FastCSTableScan::FastCSTableScan(
     Transaction* txn,
