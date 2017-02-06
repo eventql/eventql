@@ -1,1 +1,2 @@
+ERROR!
 unexpected token T_SEMICOLON, expected: value expression

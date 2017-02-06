@@ -130,23 +130,6 @@ Status compareChart(ResultList* result, const std::string& result_file_path) {
   return Status::success();
 }
 
-Status compareError(
-    const std::string& error_msg,
-    const std::string& result_file_path) {
-  auto result_is = FileInputStream::openFile(result_file_path);
-  std::string result;
-  result_is->readUntilEOF(&result);
-  StringUtil::chomp(&result);
-
-  if (result == error_msg) {
-    return Status::success();
-  } else {
-    return Status(
-        eRuntimeError,
-        StringUtil::format("unexpected error: $0", error_msg));
-  }
-}
-
 Status runTest(const std::string& test) {
   auto sql_file_path = FileUtil::joinPaths(
       kDirectoryPath,
@@ -196,13 +179,41 @@ Status runTest(const std::string& test) {
   txn->setTableProvider(new CSTableScanProvider("testtable", input_table_path));
 
   ResultList result;
+
+  bool compare_error = false;
+  auto result_is = FileInputStream::openFile(result_file_path);
+  {
+    std::string first_line;
+    if (result_is->readLine(&first_line)) {
+      StringUtil::chomp(&first_line);
+      if (first_line == "ERROR!") {
+        compare_error = true;
+      }
+    }
+  }
+
   try {
     auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
   } catch (const std::exception& e) {
 
-    /* compare error */
-    return compareError(e.what(), result_file_path);
+    if (compare_error) {
+      std::string expected_error;
+      result_is->readUntilEOF(&expected_error);
+      StringUtil::chomp(&expected_error);
+
+      if (expected_error == e.what()) {
+        return Status::success();
+      } else {
+        return Status(eRuntimeError, "wrong result");
+      }
+    }
+
+    return Status(e);
+  }
+
+  if (compare_error) {
+    return Status(eRuntimeError, "wrong result");
   }
 
   /* compare chart */
