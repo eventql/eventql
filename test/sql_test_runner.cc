@@ -36,13 +36,18 @@
 #include "eventql/eventql.h"
 using namespace csql;
 
+enum class ResultExpectation { TABLE, CHART, ERROR };
+
 const auto kTestListFile = "./sql_tests.lst";
 const auto kDirectoryPath = "./sql";
 const auto kSQLPathEnding = ".sql";
 const auto kResultPathEnding = ".result.txt";
 const auto kChartColumnName = "__chart";
+const auto kDefaultResultExpectation = ResultExpectation::TABLE;
 
-Status compareResult(ResultList* result, const std::string& result_file_path) {
+Status checkTableResult(
+    ResultList* result,
+    const std::string& result_file_path) {
   auto csv_is = CSVInputStream::openFile(result_file_path);
   std::vector<std::string> columns;
   if (!csv_is->readNextRow(&columns)) {
@@ -110,7 +115,9 @@ Status compareResult(ResultList* result, const std::string& result_file_path) {
   return Status::success();
 }
 
-Status compareChart(ResultList* result, const std::string& result_file_path) {
+Status checkChartResult(
+    ResultList* result,
+    const std::string& result_file_path) {
   auto num_returned_rows = result->getNumRows();
   if (num_returned_rows != 1) {
     return Status(eRuntimeError, StringUtil::format(
@@ -128,6 +135,27 @@ Status compareChart(ResultList* result, const std::string& result_file_path) {
   }
 
   return Status::success();
+}
+
+Status checkErrorResult(
+    const std::string& error_message,
+    const std::string& result_file_path) {
+  auto is = FileInputStream::openFile(result_file_path);
+
+  {
+    std::string result_expectation_line;
+    is->readLine(&result_expectation_line);
+  }
+
+  std::string expected_error;
+  is->readUntilEOF(&expected_error);
+  StringUtil::chomp(&expected_error);
+
+  if (expected_error == error_message) {
+    return Status::success();
+  } else {
+    return Status(eRuntimeError, "wrong result");
+  }
 }
 
 Status runTest(const std::string& test) {
@@ -149,6 +177,18 @@ Status runTest(const std::string& test) {
     return Status(
         eIOError,
         StringUtil::format("File does not exist: $0", result_file_path));
+  }
+
+  auto result_expectation = kDefaultResultExpectation;
+  {
+    auto result_is = FileInputStream::openFile(result_file_path);
+    std::string first_line;
+    if (result_is->readLine(&first_line)) {
+      StringUtil::chomp(&first_line);
+      if (first_line == "ERROR!") {
+        result_expectation = ResultExpectation::ERROR;
+      }
+    }
   }
 
   /* input table path */
@@ -177,53 +217,31 @@ Status runTest(const std::string& test) {
   auto txn = runtime->newTransaction();
 
   txn->setTableProvider(new CSTableScanProvider("testtable", input_table_path));
-
   ResultList result;
 
-  bool compare_error = false;
-  auto result_is = FileInputStream::openFile(result_file_path);
-  {
-    std::string first_line;
-    if (result_is->readLine(&first_line)) {
-      StringUtil::chomp(&first_line);
-      if (first_line == "ERROR!") {
-        compare_error = true;
-      }
-    }
-  }
-
+  std::string error_message;
   try {
     auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
   } catch (const std::exception& e) {
-
-    if (compare_error) {
-      std::string expected_error;
-      result_is->readUntilEOF(&expected_error);
-      StringUtil::chomp(&expected_error);
-
-      if (expected_error == e.what()) {
-        return Status::success();
-      } else {
-        return Status(eRuntimeError, "wrong result");
-      }
-    }
-
-    return Status(e);
+    error_message = e.what();
   }
 
-  if (compare_error) {
-    return Status(eRuntimeError, "wrong result");
-  }
-
-  /* compare chart */
   if (result.getNumColumns() == 1 &&
       result.getColumns()[0] == kChartColumnName) {
-    return compareChart(&result, result_file_path);
+    result_expectation = ResultExpectation::CHART;
   }
 
-  /* compare result */
-  return compareResult(&result, result_file_path);
+  switch (result_expectation) {
+    case ResultExpectation::TABLE:
+      return checkTableResult(&result, result_file_path);
+
+    case ResultExpectation::CHART:
+      return checkChartResult(&result, result_file_path);
+
+    case ResultExpectation::ERROR:
+      return checkErrorResult(error_message, result_file_path);
+  }
 }
 
 int main(int argc, const char** argv) {
