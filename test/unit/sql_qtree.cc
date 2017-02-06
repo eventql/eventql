@@ -403,10 +403,14 @@ TEST_CASE(QTreeTest, TestPruneConstraints, [] () {
     constraint.column_name = "time";
     constraint.type = ScanConstraintType::GREATER_THAN_OR_EQUAL_TO;
     constraint.value = SValue(SValue::IntegerType(6666));
-    auto pruned_expr = QueryTreeUtil::removeConstraintFromPredicate(
+    RefPtr<ValueExpressionNode> pruned_expr;
+    auto rc = QueryTreeUtil::removeConstraintFromPredicate(
+        txn.get(),
         where_expr,
-        constraint);
+        constraint,
+        &pruned_expr);
 
+    EXPECT(rc.isSuccess());
     EXPECT_EQ(
         pruned_expr->toSQL(),
         "logical_and(gt(1234,`time`),neq(`session_id`,444))");
@@ -417,9 +421,12 @@ TEST_CASE(QTreeTest, TestPruneConstraints, [] () {
     constraint.column_name = "time";
     constraint.type = ScanConstraintType::LESS_THAN;
     constraint.value = SValue(SValue::IntegerType(1234));
-    auto pruned_expr = QueryTreeUtil::removeConstraintFromPredicate(
+    RefPtr<ValueExpressionNode> pruned_expr;
+    auto rc = QueryTreeUtil::removeConstraintFromPredicate(
+        txn.get(),
         where_expr,
-        constraint);
+        constraint,
+        &pruned_expr);
 
     EXPECT_EQ(
         pruned_expr->toSQL(),
