@@ -22,35 +22,30 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include <eventql/util/stdtypes.h>
-#include <eventql/sql/runtime/defaultruntime.h>
+#include <eventql/sql/statements/show_tables.h>
+#include <eventql/sql/transaction.h>
 
 namespace csql {
 
-class LimitExpression : public TableExpression {
-public:
-
-  LimitExpression(
-      ExecutionContext* execution_context,
-      size_t limit,
-      size_t offset,
-      ScopedPtr<TableExpression> input);
-
-  ScopedPtr<ResultCursor> execute() override;
-
-  size_t getNumColumns() const override;
-
-protected:
-  bool next(SValue* row, size_t row_len);
-
-  ExecutionContext* execution_context_;
-  size_t limit_;
-  size_t offset_;
-  ScopedPtr<TableExpression> input_;
-  size_t counter_;
-  ScopedPtr<ResultCursor> input_cursor_;
-  Vector<SValue> buf_;
+const std::vector<std::pair<std::string, SType>> ShowTablesExpression::kOutputColumns = {
+  { "table_name", SType::STRING },
+  { "description", SType::STRING }
 };
+
+ShowTablesExpression::ShowTablesExpression(
+    Transaction* txn) :
+    SimpleTableExpression(kOutputColumns),
+    txn_(txn) {}
+
+ReturnCode ShowTablesExpression::execute() {
+  txn_->getTableProvider()->listTables([this] (const TableInfo& table) {
+    Vector<SValue> row;
+    row.emplace_back(SValue::newString(table.table_name));
+    row.emplace_back("");
+    addRow(row.data());
+  });
+
+  return ReturnCode::success();
+}
 
 }

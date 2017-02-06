@@ -22,6 +22,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <assert.h>
 #include <eventql/sql/qtree/SubqueryNode.h>
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
 
@@ -85,13 +86,13 @@ Vector<QualifiedColumn> SubqueryNode::getAvailableColumns() const {
     qualifier = alias_ + ".";
   }
 
+  auto stbl = subquery_.asInstanceOf<TableExpressionNode>();
   Vector<QualifiedColumn> cols;
-  for (const auto& c :
-        subquery_.asInstanceOf<TableExpressionNode>()->getResultColumns()) {
-    QualifiedColumn qc;
-    qc.short_name = c;
-    qc.qualified_name = qualifier + c;
-    cols.emplace_back(qc);
+  for (const auto& c : stbl->getResultColumns()) {
+    cols.emplace_back(
+        qualifier + c,
+        c,
+        stbl->getColumnType(stbl->getComputedColumnIndex(c)));
   }
 
   return cols;
@@ -118,7 +119,11 @@ size_t SubqueryNode::getComputedColumnIndex(
       ->getComputedColumnIndex(col, false);
 
   if (child_idx != size_t(-1)) {
-    auto slnode = new SelectListNode(new ColumnReferenceNode(child_idx));
+    auto slnode = new SelectListNode(
+        new ColumnReferenceNode(
+            child_idx,
+            subquery_.asInstanceOf<TableExpressionNode>()->getColumnType(child_idx)));
+
     slnode->setAlias(col);
     select_list_.emplace_back(slnode);
     return select_list_.size() - 1;
@@ -129,6 +134,11 @@ size_t SubqueryNode::getComputedColumnIndex(
 
 size_t SubqueryNode::getNumComputedColumns() const {
   return select_list_.size();
+}
+
+SType SubqueryNode::getColumnType(size_t idx) const {
+  assert(idx < select_list_.size());
+  return select_list_[idx]->expression()->getReturnType();
 }
 
 Option<RefPtr<ValueExpressionNode>> SubqueryNode::whereExpression() const {
@@ -192,6 +202,5 @@ RefPtr<QueryTreeNode> SubqueryNode::decode (
 
   return new SubqueryNode(subquery, select_list, where_expr);
 }
-
 
 } // namespace csql

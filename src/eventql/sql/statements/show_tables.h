@@ -1,6 +1,7 @@
 /**
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
+ *   - Paul Asmuth <paul@eventql.io>
  *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
@@ -22,35 +23,23 @@
  * code of your own applications
  */
 #pragma once
-#include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/qtree/ShowTablesNode.h>
 #include <eventql/sql/runtime/tablerepository.h>
 
 namespace csql {
 
-class DescribePartitionsExpression : public TableExpression {
+class ShowTablesExpression : public SimpleTableExpression {
 public:
 
-  static const size_t kNumColumns = 5;
+  static const std::vector<std::pair<std::string, SType>> kOutputColumns;
 
-  DescribePartitionsExpression(
-      Transaction* txn,
-      const String& table_name);
+  ShowTablesExpression(Transaction* txn);
 
-  ScopedPtr<ResultCursor> execute() override;
-
-  size_t getNumColumns() const override;
+  ReturnCode execute() override;
 
 protected:
-
-  bool next(SValue* row, size_t row_len);
-
   Transaction* txn_;
-  String table_name_;
-  Vector<eventql::TablePartitionInfo> rows_;
-  size_t counter_;
 };
 
-} //csql
-
+}

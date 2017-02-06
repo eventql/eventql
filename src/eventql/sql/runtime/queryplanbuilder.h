@@ -42,8 +42,15 @@ struct QueryPlanBuilderOptions {
   bool enable_constant_folding;
 };
 
+
 class QueryPlanBuilder : public RefCounted {
 public:
+
+  using ColumnResolver = Function<std::pair<size_t, SType> (const String&)>;
+  static const ColumnResolver kEmptyColumnResolver;
+
+  using ColumnTypeResolver = Function<SType (size_t)>;
+  static const ColumnTypeResolver kEmptyColumnTypeResolver;
 
   QueryPlanBuilder(
       QueryPlanBuilderOptions opts,
@@ -61,12 +68,15 @@ public:
 
   RefPtr<ValueExpressionNode> buildValueExpression(
       Transaction* txn,
-      ASTNode* ast);
+      ASTNode* ast,
+      ColumnResolver resolver = kEmptyColumnResolver,
+      ColumnTypeResolver type_resolver = kEmptyColumnTypeResolver);
 
   RefPtr<ValueExpressionNode> buildUnoptimizedValueExpression(
       Transaction* txn,
-      ASTNode* ast);
-
+      ASTNode* ast,
+      ColumnResolver resolver,
+      ColumnTypeResolver type_resolver);
 
   /**
    * Returns true if the ast is a SELECT statement that has columns in its
@@ -231,7 +241,9 @@ public:
   ValueExpressionNode* buildOperator(
       Transaction* txn,
       const std::string& name,
-      ASTNode* ast);
+      ASTNode* ast,
+      ColumnResolver resolver,
+      ColumnTypeResolver type_resolver);
 
   ValueExpressionNode* buildLiteral(
       Transaction* txn,
@@ -239,27 +251,37 @@ public:
 
   ValueExpressionNode* buildColumnReference(
       Transaction* txn,
-      ASTNode* ast);
+      ASTNode* ast,
+      ColumnResolver resolver);
 
   ValueExpressionNode* buildColumnIndex(
       Transaction* txn,
-      ASTNode* ast);
+      ASTNode* ast,
+      ColumnTypeResolver type_resolver);
 
   ValueExpressionNode* buildIfStatement(
       Transaction* txn,
-      ASTNode* ast);
+      ASTNode* ast,
+      ColumnResolver resolver,
+      ColumnTypeResolver type_resolver);
 
   ValueExpressionNode* buildMethodCall(
       Transaction* txn,
-      ASTNode* ast);
+      ASTNode* ast,
+      ColumnResolver resolver,
+      ColumnTypeResolver type_resolver);
 
   ValueExpressionNode* buildRegex(
       Transaction* txn,
-      ASTNode* ast);
+      ASTNode* ast,
+      ColumnResolver resolver,
+      ColumnTypeResolver type_resolver);
 
   ValueExpressionNode* buildLike(
       Transaction* txn,
-      ASTNode* ast);
+      ASTNode* ast,
+      ColumnResolver resolver,
+      ColumnTypeResolver type_resolver);
 
   /**
    * assign explicit column names to all output columns
@@ -271,7 +293,9 @@ public:
 
   SelectListNode* buildSelectList(
       Transaction* txn,
-      ASTNode* select_list);
+      ASTNode* select_list,
+      ColumnResolver resolver,
+      ColumnTypeResolver type_resolver);
 
   /**
    * Recursively walk the provided ast and search for column references. For

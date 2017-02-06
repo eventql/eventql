@@ -204,6 +204,7 @@ ReturnCode DatabaseImpl::start() {
   /* database context */
   database_context_.reset(new DatabaseContext());
   database_context_->db_path = tsdb_dir;
+  database_context_->db_node_id = server_name.isEmpty() ? "localhost" : server_name.get();
   database_context_->config = cfg_;
 
   /* config dir */
@@ -367,7 +368,7 @@ ReturnCode DatabaseImpl::start() {
                 internal_auth_.get()))));
 
     sql_->setCacheDir(cache_dir);
-    sql_->symbols()->registerFunction("version", &evqlVersionExpr);
+    sql_->symbols()->registerFunction("version", evqlVersionExpr);
     sql_->setQueryCache(sql_query_cache_.get());
   }
 

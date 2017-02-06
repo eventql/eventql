@@ -46,6 +46,10 @@ String LiteralExpressionNode::toSQL() const {
   return value_.toSQL();
 }
 
+SType LiteralExpressionNode::getReturnType() const {
+  return value_.getType();
+}
+
 void LiteralExpressionNode::encode(
     QueryTreeCoder* coder,
     const LiteralExpressionNode& node,

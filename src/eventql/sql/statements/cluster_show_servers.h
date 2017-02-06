@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -24,26 +24,23 @@
 #pragma once
 #include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
-#include <eventql/util/autoref.h>
-#include <eventql/util/SHA1.h>
-#include <eventql/sql/svalue.h>
-#include <eventql/sql/result_cursor.h>
+#include <eventql/sql/qtree/ShowTablesNode.h>
+#include <eventql/sql/runtime/tablerepository.h>
 
 namespace csql {
 
-class TableExpression  {
+class ClusterShowServersExpression : public SimpleTableExpression {
 public:
 
-  virtual ~TableExpression() = default;
+  static const std::vector<std::pair<std::string, SType>> kOutputColumns;
 
-  virtual ScopedPtr<ResultCursor> execute() = 0;
+  ClusterShowServersExpression(Transaction* txn);
 
-  virtual size_t getNumColumns() const = 0;
+  ReturnCode execute() override;
 
-  virtual Option<SHA1Hash> getCacheKey() const {
-    return None<SHA1Hash>();
-  }
-
+protected:
+  Transaction* txn_;
 };
 
-}
+} //csql
+

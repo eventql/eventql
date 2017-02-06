@@ -22,6 +22,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <assert.h>
 #include <eventql/sql/extensions/chartsql/chart_expression.h>
 #include <eventql/sql/extensions/chartsql/linechartbuilder.h>
 #include <eventql/sql/extensions/chartsql/areachartbuilder.h>
@@ -45,7 +46,7 @@ ChartExpression::ChartExpression(
     input_table_qtrees_(input_table_qtrees),
     counter_(0) {}
 
-ScopedPtr<ResultCursor> ChartExpression::execute() {
+ReturnCode ChartExpression::execute() {
   util::chart::Canvas canvas;
   for (size_t i = 0; i < qtree_->getDrawStatements().size(); ++i) {
     executeDrawStatement(i, &canvas);
@@ -55,14 +56,13 @@ ScopedPtr<ResultCursor> ChartExpression::execute() {
   util::chart::SVGTarget svg(svg_data_os.get());
   canvas.render(&svg);
 
-  return mkScoped(
-      new DefaultResultCursor(
-          1,
-          std::bind(
-              &ChartExpression::next,
-              this,
-              std::placeholders::_1,
-              std::placeholders::_2)));
+  return ReturnCode::success();
+}
+
+ReturnCode ChartExpression::nextBatch(
+    SVector* columns,
+    size_t* len) {
+  return ReturnCode::error("ERUNTIME", "ChartExpression::nextBatch not yet implemented");
 }
 
 void ChartExpression::executeDrawStatement(
@@ -413,8 +413,13 @@ void ChartExpression::applyLegend(
   chart->addLegend(vert_pos, horiz_pos, placement, title);
 }
 
-size_t ChartExpression::getNumColumns() const {
+size_t ChartExpression::getColumnCount() const {
   return 1;
+}
+
+SType ChartExpression::getColumnType(size_t idx) const {
+  assert(idx == 0);
+  return SType::STRING;
 }
 
 bool ChartExpression::next(SValue* row, size_t row_len) {

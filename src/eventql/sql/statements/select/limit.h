@@ -23,41 +23,33 @@
  * code of your own applications
  */
 #pragma once
-#include <stdlib.h>
-#include <string>
-#include <vector>
-#include <assert.h>
-#include <eventql/sql/runtime/tablerepository.h>
-#include <eventql/sql/runtime/compiler.h>
-#include <eventql/sql/runtime/vm.h>
-#include <eventql/sql/table_iterator.h>
-#include <eventql/sql/scheduler/execution_context.h>
-#include <eventql/util/exception.h>
+#include <eventql/util/stdtypes.h>
+#include <eventql/sql/runtime/defaultruntime.h>
 
 namespace csql {
 
-class TableScan : public TableExpression {
+class LimitExpression : public TableExpression {
 public:
 
-  TableScan(
-      Transaction* txn,
+  LimitExpression(
       ExecutionContext* execution_context,
-      RefPtr<SequentialScanNode> stmt,
-      ScopedPtr<TableIterator> iter);
+      size_t limit,
+      size_t offset,
+      ScopedPtr<TableExpression> input);
 
-  ScopedPtr<ResultCursor> execute() override;
+  ReturnCode execute() override;
+  ReturnCode nextBatch(SVector* columns, size_t* len) override;
 
-  size_t getNumColumns() const override;
+  size_t getColumnCount() const override;
+  SType getColumnType(size_t idx) const override;
 
 protected:
-
-  bool next(SValue* out, int out_len);
-
-  Transaction* txn_;
   ExecutionContext* execution_context_;
-  ScopedPtr<TableIterator> iter_;
-  Vector<ValueExpression> select_exprs_;
-  Option<ValueExpression> where_expr_;
+  size_t limit_;
+  size_t offset_;
+  ScopedPtr<TableExpression> input_;
+  std::vector<SVector> input_buffer_;
+  size_t counter_;
 };
 
-} // namespace csql
+}

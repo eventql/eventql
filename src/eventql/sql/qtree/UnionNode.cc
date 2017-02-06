@@ -108,4 +108,8 @@ size_t UnionNode::getNumComputedColumns() const {
   RAISE(kNotYetImplementedError);
 }
 
+SType UnionNode::getColumnType(size_t idx) const {
+  RAISE(kNotYetImplementedError);
+}
+
 } // namespace csql

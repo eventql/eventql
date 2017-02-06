@@ -33,6 +33,8 @@ namespace csql {
 class GroupByExpression : public TableExpression {
 public:
 
+  static const size_t kOutputBatchSize = 1024;
+
   GroupByExpression(
       Transaction* txn,
       ExecutionContext* execution_context,
@@ -42,29 +44,28 @@ public:
 
   ~GroupByExpression();
 
-  ScopedPtr<ResultCursor> execute() override;
+  ReturnCode execute() override;
+  ReturnCode nextBatch(SVector* columns, size_t* len) override;
 
-  size_t getNumColumns() const override;
+  size_t getColumnCount() const override;
+  SType getColumnType(size_t idx) const override;
 
 protected:
-
-  bool next(SValue* row, size_t row_len);
-
-  void freeResult();
-
   Transaction* txn_;
   ExecutionContext* execution_context_;
   Vector<ValueExpression> select_exprs_;
   Vector<ValueExpression> group_exprs_;
   ScopedPtr<TableExpression> input_;
   HashMap<String, Vector<VM::Instance>> groups_;
-  HashMap<String, Vector<VM::Instance>>::const_iterator groups_iter_;
+  HashMap<String, Vector<VM::Instance>>::iterator groups_iter_;
   ScratchMemory scratch_;
-  bool freed_;
+  VMStack vm_stack_;
 };
 
 class PartialGroupByExpression : public TableExpression {
 public:
+
+  static const size_t kOutputBatchSize = 1024;
 
   PartialGroupByExpression(
       Transaction* txn,
@@ -75,31 +76,30 @@ public:
 
   ~PartialGroupByExpression();
 
-  ScopedPtr<ResultCursor> execute() override;
+  ReturnCode execute() override;
+  ReturnCode nextBatch(SVector* columns, size_t* len) override;
 
-  size_t getNumColumns() const override;
+  size_t getColumnCount() const override;
+  SType getColumnType(size_t idx) const override;
 
   Option<SHA1Hash> getCacheKey() const override;
 
 protected:
-
-  bool next(SValue* row, size_t row_len);
-
-  void freeResult();
-
   Transaction* txn_;
   Vector<ValueExpression> select_exprs_;
   Vector<ValueExpression> group_exprs_;
   SHA1Hash expression_fingerprint_;
   ScopedPtr<TableExpression> input_;
   HashMap<String, Vector<VM::Instance>> groups_;
-  HashMap<String, Vector<VM::Instance>>::const_iterator groups_iter_;
+  HashMap<String, Vector<VM::Instance>>::iterator groups_iter_;
   ScratchMemory scratch_;
-  bool freed_;
+  VMStack vm_stack_;
 };
 
 class GroupByMergeExpression : public TableExpression {
 public:
+
+  static const size_t kOutputBatchSize = 1024;
 
   GroupByMergeExpression(
       Transaction* txn,
@@ -112,25 +112,23 @@ public:
 
   ~GroupByMergeExpression();
 
-  ScopedPtr<ResultCursor> execute() override;
+  ReturnCode execute() override;
+  ReturnCode nextBatch(SVector* columns, size_t* len) override;
 
-  size_t getNumColumns() const override;
+  size_t getColumnCount() const override;
+  SType getColumnType(size_t idx) const override;
 
   void addPart(GroupByNode* node, std::vector<std::string> hosts);
 
 protected:
-
-  bool next(SValue* row, size_t row_len);
-  void freeResult();
-
   Transaction* txn_;
   ExecutionContext* execution_context_;
   Vector<ValueExpression> select_exprs_;
   eventql::native_transport::TCPAsyncClient rpc_scheduler_;
   HashMap<String, Vector<VM::Instance>> groups_;
-  HashMap<String, Vector<VM::Instance>>::const_iterator groups_iter_;
+  HashMap<String, Vector<VM::Instance>>::iterator groups_iter_;
   ScratchMemory scratch_;
-  bool freed_;
+  VMStack vm_stack_;
   size_t num_parts_;
 };
 

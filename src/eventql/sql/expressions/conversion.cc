@@ -33,7 +33,7 @@ void toStringExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
         "wrong number of arguments for to_string. expected: 1, got: %i", argc);
   }
 
-  if (argv->getType() == SQL_STRING) {
+  if (argv->getType() == SType::STRING) {
     *out = *argv;
   } else {
     *out = argv->toString();
@@ -47,7 +47,7 @@ void toIntExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
         "wrong number of arguments for to_string. expected: 1, got: %i", argc);
   }
 
-  if (argv->getType() == SQL_INTEGER) {
+  if (argv->getType() == SType::INT64) {
     *out = *argv;
   } else {
     *out = argv->toInteger();
@@ -61,7 +61,7 @@ void toFloatExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
         "wrong number of arguments for to_string. expected: 1, got: %i", argc);
   }
 
-  if (argv->getType() == SQL_FLOAT) {
+  if (argv->getType() == SType::FLOAT64) {
     *out = *argv;
   } else {
     *out = argv->toFloat();
@@ -75,7 +75,7 @@ void toBoolExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
         "wrong number of arguments for to_string. expected: 1, got: %i", argc);
   }
 
-  if (argv->getType() == SQL_BOOL) {
+  if (argv->getType() == SType::BOOL) {
     *out = *argv;
   } else {
     *out = argv->toBool();

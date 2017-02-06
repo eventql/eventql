@@ -46,8 +46,6 @@ ScopedPtr<csql::TableExpression> Scheduler::buildTableExpression(
     csql::Transaction* txn,
     csql::ExecutionContext* execution_context,
     RefPtr<csql::TableExpressionNode> node) {
-  rewriteTableTimeSuffix(node.get());
-
   return DefaultScheduler::buildTableExpression(
       txn,
       execution_context,
@@ -277,59 +275,6 @@ bool Scheduler::isPipelineable(const csql::QueryTreeNode& qtree) {
 
   return false;
 }
-
-void Scheduler::rewriteTableTimeSuffix(RefPtr<csql::QueryTreeNode> node) {
-  auto seqscan = dynamic_cast<csql::SequentialScanNode*>(node.get());
-  if (seqscan) {
-    auto table_ref = TSDBTableRef::parse(seqscan->tableName());
-    if (!table_ref.keyrange_begin.isEmpty() &&
-        !table_ref.keyrange_limit.isEmpty()) {
-      seqscan->setTableName(table_ref.table_key);
-
-      auto pred = mkRef(
-          new csql::CallExpressionNode(
-              "logical_and",
-              Vector<RefPtr<csql::ValueExpressionNode>>{
-                new csql::CallExpressionNode(
-                    "gte",
-                    Vector<RefPtr<csql::ValueExpressionNode>>{
-                      new csql::ColumnReferenceNode("time"),
-                      new csql::LiteralExpressionNode(
-                          csql::SValue(csql::SValue::IntegerType(
-                              std::stoull(table_ref.keyrange_begin.get()))))
-                    }),
-                new csql::CallExpressionNode(
-                    "lte",
-                    Vector<RefPtr<csql::ValueExpressionNode>>{
-                      new csql::ColumnReferenceNode("time"),
-                      new csql::LiteralExpressionNode(
-                          csql::SValue(csql::SValue::IntegerType(
-                              std::stoull(table_ref.keyrange_limit.get()))))
-                    })
-              }));
-
-      auto where_expr = seqscan->whereExpression();
-      if (!where_expr.isEmpty()) {
-        pred = mkRef(
-            new csql::CallExpressionNode(
-                "logical_and",
-                Vector<RefPtr<csql::ValueExpressionNode>>{
-                  where_expr.get(),
-                  pred.asInstanceOf<csql::ValueExpressionNode>()
-                }));
-      }
-
-      seqscan->setWhereExpression(
-          pred.asInstanceOf<csql::ValueExpressionNode>());
-    }
-  }
-
-  auto ntables = node->numChildren();
-  for (int i = 0; i < ntables; ++i) {
-    rewriteTableTimeSuffix(node->child(i));
-  }
-}
-
 
 } // namespace eventql
 

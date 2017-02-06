@@ -49,15 +49,6 @@
 
 extern "C" {
 
-enum sql_type : uint8_t {
-  SQL_NULL = 0,
-  SQL_STRING = 1,
-  SQL_FLOAT = 2,
-  SQL_INTEGER = 3,
-  SQL_BOOL = 4,
-  SQL_TIMESTAMP = 5,
-};
-
 struct sql_txn__ { int unused; };
 typedef struct sql_txn__* sql_txn;
 

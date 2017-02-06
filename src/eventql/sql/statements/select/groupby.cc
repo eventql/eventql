@@ -26,7 +26,7 @@
 #include <eventql/util/io/fileutil.h>
 #include <eventql/util/logging.h>
 #include <eventql/util/random.h>
-#include <eventql/sql/expressions/table/groupby.h>
+#include <eventql/sql/statements/select/groupby.h>
 #include <eventql/sql/runtime/query_cache.h>
 #include <eventql/util/freeondestroy.h>
 #include <eventql/util/logging.h>
@@ -50,103 +50,146 @@ GroupByExpression::GroupByExpression(
     execution_context_(execution_context),
     select_exprs_(std::move(select_expressions)),
     group_exprs_(std::move(group_expressions)),
-    input_(std::move(input)),
-    freed_(false) {
+    input_(std::move(input)) {
   execution_context_->incrementNumTasks();
 }
 
 GroupByExpression::~GroupByExpression() {
-  if (!freed_) {
-    freeResult();
+  for (auto& group : groups_) {
+    for (size_t i = 0; i < select_exprs_.size(); ++i) {
+      VM::freeInstance(txn_, select_exprs_[i].program(), group.second[i]);
+    }
   }
 }
 
-ScopedPtr<ResultCursor> GroupByExpression::execute() {
+ReturnCode GroupByExpression::execute() {
   execution_context_->incrementNumTasksRunning();
 
-  auto input_cursor = input_->execute();
-  Vector<SValue> row(input_cursor->getNumColumns());
+  auto rc = input_->execute();
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  Vector<SVector> input_cols;
+  for (size_t i = 0; i < input_->getColumnCount(); ++i) {
+    input_cols.emplace_back(input_->getColumnType(i));
+  }
+
   size_t cnt = 0;
-  while (input_cursor->next(row.data(), row.size())) {
-    if (++cnt % 4096 == 0) {
+  for (;;) {
+    for (auto& c : input_cols) {
+      c.clear();
+    }
+
+    size_t nrecords = 0;
+    {
+      auto rc = input_->nextBatch(input_cols.data(), &nrecords);
+      if (!rc.isSuccess()) {
+        RAISE(kRuntimeError, rc.getMessage());
+      }
+    }
+
+    if (nrecords == 0) {
+      break;
+    }
+
+    {
       auto rc = txn_->triggerHeartbeat();
       if (!rc.isSuccess()) {
         RAISE(kRuntimeError, rc.getMessage());
       }
     }
 
-    Vector<SValue> gkey(group_exprs_.size(), SValue{});
-    for (size_t i = 0; i < group_exprs_.size(); ++i) {
-      VM::evaluate(
-          txn_,
-          group_exprs_[i].program(),
-          row.size(),
-          row.data(),
-          &gkey[i]);
+    Vector<void*> input_col_cursor;
+    for (const auto& c : input_cols) {
+      input_col_cursor.emplace_back((void*) c.getData());
     }
 
-    auto group_key = SValue::makeUniqueKey(gkey.data(), gkey.size());
-    auto& group = groups_[group_key];
-    if (group.size() == 0) {
-      for (const auto& e : select_exprs_) {
-        group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch_));
+    for (size_t n = 0; n < nrecords; n++) {
+      Vector<SValue> gkey(group_exprs_.size(), SValue{});
+      for (size_t i = 0; i < group_exprs_.size(); ++i) {
+        VM::evaluate(
+            txn_,
+            group_exprs_[i].program(),
+            group_exprs_[i].program()->method_call,
+            &vm_stack_,
+            nullptr,
+            input_col_cursor.size(),
+            input_col_cursor.data());
+
+        popBoxed(&vm_stack_, &gkey[i]);
       }
-    }
 
-    for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::accumulate(
-          txn_,
-          select_exprs_[i].program(),
-          &group[i],
-          row.size(),
-          row.data());
+      auto group_key = SValue::makeUniqueKey(gkey.data(), gkey.size());
+
+      auto& group = groups_[group_key];
+      if (group.size() == 0) {
+        for (const auto& e : select_exprs_) {
+          group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch_));
+        }
+      }
+
+      for (size_t i = 0; i < select_exprs_.size(); ++i) {
+        VM::evaluate(
+            txn_,
+            select_exprs_[i].program(),
+            select_exprs_[i].program()->method_accumulate,
+            &vm_stack_,
+            group[i],
+            input_col_cursor.size(),
+            input_col_cursor.data());
+      }
+
+      for (size_t i = 0; i < input_col_cursor.size(); ++i) {
+        if (input_col_cursor[i]) {
+          input_cols[i].next(&input_col_cursor[i]);
+        }
+      }
     }
   }
 
   groups_iter_ = groups_.begin();
-  return mkScoped(
-      new DefaultResultCursor(
-          select_exprs_.size(),
-          std::bind(
-              &GroupByExpression::next,
-              this,
-              std::placeholders::_1,
-              std::placeholders::_2)));
+  return ReturnCode::success();
 }
 
-size_t GroupByExpression::getNumColumns() const {
-  return select_exprs_.size();
-}
+ReturnCode GroupByExpression::nextBatch(
+    SVector* columns,
+    size_t* nrecords) {
+  *nrecords = 0;
 
-bool GroupByExpression::next(SValue* row, size_t row_len) {
-  if (groups_iter_ != groups_.end()) {
+  while (groups_iter_ != groups_.end()) {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::result(
+      VM::evaluate(
           txn_,
           select_exprs_[i].program(),
-          &groups_iter_->second[i],
-          &row[i]);
+          select_exprs_[i].program()->method_call,
+          &vm_stack_,
+          groups_iter_->second[i],
+          0,
+          nullptr);
+
+      popVector(&vm_stack_, columns + i);
     }
 
     if (++groups_iter_ == groups_.end()) {
       execution_context_->incrementNumTasksCompleted();
-      freeResult();
     }
-    return true;
-  } else {
-    return false;
+
+    if (++(*nrecords) == kOutputBatchSize) {
+      break;
+    }
   }
+
+  return ReturnCode::success();
 }
 
-void GroupByExpression::freeResult() {
-  for (auto& group : groups_) {
-    for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::freeInstance(txn_, select_exprs_[i].program(), &group.second[i]);
-    }
-  }
+size_t GroupByExpression::getColumnCount() const {
+  return select_exprs_.size();
+}
 
-  groups_.clear();
-  freed_ = true;
+SType GroupByExpression::getColumnType(size_t idx) const {
+  assert(idx < select_exprs_.size());
+  return select_exprs_[idx].getReturnType();
 }
 
 PartialGroupByExpression::PartialGroupByExpression(
@@ -159,16 +202,17 @@ PartialGroupByExpression::PartialGroupByExpression(
     select_exprs_(std::move(select_expressions)),
     group_exprs_(std::move(group_expressions)),
     expression_fingerprint_(expression_fingerprint),
-    input_(std::move(input)),
-    freed_(false) {}
+    input_(std::move(input)) {}
 
 PartialGroupByExpression::~PartialGroupByExpression() {
-  if (!freed_) {
-    freeResult();
+  for (auto& group : groups_) {
+    for (size_t i = 0; i < select_exprs_.size(); ++i) {
+      VM::freeInstance(txn_, select_exprs_[i].program(), group.second[i]);
+    }
   }
 }
 
-ScopedPtr<ResultCursor> PartialGroupByExpression::execute() {
+ReturnCode PartialGroupByExpression::execute() {
   bool from_cache = false;
   auto cache_key = getCacheKey();
   auto cache = txn_->getRuntime()->getQueryCache();
@@ -191,10 +235,10 @@ ScopedPtr<ResultCursor> PartialGroupByExpression::execute() {
         }
 
         for (size_t i = 0; i < select_exprs_.size(); ++i) {
-          VM::loadState(
+          VM::loadInstanceState(
               txn_,
               select_exprs_[i].program(),
-              &group[i],
+              group[i],
               is);
         }
       }
@@ -205,42 +249,86 @@ ScopedPtr<ResultCursor> PartialGroupByExpression::execute() {
 
   // execute
   if (!from_cache) {
-    auto input_cursor = input_->execute();
-    Vector<SValue> row(input_cursor->getNumColumns());
+    auto rc = input_->execute();
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+
+    Vector<SVector> input_cols;
+    for (size_t i = 0; i < input_->getColumnCount(); ++i) {
+      input_cols.emplace_back(input_->getColumnType(i));
+    }
+
     size_t cnt = 0;
-    while (input_cursor->next(row.data(), row.size())) {
-      if (++cnt % 512 == 0) {
+    for (;;) {
+      for (auto& c : input_cols) {
+        c.clear();
+      }
+
+      size_t nrecords = 0;
+      {
+        auto rc = input_->nextBatch(input_cols.data(), &nrecords);
+        if (!rc.isSuccess()) {
+          RAISE(kRuntimeError, rc.getMessage());
+        }
+      }
+
+      if (nrecords == 0) {
+        break;
+      }
+
+      {
         auto rc = txn_->triggerHeartbeat();
         if (!rc.isSuccess()) {
           RAISE(kRuntimeError, rc.getMessage());
         }
       }
 
-      Vector<SValue> gkey(group_exprs_.size(), SValue{});
-      for (size_t i = 0; i < group_exprs_.size(); ++i) {
-        VM::evaluate(
-            txn_,
-            group_exprs_[i].program(),
-            row.size(),
-            row.data(),
-            &gkey[i]);
+      Vector<void*> input_col_cursor;
+      for (const auto& c : input_cols) {
+        input_col_cursor.emplace_back((void*) c.getData());
       }
 
-      auto group_key = SValue::makeUniqueKey(gkey.data(), gkey.size());
-      auto& group = groups_[group_key];
-      if (group.size() == 0) {
-        for (const auto& e : select_exprs_) {
-          group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch_));
+      for (size_t n = 0; n < nrecords; n++) {
+        Vector<SValue> gkey(group_exprs_.size(), SValue{});
+        for (size_t i = 0; i < group_exprs_.size(); ++i) {
+          VM::evaluate(
+              txn_,
+              group_exprs_[i].program(),
+              group_exprs_[i].program()->method_call,
+              &vm_stack_,
+              nullptr,
+              input_col_cursor.size(),
+              input_col_cursor.data());
+
+          popBoxed(&vm_stack_, &gkey[i]);
         }
-      }
 
-      for (size_t i = 0; i < select_exprs_.size(); ++i) {
-        VM::accumulate(
-            txn_,
-            select_exprs_[i].program(),
-            &group[i],
-            row.size(),
-            row.data());
+        auto group_key = SValue::makeUniqueKey(gkey.data(), gkey.size());
+
+        auto& group = groups_[group_key];
+        if (group.size() == 0) {
+          for (const auto& e : select_exprs_) {
+            group.emplace_back(VM::allocInstance(txn_, e.program(), &scratch_));
+          }
+        }
+
+        for (size_t i = 0; i < select_exprs_.size(); ++i) {
+          VM::evaluate(
+              txn_,
+              select_exprs_[i].program(),
+              select_exprs_[i].program()->method_accumulate,
+              &vm_stack_,
+              group[i],
+              input_col_cursor.size(),
+              input_col_cursor.data());
+        }
+
+        for (size_t i = 0; i < input_col_cursor.size(); ++i) {
+          if (input_col_cursor[i]) {
+            input_cols[i].next(&input_col_cursor[i]);
+          }
+        }
       }
     }
   }
@@ -255,10 +343,10 @@ ScopedPtr<ResultCursor> PartialGroupByExpression::execute() {
         os->write(g.first.data(), g.first.size());
 
         for (size_t i = 0; i < select_exprs_.size(); ++i) {
-          VM::saveState(
+          VM::saveInstanceState(
               txn_,
               select_exprs_[i].program(),
-              &g.second[i],
+              g.second[i],
               os);
         }
       }
@@ -266,14 +354,35 @@ ScopedPtr<ResultCursor> PartialGroupByExpression::execute() {
   }
 
   groups_iter_ = groups_.begin();
-  return mkScoped(
-      new DefaultResultCursor(
-          2,
-          std::bind(
-              &PartialGroupByExpression::next,
-              this,
-              std::placeholders::_1,
-              std::placeholders::_2)));
+  return ReturnCode::success();
+}
+
+ReturnCode PartialGroupByExpression::nextBatch(
+    SVector* columns,
+    size_t* nrecords) {
+  *nrecords = 0;
+
+  while (groups_iter_ != groups_.end()) {
+    String group_data;
+    auto group_data_os = StringOutputStream::fromString(&group_data);
+    for (size_t i = 0; i < select_exprs_.size(); ++i) {
+      VM::saveInstanceState(
+          txn_,
+          select_exprs_[i].program(),
+          groups_iter_->second[i],
+          group_data_os.get());
+    }
+
+    copyString(groups_iter_->first, columns + 0);
+    copyString(group_data, columns + 1);
+    ++groups_iter_;
+
+    if (++(*nrecords) == kOutputBatchSize) {
+      break;
+    }
+  }
+
+  return ReturnCode::success();
 }
 
 Option<SHA1Hash> PartialGroupByExpression::getCacheKey() const {
@@ -286,50 +395,13 @@ Option<SHA1Hash> PartialGroupByExpression::getCacheKey() const {
   }
 }
 
-size_t PartialGroupByExpression::getNumColumns() const {
+size_t PartialGroupByExpression::getColumnCount() const {
   return 2;
 }
 
-bool PartialGroupByExpression::next(SValue* row, size_t row_len) {
-  if (groups_iter_ != groups_.end()) {
-    String group_data;
-    auto group_data_os = StringOutputStream::fromString(&group_data);
-    for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::saveState(
-          txn_,
-          select_exprs_[i].program(),
-          &groups_iter_->second[i],
-          group_data_os.get());
-    }
-
-    switch (row_len) {
-      case 2:
-        row[1] = SValue::newString(group_data);
-      case 1:
-        row[0] = SValue::newString(groups_iter_->first);
-      default:
-        break;
-    }
-
-    if (++groups_iter_ == groups_.end()) {
-      freeResult();
-    }
-    return true;
-  } else {
-    return false;
-  }
-}
-
-
-void PartialGroupByExpression::freeResult() {
-  for (auto& group : groups_) {
-    for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::freeInstance(txn_, select_exprs_[i].program(), &group.second[i]);
-    }
-  }
-
-  groups_.clear();
-  freed_ = true;
+SType PartialGroupByExpression::getColumnType(size_t idx) const {
+  assert(idx < 2);
+  return SType::STRING;
 }
 
 GroupByMergeExpression::GroupByMergeExpression(
@@ -351,18 +423,19 @@ GroupByMergeExpression::GroupByMergeExpression(
         max_concurrent_tasks,
         max_concurrent_tasks_per_host,
         config->getString("server.query_failed_shard_policy").get() == "tolerate"),
-    freed_(false),
     num_parts_(0) {
   execution_context_->incrementNumTasks();
 }
 
 GroupByMergeExpression::~GroupByMergeExpression() {
-  if (!freed_) {
-    freeResult();
+  for (auto& group : groups_) {
+    for (size_t i = 0; i < select_exprs_.size(); ++i) {
+      VM::freeInstance(txn_, select_exprs_[i].program(), group.second[i]);
+    }
   }
 }
 
-ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
+ReturnCode GroupByMergeExpression::execute() {
   execution_context_->incrementNumTasksRunning();
 
   ScratchMemory scratch;
@@ -374,7 +447,7 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
 
   RunOnDestroy remote_group_finalizer([this, &remote_group] {
     for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::freeInstance(txn_, select_exprs_[i].program(), &remote_group[i]);
+      VM::freeInstance(txn_, select_exprs_[i].program(), remote_group[i]);
     }
   });
 
@@ -423,8 +496,8 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
 
       for (size_t i = 0; i < select_exprs_.size(); ++i) {
         const auto& e = select_exprs_[i];
-        VM::loadState(txn_, e.program(), &remote_group[i], &is);
-        VM::merge(txn_, e.program(), &group[i], &remote_group[i]);
+        VM::loadInstanceState(txn_, e.program(), remote_group[i], &is);
+        VM::mergeInstance(txn_, e.program(), group[i], remote_group[i]);
       }
     }
 
@@ -450,18 +523,47 @@ ScopedPtr<ResultCursor> GroupByMergeExpression::execute() {
   }
 
   groups_iter_ = groups_.begin();
-  return mkScoped(
-      new DefaultResultCursor(
-          select_exprs_.size(),
-          std::bind(
-              &GroupByMergeExpression::next,
-              this,
-              std::placeholders::_1,
-              std::placeholders::_2)));
+  return ReturnCode::success();
 }
 
-size_t GroupByMergeExpression::getNumColumns() const {
+ReturnCode GroupByMergeExpression::nextBatch(
+    SVector* columns,
+    size_t* nrecords) {
+  *nrecords = 0;
+
+  while (groups_iter_ != groups_.end()) {
+    for (size_t i = 0; i < select_exprs_.size(); ++i) {
+      VM::evaluate(
+          txn_,
+          select_exprs_[i].program(),
+          select_exprs_[i].program()->method_call,
+          &vm_stack_,
+          groups_iter_->second[i],
+          0,
+          nullptr);
+
+      popVector(&vm_stack_, columns + i);
+    }
+
+    if (++groups_iter_ == groups_.end()) {
+      execution_context_->incrementNumTasksCompleted();
+    }
+
+    if (++(*nrecords) == kOutputBatchSize) {
+      break;
+    }
+  }
+
+  return ReturnCode::success();
+}
+
+size_t GroupByMergeExpression::getColumnCount() const {
   return select_exprs_.size();
+}
+
+SType GroupByMergeExpression::getColumnType(size_t idx) const {
+  assert(idx < select_exprs_.size());
+  return select_exprs_[idx].getReturnType();
 }
 
 void GroupByMergeExpression::addPart(
@@ -495,37 +597,6 @@ void GroupByMergeExpression::addPart(
       hosts);
 
   ++num_parts_;
-}
-
-bool GroupByMergeExpression::next(SValue* row, size_t row_len) {
-  if (groups_iter_ != groups_.end()) {
-    for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::result(
-          txn_,
-          select_exprs_[i].program(),
-          &groups_iter_->second[i],
-          &row[i]);
-    }
-
-    if (++groups_iter_ == groups_.end()) {
-      execution_context_->incrementNumTasksCompleted();
-      freeResult();
-    }
-    return true;
-  } else {
-    return false;
-  }
-}
-
-void GroupByMergeExpression::freeResult() {
-  for (auto& group : groups_) {
-    for (size_t i = 0; i < select_exprs_.size(); ++i) {
-      VM::freeInstance(txn_, select_exprs_[i].program(), &group.second[i]);
-    }
-  }
-
-  groups_.clear();
-  freed_ = true;
 }
 
 } // namespace csql

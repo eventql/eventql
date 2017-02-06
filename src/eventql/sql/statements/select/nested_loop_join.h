@@ -25,35 +25,59 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/runtime/defaultruntime.h>
-#include <eventql/sql/expressions/table_expression.h>
+#include <eventql/sql/qtree/JoinNode.h>
 
 namespace csql {
 
-class SubqueryExpression : public TableExpression {
+class NestedLoopJoin : public TableExpression {
 public:
 
-  SubqueryExpression(
+  static const size_t kOutputBatchSize = 1024;
+
+  NestedLoopJoin(
       Transaction* txn,
-      ExecutionContext* execution_context,
+      JoinType join_type,
+      const Vector<JoinNode::InputColumnRef>& input_map,
       Vector<ValueExpression> select_expressions,
+      Option<ValueExpression> join_cond_expr,
       Option<ValueExpression> where_expr,
-      ScopedPtr<TableExpression> input);
+      ScopedPtr<TableExpression> base_tbl,
+      ScopedPtr<TableExpression> joined_tbl);
 
-  ScopedPtr<ResultCursor> execute() override;
+  ReturnCode execute() override;
 
-  size_t getNumColumns() const override;
+  size_t getColumnCount() const override;
+  SType getColumnType(size_t idx) const override;
+
+  ReturnCode nextBatch(SVector* columns, size_t* len) override;
 
 protected:
 
-  bool next(SValue* row, int row_len);
+  ReturnCode executeCartesianJoin(SVector* output, size_t* output_len);
+  ReturnCode executeInnerJoin(SVector* output, size_t* output_len);
+  ReturnCode executeOuterJoin(SVector* output, size_t* output_len);
+
+  ReturnCode readJoinedTable();
+  ReturnCode readBaseTableBatch();
 
   Transaction* txn_;
-  ExecutionContext* execution_context_;
+  JoinType join_type_;
+  Vector<JoinNode::InputColumnRef> input_map_;
+  Vector<String> column_names_;
   Vector<ValueExpression> select_exprs_;
+  Option<ValueExpression> join_cond_expr_;
   Option<ValueExpression> where_expr_;
-  ScopedPtr<TableExpression> input_;
-  ScopedPtr<ResultCursor> input_cursor_;
-  Vector<SValue> buf_;
+  ScopedPtr<TableExpression> base_tbl_;
+  ScopedPtr<TableExpression> joined_tbl_;
+  std::vector<SVector> joined_tbl_data_;
+  std::vector<const void*> joined_tbl_cur_;
+  size_t joined_tbl_size_;
+  size_t joined_tbl_pos_;
+  bool joined_tbl_row_found_;
+  std::vector<SVector> base_tbl_buffer_;
+  std::vector<const void*> base_tbl_cur_;
+  size_t base_tbl_buffer_size_;
+  VMStack vm_stack_;
 };
 
 }

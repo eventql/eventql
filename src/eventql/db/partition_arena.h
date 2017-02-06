@@ -71,6 +71,9 @@ public:
   cstable::CSTableFile* getCSTableFile() const;
   SkiplistReader getSkiplistReader() const;
 
+  bool hasUpdate() const;
+  bool hasSkiplist() const;
+
 protected:
   struct RecordVersion {
     uint64_t version;
@@ -84,6 +87,8 @@ protected:
   HashMap<SHA1Hash, RecordVersion> record_versions_;
   Vector<bool> skiplist_;
   size_t num_records_;
+  bool has_update_;
+  bool has_skiplist_;
   OrderedMap<SHA1Hash, uint64_t> vmap_;
   cstable::TableSchema cstable_schema_;
   cstable::TableSchema cstable_schema_ext_;

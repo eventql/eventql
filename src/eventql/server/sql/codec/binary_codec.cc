@@ -179,8 +179,8 @@ size_t BinaryResultParser::parseRow(const void* data, size_t size) {
       return 0;
     }
 
-    switch (stype) {
-      case SQL_STRING: {
+    switch ((SType) stype) {
+      case SType::STRING: {
         String val;
         if (reader.maybeReadLenencString(&val)) {
           row.emplace_back(SValue(val));
@@ -190,7 +190,7 @@ size_t BinaryResultParser::parseRow(const void* data, size_t size) {
         }
       }
 
-      case SQL_FLOAT: {
+      case SType::FLOAT64: {
         double val;
         if (reader.maybeReadDouble(&val)) {
           row.emplace_back(SValue(SValue::FloatType(val)));
@@ -200,7 +200,7 @@ size_t BinaryResultParser::parseRow(const void* data, size_t size) {
         }
       }
 
-      case SQL_INTEGER: {
+      case SType::INT64: {
         uint64_t val;
         if (reader.maybeReadUInt64(&val)) {
           row.emplace_back(SValue(SValue::IntegerType(val)));
@@ -210,7 +210,7 @@ size_t BinaryResultParser::parseRow(const void* data, size_t size) {
         }
       }
 
-      case SQL_BOOL: {
+      case SType::BOOL: {
         uint8_t val;
         if (reader.maybeReadUInt8(&val)) {
           row.emplace_back(SValue(SValue::BoolType(val == 1)));
@@ -220,7 +220,7 @@ size_t BinaryResultParser::parseRow(const void* data, size_t size) {
         }
       }
 
-      case SQL_TIMESTAMP: {
+      case SType::TIMESTAMP64: {
         uint64_t val;
         if (reader.maybeReadUInt64(&val)) {
           row.emplace_back(SValue(SValue::TimeType(val)));
@@ -230,7 +230,7 @@ size_t BinaryResultParser::parseRow(const void* data, size_t size) {
         }
       }
 
-      case SQL_NULL: {
+      case SType::NIL: {
         row.emplace_back(SValue());
         break;
       }

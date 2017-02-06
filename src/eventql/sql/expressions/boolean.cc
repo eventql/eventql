@@ -31,6 +31,113 @@
 namespace csql {
 namespace expressions {
 
+void logical_and_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popBool(stack);
+  auto left = popBool(stack);
+  pushBool(stack, left && right);
+}
+
+const SFunction logical_and(
+    { SType::BOOL, SType::BOOL },
+    SType::BOOL,
+    &logical_and_call);
+
+
+void logical_or_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popBool(stack);
+  auto left = popBool(stack);
+  pushBool(stack, left || right);
+}
+
+const SFunction logical_or(
+    { SType::BOOL, SType::BOOL },
+    SType::BOOL,
+    &logical_or_call);
+
+
+void eq_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  pushBool(stack, left == right);
+}
+
+const SFunction eq_uint64(
+    { SType::UINT64, SType::UINT64 },
+    SType::BOOL,
+    &eq_uint64_call);
+
+const SFunction eq_timestamp64(
+    { SType::TIMESTAMP64, SType::TIMESTAMP64 },
+    SType::BOOL,
+    &eq_uint64_call);
+
+
+void lt_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  pushBool(stack, left < right);
+}
+
+const SFunction lt_uint64(
+    { SType::UINT64, SType::UINT64 },
+    SType::BOOL,
+    &lt_uint64_call);
+
+const SFunction lt_timestamp64(
+    { SType::TIMESTAMP64, SType::TIMESTAMP64 },
+    SType::BOOL,
+    &lt_uint64_call);
+
+
+void lte_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  pushBool(stack, left <= right);
+}
+
+const SFunction lte_uint64(
+    { SType::UINT64, SType::UINT64 },
+    SType::BOOL,
+    &lte_uint64_call);
+
+const SFunction lte_timestamp64(
+    { SType::TIMESTAMP64, SType::TIMESTAMP64 },
+    SType::BOOL,
+    &lte_uint64_call);
+
+void gt_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  pushBool(stack, left > right);
+}
+
+const SFunction gt_uint64(
+    { SType::UINT64, SType::UINT64 },
+    SType::BOOL,
+    &gt_uint64_call);
+
+const SFunction gt_timestamp64(
+    { SType::TIMESTAMP64, SType::TIMESTAMP64 },
+    SType::BOOL,
+    &gt_uint64_call);
+
+
+void gte_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  pushBool(stack, left >= right);
+}
+
+const SFunction gte_uint64(
+    { SType::UINT64, SType::UINT64 },
+    SType::BOOL,
+    &gte_uint64_call);
+
+const SFunction gte_timestamp64(
+    { SType::TIMESTAMP64, SType::TIMESTAMP64 },
+    SType::BOOL,
+    &gte_uint64_call);
+
 void eqExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   if (argc != 2) {
     RAISE(
@@ -41,7 +148,7 @@ void eqExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   SValue* lhs = argv;
   SValue* rhs = argv + 1;
 
-  if (lhs->getType() == SQL_NULL ^ rhs->getType() == SQL_NULL) {
+  if (lhs->getType() == SType::NIL ^ rhs->getType() == SType::NIL) {
     *out = SValue::newBool(false);
     return;
   }
@@ -51,7 +158,7 @@ void eqExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
     return;
   }
 
-  if (lhs->getType() == SQL_STRING || rhs->getType() == SQL_STRING) {
+  if (lhs->getType() == SType::STRING || rhs->getType() == SType::STRING) {
     *out = SValue::newBool(lhs->getString() == rhs->getString());
     return;
   }
@@ -106,16 +213,16 @@ void negExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   SValue* val = argv;
 
   switch(val->getType()) {
-    case SQL_INTEGER:
+    case SType::INT64:
       *out = SValue(val->getInteger() * -1);
       return;
-    case SQL_FLOAT:
+    case SType::FLOAT64:
       *out = SValue(val->getFloat() * -1.0f);
       return;
-    case SQL_BOOL:
+    case SType::BOOL:
       *out = SValue(!val->getBool());
       return;
-    case SQL_NULL:
+    case SType::NIL:
       *out = SValue();
       return;
     default:
@@ -137,45 +244,45 @@ void ltExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   SValue* rhs = argv + 1;
 
   switch(lhs->getType()) {
-    case SQL_INTEGER:
-    case SQL_TIMESTAMP:
+    case SType::INT64:
+    case SType::TIMESTAMP64:
       switch(rhs->getType()) {
-        case SQL_INTEGER:
-        case SQL_TIMESTAMP:
+        case SType::INT64:
+        case SType::TIMESTAMP64:
           *out = SValue(lhs->getInteger() < rhs->getInteger());
           return;
-        case SQL_FLOAT:
+        case SType::FLOAT64:
           *out = SValue(lhs->getFloat() < rhs->getFloat());
           return;
-        case SQL_NULL:
+        case SType::NIL:
           *out = SValue(lhs->getFloat() < 0.0f);
           return;
         default:
           break;
       }
       break;
-    case SQL_FLOAT:
+    case SType::FLOAT64:
       switch(rhs->getType()) {
-        case SQL_INTEGER:
-        case SQL_FLOAT:
-        case SQL_TIMESTAMP:
+        case SType::INT64:
+        case SType::FLOAT64:
+        case SType::TIMESTAMP64:
           *out = SValue(lhs->getFloat() < rhs->getFloat());
           return;
-        case SQL_NULL:
+        case SType::NIL:
           *out = SValue(lhs->getFloat() < 0.0f);
           return;
         default:
           break;
       }
       break;
-    case SQL_NULL:
+    case SType::NIL:
       switch(rhs->getType()) {
-        case SQL_INTEGER:
-        case SQL_FLOAT:
-        case SQL_TIMESTAMP:
+        case SType::INT64:
+        case SType::FLOAT64:
+        case SType::TIMESTAMP64:
           *out = SValue(0.0f < rhs->getFloat());
           return;
-        case SQL_NULL:
+        case SType::NIL:
           *out = SValue(SValue::BoolType(false));
           return;
         default:
@@ -185,8 +292,8 @@ void ltExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
       break;
   }
 
-  if (lhs->getType() == SQL_STRING ||
-      rhs->getType() == SQL_STRING) {
+  if (lhs->getType() == SType::STRING ||
+      rhs->getType() == SType::STRING) {
     *out = SValue(lhs->getString() < rhs->getString());
     return;
   }
@@ -207,45 +314,45 @@ void lteExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   SValue* rhs = argv + 1;
 
   switch(lhs->getType()) {
-    case SQL_INTEGER:
-    case SQL_TIMESTAMP:
+    case SType::INT64:
+    case SType::TIMESTAMP64:
       switch(rhs->getType()) {
-        case SQL_INTEGER:
-        case SQL_TIMESTAMP:
+        case SType::INT64:
+        case SType::TIMESTAMP64:
           *out = SValue(lhs->getInteger() <= rhs->getInteger());
           return;
-        case SQL_FLOAT:
+        case SType::FLOAT64:
           *out = SValue(lhs->getFloat() <= rhs->getFloat());
           return;
-        case SQL_NULL:
+        case SType::NIL:
           *out = SValue(lhs->getFloat() <= 0.0f);
           return;
         default:
           break;
       }
       break;
-    case SQL_FLOAT:
+    case SType::FLOAT64:
       switch(rhs->getType()) {
-        case SQL_INTEGER:
-        case SQL_FLOAT:
-        case SQL_TIMESTAMP:
+        case SType::INT64:
+        case SType::FLOAT64:
+        case SType::TIMESTAMP64:
           *out = SValue(lhs->getFloat() <= rhs->getFloat());
           return;
-        case SQL_NULL:
+        case SType::NIL:
           *out = SValue(lhs->getFloat() <= 0.0f);
           return;
         default:
           break;
       }
       break;
-    case SQL_NULL:
+    case SType::NIL:
       switch(rhs->getType()) {
-        case SQL_INTEGER:
-        case SQL_FLOAT:
-        case SQL_TIMESTAMP:
+        case SType::INT64:
+        case SType::FLOAT64:
+        case SType::TIMESTAMP64:
           *out = SValue(0.0f <= rhs->getFloat());
           return;
-        case SQL_NULL:
+        case SType::NIL:
           *out = SValue(SValue::BoolType(true));
           return;
         default:
@@ -255,8 +362,8 @@ void lteExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
       break;
   }
 
-  if (lhs->getType() == SQL_STRING ||
-      rhs->getType() == SQL_STRING) {
+  if (lhs->getType() == SType::STRING ||
+      rhs->getType() == SType::STRING) {
     *out = SValue(lhs->getString() <= rhs->getString());
     return;
   }
@@ -277,45 +384,45 @@ void gtExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   SValue* rhs = argv + 1;
 
   switch(lhs->getType()) {
-    case SQL_INTEGER:
-    case SQL_TIMESTAMP:
+    case SType::INT64:
+    case SType::TIMESTAMP64:
       switch(rhs->getType()) {
-        case SQL_INTEGER:
-        case SQL_TIMESTAMP:
+        case SType::INT64:
+        case SType::TIMESTAMP64:
           *out = SValue(lhs->getInteger() > rhs->getInteger());
           return;
-        case SQL_FLOAT:
+        case SType::FLOAT64:
           *out = SValue(lhs->getFloat() > rhs->getFloat());
           return;
-        case SQL_NULL:
+        case SType::NIL:
           *out = SValue(lhs->getFloat() > 0.0f);
           return;
         default:
           break;
       }
       break;
-    case SQL_FLOAT:
+    case SType::FLOAT64:
       switch(rhs->getType()) {
-        case SQL_INTEGER:
-        case SQL_FLOAT:
-        case SQL_TIMESTAMP:
+        case SType::INT64:
+        case SType::FLOAT64:
+        case SType::TIMESTAMP64:
           *out = SValue(lhs->getFloat() > rhs->getFloat());
           return;
-        case SQL_NULL:
+        case SType::NIL:
           *out = SValue(lhs->getFloat() > 0.0f);
           return;
         default:
           break;
       }
       break;
-    case SQL_NULL:
+    case SType::NIL:
       switch(rhs->getType()) {
-        case SQL_INTEGER:
-        case SQL_FLOAT:
-        case SQL_TIMESTAMP:
+        case SType::INT64:
+        case SType::FLOAT64:
+        case SType::TIMESTAMP64:
           *out = SValue(0.0f > rhs->getFloat());
           return;
-        case SQL_NULL:
+        case SType::NIL:
           *out = SValue(SValue::BoolType(false));
           return;
         default:
@@ -325,8 +432,8 @@ void gtExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
       break;
   }
 
-  if (lhs->getType() == SQL_STRING ||
-      rhs->getType() == SQL_STRING) {
+  if (lhs->getType() == SType::STRING ||
+      rhs->getType() == SType::STRING) {
     *out = SValue(lhs->getString() > rhs->getString());
     return;
   }
@@ -347,45 +454,45 @@ void gteExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   SValue* rhs = argv + 1;
 
   switch(lhs->getType()) {
-    case SQL_INTEGER:
-    case SQL_TIMESTAMP:
+    case SType::INT64:
+    case SType::TIMESTAMP64:
       switch(rhs->getType()) {
-        case SQL_INTEGER:
-        case SQL_TIMESTAMP:
+        case SType::INT64:
+        case SType::TIMESTAMP64:
           *out = SValue(lhs->getInteger() >= rhs->getInteger());
           return;
-        case SQL_FLOAT:
+        case SType::FLOAT64:
           *out = SValue(lhs->getFloat() >= rhs->getFloat());
           return;
-        case SQL_NULL:
+        case SType::NIL:
           *out = SValue(lhs->getFloat() >= 0.0f);
           return;
         default:
           break;
       }
       break;
-    case SQL_FLOAT:
+    case SType::FLOAT64:
       switch(rhs->getType()) {
-        case SQL_INTEGER:
-        case SQL_FLOAT:
-        case SQL_TIMESTAMP:
+        case SType::INT64:
+        case SType::FLOAT64:
+        case SType::TIMESTAMP64:
           *out = SValue(lhs->getFloat() >= rhs->getFloat());
           return;
-        case SQL_NULL:
+        case SType::NIL:
           *out = SValue(lhs->getFloat() >= 0.0f);
           return;
         default:
           break;
       }
       break;
-    case SQL_NULL:
+    case SType::NIL:
       switch(rhs->getType()) {
-        case SQL_INTEGER:
-        case SQL_FLOAT:
-        case SQL_TIMESTAMP:
+        case SType::INT64:
+        case SType::FLOAT64:
+        case SType::TIMESTAMP64:
           *out = SValue(0.0f >= rhs->getFloat());
           return;
-        case SQL_NULL:
+        case SType::NIL:
           *out = SValue(SValue::BoolType(true));
           return;
         default:
@@ -395,8 +502,8 @@ void gteExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
       break;
   }
 
-  if (lhs->getType() == SQL_STRING ||
-      rhs->getType() == SQL_STRING) {
+  if (lhs->getType() == SType::STRING ||
+      rhs->getType() == SType::STRING) {
     *out = SValue(lhs->getString() >= rhs->getString());
     return;
   }
@@ -413,7 +520,7 @@ void isNullExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
         "wrong number of arguments for isnull. expected: 1, got: $0", argc);
   }
 
-  if (argv[0].getType() == SQL_NULL) {
+  if (argv[0].getType() == SType::NIL) {
     *out = SValue(SValue::BoolType(true));
   } else {
     *out = SValue(SValue::BoolType(false));

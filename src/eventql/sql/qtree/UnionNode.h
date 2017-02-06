@@ -52,6 +52,8 @@ public:
 
   size_t getNumComputedColumns() const override;
 
+  SType getColumnType(size_t idx) const override;
+
 protected:
   Vector<RefPtr<QueryTreeNode>> tables_;
 };

@@ -59,5 +59,9 @@ String LikeExpressionNode::toSQL() const {
       pattern_);
 }
 
+SType LikeExpressionNode::getReturnType() const {
+  return SType::BOOL;
+}
+
 } // namespace csql
 

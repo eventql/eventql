@@ -26,28 +26,31 @@
 #include <string>
 #include <string.h>
 #include <vector>
+#include "eventql/eventql.h"
 #include <eventql/util/io/inputstream.h>
 #include <eventql/util/io/outputstream.h>
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/UnixTime.h>
 #include <eventql/util/exception.h>
 #include <eventql/sql/csql.h>
-
-#include "eventql/eventql.h"
+#include <eventql/sql/stype.h>
 
 namespace csql {
+struct VMStack;
 
 class SValue {
 public:
   typedef std::string StringType;
   typedef double FloatType;
-  typedef int64_t IntegerType;
+  typedef uint64_t IntegerType;
   typedef bool BoolType;
   typedef UnixTime TimeType;
 
   static SValue newNull();
   static SValue newString(const String& value);
   static SValue newString(const char* value);
+  static SValue newUInt64(uint64_t value);
+  static SValue newInt64(int64_t value);
   static SValue newInteger(IntegerType value);
   static SValue newInteger(const String& value);
   static SValue newFloat(FloatType value);
@@ -57,10 +60,11 @@ public:
   static SValue newTimestamp(TimeType value);
   static SValue newTimestamp(const String& value);
 
-  static const char* getTypeName(sql_type type);
+  static const char* getTypeName(SType type);
   const char* getTypeName() const;
 
   explicit SValue();
+  SValue(SType type);
   SValue(const SValue& copy);
   SValue& operator=(const SValue& copy);
   bool operator==(const SValue& other) const;
@@ -74,7 +78,7 @@ public:
   explicit SValue(BoolType bool_value);
   explicit SValue(TimeType time_value);
 
-  sql_type getType() const;
+  SType getType() const;
   bool isString() const;
   bool isNumeric() const;
   bool isInteger() const;
@@ -112,23 +116,75 @@ public:
 
   static std::string makeUniqueKey(SValue* arr, size_t len);
 
+  void copyFrom(const void* data);
+
+  const void* getData() const;
+  void* getData();
+
+  void setData(const void* data, size_t size);
+
+  size_t getCapacity() const;
+  size_t getSize() const;
+
 protected:
   struct {
-    sql_type type;
+    SType type;
     union {
-      int64_t t_integer;
+      int64_t t_int64;
+      uint64_t t_uint64;
       double t_float;
-      bool t_bool;
+      uint8_t t_bool;
       uint64_t t_timestamp;
-      struct {
-        char* ptr;
-        uint32_t len;
-      } t_string;
+      void* t_string;
     } u;
   } data_;
 };
 
+class SVector {
+public:
+
+  SVector(SType type);
+  SVector(const SVector& other) = delete;
+  SVector(SVector&& other);
+  SVector& operator=(const SVector& other) = delete;
+  ~SVector();
+
+  SType getType() const;
+
+  const void* getData() const;
+  void* getMutableData();
+
+  size_t getSize() const;
+  void setSize(size_t new_size);
+  void clear();
+
+  size_t getCapacity() const;
+  void increaseCapacity(size_t min_capacity);
+
+  void copyFrom(const SVector* other);
+  void append(const void* data, size_t size);
+  void append(const SValue& svalue);
+
+  static size_t next(SType type, void** cursor);
+  size_t next(void** cursor) const;
+
+protected:
+  SType type_;
+  void* data_;
+  size_t capacity_;
+  size_t size_;
+};
+
 String sql_escape(const String& str);
+
+size_t sql_strlen(const void* str);
+char* sql_cstr(void* str);
+const char* sql_cstr(const void* str);
+
+size_t sql_sizeof(SType type, const void* value);
+size_t sql_sizeof_static(SType type);
+
+std::string sql_tostring(SType type, const void* value);
 
 }
 

@@ -38,15 +38,17 @@ class ValueExpression {
 public:
 
   ValueExpression();
-  ValueExpression(ScopedPtr<VM::Program> program);
+  ValueExpression(ScopedPtr<vm::Program> program);
   ValueExpression(ValueExpression&& move);
 
   ValueExpression& operator=(ValueExpression&& other);
 
-  VM::Program* program() const;
+  vm::Program* program() const;
+
+  SType getReturnType() const;
 
 protected:
-  ScopedPtr<VM::Program> program_;
+  ScopedPtr<vm::Program> program_;
 };
 
 }

@@ -22,65 +22,46 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/sql/expressions/table/describe_table.h>
+#include <eventql/sql/statements/describe_table.h>
 #include <eventql/sql/transaction.h>
 
 namespace csql {
 
+const std::vector<std::pair<std::string, SType>> DescribeTableStatement::kOutputColumns = {
+  { "column_name", SType::STRING },
+  { "type", SType::STRING },
+  { "nullable", SType::STRING },
+  { "primary_key", SType::STRING },
+  { "description", SType::STRING },
+  { "encoding", SType::STRING }
+};
+
 DescribeTableStatement::DescribeTableStatement(
     Transaction* txn,
     const String& table_name) :
+    SimpleTableExpression(kOutputColumns),
     txn_(txn),
-    table_name_(table_name),
-    counter_(0) {}
+    table_name_(table_name) {}
 
-ScopedPtr<ResultCursor> DescribeTableStatement::execute() {
+ReturnCode DescribeTableStatement::execute() {
   auto table_info = txn_->getTableProvider()->describe(table_name_);
   if (table_info.isEmpty()) {
-    RAISEF(kNotFoundError, "table not found: $0", table_name_);
+    return ReturnCode::errorf("EARG", "table not found: $0", table_name_);
   }
 
-  rows_ = table_info.get().columns;
-  return mkScoped(
-      new DefaultResultCursor(
-          kNumColumns,
-          std::bind(
-              &DescribeTableStatement::next,
-              this,
-              std::placeholders::_1,
-              std::placeholders::_2)));
-}
-
-size_t DescribeTableStatement::getNumColumns() const {
-  return kNumColumns;
-}
-
-bool DescribeTableStatement::next(SValue* row, size_t row_len) {
-  if (counter_ < rows_.size()) {
-    const auto& col = rows_[counter_];
-    switch (row_len) {
-      default:
-      case 6:
-        row[5] = SValue::newString(col.encoding); //Encoding
-      case 5:
-        row[4] = SValue::newNull(); //Description
-      case 4:
-        row[3] = col.is_primary_key ? SValue::newString("YES") : SValue::newString("NO"); //Primary Key
-      case 3:
-        row[2] = col.is_nullable ? SValue::newString("YES") : SValue::newString("NO"); //Null
-      case 2:
-        row[1] = SValue::newString(col.type); //Type
-      case 1:
-        row[0] = SValue::newString(col.column_name); //Field
-      case 0:
-        break;
-    }
-
-    ++counter_;
-    return true;
-  } else {
-    return false;
+  for (const auto& col : table_info.get().columns) {
+    std::vector<SValue> row;
+    row.emplace_back(SValue::newString(col.column_name)); //Field
+    row.emplace_back(SValue::newString(getSTypeName(col.type))); //Type FIXME
+    row.emplace_back(col.is_nullable ? SValue::newString("YES") : SValue::newString("NO")); //Null
+    row.emplace_back(col.is_primary_key ? SValue::newString("YES") : SValue::newString("NO")); //Primary Key
+    row.emplace_back(SValue::newString("")); //Description
+    row.emplace_back(SValue::newString(col.encoding)); //Encoding
+    addRow(row.data());
   }
+
+  return ReturnCode::success();
 }
 
-}
+} // namespace csql
+

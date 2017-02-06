@@ -41,14 +41,11 @@ public:
   QueryRemoteResultFrame();
 
   size_t getColumnCount() const;
-  void setColumnCount(size_t column_count);
+  const std::string& getColumnData(size_t idx) const;
+  void addColumnData(const char* data, size_t size);
 
   size_t getRowCount() const;
-  size_t getRowBytes() const;
   void setRowCount(size_t row_count);
-
-  std::unique_ptr<InputStream> getRowDataInputStream();
-  std::unique_ptr<OutputStream> getRowDataOutputStream();
 
   ReturnCode parseFrom(InputStream* is);
   ReturnCode parseFrom(const char* payload, size_t payload_size);
@@ -58,9 +55,8 @@ public:
 
 protected:
   uint64_t flags_;
-  size_t column_count_;
   size_t row_count_;
-  std::string row_data_;
+  std::vector<std::string> column_data_;
 };
 
 } // namespace native_transport

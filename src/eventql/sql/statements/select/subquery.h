@@ -22,55 +22,38 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/sql/expressions/table/show_tables.h>
-#include <eventql/sql/transaction.h>
+#pragma once
+#include <eventql/util/stdtypes.h>
+#include <eventql/sql/runtime/defaultruntime.h>
+#include <eventql/sql/table_expression.h>
 
 namespace csql {
 
-ShowTablesExpression::ShowTablesExpression(
-    Transaction* txn) :
-    txn_(txn),
-    counter_(0) {}
+class SubqueryExpression : public TableExpression {
+public:
 
-ScopedPtr<ResultCursor> ShowTablesExpression::execute() {
-  txn_->getTableProvider()->listTables([this] (const TableInfo& table) {
-    Vector<SValue> row;
-    row.emplace_back(table.table_name);
+  SubqueryExpression(
+      Transaction* txn,
+      ExecutionContext* execution_context,
+      Vector<ValueExpression> select_expressions,
+      Option<ValueExpression> where_expr,
+      ScopedPtr<TableExpression> input);
 
-    if (table.description.isEmpty()) {
-      row.emplace_back();
-    } else {
-      row.emplace_back(table.description.get());
-    }
+  ReturnCode execute() override;
+  ReturnCode nextBatch(SVector* columns, size_t* len) override;
 
-    buf_.emplace_back(row);
-  });
+  size_t getColumnCount() const override;
+  SType getColumnType(size_t idx) const override;
 
-  return mkScoped(
-      new DefaultResultCursor(
-          kNumColumns,
-          std::bind(
-              &ShowTablesExpression::next,
-              this,
-              std::placeholders::_1,
-              std::placeholders::_2)));
-}
-
-size_t ShowTablesExpression::getNumColumns() const {
-  return kNumColumns;
-}
-
-bool ShowTablesExpression::next(SValue* row, size_t row_len) {
-  if (counter_ < buf_.size()) {
-    for (size_t i = 0; i < kNumColumns && i < row_len; ++i) {
-      row[i] = buf_[counter_][i];
-    }
-
-    ++counter_;
-    return true;
-  } else {
-    return false;
-  }
-}
+protected:
+  Transaction* txn_;
+  ExecutionContext* execution_context_;
+  Vector<ValueExpression> select_exprs_;
+  Option<ValueExpression> where_expr_;
+  ScopedPtr<TableExpression> input_;
+  Vector<SVector> input_cols_;
+  Vector<SValue> buf_;
+  VMStack vm_stack_;
+};
 
 }

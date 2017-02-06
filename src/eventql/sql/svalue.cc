@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #define __STDC_FORMAT_MACROS
+#include <assert.h>
 #include <inttypes.h>
 #include <stdlib.h>
 #include <string>
@@ -55,6 +56,20 @@ SValue SValue::newInteger(const String& value) {
   return SValue(value).toInteger();
 }
 
+SValue SValue::newUInt64(uint64_t value) {
+  SValue v;
+  v.data_.type = SType::UINT64;
+  v.data_.u.t_uint64 = value;
+  return v;
+}
+
+SValue SValue::newInt64(int64_t value) {
+  SValue v;
+  v.data_.type = SType::INT64;
+  v.data_.u.t_int64 = value;
+  return v;
+}
+
 SValue SValue::newFloat(FloatType value) {
   return SValue(value);
 }
@@ -81,14 +96,21 @@ SValue SValue::newTimestamp(const String& value) {
 
 SValue::SValue() {
   memset(&data_, 0, sizeof(data_));
-  data_.type = SQL_NULL;
+  data_.type = SType::NIL;
+}
+
+SValue::SValue(SType type) {
+  memset(&data_, 0, sizeof(data_));
+  data_.type = type;
 }
 
 SValue::~SValue() {
   switch (data_.type) {
 
-    case SQL_STRING:
-      free(data_.u.t_string.ptr);
+    case SType::STRING:
+      if (data_.u.t_string) {
+        free(data_.u.t_string);
+      }
       break;
 
     default:
@@ -98,18 +120,15 @@ SValue::~SValue() {
 }
 
 SValue::SValue(const SValue::StringType& string_value) {
-  data_.type = SQL_STRING;
-  data_.u.t_string.len = string_value.size();
-  data_.u.t_string.ptr = static_cast<char *>(malloc(data_.u.t_string.len));
+  data_.type = SType::STRING;
+  data_.u.t_string = malloc(string_value.size() + sizeof(uint32_t));
 
-  if (data_.u.t_string.ptr == nullptr) {
-    RAISE(kRuntimeError, "could not allocate SValue");
-  }
+  *((uint32_t*) data_.u.t_string) = string_value.size();
 
   memcpy(
-      data_.u.t_string.ptr,
+      ((char*) data_.u.t_string) + sizeof(uint32_t),
       string_value.data(),
-      data_.u.t_string.len);
+      string_value.size());
 }
 
 SValue::SValue(
@@ -117,69 +136,63 @@ SValue::SValue(
     SValue(std::string(string_value)) {}
 
 SValue::SValue(SValue::IntegerType integer_value) {
-  data_.type = SQL_INTEGER;
-  data_.u.t_integer = integer_value;
+  data_.type = SType::UINT64;
+  data_.u.t_int64 = integer_value;
 }
 
 SValue::SValue(SValue::FloatType float_value) {
-  data_.type = SQL_FLOAT;
+  data_.type = SType::FLOAT64;
   data_.u.t_float = float_value;
 }
 
 SValue::SValue(SValue::BoolType bool_value) {
-  data_.type = SQL_BOOL;
+  data_.type = SType::BOOL;
   data_.u.t_bool = bool_value;
 }
 
 SValue::SValue(SValue::TimeType time_value) {
-  data_.type = SQL_TIMESTAMP;
+  data_.type = SType::TIMESTAMP64;
   data_.u.t_timestamp = static_cast<uint64_t>(time_value);
 }
 
 SValue::SValue(const SValue& copy) {
   switch (copy.data_.type) {
 
-    case SQL_STRING:
-      data_.type = SQL_STRING;
-      data_.u.t_string.len = copy.data_.u.t_string.len;
-      data_.u.t_string.ptr = static_cast<char *>(malloc(data_.u.t_string.len));
-
-      if (data_.u.t_string.ptr == nullptr) {
-        RAISE(kRuntimeError, "could not allocate SValue");
+    case SType::STRING: {
+      if (copy.data_.u.t_string) {
+        auto len = sql_strlen(copy.data_.u.t_string) + sizeof(uint32_t);
+        data_.type = SType::STRING;
+        data_.u.t_string = malloc(len);
+        memcpy(data_.u.t_string, copy.data_.u.t_string, len);
+      } else {
+        data_.type = SType::STRING;
+        data_.u.t_string = nullptr;
       }
-
-      memcpy(
-          data_.u.t_string.ptr,
-          copy.data_.u.t_string.ptr,
-          data_.u.t_string.len);
       break;
+    }
 
     default:
       memcpy(&data_, &copy.data_, sizeof(data_));
       break;
 
   }
-
 }
 
 SValue& SValue::operator=(const SValue& copy) {
-  if (data_.type == SQL_STRING) {
-    free(data_.u.t_string.ptr);
+  if (data_.type == SType::STRING && data_.u.t_string) {
+    free(data_.u.t_string);
   }
 
-  if (copy.data_.type == SQL_STRING) {
-    data_.type = SQL_STRING;
-    data_.u.t_string.len = copy.data_.u.t_string.len;
-    data_.u.t_string.ptr = static_cast<char *>(malloc(data_.u.t_string.len));
-
-    if (data_.u.t_string.ptr == nullptr) {
-      RAISE(kRuntimeError, "could not allocate SValue");
+  if (copy.data_.type == SType::STRING) {
+    if (copy.data_.u.t_string) {
+      auto len = sql_strlen(copy.data_.u.t_string) + sizeof(uint32_t);
+      data_.type = SType::STRING;
+      data_.u.t_string = malloc(len);
+      memcpy(data_.u.t_string, copy.data_.u.t_string, len);
+    } else {
+      data_.u.t_string = nullptr;
+      data_.type = SType::STRING;
     }
-
-    memcpy(
-        data_.u.t_string.ptr,
-        copy.data_.u.t_string.ptr,
-        data_.u.t_string.len);
   } else {
     memcpy(&data_, &copy.data_, sizeof(data_));
   }
@@ -190,37 +203,49 @@ SValue& SValue::operator=(const SValue& copy) {
 bool SValue::operator==(const SValue& other) const {
   switch (data_.type) {
 
-    case SQL_INTEGER: {
+    case SType::INT64: {
       return getInteger() == other.getInteger();
     }
 
-    case SQL_TIMESTAMP: {
+    case SType::TIMESTAMP64: {
       return getInteger() == other.getInteger();
     }
 
-    case SQL_FLOAT: {
+    case SType::FLOAT64: {
       return getFloat() == other.getFloat();
     }
 
-    case SQL_BOOL: {
+    case SType::BOOL: {
       return getBool() == other.getBool();
     }
 
-    case SQL_STRING: {
+    case SType::STRING: {
+      if (data_.u.t_string == data_.u.t_string) {
+        return true;
+      }
+
+      if (!!data_.u.t_string ^ !!data_.u.t_string) {
+        return false;
+      }
+
+      if (sql_strlen(data_.u.t_string) != sql_strlen(other.data_.u.t_string)) {
+        return false;
+      }
+
       return memcmp(
-          data_.u.t_string.ptr,
-          other.data_.u.t_string.ptr,
-          data_.u.t_string.len) == 0;
+          sql_cstr(data_.u.t_string),
+          sql_cstr(other.data_.u.t_string),
+          sql_strlen(data_.u.t_string)) == 0;
     }
 
-    case SQL_NULL: {
+    case SType::NIL: {
       return other.getInteger() == 0;
     }
 
   }
 }
 
-sql_type SValue::getType() const {
+SType SValue::getType() const {
   return data_.type;
 }
 
@@ -246,11 +271,11 @@ template <> SValue::TimeType SValue::getValue<SValue::TimeType>() const {
 
 // FIXPAUL: smarter type detection
 template <> bool SValue::isConvertibleTo<SValue::BoolType>() const {
-  return data_.type == SQL_BOOL;
+  return data_.type == SType::BOOL;
 }
 
 template <> bool SValue::isConvertibleTo<SValue::TimeType>() const {
-  if (data_.type == SQL_TIMESTAMP) {
+  if (data_.type == SType::TIMESTAMP64) {
     return true;
   }
 
@@ -260,22 +285,25 @@ template <> bool SValue::isConvertibleTo<SValue::TimeType>() const {
 SValue::IntegerType SValue::getInteger() const {
   switch (data_.type) {
 
-    case SQL_INTEGER:
-      return data_.u.t_integer;
+    case SType::INT64:
+      return data_.u.t_int64;
 
-    case SQL_TIMESTAMP:
+    case SType::UINT64:
+      return data_.u.t_uint64;
+
+    case SType::TIMESTAMP64:
       return data_.u.t_timestamp;
 
-    case SQL_FLOAT:
+    case SType::FLOAT64:
       return data_.u.t_float;
 
-    case SQL_BOOL:
+    case SType::BOOL:
       return data_.u.t_bool;
 
-    case SQL_NULL:
+    case SType::NIL:
       return 0;
 
-    case SQL_STRING:
+    case SType::STRING:
       try {
         return std::stoll(getString());
       } catch (std::exception e) {
@@ -295,7 +323,7 @@ SValue::IntegerType SValue::getInteger() const {
 }
 
 SValue SValue::toInteger() const {
-  if (data_.type == SQL_INTEGER) {
+  if (data_.type == SType::INT64) {
     return *this;
   } else {
     return SValue::newInteger(getInteger());
@@ -305,22 +333,25 @@ SValue SValue::toInteger() const {
 SValue::FloatType SValue::getFloat() const {
   switch (data_.type) {
 
-    case SQL_INTEGER:
-      return data_.u.t_integer;
+    case SType::INT64:
+      return data_.u.t_int64;
 
-    case SQL_TIMESTAMP:
+    case SType::UINT64:
+      return data_.u.t_uint64;
+
+    case SType::TIMESTAMP64:
       return data_.u.t_timestamp;
 
-    case SQL_FLOAT:
+    case SType::FLOAT64:
       return data_.u.t_float;
 
-    case SQL_BOOL:
+    case SType::BOOL:
       return data_.u.t_bool;
 
-    case SQL_NULL:
+    case SType::NIL:
       return 0;
 
-    case SQL_STRING:
+    case SType::STRING:
       try {
         return std::stod(getString());
       } catch (std::exception e) {
@@ -340,7 +371,7 @@ SValue::FloatType SValue::getFloat() const {
 }
 
 SValue SValue::toFloat() const {
-  if (data_.type == SQL_FLOAT) {
+  if (data_.type == SType::FLOAT64) {
     return *this;
   } else {
     return SValue::newFloat(getFloat());
@@ -348,7 +379,7 @@ SValue SValue::toFloat() const {
 }
 
 SValue SValue::toBool() const {
-  if (data_.type == SQL_BOOL) {
+  if (data_.type == SType::BOOL) {
     return *this;
   } else {
     return SValue::newBool(getBool());
@@ -358,19 +389,20 @@ SValue SValue::toBool() const {
 SValue::BoolType SValue::getBool() const {
   switch (data_.type) {
 
-    case SQL_INTEGER:
+    case SType::INT64:
+    case SType::UINT64:
       return getInteger() > 0;
 
-    case SQL_FLOAT:
+    case SType::FLOAT64:
       return getFloat() > 0;
 
-    case SQL_BOOL:
+    case SType::BOOL:
       return data_.u.t_bool;
 
-    case SQL_STRING:
+    case SType::STRING:
       return true;
 
-    case SQL_NULL:
+    case SType::NIL:
       return false;
 
     default:
@@ -411,113 +443,63 @@ std::string SValue::makeUniqueKey(SValue* arr, size_t len) {
 }
 
 SValue SValue::toString() const {
-  if (data_.type == SQL_STRING) {
+  if (data_.type == SType::STRING) {
     return *this;
   } else {
     return SValue::newString(getString());
   }
 }
 
-
 std::string SValue::getString() const {
-  if (data_.type == SQL_STRING) {
-    return std::string(data_.u.t_string.ptr, data_.u.t_string.len);
-  }
-
-  char buf[512];
-  const char* str;
-  size_t len;
-
-  switch (data_.type) {
-
-    case SQL_INTEGER: {
-      len = snprintf(buf, sizeof(buf), "%" PRId64, getInteger());
-      str = buf;
-      break;
-    }
-
-    case SQL_TIMESTAMP: {
-      return getTimestamp().toString("%Y-%m-%d %H:%M:%S");
-    }
-
-    case SQL_FLOAT: {
-      len = snprintf(buf, sizeof(buf), "%f", getFloat());
-      str = buf;
-      break;
-    }
-
-    case SQL_BOOL: {
-      static const auto true_str = "true";
-      static const auto false_str = "false";
-      if (getBool()) {
-        str = true_str;
-        len = strlen(true_str);
-      } else {
-        str = false_str;
-        len = strlen(false_str);
-      }
-      break;
-    }
-
-    case SQL_STRING: {
-      return getString();
-    }
-
-    case SQL_NULL: {
-      static const char undef_str[] = "NULL";
-      str = undef_str;
-      len = sizeof(undef_str) - 1;
-    }
-
-  }
-
-  return std::string(str, len);
+  return sql_tostring(data_.type, getData());
 }
 
 String SValue::toSQL() const {
   switch (data_.type) {
 
-    case SQL_INTEGER: {
+    case SType::INT64:
+    case SType::UINT64: {
       return getString();
     }
 
-    case SQL_TIMESTAMP: {
+    case SType::TIMESTAMP64: {
       return StringUtil::toString(getInteger());
     }
 
-    case SQL_FLOAT: {
+    case SType::FLOAT64: {
       return getString();
     }
 
-    case SQL_BOOL: {
+    case SType::BOOL: {
       return getString();
     }
 
-    case SQL_STRING: {
+    case SType::STRING: {
       auto str = sql_escape(getString());
       return StringUtil::format("\"$0\"", str);
     }
 
-    case SQL_NULL: {
+    case SType::NIL: {
       return "NULL";
     }
 
   }
 }
 
-const char* SValue::getTypeName(sql_type type) {
+const char* SValue::getTypeName(SType type) {
   switch (type) {
-    case SQL_STRING:
+    case SType::STRING:
       return "String";
-    case SQL_FLOAT:
+    case SType::FLOAT64:
       return "Float";
-    case SQL_INTEGER:
+    case SType::INT64:
+    case SType::UINT64:
       return "Integer";
-    case SQL_BOOL:
+    case SType::BOOL:
       return "Boolean";
-    case SQL_TIMESTAMP:
+    case SType::TIMESTAMP64:
       return "Timestamp";
-    case SQL_NULL:
+    case SType::NIL:
       return "NULL";
   }
 }
@@ -528,8 +510,9 @@ const char* SValue::getTypeName() const {
 
 template <> bool SValue::isConvertibleTo<SValue::IntegerType>() const {
   switch (data_.type) {
-    case SQL_INTEGER:
-    case SQL_TIMESTAMP:
+    case SType::INT64:
+    case SType::UINT64:
+    case SType::TIMESTAMP64:
       return true;
     default:
       break;
@@ -558,9 +541,10 @@ template <> bool SValue::isConvertibleTo<SValue::IntegerType>() const {
 
 template <> bool SValue::isConvertibleTo<SValue::FloatType>() const {
   switch (data_.type) {
-    case SQL_FLOAT:
-    case SQL_INTEGER:
-    case SQL_TIMESTAMP:
+    case SType::FLOAT64:
+    case SType::INT64:
+    case SType::UINT64:
+    case SType::TIMESTAMP64:
       return true;
     default:
       break;
@@ -635,29 +619,30 @@ SValue SValue::toNumeric() const {
 }
 
 bool SValue::isString() const {
-  return data_.type == SQL_STRING;
+  return data_.type == SType::STRING;
 }
 
 bool SValue::isFloat() const {
-  return data_.type == SQL_FLOAT;
+  return data_.type == SType::FLOAT64;
 }
 
 bool SValue::isInteger() const {
-  return data_.type == SQL_INTEGER;
+  return data_.type == SType::INT64 || data_.type == SType::UINT64;
 }
 
 bool SValue::isBool() const {
-  return data_.type == SQL_BOOL;
+  return data_.type == SType::BOOL;
 }
 
 bool SValue::isTimestamp() const {
-  return data_.type == SQL_TIMESTAMP;
+  return data_.type == SType::TIMESTAMP64;
 }
 
 bool SValue::isNumeric() const {
   switch (data_.type) {
-    case SQL_FLOAT:
-    case SQL_INTEGER:
+    case SType::FLOAT64:
+    case SType::INT64:
+    case SType::UINT64:
       return true;
     default:
       return false;
@@ -676,65 +661,208 @@ bool SValue::isConvertibleToNumeric() const {
 
 bool SValue::isConvertibleToBool() const {
   switch (data_.type) {
-    case SQL_STRING:
-    case SQL_FLOAT:
-    case SQL_INTEGER:
-    case SQL_BOOL:
-    case SQL_NULL:
+    case SType::STRING:
+    case SType::FLOAT64:
+    case SType::INT64:
+    case SType::UINT64:
+    case SType::BOOL:
+    case SType::NIL:
       return true;
-    case SQL_TIMESTAMP:
+    case SType::TIMESTAMP64:
       return false;
   }
 }
 
 void SValue::encode(OutputStream* os) const {
-  os->appendUInt8(data_.type);
+  os->appendUInt8((uint8_t) data_.type);
 
   switch (data_.type) {
-    case SQL_STRING:
-      os->appendLenencString(data_.u.t_string.ptr, data_.u.t_string.len);
+    case SType::STRING:
+      os->appendLenencString(
+          sql_cstr(data_.u.t_string),
+          sql_strlen(data_.u.t_string));
       return;
-    case SQL_FLOAT:
+    case SType::FLOAT64:
       os->appendDouble(data_.u.t_float);
       return;
-    case SQL_INTEGER:
-      os->appendUInt64(data_.u.t_integer);
+    case SType::INT64:
+      os->appendUInt64(data_.u.t_int64); // FIXME
       return;
-    case SQL_BOOL:
+    case SType::UINT64:
+      os->appendUInt64(data_.u.t_uint64);
+      return;
+    case SType::BOOL:
       os->appendUInt8(data_.u.t_bool ? 1 : 0);
       return;
-    case SQL_TIMESTAMP:
+    case SType::TIMESTAMP64:
       os->appendUInt64(data_.u.t_timestamp);
       return;
-    case SQL_NULL:
+    case SType::NIL:
       return;
   }
 }
 
 void SValue::decode(InputStream* is) {
-  auto type = is->readUInt8();
+  SType type = (SType) is->readUInt8();
 
   switch (type) {
-    case SQL_STRING:
+    case SType::STRING:
       *this = SValue(is->readLenencString());
       return;
-    case SQL_FLOAT:
+    case SType::FLOAT64:
       *this = SValue(SValue::FloatType(is->readDouble()));
       return;
-    case SQL_INTEGER:
-      *this = SValue(SValue::IntegerType(is->readUInt64()));
+    case SType::INT64:
+      *this = SValue::newInt64(is->readUInt64()); // FIXME
       return;
-    case SQL_BOOL:
+    case SType::UINT64:
+      *this = SValue::newUInt64(is->readUInt64());
+      return;
+    case SType::BOOL:
       *this = SValue(SValue::BoolType(is->readUInt8() == 1));
       return;
-    case SQL_TIMESTAMP: {
+    case SType::TIMESTAMP64: {
       auto v = is->readUInt64();
       *this = SValue(SValue::TimeType(v));
       return;
     }
-    case SQL_NULL:
+    case SType::NIL:
       *this = SValue();
       return;
+  }
+}
+
+void SValue::copyFrom(const void* data) {
+  switch (data_.type) {
+
+    case SType::NIL:
+      break;
+
+    case SType::STRING: {
+      if (data_.u.t_string) {
+        free(data_.u.t_string);
+      }
+
+      if (data) {
+        auto len = sql_strlen(data) + sizeof(uint32_t);
+        data_.u.t_string = malloc(len);
+        memcpy(data_.u.t_string, data, len);
+      } else {
+        data_.u.t_string = nullptr;
+      }
+      break;
+    }
+
+    case SType::UINT64:
+    case SType::TIMESTAMP64:
+      memcpy(&data_.u.t_uint64, data, sizeof(uint64_t));
+      break;
+
+    case SType::INT64:
+      memcpy(&data_.u.t_int64, data, sizeof(int64_t));
+      break;
+
+    case SType::FLOAT64:
+      memcpy(&data_.u.t_float, data, sizeof(double));
+      break;
+
+    case SType::BOOL:
+      memcpy(&data_.u.t_bool, data, sizeof(uint8_t));
+      break;
+
+  }
+}
+
+const void* SValue::getData() const {
+  switch (data_.type) {
+    case SType::UINT64:
+      return &data_.u.t_uint64;
+    case SType::INT64:
+      return &data_.u.t_int64;
+    case SType::FLOAT64:
+      return &data_.u.t_float;
+    case SType::BOOL:
+      return &data_.u.t_bool;
+    case SType::TIMESTAMP64:
+      return &data_.u.t_timestamp;
+    case SType::STRING:
+      return data_.u.t_string;
+    default:
+      return nullptr;
+  }
+}
+
+void* SValue::getData() {
+  switch (data_.type) {
+    case SType::UINT64:
+      return &data_.u.t_uint64;
+    case SType::INT64:
+      return &data_.u.t_int64;
+    case SType::FLOAT64:
+      return &data_.u.t_float;
+    case SType::BOOL:
+      return &data_.u.t_bool;
+    case SType::TIMESTAMP64:
+      return &data_.u.t_timestamp;
+    case SType::STRING:
+      return data_.u.t_string;
+    default:
+      return nullptr;
+  }
+}
+
+void SValue::setData(const void* data, size_t size) {
+  switch (data_.type) {
+
+    case SType::UINT64:
+      data_.u.t_uint64 = *static_cast<const uint64_t*>(data);
+      return;
+
+    case SType::INT64:
+      data_.u.t_int64 = *static_cast<const int64_t*>(data);
+      return;
+
+    case SType::FLOAT64:
+      data_.u.t_float = *static_cast<const double*>(data);
+      return;
+
+    case SType::BOOL:
+      data_.u.t_bool = *static_cast<const uint8_t*>(data);
+      return;
+
+    case SType::TIMESTAMP64:
+      data_.u.t_timestamp = *static_cast<const uint64_t*>(data);
+      return;
+
+    case SType::STRING:
+      if (data_.u.t_string) {
+        free(data_.u.t_string);
+      }
+
+      data_.u.t_string = malloc(size);
+      memcpy(data_.u.t_string, data, size);
+      return;
+
+  }
+}
+
+size_t SValue::getCapacity() const {
+  return getSize();
+}
+
+size_t SValue::getSize() const {
+  switch (data_.type) {
+    case SType::STRING:
+      return sql_strlen(data_.u.t_string) + sizeof(uint32_t);
+    case SType::FLOAT64:
+    case SType::INT64:
+    case SType::UINT64:
+    case SType::TIMESTAMP64:
+      return 8;
+    case SType::BOOL:
+      return 1;
+    case SType::NIL:
+      return 0;
   }
 }
 
@@ -766,11 +894,180 @@ template <> bool SValue::isOfType<SValue::TimeType>() const {
   return isTimestamp();
 }
 
+SVector::SVector(
+    SType type) :
+    type_(type),
+    data_(nullptr),
+    capacity_(0),
+    size_(0) {}
+
+SVector::SVector(
+    SVector&& other) :
+    type_(other.type_),
+    data_(other.data_),
+    capacity_(other.capacity_),
+    size_(other.size_) {
+  other.data_ = nullptr;
+  other.capacity_ = 0;
+  other.size_ = 0;
 }
 
+SVector::~SVector() {
+  if (data_) {
+    free(data_);
+  }
+}
+
+SType SVector::getType() const {
+  return type_;
+}
+
+const void* SVector::getData() const {
+  return data_;
+}
+
+void* SVector::getMutableData() {
+  return data_;
+}
+
+size_t SVector::getSize() const {
+  return size_;
+}
+
+void SVector::setSize(size_t new_size) {
+  assert(new_size <= capacity_);
+  size_ = new_size;
+}
+
+void SVector::clear() {
+  size_ = 0;
+}
+
+size_t SVector::getCapacity() const {
+  return capacity_;
+}
+
+void SVector::increaseCapacity(size_t min_capacity) {
+  if (min_capacity <= capacity_) {
+    return;
+  }
+
+  auto new_capactity = min_capacity; // FIXME
+  if (data_) {
+    data_ = realloc(data_, new_capactity);
+  } else {
+    data_ = malloc(new_capactity);
+  }
+
+  capacity_ = new_capactity;
+}
+
+void SVector::copyFrom(const SVector* other) {
+  increaseCapacity(other->capacity_);
+  size_ = other->size_;
+  memcpy(data_, other->data_, size_);
+}
+
+void SVector::append(const void* data, size_t size) {
+  if (size_ + size > capacity_) {
+    increaseCapacity(size_ + size);
+  }
+
+  memcpy(data_ + size_, data, size);
+  size_ += size;
+}
+
+void SVector::append(const SValue& svalue) {
+  append(svalue.getData(), svalue.getSize());
+}
+
+size_t SVector::next(SType type, void** cursor) {
+  auto elen = sql_sizeof(type, *cursor);
+  *cursor = (char*) *cursor + elen;
+  return elen;
+}
+
+size_t SVector::next(void** cursor) const {
+  return next(type_, cursor);
+}
+
+size_t sql_strlen(const void* str) {
+  return *((const uint32_t*) str);
+}
+
+char* sql_cstr(void* str) {
+  return (char*) str + sizeof(uint32_t);
+}
+
+const char* sql_cstr(const void* str) {
+  return (const char*) str + sizeof(uint32_t);
+}
+
+size_t sql_sizeof(SType type, const void* data) {
+  switch (type) {
+    case SType::STRING:
+      return sizeof(uint32_t) + sql_strlen(data);
+    case SType::NIL:
+      return 0;
+    case SType::FLOAT64:
+    case SType::INT64:
+    case SType::UINT64:
+    case SType::TIMESTAMP64:
+      return 8;
+    case SType::BOOL:
+      return 1;
+  }
+}
+
+size_t sql_sizeof_static(SType type) {
+  switch (type) {
+    case SType::STRING:
+      assert(false);
+      return 0;
+    case SType::NIL:
+      return 0;
+    case SType::FLOAT64:
+    case SType::INT64:
+    case SType::UINT64:
+    case SType::TIMESTAMP64:
+      return 8;
+    case SType::BOOL:
+      return 1;
+  }
+}
+
+std::string sql_tostring(SType type, const void* value) {
+  switch (type) {
+
+    case SType::NIL:
+      return "NULL";
+
+    case SType::INT64:
+      return std::to_string(*static_cast<const int64_t*>(value));
+
+    case SType::UINT64:
+      return std::to_string(*static_cast<const uint64_t*>(value));
+
+    case SType::FLOAT64:
+      return std::to_string(*static_cast<const double*>(value));
+
+    case SType::STRING:
+      return value ? std::string(sql_cstr(value), sql_strlen(value)) : "";
+
+    case SType::TIMESTAMP64:
+      return UnixTime(*static_cast<const uint64_t*>(value)).toString();
+
+    case SType::BOOL:
+      return *static_cast<const uint8_t*>(value) ? "true" : "false";
+
+  }
+}
+
+} // namespace csql
+
 template <>
-std::string inspect<sql_type>(
-    const sql_type& type) {
+std::string inspect<csql::SType>(
+    const csql::SType& type) {
   return csql::SValue::getTypeName(type);
 }
 

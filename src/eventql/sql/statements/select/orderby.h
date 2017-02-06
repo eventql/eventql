@@ -1,6 +1,7 @@
 /**
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
+ *   - Paul Asmuth <paul@eventql.io>
  *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
@@ -22,32 +23,47 @@
  * code of your own applications
  */
 #pragma once
-#include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
-#include <eventql/sql/qtree/ShowTablesNode.h>
-#include <eventql/sql/runtime/tablerepository.h>
+#include <eventql/sql/transaction.h>
+#include <eventql/sql/runtime/ValueExpression.h>
+#include <eventql/sql/qtree/OrderByNode.h>
+#include <eventql/sql/table_expression.h>
+#include <eventql/sql/scheduler/execution_context.h>
 
 namespace csql {
 
-class ClusterShowServersExpression : public TableExpression {
+class OrderByExpression : public TableExpression {
 public:
 
-  static const size_t kNumColumns = 8;
+  static const size_t kOutputBatchSize = 1024;
 
-  ClusterShowServersExpression(Transaction* txn);
+  struct SortExpr {
+    ValueExpression expr;
+    bool descending; // false == ASCENDING, true == DESCENDING
+  };
 
-  ScopedPtr<ResultCursor> execute() override;
+  OrderByExpression(
+      Transaction* txn,
+      ExecutionContext* execution_context,
+      Vector<SortExpr> sort_specs,
+      ScopedPtr<TableExpression> input);
 
-  size_t getNumColumns() const override;
+  ReturnCode execute() override;
+  ReturnCode nextBatch(SVector* columns, size_t* len) override;
+
+  size_t getColumnCount() const override;
+  SType getColumnType(size_t idx) const override;
 
 protected:
-
-  bool next(SValue* row, size_t row_len);
-
   Transaction* txn_;
-  Vector<eventql::ServerConfig> rows_;
-  size_t counter_;
+  ExecutionContext* execution_context_;
+  Vector<SortExpr> sort_specs_;
+  ScopedPtr<TableExpression> input_;
+  Vector<Vector<SValue>> rows_;
+  size_t num_rows_;
+  size_t pos_;
+  size_t cnt_;
+  VMStack vm_stack_;
 };
 
-} //csql
-
+}

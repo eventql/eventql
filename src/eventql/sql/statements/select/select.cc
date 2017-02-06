@@ -22,72 +22,61 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/sql/expressions/table/subquery.h>
-#include <eventql/sql/runtime/vm.h>
+#include <eventql/sql/statements/select/select.h>
 
 namespace csql {
 
-SubqueryExpression::SubqueryExpression(
+SelectExpression::SelectExpression(
     Transaction* txn,
     ExecutionContext* execution_context,
-    Vector<ValueExpression> select_expressions,
-    Option<ValueExpression> where_expr,
-    ScopedPtr<TableExpression> input) :
+    Vector<ValueExpression> select_expressions) :
     txn_(txn),
     execution_context_(execution_context),
     select_exprs_(std::move(select_expressions)),
-    where_expr_(std::move(where_expr)),
-    input_(std::move(input)) {}
-
-ScopedPtr<ResultCursor> SubqueryExpression::execute() {
-  input_cursor_ = input_->execute();
-  buf_.resize(input_cursor_->getNumColumns());
-
-  return mkScoped(
-      new DefaultResultCursor(
-          select_exprs_.size(),
-          std::bind(
-              &SubqueryExpression::next,
-              this,
-              std::placeholders::_1,
-              std::placeholders::_2)));
+    pos_(0) {
+  execution_context_->incrementNumTasks();
 }
 
-size_t SubqueryExpression::getNumColumns() const {
-  return select_exprs_.size();
+ReturnCode SelectExpression::execute() {
+  execution_context_->incrementNumTasksRunning();
+
+  return ReturnCode::success();
 }
 
-bool SubqueryExpression::next(SValue* row, int row_len) {
-  Vector<SValue> buf_(input_cursor_->getNumColumns());
-
-  while (input_cursor_->next(buf_.data(), buf_.size())) {
-    if (!where_expr_.isEmpty()) {
-      SValue pred;
-      VM::evaluate(
-          txn_,
-          where_expr_.get().program(),
-          buf_.size(),
-          buf_.data(),
-          &pred);
-
-      if (!pred.getBool()) {
-        continue;
-      }
-    }
-
-    for (size_t i = 0; i < select_exprs_.size() && i < row_len; ++i) {
+ReturnCode SelectExpression::nextBatch(
+    SVector* columns,
+    size_t* nrecords) {
+  if (pos_++ == 0) {
+    for (int i = 0; i < select_exprs_.size(); ++i) {
       VM::evaluate(
           txn_,
           select_exprs_[i].program(),
-          buf_.size(),
-          buf_.data(),
-          row + i);
+          select_exprs_[i].program()->method_call,
+          &vm_stack_,
+          nullptr,
+          0,
+          nullptr);
+
+      popVector(&vm_stack_, &columns[i]);
     }
 
-    return true;
+    execution_context_->incrementNumTasksCompleted();
+    *nrecords = 1;
+  } else {
+    *nrecords = 0;
   }
 
-  return false;
+  return ReturnCode::success();
 }
 
+size_t SelectExpression::getColumnCount() const {
+  return select_exprs_.size();
 }
+
+SType SelectExpression::getColumnType(size_t idx) const {
+  assert(idx < select_exprs_.size());
+  return select_exprs_[idx].getReturnType();
+}
+
+} // namespace csql
+

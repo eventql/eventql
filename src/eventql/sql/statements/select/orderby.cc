@@ -23,7 +23,7 @@
  * code of your own applications
  */
 #include <algorithm>
-#include <eventql/sql/expressions/table/orderby.h>
+#include <eventql/sql/statements/select/orderby.h>
 #include <eventql/sql/expressions/boolean.h>
 #include <eventql/sql/runtime/runtime.h>
 #include <eventql/util/inspect.h>
@@ -49,13 +49,58 @@ OrderByExpression::OrderByExpression(
   execution_context_->incrementNumTasks();
 }
 
-ScopedPtr<ResultCursor> OrderByExpression::execute() {
-  input_cursor_ = input_->execute();
+ReturnCode OrderByExpression::execute() {
+  auto rc = input_->execute();
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
   execution_context_->incrementNumTasksRunning();
 
-  Vector<SValue> row(input_cursor_->getNumColumns());
-  while (input_cursor_->next(row.data(), row.size())) {
-    rows_.emplace_back(row);
+  Vector<SVector> input_cols;
+  for (size_t i = 0; i < input_->getColumnCount(); ++i) {
+    input_cols.emplace_back(input_->getColumnType(i));
+  }
+
+  for (;;) {
+    for (auto& c : input_cols) {
+      c.clear();
+    }
+
+    size_t nrecords = 0;
+    {
+      auto rc = input_->nextBatch(input_cols.data(), &nrecords);
+      if (!rc.isSuccess()) {
+        RAISE(kRuntimeError, rc.getMessage());
+      }
+    }
+
+    if (nrecords == 0) {
+      break;
+    }
+
+    {
+      auto rc = txn_->triggerHeartbeat();
+      if (!rc.isSuccess()) {
+        RAISE(kRuntimeError, rc.getMessage());
+      }
+    }
+
+    Vector<void*> input_col_cursor;
+    for (const auto& c : input_cols) {
+      input_col_cursor.emplace_back((void*) c.getData());
+    }
+
+
+    for (size_t n = 0; n < nrecords; n++) {
+      rows_.emplace_back();
+      auto& row = rows_.back();
+
+      for (size_t i = 0; i < input_->getColumnCount(); ++i) {
+        row.emplace_back(input_->getColumnType(i));
+        row[i].copyFrom(input_col_cursor[i]);
+      }
+    }
   }
 
   num_rows_ = rows_.size();
@@ -72,32 +117,41 @@ ScopedPtr<ResultCursor> OrderByExpression::execute() {
     }
 
     for (const auto& sort : sort_specs_) {
-      SValue args[2];
-
-      VM::evaluate(
+      VM::evaluateBoxed(
           txn_,
           sort.expr.program(),
+          sort.expr.program()->method_call,
+          &vm_stack_,
+          nullptr,
           left.size(),
-          left.data(),
-          &args[0]);
+          left.data());
 
-      VM::evaluate(
+      VM::evaluateBoxed(
           txn_,
           sort.expr.program(),
+          sort.expr.program()->method_call,
+          &vm_stack_,
+          nullptr,
           right.size(),
-          right.data(),
-          &args[1]);
+          right.data());
+
+      std::array<SValue, 2> args = {
+          sort.expr.program()->return_type,
+          sort.expr.program()->return_type };
+
+      popBoxed(&vm_stack_, &args[0]);
+      popBoxed(&vm_stack_, &args[1]);
 
       SValue res(false);
-      expressions::eqExpr(Transaction::get(txn_), 2, args, &res);
+      expressions::eqExpr(Transaction::get(txn_), 2, args.data(), &res);
       if (res.getBool()) {
         continue;
       }
 
       if (sort.descending) {
-        expressions::gtExpr(Transaction::get(txn_), 2, args, &res);
+        expressions::gtExpr(Transaction::get(txn_), 2, args.data(), &res);
       } else {
-        expressions::ltExpr(Transaction::get(txn_), 2, args, &res);
+        expressions::ltExpr(Transaction::get(txn_), 2, args.data(), &res);
       }
 
       return res.getBool();
@@ -107,35 +161,42 @@ ScopedPtr<ResultCursor> OrderByExpression::execute() {
     return false;
   });
 
-  return mkScoped(
-      new DefaultResultCursor(
-          input_cursor_->getNumColumns(),
-          std::bind(
-              &OrderByExpression::next,
-              this,
-              std::placeholders::_1,
-              std::placeholders::_2)));
+  return ReturnCode::success();
 }
 
-size_t OrderByExpression::getNumColumns() const {
-  return input_cursor_->getNumColumns();
-}
+ReturnCode OrderByExpression::nextBatch(
+    SVector* output,
+    size_t* nrecords) {
+  *nrecords = 0;
 
-bool OrderByExpression::next(SValue* out, int out_len) {
-  if (pos_ >= num_rows_) {
-    return false;
-  } else {
-    for (size_t i = 0; i < input_cursor_->getNumColumns() && i < out_len; ++i) {
-      out[i] = rows_[pos_][i];
+  if (pos_ < num_rows_) {
+    auto batch_len = std::min(num_rows_ - pos_, kOutputBatchSize);
+    auto ncols = input_->getColumnCount();
+
+    for (size_t n = 0; n < batch_len; ++n) {
+      for (size_t i = 0; i < ncols; ++i) {
+        output[i].append(
+            rows_[pos_][i].getData(),
+            rows_[pos_][i].getSize());
+      }
     }
 
-    if (++pos_ == num_rows_) {
+    *nrecords += batch_len;
+    pos_ += batch_len;
+    if (pos_ == num_rows_) {
       execution_context_->incrementNumTasksCompleted();
-      rows_.clear();
     }
-
-    return true;
   }
+
+  return ReturnCode::success();
+}
+
+size_t OrderByExpression::getColumnCount() const {
+  return input_->getColumnCount();
+}
+
+SType OrderByExpression::getColumnType(size_t idx) const {
+  return input_->getColumnType(idx);
 }
 
 } // namespace csql

@@ -32,6 +32,7 @@ message LSMTableRef {
   optional uint64 size_rows = 7;
   optional bool has_skiplist = 5 [ default = false ];
   optional bool has_sequence_column = 6 [ default = true ];
+  optional bool has_updates = 8 [ default = true ];
 }
 
 message ReplicationTarget {

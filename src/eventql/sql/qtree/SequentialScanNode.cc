@@ -21,13 +21,12 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/eventql.h"
 #include <eventql/sql/qtree/SequentialScanNode.h>
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
 #include <eventql/sql/qtree/CallExpressionNode.h>
 #include <eventql/sql/qtree/LiteralExpressionNode.h>
 #include <eventql/sql/qtree/QueryTreeUtil.h>
-
-#include "eventql/eventql.h"
 
 namespace csql {
 
@@ -40,6 +39,16 @@ bool ScanConstraint::operator==(const ScanConstraint& other) const {
 
 bool ScanConstraint::operator!=(const ScanConstraint& other) const {
   return !(*this == other);
+}
+
+SequentialScanNode::SequentialScanNode(
+    const TableInfo& table_info,
+    RefPtr<TableProvider> table_provider) :
+    table_name_(table_info.table_name),
+    aggr_strategy_(AggregationStrategy::NO_AGGREGATION) {
+  for (const auto& col : table_info.columns) {
+    table_columns_.emplace_back(col.column_name, col.type);
+  }
 }
 
 SequentialScanNode::SequentialScanNode(
@@ -61,7 +70,6 @@ SequentialScanNode::SequentialScanNode(
     Option<RefPtr<ValueExpressionNode>> where_expr,
     AggregationStrategy aggr_strategy) :
     table_name_(table_info.table_name),
-    table_provider_(table_provider),
     select_list_(select_list),
     where_expr_(where_expr),
     aggr_strategy_(aggr_strategy) {
@@ -70,7 +78,7 @@ SequentialScanNode::SequentialScanNode(
   }
 
   for (const auto& col : table_info.columns) {
-    table_columns_.emplace_back(col.column_name);
+    table_columns_.emplace_back(col.column_name, col.type);
   }
 
   if (!where_expr_.isEmpty()) {
@@ -81,7 +89,9 @@ SequentialScanNode::SequentialScanNode(
 SequentialScanNode::SequentialScanNode(
     const SequentialScanNode& other) :
     table_name_(other.table_name_),
+    table_columns_(other.table_columns_),
     output_columns_(other.output_columns_),
+    input_columns_(other.input_columns_),
     aggr_strategy_(other.aggr_strategy_),
     constraints_(other.constraints_) {
   for (const auto& e : other.select_list_) {
@@ -133,24 +143,16 @@ Vector<RefPtr<SelectListNode>> SequentialScanNode::selectList() const {
   return select_list_;
 }
 
-void SequentialScanNode::findSelectedColumnNames(
-    RefPtr<ValueExpressionNode> expr,
-    Set<String>* columns) const {
-  auto colname = dynamic_cast<ColumnReferenceNode*>(expr.get());
-  if (colname) {
-    columns->emplace(normalizeColumnName(colname->fieldName()));
-  }
-
-  for (const auto& a : expr->arguments()) {
-    findSelectedColumnNames(a, columns);
-  }
+void SequentialScanNode::addSelectList(RefPtr<SelectListNode> sl) {
+  output_columns_.emplace_back(sl->columnName());
+  select_list_.emplace_back(sl);
 }
 
-Set<String> SequentialScanNode::selectedColumns() const {
-  Set<String> columns;
+Vector<String> SequentialScanNode::selectedColumns() const {
+  Vector<String> columns;
 
-  for (const auto& sl : select_list_) {
-    findSelectedColumnNames(sl->expression(), &columns);
+  for (const auto& c : input_columns_) {
+    columns.push_back(c.first);
   }
 
   return columns;
@@ -170,10 +172,7 @@ Vector<QualifiedColumn> SequentialScanNode::getAvailableColumns() const {
 
   Vector<QualifiedColumn> cols;
   for (const auto& c : table_columns_) {
-    QualifiedColumn qc;
-    qc.short_name = c;
-    qc.qualified_name = qualifier + c;
-    cols.emplace_back(qc);
+    cols.emplace_back(qualifier + c.first, c.first, c.second);
   }
 
   return cols;
@@ -226,26 +225,70 @@ size_t SequentialScanNode::getComputedColumnIndex(
     }
   }
 
-  bool found = false;
-  for (const auto& c : table_columns_) {
-    if (c == col) {
-      found = true;
-      break;
-    }
+  auto input_idx = getInputColumnIndex(col);
+  if (input_idx != size_t(-1)) {
+    auto slnode = new SelectListNode(
+        new ColumnReferenceNode(input_idx, getInputColumnType(input_idx)));
+    slnode->setAlias(column_name);
+    select_list_.emplace_back(slnode);
+    return select_list_.size() - 1;
   }
 
-  if (!found) {
-    return -1;
-  }
-
-  auto slnode = new SelectListNode(new ColumnReferenceNode(col));
-  slnode->setAlias(col);
-  select_list_.emplace_back(slnode);
-  return select_list_.size() - 1;
+  return -1;
 }
 
 size_t SequentialScanNode::getNumComputedColumns() const {
   return select_list_.size();
+}
+
+SType SequentialScanNode::getColumnType(size_t idx) const {
+  assert(idx < select_list_.size());
+  return select_list_[idx]->expression()->getReturnType();
+}
+
+size_t SequentialScanNode::getInputColumnIndex(
+    const String& column_name,
+    bool allow_add /* = false */) {
+  for (size_t i = 0; i < input_columns_.size(); ++i) {
+    if (input_columns_[i].first == column_name) {
+      return i;
+    }
+  }
+
+  if (!allow_add) {
+    return -1;
+  }
+
+  for (const auto& c : table_columns_) {
+    if (c.first == column_name) {
+      input_columns_.emplace_back(column_name, c.second);
+      return input_columns_.size() - 1;
+    }
+  }
+
+  return -1;
+}
+
+SType SequentialScanNode::getInputColumnType(size_t idx) const {
+  if (idx >= input_columns_.size()) {
+    RAISEF(
+        kRuntimeError,
+        "invalid column index: '$0'",
+        idx);
+  }
+
+  return input_columns_[idx].second;
+}
+
+std::pair<size_t, SType> SequentialScanNode::getInputColumnInfo(
+    const String& column_name,
+    bool allow_add) {
+  auto idx = getInputColumnIndex(column_name, allow_add);
+  if (idx == size_t(-1)) {
+    return std::make_pair(idx, SType::NIL);
+  } else {
+    return std::make_pair(idx, getInputColumnType(idx));
+  }
 }
 
 AggregationStrategy SequentialScanNode::aggregationStrategy() const {
@@ -329,6 +372,12 @@ void SequentialScanNode::encode(
     os->appendLenencString(oc);
   }
 
+  os->appendVarUInt(node.input_columns_.size());
+  for (const auto& ic : node.input_columns_) {
+    os->appendLenencString(ic.first);
+    os->appendVarUInt((uint8_t) ic.second);
+  }
+
   os->appendVarUInt(node.constraints_.size());
   for (const auto& sc : node.constraints_) {
     os->appendLenencString(sc.column_name);
@@ -371,6 +420,13 @@ RefPtr<QueryTreeNode> SequentialScanNode::decode(
   auto num_output_columns = is->readVarUInt();
   for (auto i = 0; i < num_output_columns; ++i) {
     node->output_columns_.emplace_back(is->readLenencString());
+  }
+
+  auto num_input_columns = is->readVarUInt();
+  for (auto i = 0; i < num_input_columns; ++i) {
+    auto cname = is->readLenencString();
+    auto ctype = (SType) is->readVarUInt();
+    node->input_columns_.emplace_back(cname, ctype);
   }
 
   auto num_constraints = is->readVarUInt();

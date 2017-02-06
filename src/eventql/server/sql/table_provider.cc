@@ -27,6 +27,7 @@
 #include <eventql/util/SHA1.h>
 #include <eventql/server/sql/table_provider.h>
 #include <eventql/db/table_service.h>
+#include <eventql/sql/svalue.h>
 #include <eventql/sql/CSTableScan.h>
 #include <eventql/sql/qtree/QueryTreeUtil.h>
 #include <eventql/util/json/json.h>
@@ -62,12 +63,12 @@ KeyRange TSDBTableProvider::findKeyRange(
     String val;
     try {
       switch (c.value.getType()) {
-        case SQL_STRING:
-        case SQL_INTEGER:
-        case SQL_FLOAT:
+        case csql::SType::STRING:
+        case csql::SType::INT64:
+        case csql::SType::FLOAT64:
           val = encodePartitionKey(keyspace, c.value.getString());
           break;
-        case SQL_TIMESTAMP:
+        case csql::SType::TIMESTAMP64:
           val = encodePartitionKey(keyspace, c.value.toInteger().getString());
           break;
         default:
@@ -131,32 +132,6 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
     return None<ScopedPtr<csql::TableExpression>>();
   }
 
-  {
-    auto table_schema = table.get()->schema();
-    Set<String> table_schema_columns;
-    for (const auto& c : table_schema->columns()) {
-      table_schema_columns.insert(c.first);
-    }
-
-    auto check_columns = [&table_schema_columns] (
-        const RefPtr<csql::ColumnReferenceNode>& col) {
-      auto colname = col->columnName();
-      if (table_schema_columns.count(colname) == 0) {
-        RAISEF(kNotFoundError, "column(s) not found: $0", colname);
-      }
-    };
-
-    for (const auto& e : seqscan->selectList()) {
-      csql::QueryTreeUtil::findColumns(e->expression(), check_columns);
-    }
-
-    if (!seqscan->whereExpression().isEmpty()) {
-      csql::QueryTreeUtil::findColumns(
-          seqscan->whereExpression().get().get(),
-          check_columns);
-    }
-  }
-
   Vector<TableScan::PartitionLocation> partitions;
   if (table_ref.partition_key.isEmpty()) {
     auto keyrange = findKeyRange(
@@ -188,6 +163,7 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
       if (!pl.qtree->whereExpression().isEmpty()) {
         auto where_expr = seqscan->whereExpression().get();
         where_expr = simplifyWhereExpression(
+            ctx,
             table.get(),
             p.keyrange_begin(),
             p.keyrange_end(),
@@ -225,6 +201,7 @@ Option<ScopedPtr<csql::TableExpression>> TSDBTableProvider::buildSequentialScan(
 
       auto where_expr = pl.qtree->whereExpression().get();
       where_expr = simplifyWhereExpression(
+          ctx,
           table.get(),
           pstate.partition_keyrange_begin(),
           pstate.partition_keyrange_end(),
@@ -560,7 +537,30 @@ csql::TableInfo TSDBTableProvider::tableInfoForTable(
   for (const auto& col : schema->columns()) {
     csql::ColumnInfo ci;
     ci.column_name = col.first;
-    ci.type = col.second.typeName();
+    switch (col.second.type) {
+      case msg::FieldType::BOOLEAN:
+        ci.type = csql::SType::BOOL;
+        break;
+      case msg::FieldType::UINT32:
+        ci.type = csql::SType::UINT64;
+        break;
+      case msg::FieldType::UINT64:
+        ci.type = csql::SType::UINT64;
+        break;
+      case msg::FieldType::STRING:
+        ci.type = csql::SType::STRING;
+        break;
+      case msg::FieldType::DOUBLE:
+        ci.type = csql::SType::FLOAT64;
+        break;
+      case msg::FieldType::DATETIME:
+        ci.type = csql::SType::TIMESTAMP64;
+        break;
+      case msg::FieldType::OBJECT:
+        break;
+      }
+
+
     ci.type_size = col.second.typeSize();
     ci.is_nullable = col.second.optional;
     ci.is_primary_key = std::find(
@@ -588,10 +588,11 @@ const String& TSDBTableProvider::getNamespace() const {
 }
 
 RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
-      RefPtr<Table> table,
-      const String& keyrange_begin,
-      const String& keyrange_end,
-      RefPtr<csql::ValueExpressionNode> expr) const {
+    csql::Transaction* txn,
+    RefPtr<Table> table,
+    const String& keyrange_begin,
+    const String& keyrange_end,
+    RefPtr<csql::ValueExpressionNode> expr) const {
   auto pkey_col = table->getPartitionKey();
   auto pkeyspace = table->getKeyspaceType();
 
@@ -605,12 +606,12 @@ RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
 
     std::string c_val;
     switch (c.value.getType()) {
-      case SQL_STRING:
-      case SQL_INTEGER:
-      case SQL_FLOAT:
+      case csql::SType::STRING:
+      case csql::SType::INT64:
+      case csql::SType::FLOAT64:
         c_val = encodePartitionKey(pkeyspace, c.value.getString());
         break;
-      case SQL_TIMESTAMP:
+      case csql::SType::TIMESTAMP64:
         c_val = encodePartitionKey(pkeyspace, c.value.toInteger().getString());
         break;
       default:
@@ -643,14 +644,24 @@ RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
 
     }
 
-    expr = csql::QueryTreeUtil::removeConstraintFromPredicate(expr, c);
+    auto rc = csql::QueryTreeUtil::removeConstraintFromPredicate(
+        txn,
+        expr,
+        c,
+        &expr);
+
+    if (!rc.isSuccess()) {
+      RAISE(kRuntimeError, rc.getMessage());
+    }
   }
 
   return expr;
 }
 
-void evqlVersionExpr(sql_txn* ctx, int argc, csql::SValue* argv, csql::SValue* out) {
-  *out = csql::SValue::newString("EventQL " + eventql::kVersionString);
+void evql_version(sql_txn* ctx, csql::VMStack* stack) {
+  pushString(stack, "EventQL " + eventql::kVersionString);
 }
+
+const csql::SFunction evqlVersionExpr({}, csql::SType::STRING, &evql_version);
 
 } // namespace csql

@@ -30,6 +30,7 @@
 
 namespace cstable {
 class ColumnWriter;
+class ColumnStorage;
 
 class ColumnReader : public RefCounted {
 public:
@@ -65,6 +66,18 @@ public:
       uint64_t* rlvl,
       uint64_t* dlvl,
       UnixTime* value);
+
+  virtual void readValues(
+      size_t n,
+      ColumnStorage* dst,
+      std::vector<uint32_t>* dlevels = nullptr,
+      std::vector<uint32_t>* rlevels = nullptr);
+
+  virtual void readValues(
+      size_t n,
+      ColumnStorage* dst,
+      std::vector<bool>* null_set,
+      std::vector<uint32_t>* rlevels = nullptr);
 
   virtual void skipValue() = 0;
   virtual void copyValue(ColumnWriter* writer) = 0;
@@ -102,6 +115,27 @@ protected:
   ScopedPtr<UnsignedIntPageReader> rlevel_reader_;
   ScopedPtr<UnsignedIntPageReader> dlevel_reader_;
 };
+
+class ColumnStorage {
+public:
+  virtual ~ColumnStorage() = default;
+  virtual void* data() = 0;
+  virtual size_t size() = 0;
+  virtual void resize(size_t new_size) = 0;
+};
+
+class FixedColumnStorage : public ColumnStorage {
+public:
+  FixedColumnStorage(void* data, size_t* size);
+  void* data() override;
+  size_t size() override;
+  void resize(size_t new_size) override;
+protected:
+  void* data_;
+  size_t* size_;
+  size_t size_max_;
+};
+
 
 } // namespace cstable
 

@@ -2,7 +2,6 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
- *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -23,32 +22,36 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
-#include <eventql/sql/runtime/defaultruntime.h>
-#include <eventql/sql/expressions/table_expression.h>
+#include <eventql/util/autoref.h>
+#include <eventql/sql/qtree/ValueExpressionNode.h>
+#include <eventql/sql/qtree/CallExpressionNode.h>
+#include <eventql/sql/qtree/ColumnReferenceNode.h>
+#include <eventql/sql/qtree/SequentialScanNode.h>
+#include <eventql/sql/qtree/JoinNode.h>
+#include <eventql/sql/transaction.h>
 
 namespace csql {
 
-class SelectExpression : public TableExpression {
-public:
+/**
+ * Finds "join conjunctions". A join conjunction is a predicate expression
+ * that implies a logical relation (equal/less than/greather than) between
+ * columns (or projections of columns) of the two input tables of the join.
+ */
+void findJoinConjunctions(
+    const JoinNode* join,
+    const ValueExpressionNode* expr,
+    std::vector<JoinConjunction>* conjunctions);
 
-  SelectExpression(
-      Transaction* txn,
-      ExecutionContext* execution_context,
-      Vector<ValueExpression> select_expressions);
+/**
+ * Checks on which input tables a given expression's output depends
+ */
+void findJoinInputDependencies(
+    const JoinNode* join,
+    const ValueExpressionNode* expr,
+    std::set<size_t>* tables);
 
-  ScopedPtr<ResultCursor> execute() override;
 
-  size_t getNumColumns() const override;
+} // namespace csql
 
-protected:
-
-  bool next(SValue* row, int row_len);
-
-  Transaction* txn_;
-  ExecutionContext* execution_context_;
-  Vector<ValueExpression> select_exprs_;
-  size_t pos_;
-};
-
-}

@@ -26,16 +26,19 @@
 #define _FNORDMETRIC_SQL_EXPRESSIONS_DATETIME_H
 #include <eventql/sql/svalue.h>
 #include <eventql/sql/transaction.h>
+#include <eventql/sql/SFunction.h>
+#include <eventql/sql/runtime/vm.h>
 
 namespace csql {
 namespace expressions {
 
-void nowExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
-void fromTimestamp(sql_txn* ctx, int argc, SValue* argv, SValue* out);
-void dateTruncExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
-void dateAddExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
-void dateSubExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
-void timeAtExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
+//void nowExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
+//void fromTimestamp(sql_txn* ctx, int argc, SValue* argv, SValue* out);
+//void dateTruncExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
+//void dateAddExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
+//void dateSubExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
+
+extern const SFunction time_at;
 
 }
 }

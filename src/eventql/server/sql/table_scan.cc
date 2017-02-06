@@ -50,30 +50,40 @@ TableScan::TableScan(
   execution_context_->incrementNumTasks(partitions_.size());
 }
 
-ScopedPtr<csql::ResultCursor> TableScan::execute() {
-  return mkScoped(
-      new csql::DefaultResultCursor(
-          seqscan_->getNumComputedColumns(),
-          std::bind(
-              &TableScan::next,
-              this,
-              std::placeholders::_1,
-              std::placeholders::_2)));
+ReturnCode TableScan::execute() {
+  return ReturnCode::success();
 };
 
-size_t TableScan::getNumColumns() const {
+size_t TableScan::getColumnCount() const {
   return seqscan_->getNumComputedColumns();
 }
 
-bool TableScan::next(csql::SValue* row, size_t row_len) {
+csql::SType TableScan::getColumnType(size_t idx) const {
+  return seqscan_->getColumnType(idx);
+}
+
+ReturnCode TableScan::nextBatch(
+    csql::SVector* columns,
+    size_t* nrows) {
   while (cur_partition_ < partitions_.size()) {
     if (cur_cursor_.get() == nullptr) {
       cur_cursor_ = openPartition(partitions_[cur_partition_]);
       execution_context_->incrementNumTasksRunning();
     }
 
-    if (cur_cursor_.get() && cur_cursor_->next(row, row_len)) {
-      return true;
+    if (!cur_cursor_.get()) {
+      ++cur_partition_;
+      execution_context_->incrementNumTasksCompleted();
+      continue;
+    }
+
+    auto rc = cur_cursor_->nextBatch(columns, nrows);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+
+    if (*nrows > 0) {
+      return ReturnCode::success();
     } else {
       cur_cursor_.reset(nullptr);
       ++cur_partition_;
@@ -81,12 +91,23 @@ bool TableScan::next(csql::SValue* row, size_t row_len) {
     }
   }
 
-  return false;
+  *nrows = 0;
+  return ReturnCode::success();
 }
 
-ScopedPtr<csql::ResultCursor> TableScan::openPartition(
+ScopedPtr<csql::TableExpression> TableScan::openPartition(
     const PartitionLocation& partition) {
-  if (partition.servers.empty()) {
+  auto dbctx = static_cast<Session*>(txn_->getUserData())->getDatabaseContext();
+
+  bool has_local_copy = false;
+  for (const auto& s : partition.servers) {
+    if (s.is_local || s.name == dbctx->db_node_id) {
+      has_local_copy = true;
+      break;
+    }
+  }
+
+  if (has_local_copy || partition.servers.empty()) {
     return openLocalPartition(partition.partition_id, partition.qtree);
   } else {
     return openRemotePartition(
@@ -96,7 +117,7 @@ ScopedPtr<csql::ResultCursor> TableScan::openPartition(
   }
 }
 
-ScopedPtr<csql::ResultCursor> TableScan::openLocalPartition(
+ScopedPtr<csql::TableExpression> TableScan::openLocalPartition(
     const SHA1Hash& partition_key,
     RefPtr<csql::SequentialScanNode> qtree) {
   auto partition =  partition_map_->findPartition(
@@ -110,31 +131,19 @@ ScopedPtr<csql::ResultCursor> TableScan::openLocalPartition(
   }
 
   if (partition.isEmpty()) {
-    return ScopedPtr<csql::ResultCursor>();
+    return ScopedPtr<csql::TableExpression>();
   }
 
-  switch (partition.get()->getTable()->storage()) {
-    case eventql::TBL_STORAGE_COLSM:
-      return mkScoped(
-          new PartitionCursor(
-              txn_,
-              &child_execution_context_,
-              table.get(),
-              partition.get()->getSnapshot(),
-              qtree));
-
-    case eventql::TBL_STORAGE_STATIC:
-      return mkScoped(
-          new StaticPartitionCursor(
-              txn_,
-              &child_execution_context_,
-              table.get(),
-              partition.get()->getSnapshot(),
-              qtree));
-  }
+  return mkScoped(
+      new PartitionCursor(
+          txn_,
+          &child_execution_context_,
+          table.get(),
+          partition.get()->getSnapshot(),
+          qtree));
 }
 
-ScopedPtr<csql::ResultCursor> TableScan::openRemotePartition(
+ScopedPtr<csql::TableExpression> TableScan::openRemotePartition(
     const SHA1Hash& partition_key,
     RefPtr<csql::SequentialScanNode> qtree,
     const Vector<ReplicaRef> servers) {

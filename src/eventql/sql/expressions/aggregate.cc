@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <eventql/sql/expressions/aggregate.h>
 #include <eventql/sql/svalue.h>
+#include <eventql/sql/runtime/vm.h>
 
 namespace csql {
 namespace expressions {
@@ -31,157 +32,136 @@ namespace expressions {
 /**
  * COUNT() expression
  */
-void countExprAcc(sql_txn* ctx, void* scratchpad, int argc, SValue* argv) {
-  switch(argv->getType()) {
-    case SQL_NULL:
-      return;
-
-    default:
-      ++(*(uint64_t*) scratchpad);
-      return;
-  }
+void count_acc(sql_txn* ctx, void* self, VMStack* stack) {
+  ++(*static_cast<uint64_t*>(self));
 }
 
-void countExprGet(sql_txn* ctx, void* scratchpad, SValue* out) {
-  *out = SValue(SValue::IntegerType(*((uint64_t*) scratchpad)));
+void count_get(sql_txn* ctx, void* self, VMStack* stack) {
+  pushUInt64(stack, *static_cast<uint64_t*>(self));
 }
 
-void countExprReset(sql_txn* ctx, void* scratchpad) {
-  memset(scratchpad, 0, sizeof(uint64_t));
+void count_reset(sql_txn* ctx, void* self) {
+  memset(self, 0, sizeof(uint64_t));
 }
 
-void countExprMerge(sql_txn* ctx, void* scratchpad, const void* other) {
-  *(uint64_t*) scratchpad += *(uint64_t*) other;
+void count_merge(sql_txn* ctx, void* self, const void* other) {
+  *static_cast<uint64_t*>(self) += *static_cast<const uint64_t*>(other);
 }
 
-void countExprSave(sql_txn* ctx, void* scratchpad, OutputStream* os) {
-  os->appendVarUInt(*(uint64_t*) scratchpad);
+void count_save(sql_txn* ctx, const void* self, OutputStream* os) {
+  os->appendVarUInt(*static_cast<const uint64_t*>(self));
 }
 
-void countExprLoad(sql_txn* ctx, void* scratchpad, InputStream* is) {
-  *(uint64_t*) scratchpad = is->readVarUInt();
+void count_load(sql_txn* ctx, void* self, InputStream* is) {
+  *static_cast<uint64_t*>(self) = is->readVarUInt();
 }
 
-const AggregateFunction kCountExpr {
-  .scratch_size = sizeof(uint64_t),
-  .accumulate = &countExprAcc,
-  .get = &countExprGet,
-  .reset = &countExprReset,
-  .init = &countExprReset,
-  .free = nullptr,
-  .merge = &countExprMerge,
-  .savestate = &countExprSave,
-  .loadstate = &countExprLoad
-};
-
+const SFunction count(
+    { SType::NIL },
+    SType::UINT64,
+    sizeof(uint64_t),
+    &count_acc,
+    &count_get,
+    &count_reset,
+    &count_reset,
+    nullptr,
+    &count_merge,
+    &count_save,
+    &count_load);
 
 /**
- * SUM() expression
+ * SUM(int64) expression
  */
-struct sum_expr_scratchpad {
-  sql_type type;
-  double val;
-};
-
-void sumExprAcc(sql_txn* ctx, void* scratchpad, int argc, SValue* argv) {
-  SValue* val = argv;
-  auto data = (sum_expr_scratchpad*) scratchpad;
-
-  if (argc != 1) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for sum(). expected: 1, got: %i\n",
-        argc);
-  }
-
-  switch(val->getType()) {
-    case SQL_NULL:
-      return;
-
-    case SQL_INTEGER:
-      data->type = SQL_INTEGER;
-      data->val += val->getInteger();
-      return;
-
-    case SQL_FLOAT:
-    default:
-      data->type = SQL_FLOAT;
-      data->val += val->getFloat();
-      return;
-  }
+void sum_int64_acc(sql_txn* ctx, void* self, VMStack* stack) {
+  *static_cast<int64_t*>(self) += popInt64(stack);
 }
 
-void sumExprGet(sql_txn* ctx, void* scratchpad, SValue* out) {
-  auto data = (sum_expr_scratchpad*) scratchpad;
-
-  switch(data->type) {
-    case SQL_INTEGER:
-      *out = SValue(SValue::IntegerType(data->val));
-      return;
-
-    case SQL_FLOAT:
-      *out = SValue(SValue::FloatType(data->val));
-      return;
-
-    default:
-      *out = SValue();
-      return;
-  }
+void sum_int64_get(sql_txn* ctx, void* self, VMStack* stack) {
+  pushInt64(stack, *static_cast<int64_t*>(self));
 }
 
-void sumExprReset(sql_txn* ctx, void* scratchpad) {
-  memset(scratchpad, 0, sizeof(sum_expr_scratchpad));
+void sum_int64_reset(sql_txn* ctx, void* self) {
+  memset(self, 0, sizeof(int64_t));
 }
 
-void sumExprMerge(sql_txn* ctx, void* scratchpad, const void* other) {
-  auto this_data = (sum_expr_scratchpad*) scratchpad;
-  auto other_data = (const sum_expr_scratchpad*) other;
-
-  if (this_data->type == SQL_INTEGER &&
-      other_data->type == SQL_INTEGER) {
-    this_data->type = SQL_INTEGER;
-  } else {
-    this_data->type = SQL_FLOAT;
-  }
-
-  this_data->val += other_data->val;
+void sum_int64_merge(sql_txn* ctx, void* self, const void* other) {
+  *static_cast<int64_t*>(self) += *static_cast<const int64_t*>(other);
 }
 
-void sumExprSave(sql_txn* ctx, void* scratchpad, OutputStream* os) {
-  auto data = (sum_expr_scratchpad*) scratchpad;
-  os->appendVarUInt(data->type);
-  os->appendDouble(data->val);
+void sum_int64_save(sql_txn* ctx, const void* self, OutputStream* os) {
+  os->appendVarUInt(*(const int64_t*) self); // FIXME
 }
 
-void sumExprLoad(sql_txn* ctx, void* scratchpad, InputStream* is) {
-  auto data = (sum_expr_scratchpad*) scratchpad;
-  data->type = (sql_type) is->readVarUInt();
-  data->val = is->readDouble();
+void sum_int64_load(sql_txn* ctx, void* self, InputStream* is) {
+  auto data = (int64_t*) self;
+  *data = is->readVarUInt(); // FIXME
 }
 
-const AggregateFunction kSumExpr {
-  .scratch_size = sizeof(sum_expr_scratchpad),
-  .accumulate = &sumExprAcc,
-  .get = &sumExprGet,
-  .reset = &sumExprReset,
-  .init = &sumExprReset,
-  .free = nullptr,
-  .merge = &sumExprMerge,
-  .savestate = &sumExprSave,
-  .loadstate = &sumExprLoad
-};
+const SFunction sum_int64(
+    { SType::INT64 },
+    SType::INT64,
+    sizeof(int64_t),
+    &sum_int64_acc,
+    &sum_int64_get,
+    &sum_int64_reset,
+    &sum_int64_reset,
+    nullptr,
+    &sum_int64_merge,
+    &sum_int64_save,
+    &sum_int64_load);
+
+/**
+* SUM(uint64) expression
+*/
+void sum_uint64_acc(sql_txn* ctx, void* self, VMStack* stack) {
+  *static_cast<uint64_t*>(self) += popUInt64(stack);
+}
+
+void sum_uint64_get(sql_txn* ctx, void* self, VMStack* stack) {
+  pushUInt64(stack, *static_cast<uint64_t*>(self));
+}
+
+void sum_uint64_reset(sql_txn* ctx, void* self) {
+ memset(self, 0, sizeof(uint64_t));
+}
+
+void sum_uint64_merge(sql_txn* ctx, void* self, const void* other) {
+  *static_cast<uint64_t*>(self) += *static_cast<const uint64_t*>(other);
+}
+
+void sum_uint64_save(sql_txn* ctx, const void* self, OutputStream* os) {
+  os->appendVarUInt(*static_cast<const uint64_t*>(self));
+}
+
+void sum_uint64_load(sql_txn* ctx, void* self, InputStream* is) {
+  *static_cast<uint64_t*>(self) = is->readVarUInt();
+}
+
+const SFunction sum_uint64(
+   { SType::UINT64 },
+   SType::UINT64,
+   sizeof(uint64_t),
+   &sum_uint64_acc,
+   &sum_uint64_get,
+   &sum_uint64_reset,
+   &sum_uint64_reset,
+   nullptr,
+   &sum_uint64_merge,
+   &sum_uint64_save,
+   &sum_uint64_load);
+
 
 /**
  * MEAN() expression
  */
-//struct mean_expr_scratchpad {
+//struct mean_expr_self {
 //  double sum;
 //  int count;
 //};
 //
-//void meanExprAcc(sql_txn* ctx, void* scratchpad, int argc, SValue* argv) {
+//void meanExprAcc(sql_txn* ctx, void* self, int argc, SValue* argv) {
 //  SValue* val = argv;
-//  auto data = (mean_expr_scratchpad*) scratchpad;
+//  auto data = (mean_expr_self*) self;
 //
 //  if (argc != 1) {
 //    RAISE(
@@ -191,7 +171,7 @@ const AggregateFunction kSumExpr {
 //  }
 //
 //  switch(val->getType()) {
-//    case SQL_NULL:
+//    case SType::NIL:
 //      return;
 //
 //    default:
@@ -201,45 +181,45 @@ const AggregateFunction kSumExpr {
 //  }
 //}
 //
-//void meanExprGet(sql_txn* ctx, void* scratchpad, SValue* out) {
-//  auto data = (mean_expr_scratchpad*) scratchpad;
+//void meanExprGet(sql_txn* ctx, void* self, SValue* out) {
+//  auto data = (mean_expr_self*) self;
 //  *out = SValue(data->sum / data->count);
 //}
 //
-//void meanExprReset(sql_txn* ctx, void* scratchpad) {
-//  memset(scratchpad, 0, sizeof(mean_expr_scratchpad));
+//void meanExprReset(sql_txn* ctx, void* self) {
+//  memset(self, 0, sizeof(mean_expr_self));
 //}
 //
-//void meanExprFree(sql_txn* ctx, void* scratchpad) {
+//void meanExprFree(sql_txn* ctx, void* self) {
 //  /* noop */
 //}
 //
 //size_t meanExprScratchpadSize() {
-//  return sizeof(mean_expr_scratchpad);
+//  return sizeof(mean_expr_self);
 //}
 //
-//void meanExprMerge(sql_txn* ctx, void* scratchpad, const void* other) {
-//  auto this_data = (mean_expr_scratchpad*) scratchpad;
-//  auto other_data = (const mean_expr_scratchpad*) other;
+//void meanExprMerge(sql_txn* ctx, void* self, const void* other) {
+//  auto this_data = (mean_expr_self*) self;
+//  auto other_data = (const mean_expr_self*) other;
 //
 //  this_data->sum += other_data->sum;
 //  this_data->count += other_data->count;
 //}
 //
-//void meanExprSave(sql_txn* ctx, void* scratchpad, OutputStream* os) {
-//  auto data = (mean_expr_scratchpad*) scratchpad;
+//void meanExprSave(sql_txn* ctx, void* self, OutputStream* os) {
+//  auto data = (mean_expr_self*) self;
 //  os->appendVarUInt(data->count);
 //  os->appendDouble(data->sum);
 //}
 //
-//void meanExprLoad(sql_txn* ctx, void* scratchpad, InputStream* is) {
-//  auto data = (mean_expr_scratchpad*) scratchpad;
+//void meanExprLoad(sql_txn* ctx, void* self, InputStream* is) {
+//  auto data = (mean_expr_self*) self;
 //  data->count = is->readVarUInt();
 //  data->sum = is->readDouble();
 //}
 //
 //const AggregateFunction kMeanExpr {
-//  .scratch_size = sizeof(mean_expr_scratchpad),
+//  .scratch_size = sizeof(mean_expr_self),
 //  .accumulate = &meanExprAcc,
 //  .get = &meanExprGet,
 //  .reset = &meanExprReset,
@@ -253,144 +233,144 @@ const AggregateFunction kSumExpr {
 /**
  * MAX() expression
  */
-struct max_expr_scratchpad {
-  double max;
-  int count;
-};
-
-void maxExprAcc(sql_txn* ctx, void* scratchpad, int argc, SValue* argv) {
-  auto data = (max_expr_scratchpad*) scratchpad;
-
-  switch(argv->getType()) {
-    case SQL_NULL:
-      return;
-
-    default: {
-      auto fval = argv->getFloat();
-      if (data->count == 0 || fval > data->max) {
-        data->max = fval;
-      }
-
-      data->count = 1;
-      return;
-    }
-
-  }
-}
-
-void maxExprGet(sql_txn* ctx, void* scratchpad, SValue* out) {
-  *out = SValue::newFloat(((max_expr_scratchpad*) scratchpad)->max);
-}
-
-void maxExprReset(sql_txn* ctx, void* scratchpad) {
-  memset(scratchpad, 0, sizeof(max_expr_scratchpad));
-}
-
-void maxExprMerge(sql_txn* ctx, void* scratchpad, const void* other) {
-  auto data = (max_expr_scratchpad*) scratchpad;
-  auto other_data = (max_expr_scratchpad*) other;
-
-  if (other_data->count == 0) {
-    return;
-  }
-
-  if (data->count == 0 || other_data->max > data->max) {
-    data->max = other_data->max;
-  }
-
-  data->count = 1;
-}
-
-void maxExprSave(sql_txn* ctx, void* scratchpad, OutputStream* os) {
-  os->write((char*) scratchpad, sizeof(max_expr_scratchpad));
-}
-
-void maxExprLoad(sql_txn* ctx, void* scratchpad, InputStream* is) {
-  is->readNextBytes(scratchpad, sizeof(max_expr_scratchpad));
-}
-
-const AggregateFunction kMaxExpr {
-  .scratch_size = sizeof(max_expr_scratchpad),
-  .accumulate = &maxExprAcc,
-  .get = &maxExprGet,
-  .reset = &maxExprReset,
-  .init = &maxExprReset,
-  .free = nullptr,
-  .merge = &maxExprMerge,
-  .savestate = &maxExprSave,
-  .loadstate = &maxExprLoad
-};
-
-/**
- * MIN() expression
- */
-struct min_expr_scratchpad {
-  double min;
-  int count;
-};
-
-void minExprAcc(sql_txn* ctx, void* scratchpad, int argc, SValue* argv) {
-  auto data = (min_expr_scratchpad*) scratchpad;
-
-  switch(argv->getType()) {
-    case SQL_NULL:
-      return;
-
-    default: {
-      auto fval = argv->getFloat();
-      if (data->count == 0 || fval < data->min) {
-        data->min = fval;
-      }
-
-      data->count = 1;
-      return;
-    }
-
-  }
-}
-
-void minExprGet(sql_txn* ctx, void* scratchpad, SValue* out) {
-  *out = SValue::newFloat(((min_expr_scratchpad*) scratchpad)->min);
-}
-
-void minExprReset(sql_txn* ctx, void* scratchpad) {
-  memset(scratchpad, 0, sizeof(min_expr_scratchpad));
-}
-
-void minExprMerge(sql_txn* ctx, void* scratchpad, const void* other) {
-  auto data = (min_expr_scratchpad*) scratchpad;
-  auto other_data = (min_expr_scratchpad*) other;
-
-  if (other_data->count == 0) {
-    return;
-  }
-
-  if (data->count == 0 || other_data->min < data->min) {
-    data->min = other_data->min;
-  }
-
-  data->count = 1;
-}
-
-void minExprSave(sql_txn* ctx, void* scratchpad, OutputStream* os) {
-  os->write((char*) scratchpad, sizeof(min_expr_scratchpad));
-}
-
-void minExprLoad(sql_txn* ctx, void* scratchpad, InputStream* is) {
-  is->readNextBytes(scratchpad, sizeof(min_expr_scratchpad));
-}
-
-const AggregateFunction kMinExpr {
-  .scratch_size = sizeof(min_expr_scratchpad),
-  .accumulate = &minExprAcc,
-  .get = &minExprGet,
-  .reset = &minExprReset,
-  .init = &minExprReset,
-  .free = nullptr,
-  .merge = &minExprMerge,
-  .savestate = &minExprSave,
-  .loadstate = &minExprLoad
-};
+//struct max_expr_self {
+//  double max;
+//  int count;
+//};
+//
+//void maxExprAcc(sql_txn* ctx, void* self, int argc, SValue* argv) {
+//  auto data = (max_expr_self*) self;
+//
+//  switch(argv->getType()) {
+//    case SType::NIL:
+//      return;
+//
+//    default: {
+//      auto fval = argv->getFloat();
+//      if (data->count == 0 || fval > data->max) {
+//        data->max = fval;
+//      }
+//
+//      data->count = 1;
+//      return;
+//    }
+//
+//  }
+//}
+//
+//void maxExprGet(sql_txn* ctx, void* self, SValue* out) {
+//  *out = SValue::newFloat(((max_expr_self*) self)->max);
+//}
+//
+//void maxExprReset(sql_txn* ctx, void* self) {
+//  memset(self, 0, sizeof(max_expr_self));
+//}
+//
+//void maxExprMerge(sql_txn* ctx, void* self, const void* other) {
+//  auto data = (max_expr_self*) self;
+//  auto other_data = (max_expr_self*) other;
+//
+//  if (other_data->count == 0) {
+//    return;
+//  }
+//
+//  if (data->count == 0 || other_data->max > data->max) {
+//    data->max = other_data->max;
+//  }
+//
+//  data->count = 1;
+//}
+//
+//void maxExprSave(sql_txn* ctx, void* self, OutputStream* os) {
+//  os->write((char*) self, sizeof(max_expr_self));
+//}
+//
+//void maxExprLoad(sql_txn* ctx, void* self, InputStream* is) {
+//  is->readNextBytes(self, sizeof(max_expr_self));
+//}
+//
+//const AggregateFunction kMaxExpr {
+//  .scratch_size = sizeof(max_expr_self),
+//  .accumulate = &maxExprAcc,
+//  .get = &maxExprGet,
+//  .reset = &maxExprReset,
+//  .init = &maxExprReset,
+//  .free = nullptr,
+//  .merge = &maxExprMerge,
+//  .savestate = &maxExprSave,
+//  .loadstate = &maxExprLoad
+//};
+//
+///**
+// * MIN() expression
+// */
+//struct min_expr_self {
+//  double min;
+//  int count;
+//};
+//
+//void minExprAcc(sql_txn* ctx, void* self, int argc, SValue* argv) {
+//  auto data = (min_expr_self*) self;
+//
+//  switch(argv->getType()) {
+//    case SType::NIL:
+//      return;
+//
+//    default: {
+//      auto fval = argv->getFloat();
+//      if (data->count == 0 || fval < data->min) {
+//        data->min = fval;
+//      }
+//
+//      data->count = 1;
+//      return;
+//    }
+//
+//  }
+//}
+//
+//void minExprGet(sql_txn* ctx, void* self, SValue* out) {
+//  *out = SValue::newFloat(((min_expr_self*) self)->min);
+//}
+//
+//void minExprReset(sql_txn* ctx, void* self) {
+//  memset(self, 0, sizeof(min_expr_self));
+//}
+//
+//void minExprMerge(sql_txn* ctx, void* self, const void* other) {
+//  auto data = (min_expr_self*) self;
+//  auto other_data = (min_expr_self*) other;
+//
+//  if (other_data->count == 0) {
+//    return;
+//  }
+//
+//  if (data->count == 0 || other_data->min < data->min) {
+//    data->min = other_data->min;
+//  }
+//
+//  data->count = 1;
+//}
+//
+//void minExprSave(sql_txn* ctx, void* self, OutputStream* os) {
+//  os->write((char*) self, sizeof(min_expr_self));
+//}
+//
+//void minExprLoad(sql_txn* ctx, void* self, InputStream* is) {
+//  is->readNextBytes(self, sizeof(min_expr_self));
+//}
+//
+//const AggregateFunction kMinExpr {
+//  .scratch_size = sizeof(min_expr_self),
+//  .accumulate = &minExprAcc,
+//  .get = &minExprGet,
+//  .reset = &minExprReset,
+//  .init = &minExprReset,
+//  .free = nullptr,
+//  .merge = &minExprMerge,
+//  .savestate = &minExprSave,
+//  .loadstate = &minExprLoad
+//};
 
 }
 }

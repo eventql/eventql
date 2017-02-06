@@ -27,43 +27,43 @@
 
 namespace csql {
 
-PureFunction::PureFunction() : call(nullptr), has_side_effects(false) {}
-
-PureFunction::PureFunction(
-    void (*_call)(sql_txn* ctx, int argc, SValue* in, SValue* out),
-    bool _has_side_effects) :
-    call(_call),
-    has_side_effects(_has_side_effects) {}
-
-SFunction::SFunction() :
+SFunction::SFunction(
+    std::vector<SType> _arg_types,
+    SType _return_type,
+    void (*_call)(sql_txn* ctx, VMStack* stack),
+    bool _has_side_effects /* = false */) :
     type(FN_PURE),
-    vtable{ .t_pure = nullptr } {}
+    arg_types(_arg_types),
+    return_type(_return_type),
+    has_side_effects(_has_side_effects) {
+  vtable.call = _call;
+}
 
 SFunction::SFunction(
-    PureFunction fn) :
-    type(FN_PURE),
-    vtable{ .t_pure = fn } {}
-
-SFunction::SFunction(
-    AggregateFunction fn) :
+    std::vector<SType> _arg_types,
+    SType _return_type,
+    size_t _instance_size,
+    void (*_accumulate)(sql_txn*, void* self, VMStack* stack),
+    void (*_get)(sql_txn*, void* self, VMStack* stack),
+    void (*_reset)(sql_txn*, void* self),
+    void (*_init)(sql_txn*, void* self),
+    void (*_free)(sql_txn*, void* self),
+    void (*_merge)(sql_txn*, void* self, const void* other),
+    void (*_savestate)(sql_txn*, const void* self, OutputStream* os),
+    void (*_loadstate)(sql_txn*, void* self, InputStream* is)) :
     type(FN_AGGREGATE),
-    vtable{ .t_aggregate = fn } {}
-
-bool SFunction::isAggregate() const {
-  switch (type) {
-    case FN_PURE: return false;
-    case FN_AGGREGATE: return true;
-  }
+    instance_size(_instance_size),
+    arg_types(_arg_types),
+    return_type(_return_type) {
+  vtable.accumulate = _accumulate;
+  vtable.get = _get;
+  vtable.reset = _reset;
+  vtable.init = _init;
+  vtable.free = _free;
+  vtable.merge = _merge;
+  vtable.savestate = _savestate;
+  vtable.loadstate = _loadstate;
 }
 
-bool SFunction::hasSideEffects() const {
-  switch (type) {
-    case FN_AGGREGATE:
-      return false;
-    case FN_PURE:
-      return vtable.t_pure.has_side_effects;
-  }
-}
+} // namespace csql
 
-
-}

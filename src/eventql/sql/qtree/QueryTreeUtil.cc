@@ -21,32 +21,14 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <iostream>
+#include "eventql/eventql.h"
 #include <eventql/sql/runtime/runtime.h>
 #include <eventql/sql/qtree/QueryTreeUtil.h>
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
 #include <eventql/util/logging.h>
 
-#include "eventql/eventql.h"
-
 namespace csql {
-
-void QueryTreeUtil::resolveColumns(
-    RefPtr<ValueExpressionNode> expr,
-    Function<size_t (const String&)> resolver) {
-  auto colref = dynamic_cast<ColumnReferenceNode*>(expr.get());
-  if (colref && !colref->fieldName().empty()) {
-    auto idx = resolver(colref->fieldName());
-    if (idx == size_t(-1)) {
-      RAISEF(kRuntimeError, "column(s) not found: '$0'", colref->fieldName());
-    }
-
-    colref->setColumnIndex(idx);
-  }
-
-  for (auto& arg : expr->arguments()) {
-    resolveColumns(arg, resolver);
-  }
-}
 
 void QueryTreeUtil::findColumns(
     RefPtr<ValueExpressionNode> expr,
@@ -64,10 +46,10 @@ void QueryTreeUtil::findColumns(
 RefPtr<ValueExpressionNode> QueryTreeUtil::foldConstants(
     Transaction* txn,
     RefPtr<ValueExpressionNode> expr) {
-  if (isConstantExpression(txn, expr)) {
+  if (isConstantExpression(txn, expr) &&
+      !dynamic_cast<LiteralExpressionNode*>(expr.get())) {
     auto runtime = txn->getRuntime();
     auto const_val = runtime->evaluateConstExpression(txn, expr);
-
     return new LiteralExpressionNode(const_val);
   } else {
     return expr;
@@ -81,16 +63,15 @@ bool QueryTreeUtil::isConstantExpression(
     return false;
   }
 
-  auto call_expr = dynamic_cast<CallExpressionNode*>(expr.get());
-  if (call_expr) {
-    auto symbol = txn->getSymbolTable()->lookup(call_expr->symbol());
-    if (symbol.isAggregate() || symbol.hasSideEffects()) {
+  for (const auto& arg : expr->arguments()) {
+    if (!isConstantExpression(txn, arg)) {
       return false;
     }
   }
 
-  for (const auto& arg : expr->arguments()) {
-    if (!isConstantExpression(txn, arg)) {
+  auto call_expr = dynamic_cast<CallExpressionNode*>(expr.get());
+  if (call_expr) {
+    if (!call_expr->isPureFunction()) {
       return false;
     }
   }
@@ -98,17 +79,40 @@ bool QueryTreeUtil::isConstantExpression(
   return true;
 }
 
-RefPtr<ValueExpressionNode> QueryTreeUtil::prunePredicateExpression(
+ReturnCode QueryTreeUtil::prunePredicateExpression(
+    Transaction* txn,
     RefPtr<ValueExpressionNode> expr,
-    const Set<String>& column_whitelist) {
+    const Set<String>& column_whitelist,
+    RefPtr<ValueExpressionNode>* out) {
   auto call_expr = dynamic_cast<CallExpressionNode*>(expr.get());
-  if (call_expr && call_expr->symbol() == "logical_and") {
-    return new CallExpressionNode(
-        "logical_and",
-        Vector<RefPtr<ValueExpressionNode>> {
-          prunePredicateExpression(call_expr->arguments()[0], column_whitelist),
-          prunePredicateExpression(call_expr->arguments()[1], column_whitelist),
-        });
+  if (call_expr && call_expr->getFunctionName() == "logical_and") {
+    Vector<RefPtr<ValueExpressionNode>> call_args(2);
+
+    {
+      auto rc = prunePredicateExpression(
+          txn,
+          call_expr->arguments()[0],
+          column_whitelist,
+          &call_args[0]);
+
+      if (rc.isSuccess()) {
+        return rc;
+      }
+    }
+
+    {
+      auto rc = prunePredicateExpression(
+          txn,
+          call_expr->arguments()[1],
+          column_whitelist,
+          &call_args[1]);
+
+      if (rc.isSuccess()) {
+        return rc;
+      }
+    }
+
+    return CallExpressionNode::newNode(txn, "logical_and", call_args, out);
   }
 
   bool is_invalid = false;
@@ -120,19 +124,47 @@ RefPtr<ValueExpressionNode> QueryTreeUtil::prunePredicateExpression(
   });
 
   if (is_invalid) {
-    return new LiteralExpressionNode(SValue(SValue::BoolType(true)));
+    *out = RefPtr<ValueExpressionNode>(
+        new LiteralExpressionNode(SValue(SValue::BoolType(true))));
   } else {
-    return expr;
+    *out = expr;
   }
+
+  return ReturnCode::success();
 }
 
-RefPtr<ValueExpressionNode> QueryTreeUtil::removeConstraintFromPredicate(
+ReturnCode QueryTreeUtil::removeConstraintFromPredicate(
+    Transaction* txn,
     RefPtr<ValueExpressionNode> expr,
-    const ScanConstraint& constraint) {
+    const ScanConstraint& constraint,
+    RefPtr<ValueExpressionNode>* out) {
   auto call_expr = dynamic_cast<CallExpressionNode*>(expr.get());
-  if (call_expr && call_expr->symbol() == "logical_and") {
-    auto arg_left = removeConstraintFromPredicate(call_expr->arguments()[0], constraint);
-    auto arg_right = removeConstraintFromPredicate(call_expr->arguments()[1], constraint);
+  if (call_expr && call_expr->getFunctionName() == "logical_and") {
+    RefPtr<ValueExpressionNode> arg_left;
+    {
+      auto rc = removeConstraintFromPredicate(
+          txn,
+          call_expr->arguments()[0],
+          constraint,
+          &arg_left);
+
+      if (!rc.isSuccess()) {
+        return rc;
+      }
+    }
+
+    RefPtr<ValueExpressionNode> arg_right;
+    {
+      auto rc = removeConstraintFromPredicate(
+          txn,
+          call_expr->arguments()[1],
+          constraint,
+          &arg_right);
+
+      if (!rc.isSuccess()) {
+        return rc;
+      }
+    }
 
     auto arg_left_is_true =
         dynamic_cast<LiteralExpressionNode*>(arg_left.get()) &&
@@ -145,24 +177,50 @@ RefPtr<ValueExpressionNode> QueryTreeUtil::removeConstraintFromPredicate(
         dynamic_cast<LiteralExpressionNode*>(arg_right.get())->value().getBool();
 
     if (arg_left_is_true && arg_right_is_true) {
-      return new LiteralExpressionNode(SValue(SValue::BoolType(true)));
+      *out = RefPtr<ValueExpressionNode>(
+          new LiteralExpressionNode(SValue(SValue::BoolType(true))));
+      return ReturnCode::success();
     } else if (arg_left_is_true) {
-      return arg_right;
+      *out = arg_right;
+      return ReturnCode::success();
     } else if (arg_right_is_true) {
-      return arg_left;
+      *out = arg_left;
+      return ReturnCode::success();
     } else {
-      return new CallExpressionNode(
+      return CallExpressionNode::newNode(
+          txn,
           "logical_and",
-          Vector<RefPtr<ValueExpressionNode>> { arg_left, arg_right });
+          Vector<RefPtr<ValueExpressionNode>> { arg_left, arg_right },
+          out);
     }
   }
 
   auto e_constraint = findConstraint(expr);
   if (!e_constraint.isEmpty() && e_constraint.get() == constraint) {
-    return new LiteralExpressionNode(SValue(SValue::BoolType(true)));
+    *out = RefPtr<ValueExpressionNode>(
+        new LiteralExpressionNode(SValue(SValue::BoolType(true))));
   } else {
-    return expr;
+    *out = expr;
   }
+
+  return ReturnCode::success();
+}
+
+const CallExpressionNode* QueryTreeUtil::findAggregateExpression(
+    const ValueExpressionNode* expr) {
+  auto call_expr = dynamic_cast<const CallExpressionNode*>(expr);
+  if (call_expr && call_expr->isAggregateFunction()) {
+    return call_expr;
+  }
+
+  for (const auto& arg : expr->arguments()) {
+    auto aggr = findAggregateExpression(arg.get());
+    if (aggr) {
+      return aggr;
+    }
+  }
+
+  return nullptr;
 }
 
 void QueryTreeUtil::findConstraints(
@@ -171,7 +229,7 @@ void QueryTreeUtil::findConstraints(
   auto call_expr = dynamic_cast<CallExpressionNode*>(expr.get());
 
   // logical ands allow chaining multiple constraints
-  if (call_expr && call_expr->symbol() == "logical_and") {
+  if (call_expr && call_expr->getFunctionName() == "logical_and") {
     for (const auto& arg : call_expr->arguments()) {
       findConstraints(arg, constraints);
     }
@@ -215,7 +273,7 @@ Option<ScanConstraint> QueryTreeUtil::findConstraint(
   }
 
   // EQUAL_TO
-  if (call_expr->symbol() == "eq") {
+  if (call_expr->getFunctionName() == "eq") {
     ScanConstraint constraint;
     constraint.column_name = column->fieldName();
     constraint.type = ScanConstraintType::EQUAL_TO;
@@ -224,7 +282,7 @@ Option<ScanConstraint> QueryTreeUtil::findConstraint(
   }
 
   // NOT_EQUAL_TO
-  if (call_expr->symbol() == "neq") {
+  if (call_expr->getFunctionName() == "neq") {
     ScanConstraint constraint;
     constraint.column_name = column->fieldName();
     constraint.type = ScanConstraintType::NOT_EQUAL_TO;
@@ -233,7 +291,7 @@ Option<ScanConstraint> QueryTreeUtil::findConstraint(
   }
 
   // LESS_THAN
-  if (call_expr->symbol() == "lt") {
+  if (call_expr->getFunctionName() == "lt") {
     ScanConstraint constraint;
     constraint.column_name = column->fieldName();
     constraint.type = reverse_expr ?
@@ -244,7 +302,7 @@ Option<ScanConstraint> QueryTreeUtil::findConstraint(
   }
 
   // LESS_THAN_OR_EQUALS
-  if (call_expr->symbol() == "lte") {
+  if (call_expr->getFunctionName() == "lte") {
     ScanConstraint constraint;
     constraint.column_name = column->fieldName();
     constraint.type = reverse_expr ?
@@ -255,7 +313,7 @@ Option<ScanConstraint> QueryTreeUtil::findConstraint(
   }
 
   // GREATER_THAN
-  if (call_expr->symbol() == "gt") {
+  if (call_expr->getFunctionName() == "gt") {
     ScanConstraint constraint;
     constraint.column_name = column->fieldName();
     constraint.type = reverse_expr ?
@@ -266,7 +324,7 @@ Option<ScanConstraint> QueryTreeUtil::findConstraint(
   }
 
   // GREATER_THAN_OR_EQUAL_TO
-  if (call_expr->symbol() == "gte") {
+  if (call_expr->getFunctionName() == "gte") {
     ScanConstraint constraint;
     constraint.column_name = column->fieldName();
     constraint.type = reverse_expr ?

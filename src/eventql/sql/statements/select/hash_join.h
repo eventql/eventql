@@ -2,7 +2,6 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
- *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -29,46 +28,51 @@
 
 namespace csql {
 
-class NestedLoopJoin : public TableExpression {
+class HashJoin : public TableExpression {
 public:
 
-  NestedLoopJoin(
+  HashJoin(
       Transaction* txn,
       JoinType join_type,
       const Vector<JoinNode::InputColumnRef>& input_map,
       Vector<ValueExpression> select_expressions,
       Option<ValueExpression> join_cond_expr,
       Option<ValueExpression> where_expr,
+      std::vector<std::pair<ValueExpression, ValueExpression>> conjunction_exprs,
       ScopedPtr<TableExpression> base_tbl,
       ScopedPtr<TableExpression> joined_tbl);
 
-  ScopedPtr<ResultCursor> execute() override;
+  ReturnCode execute() override;
 
-  size_t getNumColumns() const override;
+  size_t getColumnCount() const override;
+  SType getColumnType(size_t idx) const override;
+
+  ReturnCode nextBatch(SVector* columns, size_t* len) override;
 
 protected:
 
-  ScopedPtr<ResultCursor> executeCartesianJoin();
-  ScopedPtr<ResultCursor> executeInnerJoin();
-  ScopedPtr<ResultCursor> executeOuterJoin();
+  ReturnCode computeInnerJoin(
+      size_t base_records,
+      SVector* output,
+      size_t* output_records);
+
+  bool computeOutputRow(const std::vector<SValue>& input, SVector* output);
+
+  ReturnCode readJoinedTable();
 
   Transaction* txn_;
   JoinType join_type_;
   Vector<JoinNode::InputColumnRef> input_map_;
-  Vector<SValue> input_buf_;
-  Vector<String> column_names_;
   Vector<ValueExpression> select_exprs_;
   Option<ValueExpression> join_cond_expr_;
   Option<ValueExpression> where_expr_;
+  std::vector<std::pair<ValueExpression, ValueExpression>> conjunction_exprs_;
   ScopedPtr<TableExpression> base_tbl_;
-  ScopedPtr<ResultCursor> base_tbl_cursor_;
-  Vector<SValue> base_tbl_row_;
-  size_t base_tbl_mincols_;
   ScopedPtr<TableExpression> joined_tbl_;
-  Vector<Vector<SValue>> joined_tbl_data_;
-  size_t joined_tbl_pos_;
-  size_t joined_tbl_mincols_;
-  bool joined_tbl_row_found_;
+  std::vector<SVector> base_tbl_cols_;
+  std::unordered_multimap<std::string, std::vector<SValue>> joined_tbl_data_;
+  VMStack vm_stack_;
 };
 
-}
+} // namespace csql
+

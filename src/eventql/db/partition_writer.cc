@@ -327,7 +327,8 @@ bool LSMPartitionWriter::commit() {
     tblref->set_last_sequence(snap->state.lsm_sequence() + arena->size());
     tblref->set_size_bytes(FileUtil::size(filepath + ".cst"));
     tblref->set_size_rows(arena->size());
-    tblref->set_has_skiplist(true);
+    tblref->set_has_skiplist(arena->hasSkiplist());
+    tblref->set_has_updates(arena->hasUpdate());
     snap->state.set_lsm_sequence(snap->state.lsm_sequence() + arena->size());
     snap->compacting_arena = nullptr;
     snap->writeToDisk();
