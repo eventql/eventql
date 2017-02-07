@@ -21,8 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/sql/backends/csv/CSVTableProvider.h>
-#include <eventql/sql/statements/select/tablescan.h>
+#include <eventql/sql/drivers/csv/CSVTableProvider.h>
 
 #include "eventql/eventql.h"
 
@@ -105,7 +104,13 @@ Option<ScopedPtr<TableExpression>> CSVTableProvider::buildSequentialScan(
   stream->skipNextRow();
 
   return Option<ScopedPtr<TableExpression>>(
-      ScopedPtr<TableExpression>(new CSVTableScan(columns_, std::move(stream))));
+      ScopedPtr<TableExpression>(
+          new CSVTableScan(
+              txn,
+              execution_context,
+              seqscan,
+              columns_,
+              std::move(stream))));
 
 }
 

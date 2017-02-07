@@ -25,8 +25,8 @@
 #include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/runtime/tablerepository.h>
-#include <eventql/sql/backends/csv/CSVInputStream.h>
-#include <eventql/sql/backends/csv/CSVTableScan.h>
+#include <eventql/sql/drivers/csv/CSVInputStream.h>
+#include <eventql/sql/drivers/csv/CSVTableScan.h>
 
 namespace csql {
 namespace backends {

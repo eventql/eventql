@@ -22,11 +22,12 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/table_expression.h>
-#include <eventql/sql/backends/csv/CSVInputStream.h>
-
-#include "eventql/eventql.h"
+#include <eventql/sql/transaction.h>
+#include <eventql/sql/drivers/csv/CSVInputStream.h>
+#include <eventql/sql/runtime/ValueExpression.h>
 
 namespace csql {
 namespace backends {
@@ -36,7 +37,10 @@ struct CSVTableScan : public TableExpression {
 public:
 
   CSVTableScan(
-      const std::vector<std::pair<std::string, SType>> columns,
+      Transaction* txn,
+      ExecutionContext* execution_context,
+      RefPtr<SequentialScanNode> stmt,
+      const std::vector<std::pair<std::string, SType>>& csv_columns,
       ScopedPtr<CSVInputStream> csv);
 
   ReturnCode execute() override;
@@ -46,8 +50,20 @@ public:
   SType getColumnType(size_t idx) const override;
 
 protected:
-  std::vector<std::pair<std::string, SType>> columns_;
+
+  ReturnCode loadInputRows(size_t* row_count);
+
+  Transaction* txn_;
+  ExecutionContext* execution_context_;
+  RefPtr<SequentialScanNode> stmt_;
+  std::vector<std::pair<std::string, SType>> csv_columns_;
   ScopedPtr<CSVInputStream> csv_;
+  std::vector<ValueExpression> select_list_;
+  ValueExpression where_expr_;
+  std::vector<SType> output_column_types_;
+  std::vector<size_t> input_column_map_;
+  std::vector<SVector> input_column_buffers_;
+  VMStack vm_stack_;
 };
 
 } // namespace csv
