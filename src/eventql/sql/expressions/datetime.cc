@@ -127,19 +127,6 @@ static Option<uint64_t> parseInterval(String time_interval) {
   return None<uint64_t>();
 }
 
-//void fromTimestamp(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  checkArgs("FROM_TIMESTAMP", argc, 1);
-//
-//  switch (argv->getType()) {
-//    case SType::TIMESTAMP64:
-//      *out = *argv;
-//      break;
-//    default:
-//      *out = SValue(SValue::TimeType(parseTimestamp(argv)));
-//      break;
-//  }
-//}
-
 //
 //void dateTruncExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
 //  checkArgs("DATE_TRUNC", argc, 2);
