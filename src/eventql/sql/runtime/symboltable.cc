@@ -34,10 +34,10 @@ SymbolTableEntry::SymbolTableEntry(
     const std::string& function_name,
     SFunction fun) :
     fun_(fun) {
-  symbol_ = function_name + "#" + getSTypeName(fun_.return_type) + "/";
+  symbol_ = function_name + "#" + sql_typename(fun_.return_type) + "/";
 
   for (const auto& t : fun_.arg_types) {
-    symbol_ += getSTypeName(t) + ";";
+    symbol_ += sql_typename(t) + ";";
   }
 }
 
@@ -71,7 +71,8 @@ void SymbolTable::registerImplicitConversion(
 ReturnCode SymbolTable::resolve(
     const std::string& function_name,
     const std::vector<SType>& arguments,
-    const SymbolTableEntry** entry) const {
+    const SymbolTableEntry** entry,
+    bool allow_conversion /* = true */) const {
   std::string function_name_downcase = function_name;
   StringUtil::toLower(&function_name_downcase);
 
@@ -109,7 +110,7 @@ ReturnCode SymbolTable::resolve(
   }
 
   /* scan the candidates looking for a match using implicit conversions */
-  if (!match) {
+  if (!match && allow_conversion) {
     for (const auto& candidate : candidates) {
       auto candidate_fn = candidate->getFunction();
       if (candidate_fn->arg_types.size() != arguments.size()) {
@@ -140,7 +141,7 @@ ReturnCode SymbolTable::resolve(
       auto candidate_fn = candidate->getFunction();
 
       for (const auto& type : candidate_fn->arg_types) {
-        candidate_types.emplace_back(getSTypeName(type));
+        candidate_types.emplace_back(sql_typename(type));
       }
 
       expected_types.emplace_back(
@@ -149,7 +150,7 @@ ReturnCode SymbolTable::resolve(
 
     std::vector<std::string> actual_types;
     for (auto type : arguments) {
-      actual_types.emplace_back(getSTypeName(type));
+      actual_types.emplace_back(sql_typename(type));
     }
 
     return ReturnCode::errorf(

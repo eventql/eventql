@@ -34,6 +34,7 @@ AreaChartBuilder::AreaChartBuilder(
 util::chart::Drawable* AreaChartBuilder::getChart() const {
   preconditionCheck();
 
+/*
   if (auto c = tryType2D<util::chart::AreaChart2D<
         SValue::TimeType,
         SValue::FloatType>>())
@@ -66,6 +67,8 @@ util::chart::Drawable* AreaChartBuilder::getChart() const {
         SValue::FloatType,
         SValue::FloatType>>())
     return c;
+
+*/
 
   invalidType();
   return nullptr;

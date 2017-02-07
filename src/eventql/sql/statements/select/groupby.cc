@@ -109,9 +109,9 @@ ReturnCode GroupByExpression::execute() {
       input_col_cursor.emplace_back((void*) c.getData());
     }
 
-    Vector<SValue> gkey;
-    for (const auto& e : group_exprs_) {
-      gkey.emplace_back(e.getReturnType());
+    Vector<SType> group_tpl_types;
+    for (size_t i = group_exprs_.size(); i-- > 0; ) {
+      group_tpl_types.emplace_back(group_exprs_[i].getReturnType());
     }
 
     for (size_t n = 0; n < nrecords; n++) {
@@ -124,11 +124,15 @@ ReturnCode GroupByExpression::execute() {
             nullptr,
             input_col_cursor.size(),
             input_col_cursor.data());
-
-        popBoxed(&vm_stack_, &gkey[i]);
       }
 
-      auto group_key = SValue::makeUniqueKey(gkey.data(), gkey.size());
+      auto group_tpl_len = sql_sizeof_tuple(
+          vm_stack_.top,
+          group_tpl_types.data(),
+          group_tpl_types.size());
+
+      auto group_key = SHA1::compute(vm_stack_.top, group_tpl_len);
+      vm::popStack(&vm_stack_, group_tpl_len);
 
       bool group_new = false;
       auto& group = groups_[group_key];
@@ -259,10 +263,9 @@ ReturnCode PartialGroupByExpression::execute() {
       is->readUInt8();
       auto num_groups = is->readUInt64();
       for (uint64_t i = 0; i < num_groups; ++i) {
-        auto group_key_len = is->readUInt32();
-        Buffer group_key(group_key_len);
-        is->readNextBytes(group_key.data(), group_key_len);
-        auto& group = groups_[group_key.toString()];
+        SHA1Hash group_key(SHA1Hash::DeferInitialization{});
+        is->readNextBytes(group_key.mutableData(), group_key.size());
+        auto& group = groups_[group_key];
 
         if (group.size() == 0) {
           for (const auto& e : select_exprs_) {
@@ -333,9 +336,9 @@ ReturnCode PartialGroupByExpression::execute() {
         input_col_cursor.emplace_back((void*) c.getData());
       }
 
-      Vector<SValue> gkey;
-      for (const auto& e : group_exprs_) {
-        gkey.emplace_back(e.getReturnType());
+      Vector<SType> group_tpl_types;
+      for (size_t i = group_exprs_.size(); i-- > 0; ) {
+        group_tpl_types.emplace_back(group_exprs_[i].getReturnType());
       }
 
       for (size_t n = 0; n < nrecords; n++) {
@@ -348,11 +351,15 @@ ReturnCode PartialGroupByExpression::execute() {
               nullptr,
               input_col_cursor.size(),
               input_col_cursor.data());
-
-          popBoxed(&vm_stack_, &gkey[i]);
         }
 
-        auto group_key = SValue::makeUniqueKey(gkey.data(), gkey.size());
+        auto group_tpl_len = sql_sizeof_tuple(
+            vm_stack_.top,
+            group_tpl_types.data(),
+            group_tpl_types.size());
+
+        auto group_key = SHA1::compute(vm_stack_.top, group_tpl_len);
+        vm::popStack(&vm_stack_, group_tpl_len);
 
         bool group_new = false;
         auto& group = groups_[group_key];
@@ -407,8 +414,7 @@ ReturnCode PartialGroupByExpression::execute() {
       os->appendUInt8(0x01);
       os->appendUInt64(groups_.size());
       for (const auto& g : groups_) {
-        os->appendUInt32(g.first.size());
-        os->write(g.first.data(), g.first.size());
+        os->write(static_cast<const char*>(g.first.data()), g.first.size());
 
         for (size_t i = 0; i < select_exprs_.size(); ++i) {
           if (select_exprs_[i].program()->method_accumulate.offset > 0) {
@@ -449,7 +455,11 @@ ReturnCode PartialGroupByExpression::nextBatch(
       }
     }
 
-    copyString(groups_iter_->first, columns + 0);
+    copyString(
+        static_cast<const char*>(groups_iter_->first.data()),
+        groups_iter_->first.size(),
+        columns + 0);
+
     copyString(group_data, columns + 1);
     ++groups_iter_;
 
@@ -569,13 +579,14 @@ ReturnCode GroupByMergeExpression::execute() {
     auto res_flags = is.readVarUInt();
     auto res_count = is.readVarUInt();
     for (size_t j = 0; j < res_count; ++j) {
-      const char* key;
-      size_t key_len;
-      if (!is.readLenencStringZ(&key, &key_len)) {
+      const char* group_key_data;
+      if (!is.readZ(&group_key_data, SHA1Hash::kSize)) {
         return ReturnCode::error("EIO", "invalid partialaggr result encoding");
       }
 
-      auto& group = groups_[std::string(key, key_len)];
+      SHA1Hash group_key(group_key_data, SHA1Hash::kSize);
+
+      auto& group = groups_[group_key];
       bool group_new = false;
       if (group.size() == 0) {
         group_new = true;

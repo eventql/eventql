@@ -125,7 +125,7 @@ ReturnCode QueryTreeUtil::prunePredicateExpression(
 
   if (is_invalid) {
     *out = RefPtr<ValueExpressionNode>(
-        new LiteralExpressionNode(SValue(SValue::BoolType(true))));
+        new LiteralExpressionNode(SValue::newBool(true)));
   } else {
     *out = expr;
   }
@@ -178,7 +178,7 @@ ReturnCode QueryTreeUtil::removeConstraintFromPredicate(
 
     if (arg_left_is_true && arg_right_is_true) {
       *out = RefPtr<ValueExpressionNode>(
-          new LiteralExpressionNode(SValue(SValue::BoolType(true))));
+          new LiteralExpressionNode(SValue::newBool(true)));
       return ReturnCode::success();
     } else if (arg_left_is_true) {
       *out = arg_right;
@@ -198,7 +198,7 @@ ReturnCode QueryTreeUtil::removeConstraintFromPredicate(
   auto e_constraint = findConstraint(expr);
   if (!e_constraint.isEmpty() && e_constraint.get() == constraint) {
     *out = RefPtr<ValueExpressionNode>(
-        new LiteralExpressionNode(SValue(SValue::BoolType(true))));
+        new LiteralExpressionNode(SValue::newBool(true)));
   } else {
     *out = expr;
   }

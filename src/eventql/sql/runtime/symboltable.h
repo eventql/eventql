@@ -50,7 +50,8 @@ public:
   ReturnCode resolve(
       const std::string& function_name,
       const std::vector<SType>& arguments,
-      const SymbolTableEntry** entry) const;
+      const SymbolTableEntry** entry,
+      bool allow_conversion = true) const;
 
   const SymbolTableEntry* lookup(const std::string& symbol) const;
 

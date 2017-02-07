@@ -134,6 +134,11 @@ ReturnCode HashJoin::computeInnerJoin(
     base_col_cursor.emplace_back((void*) c.getData());
   }
 
+  Vector<SType> hash_key_tpl_types;
+  for (size_t i = conjunction_exprs_.size(); i-- > 0; ) {
+    hash_key_tpl_types.emplace_back(conjunction_exprs_[i].first.getReturnType());
+  }
+
   auto nrecs = 0;
   for (size_t n = 0; n < base_records; ++n) {
     for (size_t i = 0; i < input_map_.size(); ++i) {
@@ -143,10 +148,7 @@ ReturnCode HashJoin::computeInnerJoin(
       }
     }
 
-    Vector<SValue> hkey;
     for (size_t i = 0; i < conjunction_exprs_.size(); ++i) {
-      hkey.emplace_back(conjunction_exprs_[i].first.getReturnType());
-
       VM::evaluateBoxed(
           txn_,
           conjunction_exprs_[i].first.program(),
@@ -155,11 +157,16 @@ ReturnCode HashJoin::computeInnerJoin(
           nullptr,
           row.size(),
           row.data());
-
-      popBoxed(&vm_stack_, &hkey[i]);
     }
 
-    auto hash_key = SValue::makeUniqueKey(hkey.data(), hkey.size());
+    auto hash_key_tpl_len = sql_sizeof_tuple(
+        vm_stack_.top,
+        hash_key_tpl_types.data(),
+        hash_key_tpl_types.size());
+
+    auto hash_key = SHA1::compute(vm_stack_.top, hash_key_tpl_len);
+    vm::popStack(&vm_stack_, hash_key_tpl_len);
+
     auto joined_data_range = joined_tbl_data_.equal_range(hash_key);
     auto joined_row = joined_data_range.first;
     for (; joined_row != joined_data_range.second; ++joined_row) {
@@ -282,6 +289,11 @@ ReturnCode HashJoin::readJoinedTable() {
       row.emplace_back(input_map_[i].type);
     }
 
+    Vector<SType> hash_key_tpl_types;
+    for (size_t i = conjunction_exprs_.size(); i-- > 0; ) {
+      hash_key_tpl_types.emplace_back(conjunction_exprs_[i].first.getReturnType());
+    }
+
     for (size_t n = 0; n < nrecords; n++) {
       for (size_t i = 0; i < input_map_.size(); ++i) {
         const auto& m = input_map_[i];
@@ -292,10 +304,7 @@ ReturnCode HashJoin::readJoinedTable() {
         row[i].copyFrom(input_col_cursor[m.column_idx]);
       }
 
-      Vector<SValue> hkey;
       for (size_t i = 0; i < conjunction_exprs_.size(); ++i) {
-        hkey.emplace_back(conjunction_exprs_[i].second.getReturnType());
-
         VM::evaluateBoxed(
             txn_,
             conjunction_exprs_[i].second.program(),
@@ -304,11 +313,16 @@ ReturnCode HashJoin::readJoinedTable() {
             nullptr,
             row.size(),
             row.data());
-
-        popBoxed(&vm_stack_, &hkey[i]);
       }
 
-      auto hash_key = SValue::makeUniqueKey(hkey.data(), hkey.size());
+      auto hash_key_tpl_len = sql_sizeof_tuple(
+          vm_stack_.top,
+          hash_key_tpl_types.data(),
+          hash_key_tpl_types.size());
+
+      auto hash_key = SHA1::compute(vm_stack_.top, hash_key_tpl_len);
+      vm::popStack(&vm_stack_, hash_key_tpl_len);
+
       joined_tbl_data_.emplace(hash_key, row);
 
       for (size_t i = 0; i < input_col_cursor.size(); ++i) {

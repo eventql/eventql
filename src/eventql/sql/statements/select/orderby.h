@@ -46,6 +46,7 @@ public:
       Transaction* txn,
       ExecutionContext* execution_context,
       Vector<SortExpr> sort_specs,
+      Vector<PureSFunctionPtr> comparators,
       ScopedPtr<TableExpression> input);
 
   ReturnCode execute() override;
@@ -58,6 +59,7 @@ protected:
   Transaction* txn_;
   ExecutionContext* execution_context_;
   Vector<SortExpr> sort_specs_;
+  Vector<PureSFunctionPtr> comparators_;
   ScopedPtr<TableExpression> input_;
   Vector<Vector<SValue>> rows_;
   size_t num_rows_;

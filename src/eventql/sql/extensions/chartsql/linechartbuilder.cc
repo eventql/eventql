@@ -39,6 +39,7 @@ util::chart::Drawable* LineChartBuilder::getChart() const {
 util::chart::Drawable* LineChartBuilder::findChartType() const {
   preconditionCheck();
 
+/*
   if (auto c = tryType2D<util::chart::LineChart2D<
         SValue::TimeType,
         SValue::TimeType>>())
@@ -88,7 +89,7 @@ util::chart::Drawable* LineChartBuilder::findChartType() const {
         SValue::StringType,
         SValue::StringType>>())
     return c;
-
+*/
   invalidType();
   return nullptr;
 }

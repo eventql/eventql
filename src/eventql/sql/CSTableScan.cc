@@ -250,10 +250,10 @@ bool CSTableScan::fetchNext(SVector* out) {
                   cur_buf_[col.second.index] = SValue::newNull();
                   break;
                 case SType::STRING:
-                  cur_buf_[col.second.index] = SValue::newInteger(v).toString();
+                  cur_buf_[col.second.index] = SValue::newString(std::to_string(v));
                   break;
                 case SType::FLOAT64:
-                  cur_buf_[col.second.index] = SValue::newFloat(v);
+                  cur_buf_[col.second.index] = SValue::newFloat64(v);
                   break;
                 case SType::INT64:
                   cur_buf_[col.second.index] = SValue::newInt64(v);
@@ -265,7 +265,7 @@ bool CSTableScan::fetchNext(SVector* out) {
                   cur_buf_[col.second.index] = SValue::newBool(v);
                   break;
                 case SType::TIMESTAMP64:
-                  cur_buf_[col.second.index] = SValue::newTimestamp(v);
+                  cur_buf_[col.second.index] = SValue::newTimestamp64(v);
                   break;
               }
             }
@@ -285,10 +285,10 @@ bool CSTableScan::fetchNext(SVector* out) {
                   cur_buf_[col.second.index] = SValue::newNull();
                   break;
                 case SType::STRING:
-                  cur_buf_[col.second.index] = SValue::newInteger(v).toString();
+                  cur_buf_[col.second.index] = SValue::newString(std::to_string(v));
                   break;
                 case SType::FLOAT64:
-                  cur_buf_[col.second.index] = SValue::newFloat(v);
+                  cur_buf_[col.second.index] = SValue::newFloat64(v);
                   break;
                 case SType::INT64:
                   cur_buf_[col.second.index] = SValue::newInt64(v);
@@ -300,7 +300,7 @@ bool CSTableScan::fetchNext(SVector* out) {
                   cur_buf_[col.second.index] = SValue::newBool(v);
                   break;
                 case SType::TIMESTAMP64:
-                  cur_buf_[col.second.index] = SValue::newTimestamp(v);
+                  cur_buf_[col.second.index] = SValue::newTimestamp64(v);
                   break;
               }
             }
@@ -313,17 +313,17 @@ bool CSTableScan::fetchNext(SVector* out) {
             reader->readBoolean(&r, &d, &v);
 
             if (d < reader->maxDefinitionLevel()) {
-              cur_buf_[col.second.index] = SValue(SValue::BoolType(false));
+              cur_buf_[col.second.index] = SValue::newBool(false);
             } else {
               switch (col.second.type) {
                 case SType::NIL:
                   cur_buf_[col.second.index] = SValue::newNull();
                   break;
                 case SType::STRING:
-                  cur_buf_[col.second.index] = SValue::newBool(v).toString();
+                  cur_buf_[col.second.index] = SValue::newString(std::to_string(v));
                   break;
                 case SType::FLOAT64:
-                  cur_buf_[col.second.index] = SValue::newFloat(v);
+                  cur_buf_[col.second.index] = SValue::newFloat64(v);
                   break;
                 case SType::INT64:
                   cur_buf_[col.second.index] = SValue::newInt64(v);
@@ -335,7 +335,7 @@ bool CSTableScan::fetchNext(SVector* out) {
                   cur_buf_[col.second.index] = SValue::newBool(v);
                   break;
                 case SType::TIMESTAMP64:
-                  cur_buf_[col.second.index] = SValue::newTimestamp(v);
+                  cur_buf_[col.second.index] = SValue::newTimestamp64(v);
                   break;
               }
             }
@@ -355,10 +355,10 @@ bool CSTableScan::fetchNext(SVector* out) {
                   cur_buf_[col.second.index] = SValue::newNull();
                   break;
                 case SType::STRING:
-                  cur_buf_[col.second.index] = SValue::newFloat(v).toString();
+                  cur_buf_[col.second.index] = SValue::newString(std::to_string(v));
                   break;
                 case SType::FLOAT64:
-                  cur_buf_[col.second.index] = SValue::newFloat(v);
+                  cur_buf_[col.second.index] = SValue::newFloat64(v);
                   break;
                 case SType::INT64:
                   cur_buf_[col.second.index] = SValue::newInt64(v);
@@ -370,7 +370,7 @@ bool CSTableScan::fetchNext(SVector* out) {
                   cur_buf_[col.second.index] = SValue::newBool(v);
                   break;
                 case SType::TIMESTAMP64:
-                  cur_buf_[col.second.index] = SValue::newTimestamp(v);
+                  cur_buf_[col.second.index] = SValue::newTimestamp64(v);
                   break;
               }
             }
@@ -379,33 +379,27 @@ bool CSTableScan::fetchNext(SVector* out) {
           }
 
           case cstable::ColumnType::DATETIME: {
-            UnixTime v;
-            reader->readDateTime(&r, &d, &v);
+            uint64_t v;
+            reader->readUnsignedInt(&r, &d, &v);
 
             if (d < reader->maxDefinitionLevel()) {
               cur_buf_[col.second.index] = SValue();
             } else {
               switch (col.second.type) {
-                case SType::NIL:
-                  cur_buf_[col.second.index] = SValue::newNull();
-                  break;
-                case SType::STRING:
-                  cur_buf_[col.second.index] = SValue::newTimestamp(v).toString();
-                  break;
                 case SType::FLOAT64:
-                  cur_buf_[col.second.index] = SValue::newTimestamp(v).toFloat();
+                  cur_buf_[col.second.index] = SValue::newFloat64(v);
                   break;
                 case SType::INT64:
-                  cur_buf_[col.second.index] = SValue::newTimestamp(v).toInteger();
+                  cur_buf_[col.second.index] = SValue::newInt64(v);
                   break;
                 case SType::UINT64:
-                  cur_buf_[col.second.index] = SValue::newTimestamp(v).toInteger();
+                  cur_buf_[col.second.index] = SValue::newUInt64(v);
                   break;
                 case SType::TIMESTAMP64:
-                  cur_buf_[col.second.index] = SValue::newTimestamp(v);
+                  cur_buf_[col.second.index] = SValue::newTimestamp64(v);
                   break;
                 default:
-                  RAISE(kIllegalStateError, "illegal column type: SUBRECORD");
+                  RAISE(kIllegalStateError, "illegal column type");
               }
             }
 

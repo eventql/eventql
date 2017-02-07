@@ -42,6 +42,7 @@ util::chart::Drawable* BarChartBuilder::getChart() const {
 util::chart::Drawable* BarChartBuilder::findChartType() const {
   preconditionCheck();
 
+/*
   if (auto c = tryType2D<util::chart::BarChart2D<
         SValue::StringType,
         SValue::FloatType>>())
@@ -52,6 +53,7 @@ util::chart::Drawable* BarChartBuilder::findChartType() const {
         SValue::FloatType,
         SValue::FloatType>>())
     return c;
+*/
 
   invalidType();
   return nullptr;

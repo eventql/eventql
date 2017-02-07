@@ -84,6 +84,7 @@ struct Program {
 static const size_t kStackBlockSize = 512 * 1024; // 512k
 
 void growStack(VMStack* stack, size_t bytes);
+void popStack(VMStack* stack, size_t bytes);
 
 } // namespace vm
 

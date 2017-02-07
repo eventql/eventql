@@ -22,6 +22,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <assert.h>
 #include <algorithm>
 #include <array>
 #include <eventql/sql/statements/select/orderby.h>
@@ -35,14 +36,18 @@ OrderByExpression::OrderByExpression(
     Transaction* txn,
     ExecutionContext* execution_context,
     Vector<SortExpr> sort_specs,
+    Vector<PureSFunctionPtr> comparators,
     ScopedPtr<TableExpression> input) :
     txn_(txn),
     execution_context_(execution_context),
     sort_specs_(std::move(sort_specs)),
+    comparators_(comparators),
     input_(std::move(input)),
     num_rows_(0),
     pos_(0),
     cnt_(0) {
+  assert(sort_specs_.size() == comparators.size());
+
   if (sort_specs_.size() == 0) {
     RAISE(kIllegalArgumentError, "can't execute ORDER BY: no sort specs");
   }
@@ -92,7 +97,6 @@ ReturnCode OrderByExpression::execute() {
       input_col_cursor.emplace_back((void*) c.getData());
     }
 
-
     for (size_t n = 0; n < nrecords; n++) {
       rows_.emplace_back();
       auto& row = rows_.back();
@@ -100,6 +104,12 @@ ReturnCode OrderByExpression::execute() {
       for (size_t i = 0; i < input_->getColumnCount(); ++i) {
         row.emplace_back(input_->getColumnType(i));
         row[i].copyFrom(input_col_cursor[i]);
+      }
+
+      for (size_t i = 0; i < input_col_cursor.size(); ++i) {
+        if (input_col_cursor[i]) {
+          input_cols[i].next(&input_col_cursor[i]);
+        }
       }
     }
   }
@@ -117,11 +127,11 @@ ReturnCode OrderByExpression::execute() {
       }
     }
 
-    for (const auto& sort : sort_specs_) {
+    for (size_t i = 0; i < sort_specs_.size(); ++i) {
       VM::evaluateBoxed(
           txn_,
-          sort.expr.program(),
-          sort.expr.program()->method_call,
+          sort_specs_[i].expr.program(),
+          sort_specs_[i].expr.program()->method_call,
           &vm_stack_,
           nullptr,
           left.size(),
@@ -129,33 +139,25 @@ ReturnCode OrderByExpression::execute() {
 
       VM::evaluateBoxed(
           txn_,
-          sort.expr.program(),
-          sort.expr.program()->method_call,
+          sort_specs_[i].expr.program(),
+          sort_specs_[i].expr.program()->method_call,
           &vm_stack_,
           nullptr,
           right.size(),
           right.data());
 
-      std::array<SValue, 2> args = {
-          sort.expr.program()->return_type,
-          sort.expr.program()->return_type };
+      comparators_[i](Transaction::get(txn_), &vm_stack_);
+      int64_t cmp = popInt64(&vm_stack_);
 
-      popBoxed(&vm_stack_, &args[0]);
-      popBoxed(&vm_stack_, &args[1]);
-
-      SValue res(false);
-      expressions::eqExpr(Transaction::get(txn_), 2, args.data(), &res);
-      if (res.getBool()) {
+      if (cmp == 0) {
         continue;
       }
 
-      if (sort.descending) {
-        expressions::gtExpr(Transaction::get(txn_), 2, args.data(), &res);
+      if (sort_specs_[i].descending) {
+        return cmp > 0;
       } else {
-        expressions::ltExpr(Transaction::get(txn_), 2, args.data(), &res);
+        return cmp < 0;
       }
-
-      return res.getBool();
     }
 
     /* all dimensions equal */
@@ -181,10 +183,11 @@ ReturnCode OrderByExpression::nextBatch(
             rows_[pos_][i].getData(),
             rows_[pos_][i].getSize());
       }
+
+      ++pos_;
     }
 
     *nrecords += batch_len;
-    pos_ += batch_len;
     if (pos_ == num_rows_) {
       execution_context_->incrementNumTasksCompleted();
     }

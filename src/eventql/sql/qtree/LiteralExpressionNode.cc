@@ -43,7 +43,7 @@ RefPtr<QueryTreeNode> LiteralExpressionNode::deepCopy() const {
 }
 
 String LiteralExpressionNode::toSQL() const {
-  return value_.toSQL();
+  return sql_toexprstring(value_.getType(), value_.getData());
 }
 
 SType LiteralExpressionNode::getReturnType() const {

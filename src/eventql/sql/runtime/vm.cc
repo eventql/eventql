@@ -93,6 +93,11 @@ void growStack(VMStack* stack, size_t bytes) {
   }
 }
 
+void popStack(VMStack* stack, size_t bytes) {
+  assert(stack->limit - stack->top >= bytes);
+  stack->top += bytes;
+}
+
 } // namespace vm
 
 

@@ -56,8 +56,8 @@ protected:
   Vector<ValueExpression> select_exprs_;
   Vector<ValueExpression> group_exprs_;
   ScopedPtr<TableExpression> input_;
-  HashMap<String, Vector<VM::Instance>> groups_;
-  HashMap<String, Vector<VM::Instance>>::iterator groups_iter_;
+  HashMap<SHA1Hash, Vector<VM::Instance>> groups_;
+  HashMap<SHA1Hash, Vector<VM::Instance>>::iterator groups_iter_;
   ScratchMemory scratch_;
   VMStack vm_stack_;
 };
@@ -90,8 +90,8 @@ protected:
   Vector<ValueExpression> group_exprs_;
   SHA1Hash expression_fingerprint_;
   ScopedPtr<TableExpression> input_;
-  HashMap<String, Vector<VM::Instance>> groups_;
-  HashMap<String, Vector<VM::Instance>>::iterator groups_iter_;
+  HashMap<SHA1Hash, Vector<VM::Instance>> groups_;
+  HashMap<SHA1Hash, Vector<VM::Instance>>::iterator groups_iter_;
   ScratchMemory scratch_;
   VMStack vm_stack_;
 };
@@ -125,8 +125,8 @@ protected:
   ExecutionContext* execution_context_;
   Vector<ValueExpression> select_exprs_;
   eventql::native_transport::TCPAsyncClient rpc_scheduler_;
-  HashMap<String, Vector<VM::Instance>> groups_;
-  HashMap<String, Vector<VM::Instance>>::iterator groups_iter_;
+  HashMap<SHA1Hash, Vector<VM::Instance>> groups_;
+  HashMap<SHA1Hash, Vector<VM::Instance>>::iterator groups_iter_;
   ScratchMemory scratch_;
   VMStack vm_stack_;
   size_t num_parts_;

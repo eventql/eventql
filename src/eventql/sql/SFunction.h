@@ -80,5 +80,7 @@ struct SFunction {
   } vtable;
 };
 
+using PureSFunctionPtr = void (*)(sql_txn*, VMStack*);
+
 } // namespace csql
 

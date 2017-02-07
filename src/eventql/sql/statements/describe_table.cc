@@ -52,7 +52,7 @@ ReturnCode DescribeTableStatement::execute() {
   for (const auto& col : table_info.get().columns) {
     std::vector<SValue> row;
     row.emplace_back(SValue::newString(col.column_name)); //Field
-    row.emplace_back(SValue::newString(getSTypeName(col.type))); //Type FIXME
+    row.emplace_back(SValue::newString(sql_typename(col.type))); //Type
     row.emplace_back(col.is_nullable ? SValue::newString("YES") : SValue::newString("NO")); //Null
     row.emplace_back(col.is_primary_key ? SValue::newString("YES") : SValue::newString("NO")); //Primary Key
     row.emplace_back(SValue::newString("")); //Description

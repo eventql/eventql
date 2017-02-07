@@ -50,6 +50,8 @@ void installDefaultSymbols(SymbolTable* rt) {
   //rt->registerFunction("min", expressions::kMinExpr);
 
   /* expressions/boolean.h */
+  rt->registerFunction("cmp",  expressions::cmp_uint64);
+  rt->registerFunction("cmp",  expressions::cmp_timestamp64);
   rt->registerFunction("eq",  expressions::eq_uint64);
   rt->registerFunction("eq",  expressions::eq_timestamp64);
 
