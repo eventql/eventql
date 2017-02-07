@@ -41,7 +41,7 @@ ReturnCode ShowTablesExpression::execute() {
   txn_->getTableProvider()->listTables([this] (const TableInfo& table) {
     Vector<SValue> row;
     row.emplace_back(SValue::newString(table.table_name));
-    row.emplace_back("");
+    row.emplace_back(SValue::newString(""));
     addRow(row.data());
   });
 
