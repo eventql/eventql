@@ -37,21 +37,21 @@ void DomainConfig::setMin(const SValue& value) {
   auto int_domain = dynamic_cast<
       util::chart::ContinuousDomain<SValue::IntegerType>*>(domain_);
   if (int_domain != nullptr) {
-    int_domain->setMin(value.getValue<SValue::IntegerType>());
+    int_domain->setMin(value.getInt64());
     return;
   }
 
   auto float_domain = dynamic_cast<
       util::chart::ContinuousDomain<SValue::FloatType>*>(domain_);
   if (float_domain != nullptr) {
-    float_domain->setMin(value.getValue<SValue::FloatType>());
+    float_domain->setMin(value.getFloat64());
     return;
   }
 
   auto time_domain =
       dynamic_cast<util::chart::TimeDomain*>(domain_);
   if (time_domain != nullptr) {
-    time_domain->setMin(value.getValue<SValue::TimeType>());
+    time_domain->setMin(value.getUInt64());
     return;
   }
 
@@ -65,21 +65,21 @@ void DomainConfig::setMax(const SValue& value) {
   auto int_domain = dynamic_cast<
       util::chart::ContinuousDomain<SValue::IntegerType>*>(domain_);
   if (int_domain != nullptr) {
-    int_domain->setMax(value.getValue<SValue::IntegerType>());
+    int_domain->setMax(value.getInt64());
     return;
   }
 
   auto float_domain = dynamic_cast<
       util::chart::ContinuousDomain<SValue::FloatType>*>(domain_);
   if (float_domain != nullptr) {
-    float_domain->setMax(value.getValue<SValue::FloatType>());
+    float_domain->setMax(value.getFloat64());
     return;
   }
 
   auto time_domain =
       dynamic_cast<util::chart::TimeDomain*>(domain_);
   if (time_domain != nullptr) {
-    time_domain->setMax(value.getValue<SValue::TimeType>());
+    time_domain->setMax(value.getUInt64());
     return;
   }
 

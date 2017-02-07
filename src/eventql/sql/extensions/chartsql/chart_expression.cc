@@ -143,7 +143,7 @@ void ChartExpression::applyAxisDefinitions(
         auto axis_title = runtime_->evaluateConstExpression(
             txn_,
             prop->getChildren()[0]);
-        axis->setTitle(axis_title.getString());
+        axis->setTitle(axis_title.toString());
         continue;
       }
 
@@ -181,7 +181,7 @@ void ChartExpression::applyAxisLabels(
         auto rot = runtime_->evaluateConstExpression(
             txn_,
             prop->getChildren()[0]);
-        axis->setLabelRotation(rot.getValue<double>());
+        axis->setLabelRotation(rot.getFloat64());
         break;
       }
       default:
@@ -286,7 +286,7 @@ void ChartExpression::applyTitle(
     auto title_eval = runtime_->evaluateConstExpression(
         txn_,
         child->getChildren()[0]);
-    auto title_str = title_eval.getString();
+    auto title_str = title_eval.toString();
 
     switch (child->getToken()->getType()) {
       case Token::T_TITLE:
@@ -399,7 +399,7 @@ void ChartExpression::applyLegend(
               txn_,
               prop->getChildren()[0]);
 
-          title = sval.getString();
+          title = sval.toString();
           break;
         }
         default:

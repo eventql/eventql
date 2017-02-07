@@ -147,6 +147,7 @@ public:
 
 protected:
 
+/*
   AnySeriesAdapter* mkSeriesAdapter(SValue* row) {
     AnySeriesAdapter* a = nullptr;
     if (!a) a = mkSeriesAdapter1D<SValue::TimeType>(row);
@@ -274,6 +275,8 @@ protected:
       return chart;
     }
   }
+
+  */
 
   void preconditionCheck() const {
     if (adapter_.get() == nullptr) {
