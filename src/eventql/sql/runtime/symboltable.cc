@@ -34,10 +34,10 @@ SymbolTableEntry::SymbolTableEntry(
     const std::string& function_name,
     SFunction fun) :
     fun_(fun) {
-  symbol_ = function_name + "#" + getSTypeName(fun_.return_type) + "/";
+  symbol_ = function_name + "#" + sql_typename(fun_.return_type) + "/";
 
   for (const auto& t : fun_.arg_types) {
-    symbol_ += getSTypeName(t) + ";";
+    symbol_ += sql_typename(t) + ";";
   }
 }
 
@@ -140,7 +140,7 @@ ReturnCode SymbolTable::resolve(
       auto candidate_fn = candidate->getFunction();
 
       for (const auto& type : candidate_fn->arg_types) {
-        candidate_types.emplace_back(getSTypeName(type));
+        candidate_types.emplace_back(sql_typename(type));
       }
 
       expected_types.emplace_back(
@@ -149,7 +149,7 @@ ReturnCode SymbolTable::resolve(
 
     std::vector<std::string> actual_types;
     for (auto type : arguments) {
-      actual_types.emplace_back(getSTypeName(type));
+      actual_types.emplace_back(sql_typename(type));
     }
 
     return ReturnCode::errorf(

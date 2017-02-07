@@ -71,7 +71,7 @@ ReturnCode CallExpressionNode::newNode(
     }
 
     std::string conversion_fn = "to_";
-    conversion_fn += getSTypeName(fun->arg_types[i]);
+    conversion_fn += sql_typename(fun->arg_types[i]);
 
     RefPtr<ValueExpressionNode> argument_converted;
     auto rc = CallExpressionNode::newNode(

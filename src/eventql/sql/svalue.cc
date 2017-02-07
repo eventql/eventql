@@ -557,6 +557,20 @@ size_t sql_sizeof_tuple(const char* data, const SType* val_types, size_t val_cnt
   return cur - data;
 }
 
+std::string sql_typename(SType type) {
+  switch (type) {
+    case SType::NIL: return "nil";
+    case SType::UINT64: return "uint64";
+    case SType::INT64: return "int64";
+    case SType::FLOAT64: return "float64";
+    case SType::BOOL: return "bool";
+    case SType::STRING: return "string";
+    case SType::TIMESTAMP64: return "timestamp64";
+  }
+
+  return "???";
+}
+
 std::string sql_tostring(SType type, const void* value) {
   if (!value) {
     return "NULL";

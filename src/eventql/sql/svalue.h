@@ -149,6 +149,7 @@ size_t sql_sizeof(SType type, const void* value);
 size_t sql_sizeof_static(SType type);
 size_t sql_sizeof_tuple(const char* data, const SType* val_types, size_t val_cnt);
 
+std::string sql_typename(SType type);
 std::string sql_tostring(SType type, const void* value);
 std::string sql_toexprstring(SType type, const void* value);
 std::string sql_escape(const std::string& str);

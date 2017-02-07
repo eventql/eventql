@@ -28,20 +28,6 @@
 
 namespace csql {
 
-std::string getSTypeName(SType type) {
-  switch (type) {
-    case SType::NIL: return "nil";
-    case SType::UINT64: return "uint64";
-    case SType::INT64: return "int64";
-    case SType::FLOAT64: return "float64";
-    case SType::BOOL: return "bool";
-    case SType::STRING: return "string";
-    case SType::TIMESTAMP64: return "timestamp64";
-  }
-
-  return "???";
-}
-
 void copyBoxed(const SValue* val, SVector* vector) {
   vector->append(val->getData(), val->getSize());
   auto tag = val->getTag();
