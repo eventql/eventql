@@ -34,9 +34,26 @@
 #include <eventql/util/exception.h>
 #include <eventql/util/SHA1.h>
 #include <eventql/sql/csql.h>
-#include <eventql/sql/stype.h>
 
 namespace csql {
+struct VMStack;
+
+enum class SType : uint8_t {
+  NIL,
+  UINT64,
+  INT64,
+  FLOAT64,
+  BOOL,
+  STRING,
+  TIMESTAMP64
+};
+
+using STag = uint8_t;
+
+enum STagFlag : uint8_t {
+  STAG_NULL = 1,
+  STAG_INLINE = 128
+};
 
 class SValue {
 public:
@@ -153,6 +170,73 @@ std::string sql_typename(SType type);
 std::string sql_tostring(SType type, const void* value);
 std::string sql_toexprstring(SType type, const void* value);
 std::string sql_escape(const std::string& str);
+
+void copyBoxed(const SValue* val, SVector* vector);
+
+void popBoxed(VMStack* stack, SValue* value);
+void popVector(VMStack* stack, SVector* vector);
+void pushBoxed(VMStack* stack, const SValue* value);
+void pushUnboxed(VMStack* stack, SType type, const void* value);
+
+void popNil();
+void popNil(STag* tag);
+void popNilBoxed(VMStack* stack, SValue* value);
+void popNilVector(VMStack* stack, SVector* vector);
+void pushNil(VMStack* stack);
+void pushNil(VMStack* stack, STag tag);
+void pushNilUnboxed(VMStack* stack, const void* value);
+
+uint64_t popUInt64(VMStack* stack);
+void popUInt64(VMStack* stack, uint64_t* value, STag* tag);
+void popUInt64Boxed(VMStack* stack, SValue* value);
+void popUInt64Vector(VMStack* stack, SVector* vector);
+void pushUInt64(VMStack* stack, uint64_t value);
+void pushUInt64(VMStack* stack, uint64_t value, STag tag);
+void pushUInt64Unboxed(VMStack* stack, const void* value);
+
+int64_t popInt64(VMStack* stack);
+void popUInt64(VMStack* stack, int64_t* value, STag* tag);
+void popInt64Boxed(VMStack* stack, SValue* value);
+void popInt64Vector(VMStack* stack, SVector* vector);
+void pushInt64(VMStack* stack, int64_t value);
+void pushInt64(VMStack* stack, int64_t value, STag tag);
+void pushInt64Unboxed(VMStack* stack, const void* value);
+
+double popFloat64(VMStack* stack);
+double popFloat64(VMStack* stack, double* value, STag* tag);
+void popFloat64Boxed(VMStack* stack, SValue* value);
+void popFloat64Vector(VMStack* stack, SVector* vector);
+void pushFloat64(VMStack* stack, double value);
+void pushFloat64(VMStack* stack, double value, STag tag);
+void pushFloat64Unboxed(VMStack* stack, const void* value);
+
+bool popBool(VMStack* stack);
+void popBool(VMStack* stack, bool* value, STag* tag);
+void popBoolBoxed(VMStack* stack, SValue* value);
+void popBoolVector(VMStack* stack, SVector* vector);
+void pushBool(VMStack* stack, bool value);
+void pushBool(VMStack* stack, bool value, STag tag);
+void pushBoolUnboxed(VMStack* stack, const void* value);
+
+void copyString(const std::string& str, SVector* vector);
+void copyString(const char* str, uint32_t strlen, SVector* vector);
+void popString(VMStack* stack, const char** data, size_t* len);
+void popString(VMStack* stack, const char** data, size_t* len, STag* tag);
+std::string popString(VMStack* stack);
+void popStringBoxed(VMStack* stack, SValue* value);
+void popStringVector(VMStack* stack, SVector* vector);
+void pushString(VMStack* stack, const char* data, size_t len);
+void pushString(VMStack* stack, const char* data, size_t len, STag tag);
+void pushString(VMStack* stack, const std::string& str);
+void pushStringUnboxed(VMStack* stack, const void* value);
+
+uint64_t popTimestamp64(VMStack* stack);
+void popTimestamp64(VMStack* stack, uint64_t* value, STag* tag);
+void popTimestamp64Boxed(VMStack* stack, SValue* value);
+void popTimestamp64Vector(VMStack* stack, SVector* vector);
+void pushTimestamp64(VMStack* stack, uint64_t value);
+void pushTimestamp64(VMStack* stack, uint64_t value, STag tag);
+void pushTimestamp64Unboxed(VMStack* stack, const void* value);
 
 
 } // namespace csql
