@@ -33,10 +33,6 @@ class TableRef;
 class ASTUtil {
 public:
 
-  static std::vector<std::string> columnNamesFromSelectList(
-      ASTNode* select_list,
-      TableRef* tbl_ref = nullptr);
-
   static String columnNameForExpression(ASTNode* expr);
 
 };

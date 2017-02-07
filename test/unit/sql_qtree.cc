@@ -22,6 +22,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/exception.h>
 #include <eventql/util/wallclock.h>
@@ -44,9 +45,8 @@
 #include "eventql/sql/qtree/nodes/describe_partitions.h"
 #include "eventql/sql/qtree/nodes/cluster_show_servers.h"
 #include "eventql/sql/CSTableScanProvider.h"
-#include "eventql/sql/backends/csv/CSVTableProvider.h"
+#include "eventql/sql/drivers/csv/CSVTableProvider.h"
 
-#include "eventql/eventql.h"
 using namespace csql;
 
 UNIT_TEST(QTreeTest);

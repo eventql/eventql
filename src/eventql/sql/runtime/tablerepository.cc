@@ -27,53 +27,6 @@
 
 namespace csql {
 
-TableRef* TableRepository::getTableRef(const std::string& table_name) const {
-  auto iter = table_refs_.find(table_name);
-
-  if (iter == table_refs_.end()) {
-    return nullptr;
-  } else {
-    return iter->second.get();
-  }
-}
-
-void TableRepository::addTableRef(
-    const std::string& table_name,
-    std::unique_ptr<TableRef>&& table_ref) {
-  table_refs_[table_name] = std::move(table_ref);
-}
-
-void TableRepository::import(
-    const std::vector<std::string>& tables,
-    const std::string& source_uri_raw,
-    const std::vector<std::unique_ptr<Backend>>& backends) {
-  URI source_uri(source_uri_raw);
-
-  for (const auto& backend : backends) {
-    std::vector<std::unique_ptr<TableRef>> tbl_refs;
-
-    if (backend->openTables(tables, source_uri, &tbl_refs)) {
-      if (tbl_refs.size() != tables.size()) {
-        RAISE(
-            kRuntimeError,
-            "openTables failed for '%s'\n",
-            source_uri.toString().c_str());
-      }
-
-      for (int i = 0; i < tables.size(); ++i) {
-        addTableRef(tables[i], std::move(tbl_refs[i]));
-      }
-
-      return;
-    }
-  }
-
-  RAISE(
-      kRuntimeError,
-      "no backend found for '%s'\n",
-      source_uri.toString().c_str());
-}
-
 void TableRepository::addProvider(RefPtr<TableProvider> provider) {
   providers_.emplace_back(provider);
 }

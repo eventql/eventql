@@ -21,52 +21,50 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/sql/backends/csv/CSVTableScan.h>
-
+#pragma once
 #include "eventql/eventql.h"
+#include <eventql/util/stdtypes.h>
+#include <eventql/sql/table_expression.h>
+#include <eventql/sql/transaction.h>
+#include <eventql/sql/drivers/csv/CSVInputStream.h>
+#include <eventql/sql/runtime/ValueExpression.h>
 
 namespace csql {
 namespace backends {
 namespace csv {
 
-CSVTableScan::CSVTableScan(
-    const Vector<String>& headers,
-    ScopedPtr<CSVInputStream> csv) :
-    headers_(headers),
-    csv_(std::move(csv)) {}
+struct CSVTableScan : public TableExpression {
+public:
 
-bool CSVTableScan::nextRow(SValue* row) {
-  Vector<String> inrow;
-  if (!csv_->readNextRow(&inrow)) {
-    return false;
-  }
+  CSVTableScan(
+      Transaction* txn,
+      ExecutionContext* execution_context,
+      RefPtr<SequentialScanNode> stmt,
+      const std::vector<std::pair<std::string, SType>>& csv_columns,
+      ScopedPtr<CSVInputStream> csv);
 
+  ReturnCode execute() override;
+  ReturnCode nextBatch(SVector* columns, size_t* len) override;
 
-  auto ncols = std::min(headers_.size(), inrow.size());
-  for (size_t i = 0; i < ncols; i++) {
-    row[i] = SValue(inrow[i]);
-  }
+  size_t getColumnCount() const override;
+  SType getColumnType(size_t idx) const override;
 
-  for (size_t i = ncols; i < headers_.size(); ++i) {
-    row[i] = SValue();
-  }
+protected:
 
-  return true;
-}
+  ReturnCode loadInputRows(size_t* row_count);
 
-size_t CSVTableScan::findColumn(const String& name) {
-  for (size_t i = 0; i < headers_.size(); i++) {
-    if (headers_[i] == name) {
-      return i;
-    }
-  }
-
-  return -1;
-}
-
-size_t CSVTableScan::numColumns() const {
-  return headers_.size();
-}
+  Transaction* txn_;
+  ExecutionContext* execution_context_;
+  RefPtr<SequentialScanNode> stmt_;
+  std::vector<std::pair<std::string, SType>> csv_columns_;
+  ScopedPtr<CSVInputStream> csv_;
+  std::vector<ValueExpression> select_list_;
+  ValueExpression where_expr_;
+  std::vector<SType> output_column_types_;
+  std::vector<size_t> input_column_map_;
+  std::vector<SVector> input_column_buffers_;
+  VMStack vm_stack_;
+};
 
 } // namespace csv
 } // namespace backends

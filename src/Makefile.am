@@ -565,10 +565,12 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/SFunction.h \
     eventql/sql/TableInfo.h \
     eventql/sql/abi.h \
-    eventql/sql/backends/backend.h \
-    eventql/sql/backends/csv/CSVInputStream.cc \
-    eventql/sql/backends/csv/CSVInputStream.h \
-    eventql/sql/backends/tableref.h \
+    eventql/sql/drivers/csv/CSVInputStream.cc \
+    eventql/sql/drivers/csv/CSVInputStream.h \
+    eventql/sql/drivers/csv/CSVTableProvider.cc \
+    eventql/sql/drivers/csv/CSVTableProvider.h \
+    eventql/sql/drivers/csv/CSVTableScan.cc \
+    eventql/sql/drivers/csv/CSVTableScan.h \
     eventql/sql/defaults.cc \
     eventql/sql/defaults.h \
     eventql/sql/expressions/aggregate.cc \

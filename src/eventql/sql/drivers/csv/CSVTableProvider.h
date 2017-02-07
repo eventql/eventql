@@ -22,31 +22,49 @@
  * code of your own applications
  */
 #pragma once
-#include <eventql/util/stdtypes.h>
-#include <eventql/sql/table_iterator.h>
-#include <eventql/sql/backends/csv/CSVInputStream.h>
-
 #include "eventql/eventql.h"
+#include <eventql/util/stdtypes.h>
+#include <eventql/sql/runtime/tablerepository.h>
+#include <eventql/sql/drivers/csv/CSVInputStream.h>
+#include <eventql/sql/drivers/csv/CSVTableScan.h>
 
 namespace csql {
 namespace backends {
 namespace csv {
 
-struct CSVTableScan : public TableIterator {
+struct CSVTableProvider : public TableProvider {
 public:
 
-  CSVTableScan(
-      const Vector<String>& headers,
-      ScopedPtr<CSVInputStream> csv);
+  typedef Function<std::unique_ptr<CSVInputStream> ()> FactoryFn;
 
-  bool nextRow(SValue* row) override;
+  CSVTableProvider(
+      const String& table_name,
+      const std::string& file_path,
+      char column_separator = ';',
+      char row_separator = '\n',
+      char quote_char = '"');
 
-  size_t findColumn(const String& name) override;
-  size_t numColumns() const override;
+  CSVTableProvider(
+      const String& table_name,
+      FactoryFn stream_factory);
+
+  void listTables(
+      Function<void (const csql::TableInfo& table)> fn) const override;
+
+  Option<csql::TableInfo> describe(const String& table_name) const override;
+
+  Option<ScopedPtr<TableExpression>> buildSequentialScan(
+      Transaction* ctx,
+      ExecutionContext* execution_context,
+      RefPtr<SequentialScanNode> seqscan) const override;
 
 protected:
-  Vector<String> headers_;
-  ScopedPtr<CSVInputStream> csv_;
+
+  csql::TableInfo tableInfo() const;
+
+  const String table_name_;
+  FactoryFn stream_factory_;
+  std::vector<std::pair<std::string, SType>> columns_;
 };
 
 } // namespace csv
