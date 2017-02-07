@@ -28,6 +28,7 @@
 #include "eventql/util/stringutil.h"
 #include "eventql/util/io/fileutil.h"
 #include "eventql/util/io/inputstream.h"
+#include "eventql/util/io/TerminalOutputStream.h"
 #include "eventql/util/cli/flagparser.h"
 #include "eventql/util/csv/CSVInputStream.h"
 #include "eventql/util/csv/CSVOutputStream.h"
@@ -40,12 +41,23 @@ using namespace csql;
 
 enum class ResultExpectation { TABLE, CHART, ERROR };
 
+enum class OutputFormat { TAP, CSV, VERBOSE };
+
 const auto kTestListFile = "./sql_tests.lst";
 const auto kDirectoryPath = "./sql";
 const auto kSQLPathEnding = ".sql";
 const auto kResultPathEnding = ".result.txt";
 const auto kChartColumnName = "__chart";
 const auto kDefaultResultExpectation = ResultExpectation::TABLE;
+const auto kDefaultOutputFormat = OutputFormat::TAP;
+
+static void printError(const std::string& error_string) {
+  auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
+  stderr_os->print(
+      "ERROR:",
+      { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
+  stderr_os->print(" " + error_string + "\n");
+}
 
 std::string getResultCSV(ResultList* result, const std::string& row_sep = "\n") {
   std::string result_csv;
@@ -193,7 +205,7 @@ Status checkErrorResult(
   }
 }
 
-Status runTest(const std::string& test) {
+Status runTest(const std::string& test, OutputFormat output_format) {
   auto sql_file_path = FileUtil::joinPaths(
       kDirectoryPath,
       StringUtil::format("$0$1", test, kSQLPathEnding));
@@ -255,6 +267,7 @@ Status runTest(const std::string& test) {
   ResultList result;
 
   std::string error_message;
+  auto rc = Status::success();
   try {
     auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
@@ -275,13 +288,31 @@ Status runTest(const std::string& test) {
 
   switch (result_expectation) {
     case ResultExpectation::TABLE:
-      return checkTableResult(&result, result_file_path);
+      rc = checkTableResult(&result, result_file_path);
+      break;
 
     case ResultExpectation::CHART:
-      return checkChartResult(&result, result_file_path);
+      rc = checkChartResult(&result, result_file_path);
+      break;
 
     case ResultExpectation::ERROR:
-      return checkErrorResult(error_message, &result, result_file_path);
+      rc = checkErrorResult(error_message, &result, result_file_path);
+      break;
+  }
+
+  if (rc.isSuccess()) {
+    return rc;
+  }
+
+  switch (output_format) {
+    case OutputFormat::CSV:
+      return Status(eRuntimeError, getResultCSV(&result));
+
+    case OutputFormat::VERBOSE:
+
+
+    case OutputFormat::TAP:
+      return rc;
   }
 }
 
@@ -306,6 +337,33 @@ int main(int argc, const char** argv) {
       "test",
       "<test_number>");
 
+  flags.defineFlag(
+      "tap",
+      cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "tap",
+      "<tap>");
+
+  flags.defineFlag(
+      "csv",
+      cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "csv",
+      "<csv>");
+
+  flags.defineFlag(
+      "verbose",
+      cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "verbose",
+      "<verbose>");
+
   flags.parseArgv(argc, argv);
 
   if (flags.isSet("help")) {
@@ -318,10 +376,43 @@ int main(int argc, const char** argv) {
 
     std::cout
       << "Usage: $ evql-test-sql [OPTIONS]" << std::endl
-      <<  "   --verbose                 Print debug output to STDERR" << std::endl
-      <<  "   -?, --help                Display this help text and exit" <<std::endl
-      <<  "   -t, --test <test_number>  Run a test specified by its test number" <<std::endl;
+      <<  "   --tap                     Print the test output as TAP" << std::endl
+      <<  "   -t, --test <test_number>  Run a test specified by its test number" <<std::endl
+      <<  "   --csv                     Print the result as CSV (use only together with --test) " << std::endl
+      <<  "   --verbose                 Print the expected and the actual result as tables (use only togehter with --test)" << std::endl
+      <<  "   -?, --help                Display this help text and exit" <<std::endl;
     return 0;
+  }
+
+  if (flags.getArgv().size() > 0) {
+    printError(StringUtil::format(
+        "invalid argument: '$0', run evql-test-sql --help for help\n",
+        flags.getArgv()[0]));
+
+    return 1;
+  }
+
+  if (flags.isSet("csv") && !flags.isSet("test")) {
+    printError("--csv can only be used if --test is set, run evql-test-sql --help for help\n");
+    return 1;
+  }
+
+  if (flags.isSet("verbose") && !flags.isSet("test")) {
+    printError("--verbose can only be used if --test is set, run evql-test-sql --help for help\n");
+    return 1;
+  }
+
+  auto output_format = kDefaultOutputFormat;
+  if (flags.isSet("tap")) {
+    output_format = OutputFormat::TAP;
+  }
+
+  if (flags.isSet("csv")) {
+    output_format = OutputFormat::CSV;
+  }
+
+  if (flags.isSet("verbose")) {
+    output_format = OutputFormat::VERBOSE;
   }
 
   std::string test_nr;
@@ -341,7 +432,7 @@ int main(int argc, const char** argv) {
         continue;
       }
 
-      auto ret = runTest(line);
+      auto ret = runTest(line, output_format);
       if (ret.isSuccess()) {
         std::cout
           << "ok "
@@ -352,13 +443,19 @@ int main(int argc, const char** argv) {
           << std::endl;
 
       } else {
-        std::cout
-          << "not ok "
-          << count
-          << " - "
-          << "[" << line << "] "
-          << ret.message()
-          << std::endl;
+
+        switch (output_format) {
+          case OutputFormat::TAP:
+            std::cout
+              << "not ok "
+              << count
+              << " - "
+              << "[" << line << "] ";
+
+          case OutputFormat::VERBOSE:
+          case OutputFormat::CSV:
+            std::cout << ret.message() << std::endl;
+        }
       }
 
       line.clear();
@@ -366,7 +463,7 @@ int main(int argc, const char** argv) {
     }
 
   } catch (const std::exception& e) {
-    std::cout << e.what();
+    printError(e.what());
     return 1;
   }
 
