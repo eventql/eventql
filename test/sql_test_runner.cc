@@ -30,6 +30,7 @@
 #include "eventql/util/io/inputstream.h"
 #include "eventql/util/cli/flagparser.h"
 #include "eventql/util/csv/CSVInputStream.h"
+#include "eventql/util/csv/CSVOutputStream.h"
 #include "eventql/sql/runtime/defaultruntime.h"
 #include "eventql/sql/CSTableScanProvider.h"
 #include "eventql/sql/result_list.h"
@@ -45,6 +46,26 @@ const auto kSQLPathEnding = ".sql";
 const auto kResultPathEnding = ".result.txt";
 const auto kChartColumnName = "__chart";
 const auto kDefaultResultExpectation = ResultExpectation::TABLE;
+
+std::string getResultCSV(ResultList* result, const std::string& row_sep = "\n") {
+  std::string result_csv;
+  auto is = new StringOutputStream(&result_csv);
+  auto csv_is = new CSVOutputStream(
+      std::unique_ptr<OutputStream>(is),
+      ";",
+      row_sep);
+
+  auto columns = result->getColumns();
+  csv_is->appendRow(columns);
+
+  auto num_rows = result->getNumRows();
+  for (size_t i = 0; i < num_rows; ++i) {
+    auto row = result->getRow(i);
+    csv_is->appendRow(row);
+  }
+
+  return result_csv;
+}
 
 Status checkTableResult(
     ResultList* result,
@@ -157,10 +178,11 @@ Status checkErrorResult(
     return Status::success();
   } else {
     if (error_message.empty()) {
+      auto result_csv = getResultCSV(result, " ");
       return Status(eRuntimeError, StringUtil::format(
           "expected error: $0 but got result: $1",
           expected_error,
-          ""));
+          result_csv));
 
     } else {
       return Status(eRuntimeError, StringUtil::format(
