@@ -62,17 +62,14 @@ KeyRange TSDBTableProvider::findKeyRange(
 
     String val;
     try {
-      switch (c.value.getType()) {
-        case csql::SType::STRING:
-        case csql::SType::INT64:
-        case csql::SType::FLOAT64:
-          val = encodePartitionKey(keyspace, c.value.getString());
+      auto cval_str = c.value.toString();
+      switch (keyspace) {
+        case KEYSPACE_UINT64:
+          val = encodePartitionKey(keyspace, std::to_string(std::stoull(cval_str)));
           break;
-        case csql::SType::TIMESTAMP64:
-          val = encodePartitionKey(keyspace, c.value.toInteger().getString());
+        case KEYSPACE_STRING:
+          val = encodePartitionKey(keyspace, cval_str);
           break;
-        default:
-          continue;
       }
     } catch (const StandardException& e) {
       continue;
@@ -450,7 +447,7 @@ Status TSDBTableProvider::insertRecord(
       column = columns[i].first;
     }
 
-    if (!msg->addField(column, data[i].second.getString())) {
+    if (!msg->addField(column, data[i].second.toString())) {
       return Status(
           eRuntimeError,
           StringUtil::format("field not found: $0", column)); //FIXME better error msg
@@ -606,16 +603,15 @@ RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
 
     std::string c_val;
     switch (c.value.getType()) {
-      case csql::SType::STRING:
-      case csql::SType::INT64:
-      case csql::SType::FLOAT64:
-        c_val = encodePartitionKey(pkeyspace, c.value.getString());
-        break;
-      case csql::SType::TIMESTAMP64:
-        c_val = encodePartitionKey(pkeyspace, c.value.toInteger().getString());
-        break;
-      default:
-        continue;
+      auto cval_str = c.value.toString();
+      switch (pkeyspace) {
+        case KEYSPACE_UINT64:
+          c_val = encodePartitionKey(pkeyspace, std::to_string(std::stoull(cval_str)));
+          break;
+        case KEYSPACE_STRING:
+          c_val = encodePartitionKey(pkeyspace, cval_str);
+          break;
+      }
     }
 
     switch (c.type) {
