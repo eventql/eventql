@@ -265,6 +265,34 @@ bool SValue::isTimestamp64() const {
   return type_ == SType::TIMESTAMP64;
 }
 
+uint64_t SValue::getUInt64() const {
+  assert(type_ == SType::UINT64);
+  uint64_t val;
+  memcpy(&val, data_, sizeof(uint64_t));
+  return val;
+}
+
+int64_t SValue::getInt64() const {
+  assert(type_ == SType::INT64);
+  int64_t val;
+  memcpy(&val, data_, sizeof(int64_t));
+  return val;
+}
+
+double SValue::getFloat64() const {
+  assert(type_ == SType::FLOAT64);
+  double val;
+  memcpy(&val, data_, sizeof(double));
+  return val;
+}
+
+bool SValue::getBool() const {
+  assert(type_ == SType::BOOL);
+  uint8_t val;
+  memcpy(&val, data_, sizeof(uint8_t));
+  return val;
+}
+
 std::string SValue::toString() const {
   return sql_tostring(type_, getData());
 }

@@ -89,6 +89,9 @@ public:
   STag getTag() const;
   void setTag(STag tag);
 
+  uint64_t getUInt64() const;
+  int64_t getInt64() const;
+  double getFloat64() const;
   bool getBool() const;
 
   std::string toString() const;
