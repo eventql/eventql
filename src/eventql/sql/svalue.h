@@ -32,116 +32,76 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/UnixTime.h>
 #include <eventql/util/exception.h>
+#include <eventql/util/SHA1.h>
 #include <eventql/sql/csql.h>
 #include <eventql/sql/stype.h>
 
 namespace csql {
-struct VMStack;
 
 class SValue {
 public:
+
   typedef std::string StringType;
   typedef double FloatType;
   typedef uint64_t IntegerType;
-  typedef bool BoolType;
   typedef UnixTime TimeType;
 
+  static const size_t kInlineDataSize = 16;
+  enum kDeferInitialization { DEFER_INITIALIZATION };
+
   static SValue newNull();
-  static SValue newString(const String& value);
-  static SValue newString(const char* value);
   static SValue newUInt64(uint64_t value);
+  static SValue newUInt64(const std::string& value);
   static SValue newInt64(int64_t value);
-  static SValue newInteger(IntegerType value);
-  static SValue newInteger(const String& value);
-  static SValue newFloat(FloatType value);
-  static SValue newFloat(const String& value);
-  static SValue newBool(BoolType value);
-  static SValue newBool(const String& value);
-  static SValue newTimestamp(TimeType value);
-  static SValue newTimestamp(const String& value);
+  static SValue newInt64(const std::string& value);
+  static SValue newFloat64(double value);
+  static SValue newFloat64(const std::string& value);
+  static SValue newBool(bool value);
+  static SValue newBool(const std::string& value);
+  static SValue newString(const std::string& value);
+  static SValue newString(const char* value, uint32_t value_len);
+  static SValue newTimestamp64(uint64_t value);
+  static SValue newTimestamp64(const std::string& value);
 
-  static const char* getTypeName(SType type);
-  const char* getTypeName() const;
-
-  explicit SValue();
+  SValue();
   SValue(SType type);
+  SValue(SType type, kDeferInitialization _);
   SValue(const SValue& copy);
-  SValue& operator=(const SValue& copy);
-  bool operator==(const SValue& other) const;
   ~SValue();
 
-  // deprecated constructors
-  explicit SValue(const StringType& string_value);
-  explicit SValue(char const* string_value); // FIXPAUL HACK!!!
-  explicit SValue(IntegerType integer_value);
-  explicit SValue(FloatType float_value);
-  explicit SValue(BoolType bool_value);
-  explicit SValue(TimeType time_value);
+  SValue& operator=(const SValue& copy);
+  bool operator==(const SValue& other) const;
 
   SType getType() const;
-  bool isString() const;
-  bool isNumeric() const;
-  bool isInteger() const;
-  bool isFloat() const;
+  bool isUInt64() const;
+  bool isInt64() const;
+  bool isFloat64() const;
   bool isBool() const;
-  bool isTimestamp() const;
+  bool isString() const;
+  bool isTimestamp64() const;
 
-  template <typename T> T getValue() const;
-  StringType getString() const;
-  IntegerType getInteger() const;
-  FloatType getFloat() const;
-  BoolType getBool() const;
-  TimeType getTimestamp() const;
+  void setData(const void* data, size_t size);
+  const void* getData() const;
+  void* getData();
 
-  template <typename T> bool isOfType() const;
-  template <typename T> bool isConvertibleTo() const;
-  bool isConvertibleToString() const;
-  bool isConvertibleToNumeric() const;
-  bool isConvertibleToInteger() const;
-  bool isConvertibleToFloat() const;
-  bool isConvertibleToBool() const;
-  bool isConvertibleToTimestamp() const;
+  size_t getSize() const;
 
-  SValue toNumeric() const;
-  SValue toString() const;
-  SValue toInteger() const;
-  SValue toFloat() const;
-  SValue toBool() const;
-  SValue toTimestamp() const;
+  STag getTag() const;
+  void setTag(STag tag);
+
+  bool getBool() const;
+
+  std::string toString() const;
+  String toSQL() const;
+
+  void copyFrom(const void* data);
 
   void encode(OutputStream* os) const;
   void decode(InputStream* is);
 
-  String toSQL() const;
-
-  static std::string makeUniqueKey(SValue* arr, size_t len);
-
-  void copyFrom(const void* data);
-
-  const void* getData() const;
-  void* getData();
-
-  void setData(const void* data, size_t size);
-
-  size_t getCapacity() const;
-  size_t getSize() const;
-
-  void setTag(STag tag);
-  STag getTag() const;
-
 protected:
-  struct {
-    SType type;
-    union {
-      int64_t t_int64;
-      uint64_t t_uint64;
-      double t_float;
-      uint8_t t_bool;
-      uint64_t t_timestamp;
-      void* t_string;
-    } u;
-  } data_;
-  STag tag_;
+  SType type_;
+  unsigned char data_[kInlineDataSize];
 };
 
 class SVector {
@@ -179,7 +139,7 @@ protected:
   size_t size_;
 };
 
-String sql_escape(const String& str);
+std::string sql_escape(const std::string& str);
 
 size_t sql_strlen(const void* str);
 char* sql_cstr(void* str);
@@ -187,16 +147,10 @@ const char* sql_cstr(const void* str);
 
 size_t sql_sizeof(SType type, const void* value);
 size_t sql_sizeof_static(SType type);
+size_t sql_sizeof_tuple(const char* data, const SType* val_types, size_t val_cnt);
 
 std::string sql_tostring(SType type, const void* value);
 
-}
 
-namespace std {
+} // namespace csql
 
-template <>
-struct hash<csql::SValue> {
-  size_t operator()(const csql::SValue& sval) const;
-};
-
-}

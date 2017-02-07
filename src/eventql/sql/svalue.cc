@@ -28,6 +28,7 @@
 #include <string>
 #include <ctime>
 #include <stdint.h>
+#include <iostream>
 #include <eventql/util/inspect.h>
 #include <eventql/util/human.h>
 #include <eventql/sql/svalue.h>
@@ -36,852 +37,372 @@
 
 namespace csql {
 
+
 SValue SValue::newNull() {
   return SValue();
 }
 
-SValue SValue::newString(const String& value) {
-  return SValue(value);
-}
-
-SValue SValue::newString(const char* value) {
-  return SValue(value);
-}
-
-SValue SValue::newInteger(IntegerType value) {
-  return SValue(SValue::IntegerType(value));
-}
-
-SValue SValue::newInteger(const String& value) {
-  return SValue(value).toInteger();
-}
-
 SValue SValue::newUInt64(uint64_t value) {
-  SValue v;
-  v.data_.type = SType::UINT64;
-  v.data_.u.t_uint64 = value;
+  static_assert(
+      sizeof(uint64_t) + sizeof(STag) <= SValue::kInlineDataSize,
+      "SValue::kInlineDataSize is too small");
+
+  SValue v(SType::UINT64, DEFER_INITIALIZATION);
+  STag tag_inline = STAG_INLINE;
+  memcpy(v.data_, &value, sizeof(uint64_t));
+  memset(v.data_ + sizeof(uint64_t), 0, sizeof(STag));
+  memcpy(v.data_ + (sizeof(data_) - sizeof(STag)), &tag_inline, sizeof(STag));
   return v;
+}
+
+SValue SValue::newUInt64(const std::string& value) {
+  return SValue::newUInt64(std::stoull(value));
 }
 
 SValue SValue::newInt64(int64_t value) {
-  SValue v;
-  v.data_.type = SType::INT64;
-  v.data_.u.t_int64 = value;
+  static_assert(
+      sizeof(int64_t) + sizeof(STag) <= SValue::kInlineDataSize,
+      "SValue::kInlineDataSize is too small");
+
+  SValue v(SType::INT64, DEFER_INITIALIZATION);
+  STag tag_inline = STAG_INLINE;
+  memcpy(v.data_, &value, sizeof(int64_t));
+  memset(v.data_ + sizeof(int64_t), 0, sizeof(STag));
+  memcpy(v.data_ + (sizeof(data_) - sizeof(STag)), &tag_inline, sizeof(STag));
   return v;
 }
 
-SValue SValue::newFloat(FloatType value) {
-  return SValue(value);
+SValue SValue::newInt64(const std::string& value) {
+  return SValue::newInt64(std::stoll(value));
 }
 
-SValue SValue::newFloat(const String& value) {
-  return SValue(value).toFloat();
+SValue SValue::newFloat64(double value) {
+  static_assert(
+      sizeof(double) + sizeof(STag) <= SValue::kInlineDataSize,
+      "SValue::kInlineDataSize is too small");
+
+  SValue v(SType::FLOAT64, DEFER_INITIALIZATION);
+  STag tag_inline = STAG_INLINE;
+  memcpy(v.data_, &value, sizeof(double));
+  memset(v.data_ + sizeof(double), 0, sizeof(STag));
+  memcpy(v.data_ + (sizeof(data_) - sizeof(STag)), &tag_inline, sizeof(STag));
+  return v;
 }
 
-SValue SValue::newBool(BoolType value) {
-  return SValue(SValue::BoolType(value));
+SValue SValue::newFloat64(const std::string& value) {
+  return SValue::newFloat64(std::stod(value));
 }
 
-SValue SValue::newBool(const String& value) {
-  return SValue(value).toBool();
+SValue SValue::newBool(bool value) {
+  static_assert(
+      sizeof(uint8_t) + sizeof(STag) <= SValue::kInlineDataSize,
+      "SValue::kInlineDataSize is too small");
+
+  uint8_t value_uint = value;
+  SValue v(SType::BOOL, DEFER_INITIALIZATION);
+  STag tag_inline = STAG_INLINE;
+  memcpy(v.data_, &value_uint, sizeof(uint8_t));
+  memset(v.data_ + sizeof(uint8_t), 0, sizeof(STag));
+  memcpy(v.data_ + (sizeof(data_) - sizeof(STag)), &tag_inline, sizeof(STag));
+  return v;
 }
 
-SValue SValue::newTimestamp(TimeType value) {
-  return SValue(value);
+SValue SValue::newString(const char* value, uint32_t value_len) {
+  static_assert(
+      sizeof(intptr_t) + sizeof(uint32_t) + sizeof(STag) <= SValue::kInlineDataSize,
+      "SValue::kInlineDataSize is too small");
+
+  SValue v(SType::STRING, DEFER_INITIALIZATION);
+  if (value_len + sizeof(uint32_t) + sizeof(STag) <= kInlineDataSize) {
+    STag tag = STAG_INLINE;
+    memcpy(v.data_, &value_len, sizeof(uint32_t));
+    memcpy(v.data_ + sizeof(uint32_t), value, value_len);
+    memset(v.data_ + sizeof(uint32_t) + value_len, 0, sizeof(STag));
+    memcpy(v.data_ + (sizeof(data_) - sizeof(STag)), &tag, sizeof(STag));
+  } else {
+    STag tag = 0;
+    uint32_t ptr_capacity = sizeof(uint32_t) + value_len + sizeof(STag);
+    intptr_t ptr = reinterpret_cast<intptr_t>(malloc(ptr_capacity));
+    memcpy(v.data_, &ptr, sizeof(intptr_t));
+    memcpy(v.data_ + sizeof(intptr_t), &ptr_capacity, sizeof(uint32_t));
+    memcpy(v.data_ + (sizeof(data_) - sizeof(STag)), &tag, sizeof(STag));
+    memcpy(reinterpret_cast<void*>(ptr), &value_len, sizeof(uint32_t));
+    memcpy(reinterpret_cast<void*>(ptr + sizeof(uint32_t)), value, value_len);
+    memset(reinterpret_cast<void*>(ptr + sizeof(uint32_t) + value_len), 0, sizeof(SType));
+  }
+
+  return v;
 }
 
-SValue SValue::newTimestamp(const String& value) {
-  return SValue(value).toTimestamp();
+SValue SValue::newString(const std::string& str) {
+  return newString(str.data(), str.size());
 }
 
-SValue::SValue() {
-  memset(&data_, 0, sizeof(data_));
-  data_.type = SType::NIL;
-  tag_ = 0;
+SValue SValue::newTimestamp64(uint64_t value) {
+  static_assert(
+      sizeof(uint64_t) + sizeof(STag) <= SValue::kInlineDataSize,
+      "SValue::kInlineDataSize is too small");
+
+  SValue v(SType::UINT64);
+  STag tag_inline = STAG_INLINE;
+  memcpy(v.data_, &value, sizeof(uint64_t));
+  memset(v.data_ + sizeof(uint64_t), 0, sizeof(STag));
+  memcpy(v.data_ + (sizeof(data_) - sizeof(STag)), &tag_inline, sizeof(STag));
+  return v;
 }
 
-SValue::SValue(SType type) {
-  memset(&data_, 0, sizeof(data_));
-  data_.type = type;
-  tag_ = 0;
+
+SValue::SValue() : SValue(SType::NIL) {}
+
+SValue::SValue(SType type) : type_(type) {
+  STag tag_inline = STAG_INLINE;
+  memset(data_, 0, sizeof(data_) - sizeof(STag));
+  memcpy(data_ + (sizeof(data_) - sizeof(STag)), &tag_inline, sizeof(STag));
 }
 
-SValue::~SValue() {
-  switch (data_.type) {
+SValue::SValue(SType type, kDeferInitialization _) : type_(type) {}
 
-    case SType::STRING:
-      if (data_.u.t_string) {
-        free(data_.u.t_string);
-      }
-      break;
+SValue::SValue(const SValue& copy) : type_(copy.type_) {
+  memcpy(data_, copy.data_, sizeof(data_));
 
-    default:
-      break;
+  STag tag;
+  memcpy(&tag, data_ + (sizeof(data_) - sizeof(STag)), sizeof(STag));
+  if (!(tag & STAG_INLINE)) {
+    intptr_t ptr;
+    memcpy(&ptr, data_, sizeof(intptr_t));
+    uint32_t ptr_capacity;
+    memcpy(&ptr_capacity, data_ + sizeof(intptr_t), sizeof(uint32_t));
 
+    intptr_t new_ptr = reinterpret_cast<intptr_t>(malloc(ptr_capacity));
+    memcpy(
+        reinterpret_cast<void*>(new_ptr),
+        reinterpret_cast<void*>(ptr),
+        ptr_capacity);
+
+    memcpy(data_, &new_ptr, sizeof(intptr_t));
   }
 }
 
-SValue::SValue(const SValue::StringType& string_value) {
-  data_.type = SType::STRING;
-  data_.u.t_string = malloc(string_value.size() + sizeof(uint32_t));
-
-  *((uint32_t*) data_.u.t_string) = string_value.size();
-
-  memcpy(
-      ((char*) data_.u.t_string) + sizeof(uint32_t),
-      string_value.data(),
-      string_value.size());
-
-  tag_ = 0;
-}
-
-SValue::SValue(
-    char const* string_value) :
-    SValue(std::string(string_value)) {}
-
-SValue::SValue(SValue::IntegerType integer_value) {
-  data_.type = SType::UINT64;
-  data_.u.t_int64 = integer_value;
-  tag_ = 0;
-}
-
-SValue::SValue(SValue::FloatType float_value) {
-  data_.type = SType::FLOAT64;
-  data_.u.t_float = float_value;
-  tag_ = 0;
-}
-
-SValue::SValue(SValue::BoolType bool_value) {
-  data_.type = SType::BOOL;
-  data_.u.t_bool = bool_value;
-  tag_ = 0;
-}
-
-SValue::SValue(SValue::TimeType time_value) {
-  data_.type = SType::TIMESTAMP64;
-  data_.u.t_timestamp = static_cast<uint64_t>(time_value);
-  tag_ = 0;
-}
-
-SValue::SValue(const SValue& copy) : tag_(copy.tag_) {
-  switch (copy.data_.type) {
-
-    case SType::STRING: {
-      if (copy.data_.u.t_string) {
-        auto len = sql_strlen(copy.data_.u.t_string) + sizeof(uint32_t);
-        data_.type = SType::STRING;
-        data_.u.t_string = malloc(len);
-        memcpy(data_.u.t_string, copy.data_.u.t_string, len);
-      } else {
-        data_.type = SType::STRING;
-        data_.u.t_string = nullptr;
-      }
-      break;
-    }
-
-    default:
-      memcpy(&data_, &copy.data_, sizeof(data_));
-      break;
-
+SValue::~SValue() {
+  STag tag;
+  memcpy(&tag, data_ + (sizeof(data_) - sizeof(STag)), sizeof(STag));
+  if (!(tag & STAG_INLINE)) {
+    intptr_t ptr;
+    memcpy(&ptr, data_, sizeof(intptr_t));
+    free(reinterpret_cast<void*>(ptr));
   }
 }
 
 SValue& SValue::operator=(const SValue& copy) {
-  tag_ = copy.tag_;
+  type_ = copy.type_;
 
-  if (data_.type == SType::STRING && data_.u.t_string) {
-    free(data_.u.t_string);
+  STag tag;
+  memcpy(&tag, data_ + (sizeof(data_) - sizeof(STag)), sizeof(STag));
+  if (!(tag & STAG_INLINE)) {
+    intptr_t ptr;
+    memcpy(&ptr, data_, sizeof(intptr_t));
+    free(reinterpret_cast<void*>(ptr));
   }
 
-  if (copy.data_.type == SType::STRING) {
-    if (copy.data_.u.t_string) {
-      auto len = sql_strlen(copy.data_.u.t_string) + sizeof(uint32_t);
-      data_.type = SType::STRING;
-      data_.u.t_string = malloc(len);
-      memcpy(data_.u.t_string, copy.data_.u.t_string, len);
-    } else {
-      data_.u.t_string = nullptr;
-      data_.type = SType::STRING;
-    }
-  } else {
-    memcpy(&data_, &copy.data_, sizeof(data_));
+  memcpy(data_, copy.data_, sizeof(data_));
+  memcpy(&tag, data_ + (sizeof(data_) - sizeof(STag)), sizeof(STag));
+  if (!(tag & STAG_INLINE)) {
+    intptr_t ptr;
+    memcpy(&ptr, data_, sizeof(intptr_t));
+    uint32_t ptr_capacity;
+    memcpy(&ptr_capacity, data_ + sizeof(intptr_t), sizeof(uint32_t));
+
+    intptr_t new_ptr = reinterpret_cast<intptr_t>(malloc(ptr_capacity));
+    memcpy(
+        reinterpret_cast<void*>(new_ptr),
+        reinterpret_cast<void*>(ptr),
+        ptr_capacity);
+
+    memcpy(data_, &new_ptr, sizeof(intptr_t));
   }
 
   return *this;
 }
 
 bool SValue::operator==(const SValue& other) const {
-  switch (data_.type) {
-
-    case SType::INT64: {
-      return getInteger() == other.getInteger();
-    }
-
-    case SType::TIMESTAMP64: {
-      return getInteger() == other.getInteger();
-    }
-
-    case SType::FLOAT64: {
-      return getFloat() == other.getFloat();
-    }
-
-    case SType::BOOL: {
-      return getBool() == other.getBool();
-    }
-
-    case SType::STRING: {
-      if (data_.u.t_string == data_.u.t_string) {
-        return true;
-      }
-
-      if (!!data_.u.t_string ^ !!data_.u.t_string) {
-        return false;
-      }
-
-      if (sql_strlen(data_.u.t_string) != sql_strlen(other.data_.u.t_string)) {
-        return false;
-      }
-
-      return memcmp(
-          sql_cstr(data_.u.t_string),
-          sql_cstr(other.data_.u.t_string),
-          sql_strlen(data_.u.t_string)) == 0;
-    }
-
-    case SType::NIL: {
-      return other.getInteger() == 0;
-    }
-
+  if (type_ != other.type_) {
+    return false;
   }
+
+  auto size = getSize();
+  if (size != other.getSize()) {
+    return false;
+  }
+
+  return memcmp(getData(), other.getData(), size) == 0;
 }
 
 SType SValue::getType() const {
-  return data_.type;
+  return type_;
 }
 
-template <> SValue::BoolType SValue::getValue<SValue::BoolType>() const {
-  return getBool();
+bool SValue::isUInt64() const {
+  return type_ == SType::UINT64;
 }
 
-template <> SValue::IntegerType SValue::getValue<SValue::IntegerType>() const {
-  return getInteger();
+bool SValue::isInt64() const {
+  return type_ == SType::INT64;
 }
 
-template <> SValue::FloatType SValue::getValue<SValue::FloatType>() const {
-  return getFloat();
-}
-
-template <> SValue::StringType SValue::getValue<SValue::StringType>() const {
-  return getString();
-}
-
-template <> SValue::TimeType SValue::getValue<SValue::TimeType>() const {
-  return getTimestamp();
-}
-
-// FIXPAUL: smarter type detection
-template <> bool SValue::isConvertibleTo<SValue::BoolType>() const {
-  return data_.type == SType::BOOL;
-}
-
-template <> bool SValue::isConvertibleTo<SValue::TimeType>() const {
-  if (data_.type == SType::TIMESTAMP64) {
-    return true;
-  }
-
-  return isConvertibleToNumeric();
-}
-
-SValue::IntegerType SValue::getInteger() const {
-  switch (data_.type) {
-
-    case SType::INT64:
-      return data_.u.t_int64;
-
-    case SType::UINT64:
-      return data_.u.t_uint64;
-
-    case SType::TIMESTAMP64:
-      return data_.u.t_timestamp;
-
-    case SType::FLOAT64:
-      return data_.u.t_float;
-
-    case SType::BOOL:
-      return data_.u.t_bool;
-
-    case SType::NIL:
-      return 0;
-
-    case SType::STRING:
-      try {
-        return std::stoll(getString());
-      } catch (std::exception e) {
-        /* fallthrough */
-      }
-
-    default:
-      RAISE(
-          kTypeError,
-          "can't convert %s '%s' to Integer",
-          SValue::getTypeName(data_.type),
-          getString().c_str());
-
-  }
-
-  return 0;
-}
-
-SValue SValue::toInteger() const {
-  if (data_.type == SType::INT64) {
-    return *this;
-  } else {
-    return SValue::newInteger(getInteger());
-  }
-}
-
-SValue::FloatType SValue::getFloat() const {
-  switch (data_.type) {
-
-    case SType::INT64:
-      return data_.u.t_int64;
-
-    case SType::UINT64:
-      return data_.u.t_uint64;
-
-    case SType::TIMESTAMP64:
-      return data_.u.t_timestamp;
-
-    case SType::FLOAT64:
-      return data_.u.t_float;
-
-    case SType::BOOL:
-      return data_.u.t_bool;
-
-    case SType::NIL:
-      return 0;
-
-    case SType::STRING:
-      try {
-        return std::stod(getString());
-      } catch (std::exception e) {
-        /* fallthrough */
-      }
-
-    default:
-      RAISE(
-          kTypeError,
-          "can't convert %s '%s' to Float",
-          SValue::getTypeName(data_.type),
-          getString().c_str());
-
-  }
-
-  return 0;
-}
-
-SValue SValue::toFloat() const {
-  if (data_.type == SType::FLOAT64) {
-    return *this;
-  } else {
-    return SValue::newFloat(getFloat());
-  }
-}
-
-SValue SValue::toBool() const {
-  if (data_.type == SType::BOOL) {
-    return *this;
-  } else {
-    return SValue::newBool(getBool());
-  }
-}
-
-SValue::BoolType SValue::getBool() const {
-  switch (data_.type) {
-
-    case SType::INT64:
-    case SType::UINT64:
-      return getInteger() > 0;
-
-    case SType::FLOAT64:
-      return getFloat() > 0;
-
-    case SType::BOOL:
-      return data_.u.t_bool;
-
-    case SType::STRING:
-      return true;
-
-    case SType::NIL:
-      return false;
-
-    default:
-      RAISEF(
-         kTypeError,
-          "can't convert $0 '$1' to Boolean",
-          SValue::getTypeName(data_.type),
-          getString());
-
-  }
-}
-
-SValue::TimeType SValue::getTimestamp() const {
-  if (isTimestamp()) {
-    return data_.u.t_timestamp;
-  }
-
-  if (isConvertibleTo<TimeType>()) {
-    return toTimestamp().getTimestamp();
-  } else {
-    RAISE(
-       kTypeError,
-        "can't convert %s '%s' to TIMESTAMP",
-        SValue::getTypeName(data_.type),
-        getString().c_str());
-  }
-}
-
-std::string SValue::makeUniqueKey(SValue* arr, size_t len) {
-  std::string key;
-
-  for (int i = 0; i < len; ++i) {
-    key.append(arr[i].getString());
-    key.append("\x00");
-  }
-
-  return key;
-}
-
-SValue SValue::toString() const {
-  if (data_.type == SType::STRING) {
-    return *this;
-  } else {
-    return SValue::newString(getString());
-  }
-}
-
-std::string SValue::getString() const {
-  return sql_tostring(data_.type, getData());
-}
-
-String SValue::toSQL() const {
-  switch (data_.type) {
-
-    case SType::INT64:
-    case SType::UINT64: {
-      return getString();
-    }
-
-    case SType::TIMESTAMP64: {
-      return StringUtil::toString(getInteger());
-    }
-
-    case SType::FLOAT64: {
-      return getString();
-    }
-
-    case SType::BOOL: {
-      return getString();
-    }
-
-    case SType::STRING: {
-      auto str = sql_escape(getString());
-      return StringUtil::format("\"$0\"", str);
-    }
-
-    case SType::NIL: {
-      return "NULL";
-    }
-
-  }
-}
-
-const char* SValue::getTypeName(SType type) {
-  switch (type) {
-    case SType::STRING:
-      return "String";
-    case SType::FLOAT64:
-      return "Float";
-    case SType::INT64:
-    case SType::UINT64:
-      return "Integer";
-    case SType::BOOL:
-      return "Boolean";
-    case SType::TIMESTAMP64:
-      return "Timestamp";
-    case SType::NIL:
-      return "NULL";
-  }
-}
-
-const char* SValue::getTypeName() const {
-  return SValue::getTypeName(data_.type);
-}
-
-template <> bool SValue::isConvertibleTo<SValue::IntegerType>() const {
-  switch (data_.type) {
-    case SType::INT64:
-    case SType::UINT64:
-    case SType::TIMESTAMP64:
-      return true;
-    default:
-      break;
-  }
-
-  auto str = getString();
-  const char* cur = str.c_str();
-  const char* end = cur + str.size();
-
-  if (*cur == '-') {
-    ++cur;
-  }
-
-  if (cur == end) {
-    return false;
-  }
-
-  for (; cur < end; ++cur) {
-    if (*cur < '0' || *cur > '9') {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-template <> bool SValue::isConvertibleTo<SValue::FloatType>() const {
-  switch (data_.type) {
-    case SType::FLOAT64:
-    case SType::INT64:
-    case SType::UINT64:
-    case SType::TIMESTAMP64:
-      return true;
-    default:
-      break;
-  }
-
-  auto str = getString();
-  bool dot = false;
-  const char* c = str.c_str();
-
-  if (*c == '-') {
-    ++c;
-  }
-
-  for (; *c != 0; ++c) {
-    if (*c >= '0' && *c <= '9') {
-      continue;
-    }
-
-    if (*c == '.' || *c == ',') {
-      if (dot) {
-        return false;
-      } else {
-        dot = true;
-      }
-      continue;
-    }
-
-    return false;
-  }
-
-  return true;
-}
-
-template <> bool SValue::isConvertibleTo<std::string>() const {
-  return true;
-}
-
-SValue SValue::toTimestamp() const {
-  if (isTimestamp()) {
-    return *this;
-  }
-
-  if (isConvertibleToNumeric()) {
-    return SValue(SValue::TimeType(toNumeric().getFloat()));
-  }
-
-  RAISE(
-      kTypeError,
-      "can't convert %s '%s' to TIMESTAMP",
-      SValue::getTypeName(data_.type),
-      getString().c_str());
-}
-
-SValue SValue::toNumeric() const {
-  if (isNumeric()) {
-    return *this;
-  }
-
-  if (isConvertibleTo<SValue::IntegerType>()) {
-    return SValue(SValue::IntegerType(getInteger()));
-  }
-
-  if (isConvertibleTo<SValue::FloatType>()) {
-    return SValue(SValue::FloatType(getFloat()));
-  }
-
-  RAISE(
-      kTypeError,
-      "can't convert %s '%s' to NUMERIC",
-      SValue::getTypeName(data_.type),
-      getString().c_str());
-}
-
-bool SValue::isString() const {
-  return data_.type == SType::STRING;
-}
-
-bool SValue::isFloat() const {
-  return data_.type == SType::FLOAT64;
-}
-
-bool SValue::isInteger() const {
-  return data_.type == SType::INT64 || data_.type == SType::UINT64;
+bool SValue::isFloat64() const {
+  return type_ == SType::FLOAT64;
 }
 
 bool SValue::isBool() const {
-  return data_.type == SType::BOOL;
+  return type_ == SType::BOOL;
 }
 
-bool SValue::isTimestamp() const {
-  return data_.type == SType::TIMESTAMP64;
+bool SValue::isString() const {
+  return type_ == SType::STRING;
 }
 
-bool SValue::isNumeric() const {
-  switch (data_.type) {
-    case SType::FLOAT64:
-    case SType::INT64:
-    case SType::UINT64:
-      return true;
-    default:
-      return false;
-  }
+bool SValue::isTimestamp64() const {
+  return type_ == SType::TIMESTAMP64;
 }
 
-bool SValue::isConvertibleToNumeric() const {
-  if (isConvertibleTo<SValue::IntegerType>() ||
-      isConvertibleTo<SValue::FloatType>() ||
-      isTimestamp()) {
-    return true;
-  } else {
-    return false;
-  }
+std::string SValue::toString() const {
+  return sql_tostring(type_, getData());
 }
 
-bool SValue::isConvertibleToBool() const {
-  switch (data_.type) {
-    case SType::STRING:
-    case SType::FLOAT64:
-    case SType::INT64:
-    case SType::UINT64:
-    case SType::BOOL:
-    case SType::NIL:
-      return true;
-    case SType::TIMESTAMP64:
-      return false;
-  }
-}
+//String SValue::toSQL() const {
+//  switch (data_.type) {
+//
+//    case SType::INT64:
+//    case SType::UINT64: {
+//      return getString();
+//    }
+//
+//    case SType::TIMESTAMP64: {
+//      return StringUtil::toString(getInteger());
+//    }
+//
+//    case SType::FLOAT64: {
+//      return getString();
+//    }
+//
+//    case SType::BOOL: {
+//      return getString();
+//    }
+//
+//    case SType::STRING: {
+//      auto str = sql_escape(getString());
+//      return StringUtil::format("\"$0\"", str);
+//    }
+//
+//    case SType::NIL: {
+//      return "NULL";
+//    }
+//
+//  }
+//}
 
 void SValue::encode(OutputStream* os) const {
-  os->appendUInt8((uint8_t) data_.type);
-
-  switch (data_.type) {
-    case SType::STRING:
-      os->appendLenencString(
-          sql_cstr(data_.u.t_string),
-          sql_strlen(data_.u.t_string));
-      return;
-    case SType::FLOAT64:
-      os->appendDouble(data_.u.t_float);
-      return;
-    case SType::INT64:
-      os->appendUInt64(data_.u.t_int64); // FIXME
-      return;
-    case SType::UINT64:
-      os->appendUInt64(data_.u.t_uint64);
-      return;
-    case SType::BOOL:
-      os->appendUInt8(data_.u.t_bool ? 1 : 0);
-      return;
-    case SType::TIMESTAMP64:
-      os->appendUInt64(data_.u.t_timestamp);
-      return;
-    case SType::NIL:
-      return;
-  }
+  os->appendUInt8((uint8_t) type_);
+  os->appendLenencString(getData(), getSize());
 }
 
 void SValue::decode(InputStream* is) {
-  SType type = (SType) is->readUInt8();
-
-  switch (type) {
-    case SType::STRING:
-      *this = SValue(is->readLenencString());
-      return;
-    case SType::FLOAT64:
-      *this = SValue(SValue::FloatType(is->readDouble()));
-      return;
-    case SType::INT64:
-      *this = SValue::newInt64(is->readUInt64()); // FIXME
-      return;
-    case SType::UINT64:
-      *this = SValue::newUInt64(is->readUInt64());
-      return;
-    case SType::BOOL:
-      *this = SValue(SValue::BoolType(is->readUInt8() == 1));
-      return;
-    case SType::TIMESTAMP64: {
-      auto v = is->readUInt64();
-      *this = SValue(SValue::TimeType(v));
-      return;
-    }
-    case SType::NIL:
-      *this = SValue();
-      return;
-  }
+  type_ = (SType) is->readUInt8();
+  auto data = is->readLenencString();
+  setData(data.data(), data.size());
 }
 
 void SValue::copyFrom(const void* data) {
-  switch (data_.type) {
-
-    case SType::NIL:
-      break;
-
-    case SType::STRING: {
-      if (data_.u.t_string) {
-        free(data_.u.t_string);
-      }
-
-      if (data) {
-        auto len = sql_strlen(data) + sizeof(uint32_t);
-        data_.u.t_string = malloc(len);
-        memcpy(data_.u.t_string, data, len);
-      } else {
-        data_.u.t_string = nullptr;
-      }
-      break;
-    }
-
-    case SType::UINT64:
-    case SType::TIMESTAMP64:
-      memcpy(&data_.u.t_uint64, data, sizeof(uint64_t));
-      break;
-
-    case SType::INT64:
-      memcpy(&data_.u.t_int64, data, sizeof(int64_t));
-      break;
-
-    case SType::FLOAT64:
-      memcpy(&data_.u.t_float, data, sizeof(double));
-      break;
-
-    case SType::BOOL:
-      memcpy(&data_.u.t_bool, data, sizeof(uint8_t));
-      break;
-
-  }
+  auto data_len = sql_sizeof(type_, data);
+  setData(data, data_len);
 }
 
 const void* SValue::getData() const {
-  switch (data_.type) {
-    case SType::UINT64:
-      return &data_.u.t_uint64;
-    case SType::INT64:
-      return &data_.u.t_int64;
-    case SType::FLOAT64:
-      return &data_.u.t_float;
-    case SType::BOOL:
-      return &data_.u.t_bool;
-    case SType::TIMESTAMP64:
-      return &data_.u.t_timestamp;
-    case SType::STRING:
-      return data_.u.t_string;
-    default:
-      return nullptr;
+  STag tag;
+  memcpy(&tag, data_ + (sizeof(data_) - sizeof(STag)), sizeof(STag));
+  if (tag & STAG_INLINE) {
+    return data_;
+  } else {
+    intptr_t ptr;
+    memcpy(&ptr, data_, sizeof(intptr_t));
+    return reinterpret_cast<void*>(ptr);
   }
 }
 
 void* SValue::getData() {
-  switch (data_.type) {
-    case SType::UINT64:
-      return &data_.u.t_uint64;
-    case SType::INT64:
-      return &data_.u.t_int64;
-    case SType::FLOAT64:
-      return &data_.u.t_float;
-    case SType::BOOL:
-      return &data_.u.t_bool;
-    case SType::TIMESTAMP64:
-      return &data_.u.t_timestamp;
-    case SType::STRING:
-      return data_.u.t_string;
-    default:
-      return nullptr;
+  STag tag;
+  memcpy(&tag, data_ + (sizeof(data_) - sizeof(STag)), sizeof(STag));
+  if (tag & STAG_INLINE) {
+    return data_;
+  } else {
+    intptr_t ptr;
+    memcpy(&ptr, data_, sizeof(intptr_t));
+    return reinterpret_cast<void*>(ptr);
   }
 }
 
 void SValue::setData(const void* data, size_t size) {
-  switch (data_.type) {
+  static_assert(
+      sizeof(intptr_t) + sizeof(uint32_t) + sizeof(STag) <= SValue::kInlineDataSize,
+      "SValue::kInlineDataSize is too small");
 
-    case SType::UINT64:
-      data_.u.t_uint64 = *static_cast<const uint64_t*>(data);
-      return;
-
-    case SType::INT64:
-      data_.u.t_int64 = *static_cast<const int64_t*>(data);
-      return;
-
-    case SType::FLOAT64:
-      data_.u.t_float = *static_cast<const double*>(data);
-      return;
-
-    case SType::BOOL:
-      data_.u.t_bool = *static_cast<const uint8_t*>(data);
-      return;
-
-    case SType::TIMESTAMP64:
-      data_.u.t_timestamp = *static_cast<const uint64_t*>(data);
-      return;
-
-    case SType::STRING:
-      if (data_.u.t_string) {
-        free(data_.u.t_string);
-      }
-
-      data_.u.t_string = malloc(size);
-      memcpy(data_.u.t_string, data, size);
-      return;
-
+  bool needs_ext_mem = size > kInlineDataSize;
+  bool has_ext_mem;
+  {
+    STag tag;
+    memcpy(&tag, data_ + (sizeof(data_) - sizeof(STag)), sizeof(STag));
+    has_ext_mem = !(tag & STAG_INLINE);
   }
-}
 
-size_t SValue::getCapacity() const {
-  return getSize();
+  if (!has_ext_mem && !needs_ext_mem) {
+    memcpy(data_, data, size);
+    STag tag;
+    memcpy(&tag, data_ + (sizeof(data_) - sizeof(STag)), sizeof(STag));
+    tag |= STAG_INLINE;
+    memcpy(data_ + (sizeof(data_) - sizeof(STag)), &tag, sizeof(STag));
+    return;
+  }
+
+  intptr_t ptr;
+  if (has_ext_mem) {
+    uint32_t ptr_capacity;
+    memcpy(&ptr, data_, sizeof(intptr_t));
+    memcpy(&ptr_capacity, data_ + sizeof(intptr_t), sizeof(uint32_t));
+
+    if (ptr_capacity < size) {
+      uint32_t ptr_capacity = size;
+      ptr = reinterpret_cast<intptr_t>(
+          realloc(reinterpret_cast<void*>(ptr), ptr_capacity));
+
+      memcpy(data_, &ptr, sizeof(intptr_t));
+      memcpy(data_ + sizeof(intptr_t), &ptr_capacity, sizeof(uint32_t));
+    }
+  } else {
+    uint32_t ptr_capacity = size;
+    ptr = reinterpret_cast<intptr_t>(malloc(ptr_capacity));
+    memcpy(data_, &ptr, sizeof(intptr_t));
+    memcpy(data_ + sizeof(intptr_t), &ptr_capacity, sizeof(uint32_t));
+    STag tag = 0;
+    memcpy(data_ + (sizeof(data_) - sizeof(STag)), &tag, sizeof(STag));
+  }
+
+  memcpy(reinterpret_cast<void*>(ptr), data, size);
 }
 
 size_t SValue::getSize() const {
-  switch (data_.type) {
-    case SType::STRING:
-      return sql_strlen(data_.u.t_string) + sizeof(uint32_t);
-    case SType::FLOAT64:
-    case SType::INT64:
-    case SType::UINT64:
-    case SType::TIMESTAMP64:
-      return 8;
-    case SType::BOOL:
-      return 1;
-    case SType::NIL:
-      return 0;
-  }
+  return sql_sizeof(type_, getData());
 }
 
 void SValue::setTag(STag tag) {
-  tag_ = tag;
+  auto data = getData();
+  memcpy(data + sql_sizeof(type_, data) - sizeof(STag), &tag, sizeof(STag));
 }
 
 STag SValue::getTag() const {
-  return tag_;
+  STag tag;
+  auto data = getData();
+  memcpy(&tag, data + sql_sizeof(type_, data) - sizeof(STag), sizeof(STag));
+  return tag;
 }
 
 String sql_escape(const String& orig_str) {
@@ -890,26 +411,6 @@ String sql_escape(const String& orig_str) {
   StringUtil::replaceAll(&str, "'", "\\'");
   StringUtil::replaceAll(&str, "\"", "\\\"");
   return str;
-}
-
-template <> bool SValue::isOfType<SValue::StringType>() const {
-  return isString();
-}
-
-template <> bool SValue::isOfType<SValue::FloatType>() const {
-  return isFloat();
-}
-
-template <> bool SValue::isOfType<SValue::IntegerType>() const {
-  return isInteger();
-}
-
-template <> bool SValue::isOfType<SValue::BoolType>() const {
-  return isBool();
-}
-
-template <> bool SValue::isOfType<SValue::TimeType>() const {
-  return isTimestamp();
 }
 
 SVector::SVector(
@@ -1042,8 +543,7 @@ size_t sql_sizeof(SType type, const void* data) {
 size_t sql_sizeof_static(SType type) {
   switch (type) {
     case SType::STRING:
-      assert(false);
-      return 0;
+      throw std::runtime_error("invalid call of sql_sizeof_static(STRING)");
     case SType::NIL:
       return 0 + sizeof(STag);
     case SType::FLOAT64:
@@ -1132,22 +632,3 @@ std::string sql_tostring(SType type, const void* value) {
 
 } // namespace csql
 
-template <>
-std::string inspect<csql::SType>(
-    const csql::SType& type) {
-  return csql::SValue::getTypeName(type);
-}
-
-template <>
-std::string inspect<csql::SValue>(
-    const csql::SValue& sval) {
-  return sval.getString();
-}
-
-namespace std {
-
-size_t hash<csql::SValue>::operator()(const csql::SValue& sval) const {
-  return hash<std::string>()(sval.getString()); // FIXPAUL
-}
-
-}
