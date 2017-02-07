@@ -1586,7 +1586,7 @@ RefPtr<ValueExpressionNode> QueryPlanBuilder::buildUnoptimizedValueExpression(
       return buildLiteral(txn, ast);
 
     case ASTNode::T_VOID:
-      return new LiteralExpressionNode(SValue("void"));
+      return new LiteralExpressionNode(SValue::newNull());
 
     case ASTNode::T_IF_EXPR:
       return buildIfStatement(txn, ast, resolver, type_resolver);
@@ -1624,23 +1624,27 @@ ValueExpressionNode* QueryPlanBuilder::buildLiteral(
   switch (token->getType()) {
 
     case Token::T_TRUE:
-      literal = SValue(true);
+      literal = SValue::newBool(true);
       break;
 
     case Token::T_FALSE:
-      literal = SValue(false);
+      literal = SValue::newBool(false);
       break;
 
     case Token::T_NUMERIC:
-      literal = SValue(token->getString()).toNumeric();
+      if (token->getString().find(".") == std::string::npos) {
+        literal = SValue::newInt64(token->getString());
+      } else {
+        literal = SValue::newFloat64(token->getString());
+      }
       break;
 
     case Token::T_STRING:
-      literal = SValue(token->getString());
+      literal = SValue::newString(token->getString());
       break;
 
     case Token::T_NULL:
-      literal = SValue();
+      literal = SValue{};
       break;
 
     default:
