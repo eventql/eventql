@@ -35,28 +35,6 @@
 namespace csql {
 namespace expressions {
 
-static int64_t parseTimestamp(SValue* arg) {
-  switch (arg->getType()) {
-    case SType::TIMESTAMP64:
-      return arg->getInteger();
-    case SType::INT64:
-      return arg->getInteger() * kMicrosPerSecond;
-    case SType::FLOAT64:
-      return arg->getFloat() * kMicrosPerSecond;
-    default: {
-      if (arg->isConvertibleToNumeric()) {
-        return arg->toNumeric().getFloat() * kMicrosPerSecond;
-      }
-    }
-  }
-
-  RAISEF(
-     kTypeError,
-      "can't convert $0 '$1' to TIMESTAMP",
-      SValue::getTypeName(arg->getType()),
-      arg->getString());
-}
-
 static Option<uint64_t> parseInterval(String time_interval) {
   uint64_t num;
   String unit;
