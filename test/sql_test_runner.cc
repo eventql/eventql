@@ -140,6 +140,7 @@ Status checkChartResult(
 
 Status checkErrorResult(
     const std::string& error_message,
+    ResultList* result,
     const std::string& result_file_path) {
   auto is = FileInputStream::openFile(result_file_path);
 
@@ -155,7 +156,18 @@ Status checkErrorResult(
   if (expected_error == error_message) {
     return Status::success();
   } else {
-    return Status(eRuntimeError, "wrong result");
+    if (error_message.empty()) {
+      return Status(eRuntimeError, StringUtil::format(
+          "expected error: $0 but got result: $1",
+          expected_error,
+          ""));
+
+    } else {
+      return Status(eRuntimeError, StringUtil::format(
+          "expected error: $0 but got error $1",
+          expected_error,
+          error_message));
+    }
   }
 }
 
@@ -247,7 +259,7 @@ Status runTest(const std::string& test) {
       return checkChartResult(&result, result_file_path);
 
     case ResultExpectation::ERROR:
-      return checkErrorResult(error_message, result_file_path);
+      return checkErrorResult(error_message, &result, result_file_path);
   }
 }
 
