@@ -27,7 +27,7 @@
 #include "eventql/util/csv/CSVInputStream.h"
 #include "eventql/util/exception.h"
 #include "eventql/util/io/inputstream.h"
-#include "eventql/sql/backends/csv/CSVInputStream.h"
+#include "eventql/sql/drivers/csv/CSVInputStream.h"
 
 namespace csql {
 namespace backends {
