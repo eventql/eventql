@@ -28,7 +28,10 @@
 #include "eventql/util/stringutil.h"
 #include "eventql/util/io/fileutil.h"
 #include "eventql/util/io/inputstream.h"
+#include "eventql/util/io/TerminalOutputStream.h"
+#include "eventql/util/cli/flagparser.h"
 #include "eventql/util/csv/CSVInputStream.h"
+#include "eventql/util/csv/CSVOutputStream.h"
 #include "eventql/sql/runtime/defaultruntime.h"
 #include "eventql/sql/CSTableScanProvider.h"
 #include "eventql/sql/result_list.h"
@@ -36,13 +39,49 @@
 #include "eventql/eventql.h"
 using namespace csql;
 
+enum class ResultExpectation { TABLE, CHART, ERROR };
+
+enum class OutputFormat { TAP, CSV, VERBOSE };
+
 const auto kTestListFile = "./sql_tests.lst";
 const auto kDirectoryPath = "./sql";
 const auto kSQLPathEnding = ".sql";
 const auto kResultPathEnding = ".result.txt";
 const auto kChartColumnName = "__chart";
+const auto kDefaultResultExpectation = ResultExpectation::TABLE;
+const auto kDefaultOutputFormat = OutputFormat::TAP;
 
-Status compareResult(ResultList* result, const std::string& result_file_path) {
+static void printError(const std::string& error_string) {
+  auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
+  stderr_os->print(
+      "ERROR:",
+      { TerminalStyle::RED, TerminalStyle::UNDERSCORE });
+  stderr_os->print(" " + error_string + "\n");
+}
+
+std::string getResultCSV(ResultList* result, const std::string& row_sep = "\n") {
+  std::string result_csv;
+  auto is = new StringOutputStream(&result_csv);
+  auto csv_is = new CSVOutputStream(
+      std::unique_ptr<OutputStream>(is),
+      ";",
+      row_sep);
+
+  auto columns = result->getColumns();
+  csv_is->appendRow(columns);
+
+  auto num_rows = result->getNumRows();
+  for (size_t i = 0; i < num_rows; ++i) {
+    auto row = result->getRow(i);
+    csv_is->appendRow(row);
+  }
+
+  return result_csv;
+}
+
+Status checkTableResult(
+    ResultList* result,
+    const std::string& result_file_path) {
   auto csv_is = CSVInputStream::openFile(result_file_path);
   std::vector<std::string> columns;
   if (!csv_is->readNextRow(&columns)) {
@@ -110,7 +149,9 @@ Status compareResult(ResultList* result, const std::string& result_file_path) {
   return Status::success();
 }
 
-Status compareChart(ResultList* result, const std::string& result_file_path) {
+Status checkChartResult(
+    ResultList* result,
+    const std::string& result_file_path) {
   auto num_returned_rows = result->getNumRows();
   if (num_returned_rows != 1) {
     return Status(eRuntimeError, StringUtil::format(
@@ -130,24 +171,41 @@ Status compareChart(ResultList* result, const std::string& result_file_path) {
   return Status::success();
 }
 
-Status compareError(
-    const std::string& error_msg,
+Status checkErrorResult(
+    const std::string& error_message,
+    ResultList* result,
     const std::string& result_file_path) {
-  auto result_is = FileInputStream::openFile(result_file_path);
-  std::string result;
-  result_is->readUntilEOF(&result);
-  StringUtil::chomp(&result);
+  auto is = FileInputStream::openFile(result_file_path);
 
-  if (result == error_msg) {
+  {
+    std::string result_expectation_line;
+    is->readLine(&result_expectation_line);
+  }
+
+  std::string expected_error;
+  is->readUntilEOF(&expected_error);
+  StringUtil::chomp(&expected_error);
+
+  if (expected_error == error_message) {
     return Status::success();
   } else {
-    return Status(
-        eRuntimeError,
-        StringUtil::format("unexpected error: $0", error_msg));
+    if (error_message.empty()) {
+      auto result_csv = getResultCSV(result, " ");
+      return Status(eRuntimeError, StringUtil::format(
+          "expected error: $0 but got result: $1",
+          expected_error,
+          result_csv));
+
+    } else {
+      return Status(eRuntimeError, StringUtil::format(
+          "expected error: $0 but got error $1",
+          expected_error,
+          error_message));
+    }
   }
 }
 
-Status runTest(const std::string& test) {
+Status runTest(const std::string& test, OutputFormat output_format) {
   auto sql_file_path = FileUtil::joinPaths(
       kDirectoryPath,
       StringUtil::format("$0$1", test, kSQLPathEnding));
@@ -166,6 +224,16 @@ Status runTest(const std::string& test) {
     return Status(
         eIOError,
         StringUtil::format("File does not exist: $0", result_file_path));
+  }
+
+  auto result_expectation = kDefaultResultExpectation;
+  auto result_is = FileInputStream::openFile(result_file_path);
+  std::string first_line;
+  if (result_is->readLine(&first_line)) {
+    StringUtil::chomp(&first_line);
+    if (first_line == "ERROR!") {
+      result_expectation = ResultExpectation::ERROR;
+    }
   }
 
   /* input table path */
@@ -194,29 +262,187 @@ Status runTest(const std::string& test) {
   auto txn = runtime->newTransaction();
 
   txn->setTableProvider(new CSTableScanProvider("testtable", input_table_path));
-
   ResultList result;
+
+  std::string error_message;
+  auto rc = Status::success();
   try {
     auto qplan = runtime->buildQueryPlan(txn.get(), query);
     qplan->execute(0, &result);
   } catch (const std::exception& e) {
+    error_message = e.what();
 
-    /* compare error */
-    return compareError(e.what(), result_file_path);
+    if (result_expectation != ResultExpectation::ERROR) {
+      return Status(
+          eRuntimeError,
+          StringUtil::format("unexpected error: $0", error_message));
+    }
   }
 
-  /* compare chart */
   if (result.getNumColumns() == 1 &&
       result.getColumns()[0] == kChartColumnName) {
-    return compareChart(&result, result_file_path);
+    result_expectation = ResultExpectation::CHART;
   }
 
-  /* compare result */
-  return compareResult(&result, result_file_path);
+  switch (result_expectation) {
+    case ResultExpectation::TABLE:
+      rc = checkTableResult(&result, result_file_path);
+      break;
+
+    case ResultExpectation::CHART:
+      rc = checkChartResult(&result, result_file_path);
+      break;
+
+    case ResultExpectation::ERROR:
+      rc = checkErrorResult(error_message, &result, result_file_path);
+      break;
+  }
+
+  if (rc.isSuccess()) {
+    return rc;
+  }
+
+  switch (output_format) {
+    case OutputFormat::CSV:
+      return Status(eRuntimeError, getResultCSV(&result));
+
+    case OutputFormat::VERBOSE: {
+      std::string output = StringUtil::format("$0\n", rc.message());
+
+      /* add the expected result's debug print */
+      {
+        ResultList expected_result;
+        expected_result.addHeader(StringUtil::split(first_line, ";"));
+        std::string line;
+        while (result_is->readLine(&line)) {
+          StringUtil::chomp(&line);
+          expected_result.addRow(StringUtil::split(line, ";"));
+          line.clear();
+        }
+
+        output.append("expected:\n");
+        auto string_is = new StringOutputStream(&output);
+        expected_result.debugPrint(string_is);
+      }
+
+      /* add the returned result's debug print */
+      {
+        output.append("got:\n");
+        auto string_is = new StringOutputStream(&output);
+        result.debugPrint(string_is);
+      }
+
+      return Status(eRuntimeError, output);
+    }
+
+    case OutputFormat::TAP:
+      return rc;
+  }
 }
 
 int main(int argc, const char** argv) {
-  int rc = 0;
+  cli::FlagParser flags;
+
+  flags.defineFlag(
+      "help",
+      cli::FlagParser::T_SWITCH,
+      false,
+      "?",
+      NULL,
+      "help",
+      "<help>");
+
+  flags.defineFlag(
+      "test",
+      cli::FlagParser::T_STRING,
+      false,
+      "t",
+      NULL,
+      "test",
+      "<test_number>");
+
+  flags.defineFlag(
+      "tap",
+      cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "tap",
+      "<tap>");
+
+  flags.defineFlag(
+      "csv",
+      cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "csv",
+      "<csv>");
+
+  flags.defineFlag(
+      "verbose",
+      cli::FlagParser::T_SWITCH,
+      false,
+      NULL,
+      NULL,
+      "verbose",
+      "<verbose>");
+
+  flags.parseArgv(argc, argv);
+
+  if (flags.isSet("help")) {
+    std::cout
+      << StringUtil::format(
+            "EventQL $0 ($1)\n"
+            "Copyright (c) 2016, DeepCortex GmbH. All rights reserved.\n\n",
+            eventql::kVersionString,
+            eventql::kBuildID);
+
+    std::cout
+      << "Usage: $ evql-test-sql [OPTIONS]" << std::endl
+      <<  "   --tap                     Print the test output as TAP" << std::endl
+      <<  "   -t, --test <test_number>  Run a test specified by its test number" <<std::endl
+      <<  "   --csv                     Print the result as CSV (use only together with --test) " << std::endl
+      <<  "   --verbose                 Print the expected and the actual result as tables (use only togehter with --test)" << std::endl
+      <<  "   -?, --help                Display this help text and exit" <<std::endl;
+    return 0;
+  }
+
+  if (flags.getArgv().size() > 0) {
+    printError(StringUtil::format(
+        "invalid argument: '$0', run evql-test-sql --help for help\n",
+        flags.getArgv()[0]));
+
+    return 1;
+  }
+
+  if (flags.isSet("csv") && !flags.isSet("test")) {
+    printError("--csv can only be used if --test is set, run evql-test-sql --help for help\n");
+    return 1;
+  }
+
+  if (flags.isSet("verbose") && !flags.isSet("test")) {
+    printError("--verbose can only be used if --test is set, run evql-test-sql --help for help\n");
+    return 1;
+  }
+
+  auto output_format = kDefaultOutputFormat;
+  if (flags.isSet("tap")) {
+    output_format = OutputFormat::TAP;
+  }
+
+  if (flags.isSet("csv")) {
+    output_format = OutputFormat::CSV;
+  }
+
+  if (flags.isSet("verbose")) {
+    output_format = OutputFormat::VERBOSE;
+  }
+
+  std::string test_nr;
+  if (flags.isSet("test")) {
+    test_nr = flags.getString("test");
+  }
 
   try {
     auto is = FileInputStream::openFile(kTestListFile);
@@ -225,11 +451,36 @@ int main(int argc, const char** argv) {
     size_t count = 1;
     while (is->readLine(&line)) {
       StringUtil::chomp(&line);
-      auto ret = runTest(line);
+
+      if (!test_nr.empty() && !StringUtil::beginsWith(line, test_nr)) {
+        line.clear();
+        continue;
+      }
+
+      auto ret = runTest(line, output_format);
       if (ret.isSuccess()) {
-        std::cout << "ok " << count << " - test passed" << std::endl;
+        std::cout
+          << "ok "
+          << count
+          << " - "
+          << "[" << line << "] "
+          << "Test passed"
+          << std::endl;
+
       } else {
-        std::cout << "not ok " << count << " - " << ret.message() << std::endl;
+
+        switch (output_format) {
+          case OutputFormat::TAP:
+            std::cout
+              << "not ok "
+              << count
+              << " - "
+              << "[" << line << "] ";
+
+          case OutputFormat::VERBOSE:
+          case OutputFormat::CSV:
+            std::cout << ret.message() << std::endl;
+        }
       }
 
       line.clear();
@@ -237,10 +488,10 @@ int main(int argc, const char** argv) {
     }
 
   } catch (const std::exception& e) {
-    rc = 1;
-    std::cout << e.what();
+    printError(e.what());
+    return 1;
   }
 
-  return rc;
+  return 0;
 }
 
