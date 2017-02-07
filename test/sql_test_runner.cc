@@ -227,14 +227,12 @@ Status runTest(const std::string& test, OutputFormat output_format) {
   }
 
   auto result_expectation = kDefaultResultExpectation;
-  {
-    auto result_is = FileInputStream::openFile(result_file_path);
-    std::string first_line;
-    if (result_is->readLine(&first_line)) {
-      StringUtil::chomp(&first_line);
-      if (first_line == "ERROR!") {
-        result_expectation = ResultExpectation::ERROR;
-      }
+  auto result_is = FileInputStream::openFile(result_file_path);
+  std::string first_line;
+  if (result_is->readLine(&first_line)) {
+    StringUtil::chomp(&first_line);
+    if (first_line == "ERROR!") {
+      result_expectation = ResultExpectation::ERROR;
     }
   }
 
@@ -308,8 +306,34 @@ Status runTest(const std::string& test, OutputFormat output_format) {
     case OutputFormat::CSV:
       return Status(eRuntimeError, getResultCSV(&result));
 
-    case OutputFormat::VERBOSE:
+    case OutputFormat::VERBOSE: {
+      std::string output = StringUtil::format("$0\n", rc.message());
 
+      /* add the expected result's debug print */
+      {
+        ResultList expected_result;
+        expected_result.addHeader(StringUtil::split(first_line, ";"));
+        std::string line;
+        while (result_is->readLine(&line)) {
+          StringUtil::chomp(&line);
+          expected_result.addRow(StringUtil::split(line, ";"));
+          line.clear();
+        }
+
+        output.append("expected:\n");
+        auto string_is = new StringOutputStream(&output);
+        expected_result.debugPrint(string_is);
+      }
+
+      /* add the returned result's debug print */
+      {
+        output.append("got:\n");
+        auto string_is = new StringOutputStream(&output);
+        result.debugPrint(string_is);
+      }
+
+      return Status(eRuntimeError, output);
+    }
 
     case OutputFormat::TAP:
       return rc;
@@ -429,6 +453,7 @@ int main(int argc, const char** argv) {
       StringUtil::chomp(&line);
 
       if (!test_nr.empty() && !StringUtil::beginsWith(line, test_nr)) {
+        line.clear();
         continue;
       }
 
