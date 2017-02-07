@@ -87,7 +87,7 @@ TEST_CASE(QTreeTest, TestExtractEqualsConstraint, [] () {
     auto constraint = constraints[0];
     EXPECT_EQ(constraint.column_name, "time");
     EXPECT_TRUE(constraint.type == ScanConstraintType::EQUAL_TO);
-    EXPECT_EQ(constraint.value.getString(), "1234");
+    EXPECT_EQ(constraint.value.toString(), "1234");
   }
 });
 
@@ -127,7 +127,7 @@ TEST_CASE(QTreeTest, TestExtractNotEqualsConstraint, [] () {
     auto constraint = constraints[0];
     EXPECT_EQ(constraint.column_name, "time");
     EXPECT_TRUE(constraint.type == ScanConstraintType::NOT_EQUAL_TO);
-    EXPECT_EQ(constraint.value.getString(), "1234");
+    EXPECT_EQ(constraint.value.toString(), "1234");
   }
 });
 
@@ -167,7 +167,7 @@ TEST_CASE(QTreeTest, TestExtractLessThanConstraint, [] () {
     auto constraint = constraints[0];
     EXPECT_EQ(constraint.column_name, "time");
     EXPECT_TRUE(constraint.type == ScanConstraintType::LESS_THAN);
-    EXPECT_EQ(constraint.value.getString(), "1234");
+    EXPECT_EQ(constraint.value.toString(), "1234");
   }
 });
 
@@ -207,7 +207,7 @@ TEST_CASE(QTreeTest, TestExtractLessThanOrEqualToConstraint, [] () {
     auto constraint = constraints[0];
     EXPECT_EQ(constraint.column_name, "time");
     EXPECT_TRUE(constraint.type == ScanConstraintType::LESS_THAN_OR_EQUAL_TO);
-    EXPECT_EQ(constraint.value.getString(), "1234");
+    EXPECT_EQ(constraint.value.toString(), "1234");
   }
 });
 
@@ -247,7 +247,7 @@ TEST_CASE(QTreeTest, TestExtractGreaterThanConstraint, [] () {
     auto constraint = constraints[0];
     EXPECT_EQ(constraint.column_name, "time");
     EXPECT_TRUE(constraint.type == ScanConstraintType::GREATER_THAN);
-    EXPECT_EQ(constraint.value.getString(), "1234");
+    EXPECT_EQ(constraint.value.toString(), "1234");
   }
 });
 
@@ -287,7 +287,7 @@ TEST_CASE(QTreeTest, TestExtractGreaterThanOrEqualToConstraint, [] () {
     auto constraint = constraints[0];
     EXPECT_EQ(constraint.column_name, "time");
     EXPECT_TRUE(constraint.type == ScanConstraintType::GREATER_THAN_OR_EQUAL_TO);
-    EXPECT_EQ(constraint.value.getString(), "1234");
+    EXPECT_EQ(constraint.value.toString(), "1234");
   }
 });
 
@@ -324,21 +324,21 @@ TEST_CASE(QTreeTest, TestExtractMultipleConstraints, [] () {
     auto constraint = constraints[0];
     EXPECT_EQ(constraint.column_name, "time");
     EXPECT_TRUE(constraint.type == ScanConstraintType::LESS_THAN);
-    EXPECT_EQ(constraint.value.getString(), "1234");
+    EXPECT_EQ(constraint.value.toString(), "1234");
   }
 
   {
     auto constraint = constraints[1];
     EXPECT_EQ(constraint.column_name, "session_id");
     EXPECT_TRUE(constraint.type == ScanConstraintType::NOT_EQUAL_TO);
-    EXPECT_EQ(constraint.value.getString(), "444");
+    EXPECT_EQ(constraint.value.toString(), "444");
   }
 
   {
     auto constraint = constraints[2];
     EXPECT_EQ(constraint.column_name, "time");
     EXPECT_TRUE(constraint.type == ScanConstraintType::GREATER_THAN_OR_EQUAL_TO);
-    EXPECT_EQ(constraint.value.getString(), "6666");
+    EXPECT_EQ(constraint.value.toString(), "6666");
   }
 });
 
@@ -402,7 +402,7 @@ TEST_CASE(QTreeTest, TestPruneConstraints, [] () {
     ScanConstraint constraint;
     constraint.column_name = "time";
     constraint.type = ScanConstraintType::GREATER_THAN_OR_EQUAL_TO;
-    constraint.value = SValue(SValue::IntegerType(6666));
+    constraint.value = SValue::newInt64(6666);
     RefPtr<ValueExpressionNode> pruned_expr;
     auto rc = QueryTreeUtil::removeConstraintFromPredicate(
         txn.get(),
@@ -420,7 +420,7 @@ TEST_CASE(QTreeTest, TestPruneConstraints, [] () {
     ScanConstraint constraint;
     constraint.column_name = "time";
     constraint.type = ScanConstraintType::LESS_THAN;
-    constraint.value = SValue(SValue::IntegerType(1234));
+    constraint.value = SValue(SValue::newInt64(1234));
     RefPtr<ValueExpressionNode> pruned_expr;
     auto rc = QueryTreeUtil::removeConstraintFromPredicate(
         txn.get(),
