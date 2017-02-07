@@ -55,6 +55,29 @@ const SFunction logical_or(
     &logical_or_call);
 
 
+void cmp_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  if (left < right) {
+    pushInt64(stack, -1);
+  } else if (left > right) {
+    pushInt64(stack, 1);
+  } else {
+    pushInt64(stack, 0);
+  }
+}
+
+const SFunction cmp_uint64(
+    { SType::UINT64, SType::UINT64 },
+    SType::INT64,
+    &cmp_uint64_call);
+
+const SFunction cmp_timestamp64(
+    { SType::TIMESTAMP64, SType::TIMESTAMP64 },
+    SType::INT64,
+    &cmp_uint64_call);
+
+
 void eq_uint64_call(sql_txn* ctx, VMStack* stack) {
   auto right = popUInt64(stack);
   auto left = popUInt64(stack);
