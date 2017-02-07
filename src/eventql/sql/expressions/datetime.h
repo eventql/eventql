@@ -32,7 +32,7 @@
 namespace csql {
 namespace expressions {
 
-//void nowExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
+extern const SFunction now;
 //void fromTimestamp(sql_txn* ctx, int argc, SValue* argv, SValue* out);
 //void dateTruncExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
 //void dateAddExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);

@@ -83,7 +83,7 @@ void installDefaultSymbols(SymbolTable* rt) {
   //rt->registerFunction("to_bool", PureFunction(&expressions::toBoolExpr));
 
   /* expressions/datetime.h */
-  //rt->registerFunction("now", PureFunction(&expressions::nowExpr));
+  rt->registerFunction("now", expressions::now);
   //rt->registerFunction(
   //    "FROM_TIMESTAMP",
   //    PureFunction(&expressions::fromTimestamp));

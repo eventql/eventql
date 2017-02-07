@@ -35,6 +35,15 @@
 namespace csql {
 namespace expressions {
 
+void now_call(sql_txn* ctx, VMStack* stack) {
+  pushTimestamp64(stack, WallClock::unixMicros());
+}
+
+const SFunction now(
+    {  },
+    SType::TIMESTAMP64,
+    &now_call);
+
 static Option<uint64_t> parseInterval(String time_interval) {
   uint64_t num;
   String unit;
@@ -98,10 +107,6 @@ static Option<uint64_t> parseInterval(String time_interval) {
   return None<uint64_t>();
 }
 
-//void nowExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  *out = SValue::newTimestamp(WallClock::unixMicros());
-//}
-//
 //void fromTimestamp(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
 //  checkArgs("FROM_TIMESTAMP", argc, 1);
 //
@@ -114,6 +119,7 @@ static Option<uint64_t> parseInterval(String time_interval) {
 //      break;
 //  }
 //}
+
 //
 //void dateTruncExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
 //  checkArgs("DATE_TRUNC", argc, 2);
