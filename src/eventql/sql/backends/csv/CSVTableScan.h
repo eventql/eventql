@@ -23,7 +23,7 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
-#include <eventql/sql/table_iterator.h>
+#include <eventql/sql/table_expression.h>
 #include <eventql/sql/backends/csv/CSVInputStream.h>
 
 #include "eventql/eventql.h"
@@ -32,20 +32,21 @@ namespace csql {
 namespace backends {
 namespace csv {
 
-struct CSVTableScan : public TableIterator {
+struct CSVTableScan : public TableExpression {
 public:
 
   CSVTableScan(
-      const Vector<String>& headers,
+      const std::vector<std::pair<std::string, SType>> columns,
       ScopedPtr<CSVInputStream> csv);
 
-  bool nextRow(SValue* row) override;
+  ReturnCode execute() override;
+  ReturnCode nextBatch(SVector* columns, size_t* len) override;
 
-  size_t findColumn(const String& name) override;
-  size_t numColumns() const override;
+  size_t getColumnCount() const override;
+  SType getColumnType(size_t idx) const override;
 
 protected:
-  Vector<String> headers_;
+  std::vector<std::pair<std::string, SType>> columns_;
   ScopedPtr<CSVInputStream> csv_;
 };
 

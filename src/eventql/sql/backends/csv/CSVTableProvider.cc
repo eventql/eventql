@@ -37,8 +37,13 @@ CSVTableProvider::CSVTableProvider(
     stream_factory_(factory) {
   auto stream = stream_factory_();
 
-  if (!stream->readNextRow(&headers_)) {
+  std::vector<std::string> headers;
+  if (!stream->readNextRow(&headers)) {
     RAISE(kRuntimeError, "can't read CSV headers");
+  }
+
+  for (const auto& h : headers) {
+    columns_.emplace_back(h, SType::STRING);
   }
 }
 
@@ -76,12 +81,12 @@ TableInfo CSVTableProvider::tableInfo() const {
   TableInfo ti;
   ti.table_name = table_name_;
 
-  for (const auto& col : headers_) {
+  for (const auto& col : columns_) {
     ColumnInfo ci;
-    ci.column_name = col;
+    ci.column_name = col.first;
     ci.type_size = 0;
     ci.is_nullable = true;
-    ci.type = "string";
+    ci.type = col.second;
     ti.columns.emplace_back(ci);
   }
 
@@ -100,12 +105,7 @@ Option<ScopedPtr<TableExpression>> CSVTableProvider::buildSequentialScan(
   stream->skipNextRow();
 
   return Option<ScopedPtr<TableExpression>>(
-      ScopedPtr<TableExpression>(
-          new TableScan(
-              txn,
-              execution_context,
-              seqscan,
-              mkScoped(new CSVTableScan(headers_, std::move(stream))))));
+      ScopedPtr<TableExpression>(new CSVTableScan(columns_, std::move(stream))));
 
 }
 

@@ -48,11 +48,6 @@ public:
       const String& table_name,
       FactoryFn stream_factory);
 
-//  TaskIDList buildSequentialScan(
-//      Transaction* txn,
-//      RefPtr<SequentialScanNode> seqscan,
-//      TaskDAG* tasks) const override;
-//
   void listTables(
       Function<void (const csql::TableInfo& table)> fn) const override;
 
@@ -69,7 +64,7 @@ protected:
 
   const String table_name_;
   FactoryFn stream_factory_;
-  Vector<String> headers_;
+  std::vector<std::pair<std::string, SType>> columns_;
 };
 
 } // namespace csv
