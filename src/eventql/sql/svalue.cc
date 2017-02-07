@@ -394,13 +394,13 @@ size_t SValue::getSize() const {
 }
 
 void SValue::setTag(STag tag) {
-  auto data = getData();
+  auto data = static_cast<char*>(getData());
   memcpy(data + sql_sizeof(type_, data) - sizeof(STag), &tag, sizeof(STag));
 }
 
 STag SValue::getTag() const {
   STag tag;
-  auto data = getData();
+  auto data = static_cast<const char*>(getData());
   memcpy(&tag, data + sql_sizeof(type_, data) - sizeof(STag), sizeof(STag));
   return tag;
 }
@@ -538,6 +538,8 @@ size_t sql_sizeof(SType type, const void* data) {
     case SType::BOOL:
       return 1 + sizeof(STag);
   }
+
+  throw std::runtime_error("invalid SType");
 }
 
 size_t sql_sizeof_static(SType type) {
@@ -554,6 +556,17 @@ size_t sql_sizeof_static(SType type) {
     case SType::BOOL:
       return 1 + sizeof(STag);
   }
+
+  throw std::runtime_error("invalid SType");
+}
+
+size_t sql_sizeof_tuple(const char* data, const SType* val_types, size_t val_cnt) {
+  auto cur = data;
+  for (size_t i = 0; i < val_cnt; ++i) {
+    cur += sql_sizeof(val_types[i], cur);
+  }
+
+  return cur - data;
 }
 
 std::string sql_tostring(SType type, const void* value) {
@@ -628,6 +641,8 @@ std::string sql_tostring(SType type, const void* value) {
     }
 
   }
+
+  throw std::runtime_error("invalid SType");
 }
 
 } // namespace csql
