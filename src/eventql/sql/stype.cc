@@ -397,9 +397,12 @@ void pushBoolUnboxed(VMStack* stack, const void* value) {
 }
 
 void copyString(const std::string& str, SVector* vector) {
-  uint32_t strlen = str.size();
+  copyString(str.data(), str.size(), vector);
+}
+
+void copyString(const char* str, uint32_t strlen, SVector* vector) {
   vector->append((const char*) &strlen, sizeof(uint32_t));
-  vector->append(str.data(), strlen);
+  vector->append(str, strlen);
   STag tag = 0;
   vector->append(&tag, sizeof(tag));
 }

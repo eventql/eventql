@@ -52,7 +52,8 @@ enum class SType : uint8_t {
 using STag = uint8_t;
 
 enum STagFlag : uint8_t {
-  STAG_NULL = 1
+  STAG_NULL = 1,
+  STAG_INLINE = 128
 };
 
 std::string getSTypeName(SType type);
@@ -105,6 +106,7 @@ void pushBool(VMStack* stack, bool value, STag tag);
 void pushBoolUnboxed(VMStack* stack, const void* value);
 
 void copyString(const std::string& str, SVector* vector);
+void copyString(const char* str, uint32_t strlen, SVector* vector);
 void popString(VMStack* stack, const char** data, size_t* len);
 void popString(VMStack* stack, const char** data, size_t* len, STag* tag);
 std::string popString(VMStack* stack);
