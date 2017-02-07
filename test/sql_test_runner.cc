@@ -28,6 +28,7 @@
 #include "eventql/util/stringutil.h"
 #include "eventql/util/io/fileutil.h"
 #include "eventql/util/io/inputstream.h"
+#include "eventql/util/cli/flagparser.h"
 #include "eventql/util/csv/CSVInputStream.h"
 #include "eventql/sql/runtime/defaultruntime.h"
 #include "eventql/sql/CSTableScanProvider.h"
@@ -245,7 +246,48 @@ Status runTest(const std::string& test) {
 }
 
 int main(int argc, const char** argv) {
-  int rc = 0;
+  cli::FlagParser flags;
+
+  flags.defineFlag(
+      "help",
+      cli::FlagParser::T_SWITCH,
+      false,
+      "?",
+      NULL,
+      "help",
+      "<help>");
+
+  flags.defineFlag(
+      "test",
+      cli::FlagParser::T_STRING,
+      false,
+      "t",
+      NULL,
+      "test",
+      "<test_number>");
+
+  flags.parseArgv(argc, argv);
+
+  if (flags.isSet("help")) {
+    std::cout
+      << StringUtil::format(
+            "EventQL $0 ($1)\n"
+            "Copyright (c) 2016, DeepCortex GmbH. All rights reserved.\n\n",
+            eventql::kVersionString,
+            eventql::kBuildID);
+
+    std::cout
+      << "Usage: $ evql-test-sql [OPTIONS]" << std::endl
+      <<  "   --verbose                 Print debug output to STDERR" << std::endl
+      <<  "   -?, --help                Display this help text and exit" <<std::endl
+      <<  "   -t, --test <test_number>  Run a test specified by its test number" <<std::endl;
+    return 0;
+  }
+
+  std::string test_nr;
+  if (flags.isSet("test")) {
+    test_nr = flags.getString("test");
+  }
 
   try {
     auto is = FileInputStream::openFile(kTestListFile);
@@ -254,6 +296,11 @@ int main(int argc, const char** argv) {
     size_t count = 1;
     while (is->readLine(&line)) {
       StringUtil::chomp(&line);
+
+      if (!test_nr.empty() && !StringUtil::beginsWith(line, test_nr)) {
+        continue;
+      }
+
       auto ret = runTest(line);
       if (ret.isSuccess()) {
         std::cout
@@ -279,10 +326,10 @@ int main(int argc, const char** argv) {
     }
 
   } catch (const std::exception& e) {
-    rc = 1;
     std::cout << e.what();
+    return 1;
   }
 
-  return rc;
+  return 0;
 }
 
