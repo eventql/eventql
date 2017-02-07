@@ -44,6 +44,26 @@ const SFunction now(
     SType::TIMESTAMP64,
     &now_call);
 
+void to_timestamp_int64_call(sql_txn* ctx, VMStack* stack) {
+  auto value = popInt64(stack);
+  pushTimestamp64(stack, value * kMicrosPerSecond);
+}
+
+const SFunction to_timestamp_int64(
+    { SType::INT64 },
+    SType::TIMESTAMP64,
+    &to_timestamp_int64_call);
+
+void to_timestamp_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto value = popFloat64(stack);
+  pushTimestamp64(stack, value * kMicrosPerSecond);
+}
+
+const SFunction to_timestamp_float64(
+    { SType::FLOAT64 },
+    SType::TIMESTAMP64,
+    &to_timestamp_float64_call);
+
 static Option<uint64_t> parseInterval(String time_interval) {
   uint64_t num;
   String unit;
