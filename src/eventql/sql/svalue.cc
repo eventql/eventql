@@ -297,38 +297,6 @@ std::string SValue::toString() const {
   return sql_tostring(type_, getData());
 }
 
-//String SValue::toSQL() const {
-//  switch (data_.type) {
-//
-//    case SType::INT64:
-//    case SType::UINT64: {
-//      return getString();
-//    }
-//
-//    case SType::TIMESTAMP64: {
-//      return StringUtil::toString(getInteger());
-//    }
-//
-//    case SType::FLOAT64: {
-//      return getString();
-//    }
-//
-//    case SType::BOOL: {
-//      return getString();
-//    }
-//
-//    case SType::STRING: {
-//      auto str = sql_escape(getString());
-//      return StringUtil::format("\"$0\"", str);
-//    }
-//
-//    case SType::NIL: {
-//      return "NULL";
-//    }
-//
-//  }
-//}
-
 void SValue::encode(OutputStream* os) const {
   os->appendUInt8((uint8_t) type_);
   os->appendLenencString(getData(), getSize());
@@ -431,14 +399,6 @@ STag SValue::getTag() const {
   auto data = static_cast<const char*>(getData());
   memcpy(&tag, data + sql_sizeof(type_, data) - sizeof(STag), sizeof(STag));
   return tag;
-}
-
-String sql_escape(const String& orig_str) {
-  auto str = orig_str;
-  StringUtil::replaceAll(&str, "\\", "\\\\");
-  StringUtil::replaceAll(&str, "'", "\\'");
-  StringUtil::replaceAll(&str, "\"", "\\\"");
-  return str;
 }
 
 SVector::SVector(
@@ -671,6 +631,91 @@ std::string sql_tostring(SType type, const void* value) {
   }
 
   throw std::runtime_error("invalid SType");
+}
+
+std::string sql_toexprstring(SType type, const void* value) {
+  if (!value) {
+    return "NULL";
+  }
+
+  switch (type) {
+
+    case SType::NIL:
+      return "NULL";
+
+    case SType::INT64: {
+      STag tag;
+      memcpy(&tag, (const char*) value + sizeof(int64_t), sizeof(STag));
+      if (tag & STAG_NULL) {
+        return "NULL";
+      } else {
+        return std::to_string(*static_cast<const int64_t*>(value));
+      }
+    }
+
+    case SType::UINT64: {
+      STag tag;
+      memcpy(&tag, (const char*) value + sizeof(uint64_t), sizeof(STag));
+      if (tag & STAG_NULL) {
+        return "NULL";
+      } else {
+        return std::to_string(*static_cast<const uint64_t*>(value));
+      }
+    }
+
+    case SType::FLOAT64: {
+      STag tag;
+      memcpy(&tag, (const char*) value + sizeof(double), sizeof(STag));
+      if (tag & STAG_NULL) {
+        return "NULL";
+      } else {
+        return std::to_string(*static_cast<const double*>(value));
+      }
+    }
+
+    case SType::STRING: {
+      auto strlen = sql_strlen(value);
+      STag tag;
+      memcpy(&tag, (const char*) value + sizeof(uint32_t) + strlen, sizeof(STag));
+      if (tag & STAG_NULL) {
+        return "NULL";
+      } else {
+        auto str = sql_escape(std::string(sql_cstr(value), strlen));
+        return StringUtil::format("\"$0\"", str);
+      }
+    }
+
+    case SType::TIMESTAMP64: {
+      STag tag;
+      memcpy(&tag, (const char*) value + sizeof(uint64_t), sizeof(STag));
+      if (tag & STAG_NULL) {
+        return "NULL";
+      } else {
+        return UnixTime(*static_cast<const uint64_t*>(value)).toString();
+      }
+    }
+
+    case SType::BOOL: {
+      STag tag;
+      memcpy(&tag, (const char*) value + sizeof(uint8_t), sizeof(STag));
+      if (tag & STAG_NULL) {
+        return "NULL";
+      } else {
+        return *static_cast<const uint8_t*>(value) ? "true" : "false";
+      }
+    }
+
+  }
+
+  throw std::runtime_error("invalid SType");
+}
+
+String sql_escape(const String& orig_str) {
+  auto str = orig_str;
+  StringUtil::replaceAll(&str, "\\", "\\\\");
+  StringUtil::replaceAll(&str, "'", "\\'");
+  StringUtil::replaceAll(&str, "\"", "\\\"");
+  return str;
 }
 
 } // namespace csql

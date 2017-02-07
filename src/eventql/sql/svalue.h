@@ -95,7 +95,6 @@ public:
   bool getBool() const;
 
   std::string toString() const;
-  String toSQL() const;
 
   void copyFrom(const void* data);
 
@@ -142,8 +141,6 @@ protected:
   size_t size_;
 };
 
-std::string sql_escape(const std::string& str);
-
 size_t sql_strlen(const void* str);
 char* sql_cstr(void* str);
 const char* sql_cstr(const void* str);
@@ -153,6 +150,8 @@ size_t sql_sizeof_static(SType type);
 size_t sql_sizeof_tuple(const char* data, const SType* val_types, size_t val_cnt);
 
 std::string sql_tostring(SType type, const void* value);
+std::string sql_toexprstring(SType type, const void* value);
+std::string sql_escape(const std::string& str);
 
 
 } // namespace csql
