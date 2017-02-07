@@ -97,11 +97,26 @@ ScopedPtr<TableExpression> DefaultScheduler::buildOrderByExpression(
     ExecutionContext* execution_context,
     RefPtr<OrderByNode> node) {
   Vector<OrderByExpression::SortExpr> sort_exprs;
+  Vector<PureSFunctionPtr> comparators;
   for (const auto& ss : node->sortSpecs()) {
     OrderByExpression::SortExpr se;
     se.descending = ss.descending;
     se.expr = txn->getCompiler()->buildValueExpression(txn, ss.expr);
+
+    const SymbolTableEntry* symbol;
+    auto rc = txn->getSymbolTable()->resolve(
+        "cmp",
+        { se.expr.getReturnType(), se.expr.getReturnType() },
+        &symbol,
+        false);
+
+    if (!rc.isSuccess()) {
+      RAISE(kRuntimeError, rc.getMessage());
+    }
+
+    assert(symbol->getFunction()->return_type == SType::INT64);
     sort_exprs.emplace_back(std::move(se));
+    comparators.emplace_back(symbol->getFunction()->vtable.call);
   }
 
   return mkScoped(
@@ -109,6 +124,7 @@ ScopedPtr<TableExpression> DefaultScheduler::buildOrderByExpression(
           txn,
           execution_context,
           std::move(sort_exprs),
+          comparators,
           buildTableExpression(
               txn,
               execution_context,

@@ -71,7 +71,8 @@ void SymbolTable::registerImplicitConversion(
 ReturnCode SymbolTable::resolve(
     const std::string& function_name,
     const std::vector<SType>& arguments,
-    const SymbolTableEntry** entry) const {
+    const SymbolTableEntry** entry,
+    bool allow_conversion /* = true */) const {
   std::string function_name_downcase = function_name;
   StringUtil::toLower(&function_name_downcase);
 
@@ -109,7 +110,7 @@ ReturnCode SymbolTable::resolve(
   }
 
   /* scan the candidates looking for a match using implicit conversions */
-  if (!match) {
+  if (!match && allow_conversion) {
     for (const auto& candidate : candidates) {
       auto candidate_fn = candidate->getFunction();
       if (candidate_fn->arg_types.size() != arguments.size()) {
