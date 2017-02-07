@@ -226,6 +226,12 @@ Status runTest(const std::string& test) {
     qplan->execute(0, &result);
   } catch (const std::exception& e) {
     error_message = e.what();
+
+    if (result_expectation != ResultExpectation::ERROR) {
+      return Status(
+          eRuntimeError,
+          StringUtil::format("unexpected error: $0", error_message));
+    }
   }
 
   if (result.getNumColumns() == 1 &&
