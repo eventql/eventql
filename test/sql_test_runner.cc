@@ -445,10 +445,13 @@ int main(int argc, const char** argv) {
   }
 
   try {
+    auto stdout_os = OutputStream::getStdout();
+    bool test_executed = false;
+
     auto is = FileInputStream::openFile(kTestListFile);
 
-    std::string line;
     size_t count = 1;
+    std::string line;
     while (is->readLine(&line)) {
       StringUtil::chomp(&line);
 
@@ -459,32 +462,35 @@ int main(int argc, const char** argv) {
 
       auto ret = runTest(line, output_format);
       if (ret.isSuccess()) {
-        std::cout
-          << "ok "
-          << count
-          << " - "
-          << "[" << line << "] "
-          << "Test passed"
-          << std::endl;
+        stdout_os->write(StringUtil::format(
+            "ok $0 - [$1] Test passed\n",
+            count,
+            line));
 
       } else {
 
         switch (output_format) {
           case OutputFormat::TAP:
-            std::cout
-              << "not ok "
-              << count
-              << " - "
-              << "[" << line << "] ";
+            stdout_os->write(StringUtil::format(
+                "not ok $0 - [$1] ",
+                count,
+                line));
 
           case OutputFormat::VERBOSE:
           case OutputFormat::CSV:
-            std::cout << ret.message() << std::endl;
+            stdout_os->write(StringUtil::format("$0\n", ret.message()));
         }
       }
 
       line.clear();
+      test_executed = true;
       ++count;
+    }
+
+    if (!test_executed) {
+      printError(StringUtil::format(
+          "could not find a test with number $0", test_nr));
+      return 1;
     }
 
   } catch (const std::exception& e) {
