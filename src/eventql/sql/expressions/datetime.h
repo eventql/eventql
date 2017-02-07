@@ -33,6 +33,8 @@ namespace csql {
 namespace expressions {
 
 extern const SFunction now;
+extern const SFunction from_timestamp_int64;
+extern const SFunction from_timestamp_float64;
 extern const SFunction to_timestamp_int64;
 extern const SFunction to_timestamp_float64;
 //void dateTruncExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);

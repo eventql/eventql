@@ -44,9 +44,29 @@ const SFunction now(
     SType::TIMESTAMP64,
     &now_call);
 
-void to_timestamp_int64_call(sql_txn* ctx, VMStack* stack) {
+void from_timestamp_int64_call(sql_txn* ctx, VMStack* stack) {
   auto value = popInt64(stack);
   pushTimestamp64(stack, value * kMicrosPerSecond);
+}
+
+const SFunction from_timestamp_int64(
+    { SType::INT64 },
+    SType::TIMESTAMP64,
+    &from_timestamp_int64_call);
+
+void from_timestamp_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto value = popFloat64(stack);
+  pushTimestamp64(stack, value * kMicrosPerSecond);
+}
+
+const SFunction from_timestamp_float64(
+    { SType::FLOAT64 },
+    SType::TIMESTAMP64,
+    &from_timestamp_float64_call);
+
+void to_timestamp_int64_call(sql_txn* ctx, VMStack* stack) {
+  auto value = popInt64(stack);
+  pushTimestamp64(stack, value);
 }
 
 const SFunction to_timestamp_int64(
@@ -56,7 +76,7 @@ const SFunction to_timestamp_int64(
 
 void to_timestamp_float64_call(sql_txn* ctx, VMStack* stack) {
   auto value = popFloat64(stack);
-  pushTimestamp64(stack, value * kMicrosPerSecond);
+  pushTimestamp64(stack, value);
 }
 
 const SFunction to_timestamp_float64(
