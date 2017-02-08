@@ -62,11 +62,13 @@ void installDefaultSymbols(SymbolTable* rt) {
   rt->registerFunction("eq",  expressions::eq_int64);
   rt->registerFunction("eq",  expressions::eq_float64);
   rt->registerFunction("eq",  expressions::eq_bool);
+  rt->registerFunction("eq",  expressions::eq_string);
   rt->registerFunction("eq",  expressions::eq_timestamp64);
   rt->registerFunction("neq",  expressions::neq_uint64);
   rt->registerFunction("neq",  expressions::neq_int64);
   rt->registerFunction("neq",  expressions::neq_float64);
   rt->registerFunction("neq",  expressions::neq_bool);
+  rt->registerFunction("neq",  expressions::neq_string);
   rt->registerFunction("neq",  expressions::neq_timestamp64);
   rt->registerFunction("lt", expressions::lt_uint64);
   rt->registerFunction("lt", expressions::lt_int64);

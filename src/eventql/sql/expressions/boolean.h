@@ -49,12 +49,14 @@ extern const SFunction eq_uint64;
 extern const SFunction eq_int64;
 extern const SFunction eq_float64;
 extern const SFunction eq_bool;
+extern const SFunction eq_string;
 extern const SFunction eq_timestamp64;
 
 extern const SFunction neq_uint64;
 extern const SFunction neq_int64;
 extern const SFunction neq_float64;
 extern const SFunction neq_bool;
+extern const SFunction neq_string;
 extern const SFunction neq_timestamp64;
 
 extern const SFunction lt_uint64;
