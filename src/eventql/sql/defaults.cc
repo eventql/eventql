@@ -28,6 +28,7 @@
 #include <eventql/sql/expressions/conversion.h>
 #include <eventql/sql/expressions/datetime.h>
 #include <eventql/sql/expressions/math.h>
+#include <eventql/sql/expressions/string.h>
 
 #include "eventql/eventql.h"
 
@@ -143,6 +144,7 @@ void installDefaultSymbols(SymbolTable* rt) {
   //rt->registerFunction("uppercase", PureFunction(&expressions::upperCaseExpr));
   //rt->registerFunction("ucase", PureFunction(&expressions::upperCaseExpr));
   //rt->registerFunction("lowercase", PureFunction(&expressions::lowerCaseExpr));
+  rt->registerFunction("lcase", expressions::lcase);
   //rt->registerFunction("lcase", PureFunction(&expressions::lowerCaseExpr));
   //rt->registerFunction("substring", PureFunction(&expressions::subStringExpr));
   //rt->registerFunction("substr", PureFunction(&expressions::subStringExpr));

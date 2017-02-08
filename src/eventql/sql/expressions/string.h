@@ -23,25 +23,28 @@
  */
 #pragma once
 #include <eventql/sql/svalue.h>
+#include <eventql/sql/SFunction.h>
 #include <eventql/sql/transaction.h>
+#include <eventql/sql/runtime/vm.h>
 
 namespace csql {
 namespace expressions {
 
-void startsWithExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
-
-void endsWithExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
-
-void upperCaseExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
-
-void lowerCaseExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
-
-void subStringExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
-
-void ltrimExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
-void rtrimExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
-
-void concatExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
+extern const SFunction lcase;
+//void startsWithExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
+//
+//void endsWithExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
+//
+//void upperCaseExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
+//
+//void lowerCaseExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
+//
+//void subStringExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
+//
+//void ltrimExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
+//void rtrimExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
+//
+//void concatExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
 
 }
 }
