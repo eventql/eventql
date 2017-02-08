@@ -149,7 +149,7 @@ void installDefaultSymbols(SymbolTable* rt) {
   //rt->registerFunction("substr", PureFunction(&expressions::subStringExpr));
   rt->registerFunction("ltrim", expressions::ltrim);
   rt->registerFunction("rtrim", expressions::rtrim);
-  //rt->registerFunction("concat", PureFunction(&expressions::concatExpr));
+  rt->registerFunction("concat", expressions::concat);
 
   /* expressions/miscellaneous.h */
   //rt->registerFunction("usleep", PureFunction(&expressions::usleepExpr, true));

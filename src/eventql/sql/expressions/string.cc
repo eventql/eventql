@@ -134,15 +134,17 @@ const SFunction rtrim(
 //  }
 //}
 //
-//
-//void concatExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  std::string str;
-//  for (int i = 0; i < argc; ++i) {
-//    str += argv[i].getString();
-//  }
-//
-//  *out = SValue::newString(str);
-//}
+void concat_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popString(stack);
+  auto left = popString(stack);
+  auto concat = left + right;
+  pushString(stack, concat);
+}
+
+const SFunction concat(
+    { SType::STRING, SType::STRING },
+    SType::STRING,
+    &concat_call);
 
 }
 }

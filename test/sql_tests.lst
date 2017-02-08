@@ -5,3 +5,4 @@
 00005_test_date_trunc
 00006_test_lcase_ucase
 00007_test_starts_ends_with
+00008_test_concat

@@ -38,7 +38,7 @@ extern const SFunction ltrim;
 extern const SFunction rtrim;
 //void subStringExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
 //
-//void concatExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
+extern const SFunction concat;
 
 }
 }
