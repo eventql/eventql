@@ -92,26 +92,6 @@ const SFunction from_timestamp_float64(
     SType::TIMESTAMP64,
     &from_timestamp_float64_call);
 
-void to_timestamp_int64_call(sql_txn* ctx, VMStack* stack) {
-  auto value = popInt64(stack);
-  pushTimestamp64(stack, value);
-}
-
-const SFunction to_timestamp_int64(
-    { SType::INT64 },
-    SType::TIMESTAMP64,
-    &to_timestamp_int64_call);
-
-void to_timestamp_float64_call(sql_txn* ctx, VMStack* stack) {
-  auto value = popFloat64(stack);
-  pushTimestamp64(stack, value);
-}
-
-const SFunction to_timestamp_float64(
-    { SType::FLOAT64 },
-    SType::TIMESTAMP64,
-    &to_timestamp_float64_call);
-
 void date_trunc_timestamp64_call(sql_txn* ctx, VMStack* stack) {
   auto timestamp = popTimestamp64(stack);
   auto window = popString(stack);

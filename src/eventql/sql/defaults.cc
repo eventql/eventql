@@ -42,6 +42,8 @@ void installDefaultSymbols(SymbolTable* rt) {
   rt->registerImplicitConversion(SType::BOOL, SType::NIL);
   rt->registerImplicitConversion(SType::STRING, SType::NIL);
   rt->registerImplicitConversion(SType::TIMESTAMP64, SType::NIL);
+  rt->registerFunction("to_timestamp", expressions::to_timestamp64_int64);
+  rt->registerFunction("to_timestamp", expressions::to_timestamp64_float64);
 
   /* expressions/aggregate.h */
   rt->registerFunction("count", expressions::count);
@@ -102,8 +104,6 @@ void installDefaultSymbols(SymbolTable* rt) {
   rt->registerFunction("now", expressions::now);
   rt->registerFunction("from_timestamp", expressions::from_timestamp_int64);
   rt->registerFunction("from_timestamp", expressions::from_timestamp_float64);
-  rt->registerFunction("to_timestamp", expressions::to_timestamp_int64);
-  rt->registerFunction("to_timestamp", expressions::to_timestamp_float64);
   rt->registerFunction("date_trunc", expressions::date_trunc_timestamp64);
   //rt->registerFunction("date_add", PureFunction(&expressions::dateAddExpr));
   //rt->registerFunction("date_sub", PureFunction(&expressions::dateAddExpr));

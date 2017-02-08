@@ -38,6 +38,8 @@ extern const SFunction to_nil_float64;
 extern const SFunction to_nil_bool;
 extern const SFunction to_nil_string;
 extern const SFunction to_nil_timestamp64;
+extern const SFunction to_timestamp64_int64;
+extern const SFunction to_timestamp64_float64;
 
 extern const SFunction to_int64_uint64;
 extern const SFunction to_int64_float64;
