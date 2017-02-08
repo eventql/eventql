@@ -533,7 +533,7 @@ size_t sql_sizeof(SType type, const void* data) {
 size_t sql_sizeof_static(SType type) {
   switch (type) {
     case SType::STRING:
-      throw std::runtime_error("invalid call of sql_sizeof_static(STRING)");
+      return sizeof(uint32_t) + sizeof(STag);
     case SType::NIL:
       return 0 + sizeof(STag);
     case SType::FLOAT64:
