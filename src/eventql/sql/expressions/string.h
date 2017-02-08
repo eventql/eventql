@@ -36,14 +36,7 @@ extern const SFunction startswith;
 extern const SFunction endswith;
 extern const SFunction ltrim;
 extern const SFunction rtrim;
-//void upperCaseExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
-//
-//void lowerCaseExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
-//
 //void subStringExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
-//
-//void ltrimExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
-//void rtrimExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
 //
 //void concatExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
 
