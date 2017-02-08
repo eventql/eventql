@@ -266,6 +266,10 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
 //}
 //
 
+static SType resolveColumnType(const TableExpressionNode* node, size_t idx) {
+  return node->getColumnType(idx);
+}
+
 bool QueryPlanBuilder::hasImplicitlyNamedColumns(ASTNode* ast) const {
   if (ast->getType() != ASTNode::T_SELECT &&
       ast->getType() != ASTNode::T_SELECT_DEEP) {
@@ -479,7 +483,7 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(
                   std::placeholders::_1,
                   true),
               std::bind(
-                  &TableExpressionNode::getColumnType,
+                  &resolveColumnType,
                   subtree_tbl.get(),
                   std::placeholders::_1)));
     }
@@ -506,7 +510,7 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(
               std::placeholders::_1,
               false),
           std::bind(
-              &TableExpressionNode::getColumnType,
+              &resolveColumnType,
               subtree_tbl.get(),
               std::placeholders::_1));
 
@@ -697,7 +701,7 @@ QueryTreeNode* QueryPlanBuilder::buildOrderByClause(
               std::placeholders::_1,
               true),
           std::bind(
-              &TableExpressionNode::getColumnType,
+              &resolveColumnType,
               subtree_tbl.get(),
               std::placeholders::_1));
 
@@ -1285,7 +1289,7 @@ QueryTreeNode* QueryPlanBuilder::buildSubqueryTableReference(
   };
 
   auto type_resolver = std::bind(
-      &TableExpressionNode::getColumnType,
+      &resolveColumnType,
       subquery_tbl.get(),
       std::placeholders::_1);
 
