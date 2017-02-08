@@ -31,11 +31,13 @@ SFunction::SFunction(
     std::vector<SType> _arg_types,
     SType _return_type,
     void (*_call)(sql_txn* ctx, VMStack* stack),
-    bool _has_side_effects /* = false */) :
+    bool _has_side_effects /* = false */,
+    bool _allow_arg_conversion /* = true */) :
     type(FN_PURE),
     arg_types(_arg_types),
     return_type(_return_type),
-    has_side_effects(_has_side_effects) {
+    has_side_effects(_has_side_effects),
+    allow_arg_conversion(_allow_arg_conversion) {
   vtable.call = _call;
 }
 
@@ -54,7 +56,9 @@ SFunction::SFunction(
     type(FN_AGGREGATE),
     instance_size(_instance_size),
     arg_types(_arg_types),
-    return_type(_return_type) {
+    return_type(_return_type),
+    has_side_effects(true),
+    allow_arg_conversion(true) {
   vtable.accumulate = _accumulate;
   vtable.get = _get;
   vtable.reset = _reset;

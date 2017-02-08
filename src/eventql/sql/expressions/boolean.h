@@ -39,6 +39,12 @@ extern const SFunction cmp_int64;
 extern const SFunction cmp_float64;
 extern const SFunction cmp_timestamp64;
 
+/**
+ * N.B.: Do not enable implicit argument conversion for the comparison functions
+ * as implicitly converting static column references to computed values will
+ * break a lot of query plan optimizations
+ */
+
 extern const SFunction eq_uint64;
 extern const SFunction eq_int64;
 extern const SFunction eq_float64;

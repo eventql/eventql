@@ -117,6 +117,10 @@ ReturnCode SymbolTable::resolve(
         continue;
       }
 
+      if (!candidate_fn->allow_arg_conversion) {
+        continue;
+      }
+
       match = candidate;
       for (size_t i = 0; i < arguments.size(); ++i) {
         if (arguments[i] == candidate_fn->arg_types[i]) {

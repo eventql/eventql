@@ -158,13 +158,16 @@ void eq_uint64_call(sql_txn* ctx, VMStack* stack) {
 const SFunction eq_uint64(
     { SType::UINT64, SType::UINT64 },
     SType::BOOL,
-    &eq_uint64_call);
+    &eq_uint64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
 
 const SFunction eq_timestamp64(
     { SType::TIMESTAMP64, SType::TIMESTAMP64 },
     SType::BOOL,
-    &eq_uint64_call);
-
+    &eq_uint64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
 
 /**
  * eq(int64, int64) -> bool
@@ -178,7 +181,9 @@ void eq_int64_call(sql_txn* ctx, VMStack* stack) {
 const SFunction eq_int64(
     { SType::INT64, SType::INT64 },
     SType::BOOL,
-    &eq_int64_call);
+    &eq_int64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
 
 
 /**
@@ -193,7 +198,9 @@ void eq_float64_call(sql_txn* ctx, VMStack* stack) {
 const SFunction eq_float64(
     { SType::FLOAT64, SType::FLOAT64 },
     SType::BOOL,
-    &eq_float64_call);
+    &eq_float64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
 
 
 /**
@@ -208,7 +215,9 @@ void eq_bool_call(sql_txn* ctx, VMStack* stack) {
 const SFunction eq_bool(
     { SType::BOOL, SType::BOOL },
     SType::BOOL,
-    &eq_bool_call);
+    &eq_bool_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
 
 
 /**
@@ -224,12 +233,16 @@ void neq_uint64_call(sql_txn* ctx, VMStack* stack) {
 const SFunction neq_uint64(
     { SType::UINT64, SType::UINT64 },
     SType::BOOL,
-    &neq_uint64_call);
+    &neq_uint64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
 
 const SFunction neq_timestamp64(
     { SType::TIMESTAMP64, SType::TIMESTAMP64 },
     SType::BOOL,
-    &neq_uint64_call);
+    &neq_uint64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
 
 
 /**
@@ -244,7 +257,9 @@ void neq_int64_call(sql_txn* ctx, VMStack* stack) {
 const SFunction neq_int64(
     { SType::INT64, SType::INT64 },
     SType::BOOL,
-    &neq_int64_call);
+    &neq_int64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
 
 
 /**
@@ -259,7 +274,9 @@ void neq_float64_call(sql_txn* ctx, VMStack* stack) {
 const SFunction neq_float64(
     { SType::FLOAT64, SType::FLOAT64 },
     SType::BOOL,
-    &neq_float64_call);
+    &neq_float64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
 
 
 /**
@@ -274,7 +291,9 @@ void neq_bool_call(sql_txn* ctx, VMStack* stack) {
 const SFunction neq_bool(
     { SType::BOOL, SType::BOOL },
     SType::BOOL,
-    &neq_bool_call);
+    &neq_bool_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
 
 
 /**
@@ -290,12 +309,16 @@ void lt_uint64_call(sql_txn* ctx, VMStack* stack) {
 const SFunction lt_uint64(
     { SType::UINT64, SType::UINT64 },
     SType::BOOL,
-    &lt_uint64_call);
+    &lt_uint64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
 
 const SFunction lt_timestamp64(
     { SType::TIMESTAMP64, SType::TIMESTAMP64 },
     SType::BOOL,
-    &lt_uint64_call);
+    &lt_uint64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
 
 
 /**
@@ -325,7 +348,9 @@ void lt_float64_call(sql_txn* ctx, VMStack* stack) {
 const SFunction lt_float64(
     { SType::FLOAT64, SType::FLOAT64 },
     SType::BOOL,
-    &lt_float64_call);
+    &lt_float64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
 
 
 /**
@@ -341,12 +366,16 @@ void lte_uint64_call(sql_txn* ctx, VMStack* stack) {
 const SFunction lte_uint64(
     { SType::UINT64, SType::UINT64 },
     SType::BOOL,
-    &lte_uint64_call);
+    &lte_uint64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
 
 const SFunction lte_timestamp64(
     { SType::TIMESTAMP64, SType::TIMESTAMP64 },
     SType::BOOL,
-    &lte_uint64_call);
+    &lte_uint64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
 
 
 /**
@@ -361,7 +390,9 @@ void lte_int64_call(sql_txn* ctx, VMStack* stack) {
 const SFunction lte_int64(
     { SType::INT64, SType::INT64 },
     SType::BOOL,
-    &lte_int64_call);
+    &lte_int64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
 
 
 /**
@@ -376,7 +407,9 @@ void lte_float64_call(sql_txn* ctx, VMStack* stack) {
 const SFunction lte_float64(
     { SType::FLOAT64, SType::FLOAT64 },
     SType::BOOL,
-    &lte_float64_call);
+    &lte_float64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
 
 
 /**
@@ -392,12 +425,16 @@ void gt_uint64_call(sql_txn* ctx, VMStack* stack) {
 const SFunction gt_uint64(
     { SType::UINT64, SType::UINT64 },
     SType::BOOL,
-    &gt_uint64_call);
+    &gt_uint64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
 
 const SFunction gt_timestamp64(
     { SType::TIMESTAMP64, SType::TIMESTAMP64 },
     SType::BOOL,
-    &gt_uint64_call);
+    &gt_uint64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
 
 
 /**
@@ -412,7 +449,9 @@ void gt_int64_call(sql_txn* ctx, VMStack* stack) {
 const SFunction gt_int64(
     { SType::INT64, SType::INT64 },
     SType::BOOL,
-    &gt_int64_call);
+    &gt_int64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
 
 
 /**
@@ -427,7 +466,9 @@ void gt_float64_call(sql_txn* ctx, VMStack* stack) {
 const SFunction gt_float64(
     { SType::FLOAT64, SType::FLOAT64 },
     SType::BOOL,
-    &gt_float64_call);
+    &gt_float64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
 
 
 /**
@@ -443,12 +484,16 @@ void gte_uint64_call(sql_txn* ctx, VMStack* stack) {
 const SFunction gte_uint64(
     { SType::UINT64, SType::UINT64 },
     SType::BOOL,
-    &gte_uint64_call);
+    &gte_uint64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
 
 const SFunction gte_timestamp64(
     { SType::TIMESTAMP64, SType::TIMESTAMP64 },
     SType::BOOL,
-    &gte_uint64_call);
+    &gte_uint64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
 
 
 /**
@@ -463,7 +508,9 @@ void gte_int64_call(sql_txn* ctx, VMStack* stack) {
 const SFunction gte_int64(
     { SType::INT64, SType::INT64 },
     SType::BOOL,
-    &gte_int64_call);
+    &gte_int64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
 
 
 /**
@@ -478,7 +525,9 @@ void gte_float64_call(sql_txn* ctx, VMStack* stack) {
 const SFunction gte_float64(
     { SType::FLOAT64, SType::FLOAT64 },
     SType::BOOL,
-    &gte_float64_call);
+    &gte_float64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
 
 
 } // namespace expressions

@@ -45,7 +45,8 @@ struct SFunction {
       std::vector<SType> _arg_types,
       SType _return_type,
       void (*_call)(sql_txn* ctx, VMStack* stack),
-      bool _has_side_effects = false);
+      bool _has_side_effects = false,
+      bool _allow_arg_conversion = true);
 
   /* A stateful ("aggregate") function */
   SFunction(
@@ -66,6 +67,7 @@ struct SFunction {
   SType return_type;
   bool has_side_effects;
   size_t instance_size;
+  bool allow_arg_conversion;
 
   struct VTable {
     void (*call)(sql_txn*, VMStack*);
