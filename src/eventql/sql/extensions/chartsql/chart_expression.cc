@@ -47,6 +47,8 @@ ChartExpression::ChartExpression(
     counter_(0) {}
 
 ReturnCode ChartExpression::execute() {
+  return ReturnCode::error("ERUNTIME", "ChartExpression::execute not currently implemented");
+
   util::chart::Canvas canvas;
   for (size_t i = 0; i < qtree_->getDrawStatements().size(); ++i) {
     executeDrawStatement(i, &canvas);
