@@ -204,6 +204,33 @@ const SFunction eq_float64(
 
 
 /**
+ * eq(string, string) -> bool
+ */
+void eq_string_call(sql_txn* ctx, VMStack* stack) {
+  const char* right;
+  size_t right_len;
+  popString(stack, &right, &right_len);
+
+  const char* left;
+  size_t left_len;
+  popString(stack, &left, &left_len);
+
+  if (left_len != right_len) {
+    pushBool(stack, false);
+  } else {
+    pushBool(stack, memcmp(left, right, left_len) == 0);
+  }
+}
+
+const SFunction eq_string(
+    { SType::STRING, SType::STRING },
+    SType::BOOL,
+    &eq_string_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
  * eq(bool, bool) -> bool
  */
 void eq_bool_call(sql_txn* ctx, VMStack* stack) {
@@ -292,6 +319,33 @@ const SFunction neq_bool(
     { SType::BOOL, SType::BOOL },
     SType::BOOL,
     &neq_bool_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
+ * eq(string, string) -> bool
+ */
+void neq_string_call(sql_txn* ctx, VMStack* stack) {
+  const char* right;
+  size_t right_len;
+  popString(stack, &right, &right_len);
+
+  const char* left;
+  size_t left_len;
+  popString(stack, &left, &left_len);
+
+  if (left_len != right_len) {
+    pushBool(stack, true);
+  } else {
+    pushBool(stack, memcmp(left, right, left_len) != 0);
+  }
+}
+
+const SFunction neq_string(
+    { SType::STRING, SType::STRING },
+    SType::BOOL,
+    &neq_string_call,
     false,  /* has_side_effects*/
     false); /* allow_argument_conversion */
 
