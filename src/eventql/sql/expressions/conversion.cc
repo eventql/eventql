@@ -88,61 +88,55 @@ const SFunction to_nil_timestamp64(
     SType::NIL,
     &to_nil_timestamp64_call);
 
-//void toStringExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  if (argc != 1) {
-//    RAISE(
-//        kRuntimeError,
-//        "wrong number of arguments for to_string. expected: 1, got: %i", argc);
-//  }
-//
-//  if (argv->getType() == SType::STRING) {
-//    *out = *argv;
-//  } else {
-//    *out = argv->toString();
-//  }
-//}
-//
-//void toIntExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  if (argc != 1) {
-//    RAISE(
-//        kRuntimeError,
-//        "wrong number of arguments for to_string. expected: 1, got: %i", argc);
-//  }
-//
-//  if (argv->getType() == SType::INT64) {
-//    *out = *argv;
-//  } else {
-//    *out = argv->toInteger();
-//  }
-//}
-//
-//void toFloatExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  if (argc != 1) {
-//    RAISE(
-//        kRuntimeError,
-//        "wrong number of arguments for to_string. expected: 1, got: %i", argc);
-//  }
-//
-//  if (argv->getType() == SType::FLOAT64) {
-//    *out = *argv;
-//  } else {
-//    *out = argv->toFloat();
-//  }
-//}
-//
-//void toBoolExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  if (argc != 1) {
-//    RAISE(
-//        kRuntimeError,
-//        "wrong number of arguments for to_string. expected: 1, got: %i", argc);
-//  }
-//
-//  if (argv->getType() == SType::BOOL) {
-//    *out = *argv;
-//  } else {
-//    *out = argv->toBool();
-//  }
-//}
-//
+
+/**
+ * to_int64(uint64) -> int64
+ * to_int64(timestamp64) -> int64
+ */
+void to_int64_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto value = popUInt64(stack);
+  pushInt64(stack, value);
 }
+
+const SFunction to_int64_uint64(
+    { SType::UINT64 },
+    SType::INT64,
+    &to_int64_uint64_call);
+
+const SFunction to_int64_timestamp64(
+    { SType::TIMESTAMP64 },
+    SType::INT64,
+    &to_int64_uint64_call);
+
+
+/**
+ * to_int64(float64) -> int64
+ */
+void to_int64_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto value = popFloat64(stack);
+  pushInt64(stack, value);
 }
+
+const SFunction to_int64_float64(
+    { SType::FLOAT64 },
+    SType::INT64,
+    &to_int64_float64_call);
+
+
+/**
+ * to_int64(bool) -> int64
+ */
+void to_int64_bool_call(sql_txn* ctx, VMStack* stack) {
+  auto value = popBool(stack);
+  pushInt64(stack, value);
+}
+
+const SFunction to_int64_bool(
+    { SType::BOOL },
+    SType::INT64,
+    &to_int64_bool_call);
+
+
+} // namespace expressions
+} // namespace csql
+

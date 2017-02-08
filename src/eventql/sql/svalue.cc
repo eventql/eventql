@@ -920,10 +920,7 @@ uint64_t popUInt64(VMStack* stack) {
 void popUInt64Boxed(VMStack* stack, SValue* value) {
   assert(value->getType() == SType::UINT64);
   assert(stack->limit - stack->top >= sizeof(uint64_t) + sizeof(STag));
-  memcpy(value->getData(), stack->top, sizeof(uint64_t));
-  STag tag;
-  memcpy(&tag, stack->top + sizeof(uint64_t), sizeof(STag));
-  value->setTag(tag);
+  memcpy(value->getData(), stack->top, sizeof(uint64_t) + sizeof(STag));
   stack->top += sizeof(uint64_t) + sizeof(STag);
 }
 
@@ -964,10 +961,7 @@ int64_t popInt64(VMStack* stack) {
 void popInt64Boxed(VMStack* stack, SValue* value) {
   assert(value->getType() == SType::INT64);
   assert(stack->limit - stack->top >= sizeof(int64_t) + sizeof(STag));
-  memcpy(value->getData(), stack->top, sizeof(int64_t));
-  STag tag;
-  memcpy(&tag, stack->top + sizeof(int64_t), sizeof(STag));
-  value->setTag(tag);
+  memcpy(value->getData(), stack->top, sizeof(int64_t) + sizeof(STag));
   stack->top += sizeof(int64_t) + sizeof(STag);
 }
 
@@ -1008,10 +1002,7 @@ double popFloat64(VMStack* stack) {
 void popFloat64Boxed(VMStack* stack, SValue* value) {
   assert(value->getType() == SType::FLOAT64);
   assert(stack->limit - stack->top >= sizeof(double) + sizeof(STag));
-  memcpy(value->getData(), stack->top, sizeof(double));
-  STag tag;
-  memcpy(&tag, stack->top + sizeof(double), sizeof(STag));
-  value->setTag(tag);
+  memcpy(value->getData(), stack->top, sizeof(double) + sizeof(STag));
   stack->top += sizeof(double) + sizeof(STag);
 }
 
@@ -1052,10 +1043,7 @@ bool popBool(VMStack* stack) {
 void popBoolBoxed(VMStack* stack, SValue* value) {
   assert(value->getType() == SType::BOOL);
   assert(stack->limit - stack->top >= sizeof(uint8_t) + sizeof(STag));
-  memcpy(value->getData(), stack->top, sizeof(uint8_t));
-  STag tag;
-  memcpy(&tag, stack->top + sizeof(uint8_t), sizeof(STag));
-  value->setTag(tag);
+  memcpy(value->getData(), stack->top, sizeof(uint8_t) + sizeof(STag));
   stack->top += sizeof(uint8_t) + sizeof(STag);
 }
 
@@ -1119,10 +1107,7 @@ void popStringBoxed(VMStack* stack, SValue* value) {
   assert(stack->limit - stack->top >= sizeof(uint32_t));
   size_t len = *reinterpret_cast<uint32_t*>(stack->top);
   assert(stack->limit - stack->top >= sizeof(uint32_t) + len + sizeof(STag));
-  value->setData(stack->top, sizeof(uint32_t) + len);
-  STag tag;
-  memcpy(&tag, stack->top + sizeof(uint32_t) + len, sizeof(STag));
-  value->setTag(tag);
+  value->setData(stack->top, sizeof(uint32_t) + len + sizeof(STag));
   stack->top += sizeof(uint32_t) + len + sizeof(STag);
 }
 
@@ -1186,10 +1171,7 @@ uint64_t popTimestamp64(VMStack* stack) {
 void popTimestamp64Boxed(VMStack* stack, SValue* value) {
   assert(value->getType() == SType::TIMESTAMP64);
   assert(stack->limit - stack->top >= sizeof(uint64_t) + sizeof(STag));
-  memcpy(value->getData(), stack->top, sizeof(uint64_t));
-  STag tag;
-  memcpy(&tag, stack->top + sizeof(uint64_t), sizeof(STag));
-  value->setTag(tag);
+  memcpy(value->getData(), stack->top, sizeof(uint64_t) + sizeof(STag));
   stack->top += sizeof(uint64_t) + sizeof(STag);
 }
 
