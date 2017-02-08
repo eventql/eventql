@@ -75,7 +75,7 @@ TEST_CASE(QTreeTest, TestExtractEqualsConstraint, [] () {
         parser.getStatements(),
         txn->getTableProvider());
 
-    EXPECT_EQ(qtrees.size(), 1);
+    EXPECT(!qtrees.empty());
     auto qtree = qtrees[0];
     EXPECT_TRUE(dynamic_cast<SequentialScanNode*>(qtree.get()) != nullptr);
     auto seqscan = qtree.asInstanceOf<SequentialScanNode>();
@@ -300,7 +300,7 @@ TEST_CASE(QTreeTest, TestExtractMultipleConstraints, [] () {
           "testtable",
           "sql_testdata/testtbl.cst"));
 
-  String query = "select 1 from testtable where 1000 + 200 + 30 + 4 > time AND session_id != 400 + 44 AND time >= 1111 * 6;";
+  String query = "select 1 from testtable where 1000 + 200 + 30 + 4 > time AND session_id != 'blah' AND time >= 1111 * 6;";
 
   csql::Parser parser;
   parser.parse(query.data(), query.size());
@@ -382,7 +382,7 @@ TEST_CASE(QTreeTest, TestPruneConstraints, [] () {
           "testtable",
           "sql_testdata/testtbl.cst"));
 
-  String query = "select 1 from testtable where 1000 + 200 + 30 + 4 > time AND session_id != 400 + 44 AND time >= 1111 * 6;";
+  String query = "select 1 from testtable where 1000 + 200 + 30 + 4 > time AND session_id != to_string(400 + 44) AND time >= 1111 * 6;";
   csql::Parser parser;
   parser.parse(query.data(), query.size());
 
@@ -413,7 +413,7 @@ TEST_CASE(QTreeTest, TestPruneConstraints, [] () {
     EXPECT(rc.isSuccess());
     EXPECT_EQ(
         pruned_expr->toSQL(),
-        "logical_and(gt(1234,`time`),neq(`session_id`,444))");
+        "logical_and(gt(1234,`time`),neq(`session_id`,'444'))");
   }
 
   {
@@ -430,7 +430,7 @@ TEST_CASE(QTreeTest, TestPruneConstraints, [] () {
 
     EXPECT_EQ(
         pruned_expr->toSQL(),
-        "logical_and(neq(`session_id`,444),gte(`time`,6666))");
+        "logical_and(neq(`session_id`,'444'),gte(`time`,6666))");
   }
 });
 
