@@ -1633,7 +1633,11 @@ ValueExpressionNode* QueryPlanBuilder::buildLiteral(
 
     case Token::T_NUMERIC:
       if (token->getString().find(".") == std::string::npos) {
-        literal = SValue::newInt64(token->getString());
+        if (token->getString().find("-") == std::string::npos) {
+          literal = SValue::newUInt64(token->getString());
+        } else {
+          literal = SValue::newInt64(token->getString());
+        }
       } else {
         literal = SValue::newFloat64(token->getString());
       }
