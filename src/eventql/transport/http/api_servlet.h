@@ -123,6 +123,13 @@ protected:
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
+  void executeSQL_CSV(
+      const std::string& query,
+      const std::string& database,
+      Session* session,
+      http::HTTPResponse* res,
+      RefPtr<http::HTTPResponseStream> res_stream);
+
   Database* db_;
   MapReduceAPIServlet mapreduce_api_;
 };

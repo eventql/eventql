@@ -39,9 +39,11 @@
 #include "eventql/util/protobuf/MessageEncoder.h"
 #include "eventql/util/csv/CSVInputStream.h"
 #include "eventql/util/csv/BinaryCSVInputStream.h"
+#include "eventql/util/csv/CSVOutputStream.h"
 #include "eventql/db/table_config.pb.h"
 #include "eventql/server/sql/codec/json_codec.h"
 #include "eventql/server/sql/codec/json_sse_codec.h"
+#include <eventql/server/sql/codec/csv_codec.h>
 #include "eventql/server/sql/codec/binary_codec.h"
 #include "eventql/transport/http/http_auth.h"
 #include <eventql/io/cstable/cstable_writer.h>
@@ -883,6 +885,8 @@ void APIServlet::executeSQL(
       executeSQL_JSON(query, database, session, res, res_stream);
     } else if (format == "json_sse") {
       executeSQL_JSONSSE(query, database, session, res, res_stream);
+    } else if (format == "csv") {
+      executeSQL_CSV(query, database, session, res, res_stream);
     } else {
       res->setStatus(http::kStatusBadRequest);
       res->addBody("invalid format: " + format);
@@ -1100,6 +1104,63 @@ void APIServlet::executeSQL_JSONSSE(
   }
 
   sse_stream->finish();
+}
+
+void APIServlet::executeSQL_CSV(
+    const std::string& query,
+    const std::string& database,
+    Session* session,
+    http::HTTPResponse* res,
+    RefPtr<http::HTTPResponseStream> res_stream) {
+  auto dbctx = session->getDatabaseContext();
+
+  if (!database.empty()) {
+    auto rc = dbctx->client_auth->changeNamespace(session, database);
+    if (!rc.isSuccess()) {
+      res->setStatus(http::kStatusInternalServerError);
+      res->addBody(StringUtil::format("error: $0", rc.message()));
+      res_stream->writeResponse(*res);
+      return;
+    }
+  }
+
+  if (session->getEffectiveNamespace().empty()) {
+    res->setStatus(http::kStatusInternalServerError);
+    res->addBody("error: No database selected");
+    res_stream->writeResponse(*res);
+    return;
+  }
+
+  try {
+    auto txn = dbctx->sql_service->startTransaction(session);
+    auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), query);
+
+    Buffer result;
+    CSVOutputStream csv(BufferOutputStream::fromBuffer(&result), ",");
+    CSVCodec csv_codec(&csv);
+
+    if (qplan->numStatements() != 1) {
+      res->setStatus(http::kStatusInternalServerError);
+      res->addBody("error: can't send more than one query result as CSV at once");
+      res_stream->writeResponse(*res);
+      return;
+    }
+
+    auto result_columns = qplan->getStatementgetResultColumns(0);
+    auto result_cursor = qplan->execute(0);
+    csv_codec.sendResults(result_columns, result_cursor.get());
+
+    res->setStatus(http::kStatusOK);
+    res->addHeader("Content-Type", "text/csv; charset=utf-8");
+    res->addBody(result);
+    res_stream->writeResponse(*res);
+
+  } catch (const StandardException& e) {
+    res->setStatus(http::kStatusInternalServerError);
+    res->addBody("error: ");
+    res->addBody(e.what());
+    res_stream->writeResponse(*res);
+  }
 }
 
 } // namespace eventql
