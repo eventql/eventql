@@ -35,6 +35,93 @@
 namespace csql {
 namespace expressions {
 
+static const std::unordered_map<std::string, uint64_t> time_windows = {
+  {"ms", kMicrosPerMilli},
+  {"msec", kMicrosPerMilli},
+  {"millisecond", kMicrosPerMilli},
+  {"milliseconds", kMicrosPerMilli},
+  {"s", kMicrosPerSecond},
+  {"sec", kMicrosPerSecond},
+  {"second", kMicrosPerSecond},
+  {"seconds", kMicrosPerSecond},
+  {"min", kMicrosPerMinute},
+  {"minute", kMicrosPerMinute},
+  {"minutes", kMicrosPerMinute},
+  {"h", kMicrosPerHour},
+  {"hour", kMicrosPerHour},
+  {"hours", kMicrosPerHour},
+  {"d", kMicrosPerDay},
+  {"day", kMicrosPerDay},
+  {"days", kMicrosPerDay},
+  {"w", kMicrosPerWeek},
+  {"week", kMicrosPerWeek},
+  {"weeks", kMicrosPerWeek},
+  {"month", kMicrosPerDay * 30},
+  {"months", kMicrosPerDay * 30},
+  {"y", kMicrosPerYear},
+  {"year", kMicrosPerYear},
+  {"years", kMicrosPerYear}
+};
+
+void now_call(sql_txn* ctx, VMStack* stack) {
+  pushTimestamp64(stack, WallClock::unixMicros());
+}
+
+const SFunction now(
+    {  },
+    SType::TIMESTAMP64,
+    &now_call);
+
+void from_timestamp_int64_call(sql_txn* ctx, VMStack* stack) {
+  auto value = popInt64(stack);
+  pushTimestamp64(stack, value * kMicrosPerSecond);
+}
+
+const SFunction from_timestamp_int64(
+    { SType::INT64 },
+    SType::TIMESTAMP64,
+    &from_timestamp_int64_call);
+
+void from_timestamp_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto value = popFloat64(stack);
+  pushTimestamp64(stack, value * kMicrosPerSecond);
+}
+
+const SFunction from_timestamp_float64(
+    { SType::FLOAT64 },
+    SType::TIMESTAMP64,
+    &from_timestamp_float64_call);
+
+void date_trunc_timestamp64_call(sql_txn* ctx, VMStack* stack) {
+  auto timestamp = popTimestamp64(stack);
+  auto window = popString(stack);
+  uint64_t window_multiplicator;
+  std::string window_name;
+  try {
+    size_t sz;
+    window_multiplicator = std::stoull(window, &sz);
+    window_name = window.substr(sz);
+  } catch (const std::exception& e) {
+    window_multiplicator = 1;
+    window_name = window;
+  }
+
+  auto window_value = time_windows.find(window_name);
+  if (window_value == time_windows.end()) {
+    throw std::runtime_error(
+        StringUtil::format("unknown time window $0", window));
+  }
+
+  auto truncater = window_value->second * window_multiplicator;
+  auto truncated = ((uint64_t)timestamp / truncater) * truncater;
+  pushTimestamp64(stack, truncated);
+}
+
+const SFunction date_trunc_timestamp64(
+    { SType::STRING, SType::TIMESTAMP64 },
+    SType::TIMESTAMP64,
+    &date_trunc_timestamp64_call);
+
 static Option<uint64_t> parseInterval(String time_interval) {
   uint64_t num;
   String unit;
@@ -97,112 +184,6 @@ static Option<uint64_t> parseInterval(String time_interval) {
 
   return None<uint64_t>();
 }
-
-//void nowExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  *out = SValue::newTimestamp(WallClock::unixMicros());
-//}
-//
-//void fromTimestamp(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  checkArgs("FROM_TIMESTAMP", argc, 1);
-//
-//  switch (argv->getType()) {
-//    case SType::TIMESTAMP64:
-//      *out = *argv;
-//      break;
-//    default:
-//      *out = SValue(SValue::TimeType(parseTimestamp(argv)));
-//      break;
-//  }
-//}
-//
-//void dateTruncExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  checkArgs("DATE_TRUNC", argc, 2);
-//
-//  auto time_suffix = argv[0].getString();
-//  uint64_t val = argv[1].getTimestamp().unixMicros();
-//  unsigned long long dur = 1;
-//
-//  if (StringUtil::isNumber(time_suffix.substr(0, 1))) {
-//    size_t sz;
-//    dur = std::stoull(time_suffix, &sz);
-//    time_suffix = time_suffix.substr(sz);
-//  }
-//
-//  if (time_suffix == "ms" ||
-//      time_suffix == "msec" ||
-//      time_suffix == "msecs" ||
-//      time_suffix == "millisecond" ||
-//      time_suffix == "milliseconds") {
-//    *out = SValue(SValue::TimeType(
-//        (uint64_t(val) / (kMicrosPerMilli * dur)) * kMicrosPerMilli * dur));
-//    return;
-//  }
-//
-//  if (time_suffix == "s" ||
-//      time_suffix == "sec" ||
-//      time_suffix == "secs" ||
-//      time_suffix == "second" ||
-//      time_suffix == "seconds") {
-//    *out = SValue(SValue::TimeType(
-//        (uint64_t(val) / (kMicrosPerSecond * dur)) * kMicrosPerSecond * dur));
-//    return;
-//  }
-//
-//  if (time_suffix == "m" ||
-//      time_suffix == "min" ||
-//      time_suffix == "mins" ||
-//      time_suffix == "minute" ||
-//      time_suffix == "minutes") {
-//    *out = SValue(SValue::TimeType(
-//        (uint64_t(val) / (kMicrosPerMinute * dur)) * kMicrosPerMinute * dur));
-//    return;
-//  }
-//
-//  if (time_suffix == "h" ||
-//      time_suffix == "hour" ||
-//      time_suffix == "hours") {
-//    *out = SValue(SValue::TimeType(
-//        (uint64_t(val) / (kMicrosPerHour * dur)) * kMicrosPerHour * dur));
-//    return;
-//  }
-//
-//  if (time_suffix == "d" ||
-//      time_suffix == "day" ||
-//      time_suffix == "days") {
-//    *out = SValue(SValue::TimeType(
-//        (uint64_t(val) / (kMicrosPerDay * dur)) * kMicrosPerDay * dur));
-//    return;
-//  }
-//
-//  if (time_suffix == "w" ||
-//      time_suffix == "week" ||
-//      time_suffix == "weeks") {
-//    *out = SValue(SValue::TimeType(
-//        (uint64_t(val) / (kMicrosPerWeek * dur)) * kMicrosPerWeek * dur));
-//    return;
-//  }
-//
-//  if (time_suffix == "m" ||
-//      time_suffix == "month" ||
-//      time_suffix == "months") {
-//    *out = SValue(SValue::TimeType(
-//        (uint64_t(val) / (kMicrosPerDay * 31 * dur)) * kMicrosPerDay * 31 * dur));
-//    return;
-//  }
-//
-//  if (time_suffix == "y" ||
-//      time_suffix == "year" ||
-//      time_suffix == "years") {
-//    *out = SValue(SValue::TimeType(
-//        (uint64_t(val) / (kMicrosPerYear * dur)) * kMicrosPerYear * dur));
-//    return;
-//  }
-//
-//  RAISE(
-//      kRuntimeError,
-//      "unknown time precision %s",
-//      time_suffix.c_str());
-//}
 //
 //void dateAddExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
 //  checkArgs("DATE_ADD", argc, 3);

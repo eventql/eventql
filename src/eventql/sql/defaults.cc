@@ -105,13 +105,14 @@ void installDefaultSymbols(SymbolTable* rt) {
   rt->registerFunction("to_string", expressions::to_string_float64);
   rt->registerFunction("to_string", expressions::to_string_bool);
   rt->registerFunction("to_string", expressions::to_string_timestamp64);
+  rt->registerFunction("to_timestamp64", expressions::to_timestamp64_int64);
+  rt->registerFunction("to_timestamp64", expressions::to_timestamp64_float64);
 
   /* expressions/datetime.h */
-  //rt->registerFunction("now", PureFunction(&expressions::nowExpr));
-  //rt->registerFunction(
-  //    "FROM_TIMESTAMP",
-  //    PureFunction(&expressions::fromTimestamp));
-  //rt->registerFunction("date_trunc", PureFunction(&expressions::dateTruncExpr));
+  rt->registerFunction("now", expressions::now);
+  rt->registerFunction("from_timestamp", expressions::from_timestamp_int64);
+  rt->registerFunction("from_timestamp", expressions::from_timestamp_float64);
+  rt->registerFunction("date_trunc", expressions::date_trunc_timestamp64);
   //rt->registerFunction("date_add", PureFunction(&expressions::dateAddExpr));
   //rt->registerFunction("date_sub", PureFunction(&expressions::dateAddExpr));
   rt->registerFunction("time_at", expressions::time_at);

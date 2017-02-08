@@ -217,6 +217,34 @@ const SFunction to_string_bool(
     &to_string_bool_call);
 
 
+/**
+ * to_timestamp64(int64) -> timestamp64
+ */
+void to_timestamp64_int64_call(sql_txn* ctx, VMStack* stack) {
+  auto value = popInt64(stack);
+  pushTimestamp64(stack, value);
+}
+
+const SFunction to_timestamp64_int64(
+    { SType::INT64 },
+    SType::TIMESTAMP64,
+    &to_timestamp64_int64_call);
+
+
+/**
+ * to_float64(int64) -> timestamp64
+ */
+void to_timestamp64_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto value = popFloat64(stack);
+  pushTimestamp64(stack, value);
+}
+
+const SFunction to_timestamp64_float64(
+    { SType::FLOAT64 },
+    SType::TIMESTAMP64,
+    &to_timestamp64_float64_call);
+
+
 } // namespace expressions
 } // namespace csql
 
