@@ -734,8 +734,6 @@ String sql_escape(const String& orig_str) {
 
 void copyBoxed(const SValue* val, SVector* vector) {
   vector->append(val->getData(), val->getSize());
-  auto tag = val->getTag();
-  vector->append(&tag, sizeof(STag));
 }
 
 void popBoxed(VMStack* stack, SValue* value) {
