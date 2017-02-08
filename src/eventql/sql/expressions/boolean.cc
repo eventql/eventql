@@ -31,6 +31,10 @@
 namespace csql {
 namespace expressions {
 
+
+/**
+ * logical_and(bool, bool) -> bool
+ */
 void logical_and_call(sql_txn* ctx, VMStack* stack) {
   auto right = popBool(stack);
   auto left = popBool(stack);
@@ -43,6 +47,9 @@ const SFunction logical_and(
     &logical_and_call);
 
 
+/**
+ * logical_or(bool, bool) -> bool
+ */
 void logical_or_call(sql_txn* ctx, VMStack* stack) {
   auto right = popBool(stack);
   auto left = popBool(stack);
@@ -55,6 +62,10 @@ const SFunction logical_or(
     &logical_or_call);
 
 
+/**
+ * cmp(uint64, uint64) -> int64
+ * cmp(timestamp64, timestamp64) -> int64
+ */
 void cmp_uint64_call(sql_txn* ctx, VMStack* stack) {
   auto right = popUInt64(stack);
   auto left = popUInt64(stack);
@@ -78,6 +89,10 @@ const SFunction cmp_timestamp64(
     &cmp_uint64_call);
 
 
+/**
+ * eq(uint64, uint64) -> bool
+ * eq(timestamp64, timestamp64) -> bool
+ */
 void eq_uint64_call(sql_txn* ctx, VMStack* stack) {
   auto right = popUInt64(stack);
   auto left = popUInt64(stack);
@@ -95,6 +110,40 @@ const SFunction eq_timestamp64(
     &eq_uint64_call);
 
 
+/**
+ * eq(int64, int64) -> bool
+ */
+void eq_int64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popInt64(stack);
+  auto left = popInt64(stack);
+  pushBool(stack, left == right);
+}
+
+const SFunction eq_int64(
+    { SType::INT64, SType::INT64 },
+    SType::BOOL,
+    &eq_int64_call);
+
+
+/**
+ * eq(float64, float64) -> bool
+ */
+void eq_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popFloat64(stack);
+  auto left = popFloat64(stack);
+  pushBool(stack, left == right);
+}
+
+const SFunction eq_float64(
+    { SType::FLOAT64, SType::FLOAT64 },
+    SType::BOOL,
+    &eq_float64_call);
+
+
+/**
+ * lt(uint64, uint64) -> bool
+ * lt(timestamp64, timestamp4) -> bool
+ */
 void lt_uint64_call(sql_txn* ctx, VMStack* stack) {
   auto right = popUInt64(stack);
   auto left = popUInt64(stack);
@@ -112,6 +161,10 @@ const SFunction lt_timestamp64(
     &lt_uint64_call);
 
 
+/**
+ * lte(uint64, uint64) -> bool
+ * lte(timestamp64, timestamp64) -> bool
+ */
 void lte_uint64_call(sql_txn* ctx, VMStack* stack) {
   auto right = popUInt64(stack);
   auto left = popUInt64(stack);
@@ -134,6 +187,11 @@ void gt_uint64_call(sql_txn* ctx, VMStack* stack) {
   pushBool(stack, left > right);
 }
 
+
+/**
+ * gt(uint64, uint64) -> bool
+ * gt(timestamp64, timestamp4) -> bool
+ */
 const SFunction gt_uint64(
     { SType::UINT64, SType::UINT64 },
     SType::BOOL,
@@ -145,6 +203,10 @@ const SFunction gt_timestamp64(
     &gt_uint64_call);
 
 
+/**
+ * gte(uint64, uint64) -> bool
+ * gte(timestamp64, timestamp64) -> bool
+ */
 void gte_uint64_call(sql_txn* ctx, VMStack* stack) {
   auto right = popUInt64(stack);
   auto left = popUInt64(stack);
@@ -161,394 +223,7 @@ const SFunction gte_timestamp64(
     SType::BOOL,
     &gte_uint64_call);
 
-//void eqExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  if (argc != 2) {
-//    RAISE(
-//        kRuntimeError,
-//        "wrong number of arguments for eq. expected: 2, got: %i", argc);
-//  }
-//
-//  SValue* lhs = argv;
-//  SValue* rhs = argv + 1;
-//
-//  if (lhs->getType() == SType::NIL ^ rhs->getType() == SType::NIL) {
-//    *out = SValue::newBool(false);
-//    return;
-//  }
-//
-//  if (lhs->isConvertibleToNumeric() && rhs->isConvertibleToNumeric()) {
-//    *out = SValue::newBool(lhs->getFloat() == rhs->getFloat());
-//    return;
-//  }
-//
-//  if (lhs->getType() == SType::STRING || rhs->getType() == SType::STRING) {
-//    *out = SValue::newBool(lhs->getString() == rhs->getString());
-//    return;
-//  }
-//
-//  if (lhs->isConvertibleToBool() || rhs->isConvertibleToBool()) {
-//    *out = SValue::newBool(lhs->getBool() == rhs->getBool());
-//    return;
-//  }
-//
-//  RAISE(kRuntimeError, "can't compare %s with %s",
-//      lhs->getTypeName(),
-//      rhs->getTypeName());
-//}
-//
-//void neqExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  SValue ret;
-//  eqExpr(ctx, argc, argv, &ret);
-//  *out = SValue(!ret.getValue<bool>());
-//}
-//
-//void andExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  if (argc != 2) {
-//    RAISE(
-//        kRuntimeError,
-//        "wrong number of arguments for AND. expected: 2, got: %i", argc);
-//  }
-//
-//  SValue* lhs = argv;
-//  SValue* rhs = argv + 1;
-//  *out = SValue(lhs->getBool() && rhs->getBool());
-//}
-//
-//void orExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  if (argc != 2) {
-//    RAISE(
-//        kRuntimeError,
-//        "wrong number of arguments for or. expected: 2, got: %i", argc);
-//  }
-//
-//  SValue* lhs = argv;
-//  SValue* rhs = argv + 1;
-//  *out = SValue(lhs->getBool() || rhs->getBool());
-//}
-//
-//void negExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  if (argc != 1) {
-//    RAISE(
-//        kRuntimeError,
-//        "wrong number of arguments for neg. expected: 1, got: %i", argc);
-//  }
-//
-//  SValue* val = argv;
-//
-//  switch(val->getType()) {
-//    case SType::INT64:
-//      *out = SValue(val->getInteger() * -1);
-//      return;
-//    case SType::FLOAT64:
-//      *out = SValue(val->getFloat() * -1.0f);
-//      return;
-//    case SType::BOOL:
-//      *out = SValue(!val->getBool());
-//      return;
-//    case SType::NIL:
-//      *out = SValue();
-//      return;
-//    default:
-//      break;
-//  }
-//
-//  RAISE(kRuntimeError, "can't negate %s",
-//      val->getTypeName());
-//}
-//
-//void ltExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  if (argc != 2) {
-//    RAISE(
-//        kRuntimeError,
-//        "wrong number of arguments for ltExpr. expected: 2, got: %i", argc);
-//  }
-//
-//  SValue* lhs = argv;
-//  SValue* rhs = argv + 1;
-//
-//  switch(lhs->getType()) {
-//    case SType::INT64:
-//    case SType::TIMESTAMP64:
-//      switch(rhs->getType()) {
-//        case SType::INT64:
-//        case SType::TIMESTAMP64:
-//          *out = SValue(lhs->getInteger() < rhs->getInteger());
-//          return;
-//        case SType::FLOAT64:
-//          *out = SValue(lhs->getFloat() < rhs->getFloat());
-//          return;
-//        case SType::NIL:
-//          *out = SValue(lhs->getFloat() < 0.0f);
-//          return;
-//        default:
-//          break;
-//      }
-//      break;
-//    case SType::FLOAT64:
-//      switch(rhs->getType()) {
-//        case SType::INT64:
-//        case SType::FLOAT64:
-//        case SType::TIMESTAMP64:
-//          *out = SValue(lhs->getFloat() < rhs->getFloat());
-//          return;
-//        case SType::NIL:
-//          *out = SValue(lhs->getFloat() < 0.0f);
-//          return;
-//        default:
-//          break;
-//      }
-//      break;
-//    case SType::NIL:
-//      switch(rhs->getType()) {
-//        case SType::INT64:
-//        case SType::FLOAT64:
-//        case SType::TIMESTAMP64:
-//          *out = SValue(0.0f < rhs->getFloat());
-//          return;
-//        case SType::NIL:
-//          *out = SValue(SValue::BoolType(false));
-//          return;
-//        default:
-//          break;
-//      }
-//    default:
-//      break;
-//  }
-//
-//  if (lhs->getType() == SType::STRING ||
-//      rhs->getType() == SType::STRING) {
-//    *out = SValue(lhs->getString() < rhs->getString());
-//    return;
-//  }
-//
-//  RAISE(kRuntimeError, "can't compare %s with %s",
-//      lhs->getTypeName(),
-//      rhs->getTypeName());
-//}
-//
-//void lteExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  if (argc != 2) {
-//    RAISE(
-//        kRuntimeError,
-//        "wrong number of arguments for lteExpr. expected: 2, got: %i", argc);
-//  }
-//
-//  SValue* lhs = argv;
-//  SValue* rhs = argv + 1;
-//
-//  switch(lhs->getType()) {
-//    case SType::INT64:
-//    case SType::TIMESTAMP64:
-//      switch(rhs->getType()) {
-//        case SType::INT64:
-//        case SType::TIMESTAMP64:
-//          *out = SValue(lhs->getInteger() <= rhs->getInteger());
-//          return;
-//        case SType::FLOAT64:
-//          *out = SValue(lhs->getFloat() <= rhs->getFloat());
-//          return;
-//        case SType::NIL:
-//          *out = SValue(lhs->getFloat() <= 0.0f);
-//          return;
-//        default:
-//          break;
-//      }
-//      break;
-//    case SType::FLOAT64:
-//      switch(rhs->getType()) {
-//        case SType::INT64:
-//        case SType::FLOAT64:
-//        case SType::TIMESTAMP64:
-//          *out = SValue(lhs->getFloat() <= rhs->getFloat());
-//          return;
-//        case SType::NIL:
-//          *out = SValue(lhs->getFloat() <= 0.0f);
-//          return;
-//        default:
-//          break;
-//      }
-//      break;
-//    case SType::NIL:
-//      switch(rhs->getType()) {
-//        case SType::INT64:
-//        case SType::FLOAT64:
-//        case SType::TIMESTAMP64:
-//          *out = SValue(0.0f <= rhs->getFloat());
-//          return;
-//        case SType::NIL:
-//          *out = SValue(SValue::BoolType(true));
-//          return;
-//        default:
-//          break;
-//      }
-//    default:
-//      break;
-//  }
-//
-//  if (lhs->getType() == SType::STRING ||
-//      rhs->getType() == SType::STRING) {
-//    *out = SValue(lhs->getString() <= rhs->getString());
-//    return;
-//  }
-//
-//  RAISE(kRuntimeError, "can't compare %s with %s",
-//      lhs->getTypeName(),
-//      rhs->getTypeName());
-//}
-//
-//void gtExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  if (argc != 2) {
-//    RAISE(
-//        kRuntimeError,
-//        "wrong number of arguments for gtExpr. expected: 2, got: %i", argc);
-//  }
-//
-//  SValue* lhs = argv;
-//  SValue* rhs = argv + 1;
-//
-//  switch(lhs->getType()) {
-//    case SType::INT64:
-//    case SType::TIMESTAMP64:
-//      switch(rhs->getType()) {
-//        case SType::INT64:
-//        case SType::TIMESTAMP64:
-//          *out = SValue(lhs->getInteger() > rhs->getInteger());
-//          return;
-//        case SType::FLOAT64:
-//          *out = SValue(lhs->getFloat() > rhs->getFloat());
-//          return;
-//        case SType::NIL:
-//          *out = SValue(lhs->getFloat() > 0.0f);
-//          return;
-//        default:
-//          break;
-//      }
-//      break;
-//    case SType::FLOAT64:
-//      switch(rhs->getType()) {
-//        case SType::INT64:
-//        case SType::FLOAT64:
-//        case SType::TIMESTAMP64:
-//          *out = SValue(lhs->getFloat() > rhs->getFloat());
-//          return;
-//        case SType::NIL:
-//          *out = SValue(lhs->getFloat() > 0.0f);
-//          return;
-//        default:
-//          break;
-//      }
-//      break;
-//    case SType::NIL:
-//      switch(rhs->getType()) {
-//        case SType::INT64:
-//        case SType::FLOAT64:
-//        case SType::TIMESTAMP64:
-//          *out = SValue(0.0f > rhs->getFloat());
-//          return;
-//        case SType::NIL:
-//          *out = SValue(SValue::BoolType(false));
-//          return;
-//        default:
-//          break;
-//      }
-//    default:
-//      break;
-//  }
-//
-//  if (lhs->getType() == SType::STRING ||
-//      rhs->getType() == SType::STRING) {
-//    *out = SValue(lhs->getString() > rhs->getString());
-//    return;
-//  }
-//
-//  RAISE(kRuntimeError, "can't compare %s with %s",
-//      lhs->getTypeName(),
-//      rhs->getTypeName());
-//}
-//
-//void gteExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  if (argc != 2) {
-//    RAISE(
-//        kRuntimeError,
-//        "wrong number of arguments for gteExpr. expected: 2, got: %i", argc);
-//  }
-//
-//  SValue* lhs = argv;
-//  SValue* rhs = argv + 1;
-//
-//  switch(lhs->getType()) {
-//    case SType::INT64:
-//    case SType::TIMESTAMP64:
-//      switch(rhs->getType()) {
-//        case SType::INT64:
-//        case SType::TIMESTAMP64:
-//          *out = SValue(lhs->getInteger() >= rhs->getInteger());
-//          return;
-//        case SType::FLOAT64:
-//          *out = SValue(lhs->getFloat() >= rhs->getFloat());
-//          return;
-//        case SType::NIL:
-//          *out = SValue(lhs->getFloat() >= 0.0f);
-//          return;
-//        default:
-//          break;
-//      }
-//      break;
-//    case SType::FLOAT64:
-//      switch(rhs->getType()) {
-//        case SType::INT64:
-//        case SType::FLOAT64:
-//        case SType::TIMESTAMP64:
-//          *out = SValue(lhs->getFloat() >= rhs->getFloat());
-//          return;
-//        case SType::NIL:
-//          *out = SValue(lhs->getFloat() >= 0.0f);
-//          return;
-//        default:
-//          break;
-//      }
-//      break;
-//    case SType::NIL:
-//      switch(rhs->getType()) {
-//        case SType::INT64:
-//        case SType::FLOAT64:
-//        case SType::TIMESTAMP64:
-//          *out = SValue(0.0f >= rhs->getFloat());
-//          return;
-//        case SType::NIL:
-//          *out = SValue(SValue::BoolType(true));
-//          return;
-//        default:
-//          break;
-//      }
-//    default:
-//      break;
-//  }
-//
-//  if (lhs->getType() == SType::STRING ||
-//      rhs->getType() == SType::STRING) {
-//    *out = SValue(lhs->getString() >= rhs->getString());
-//    return;
-//  }
-//
-//  RAISE(kRuntimeError, "can't compare %s with %s",
-//      lhs->getTypeName(),
-//      rhs->getTypeName());
-//}
-//
-//void isNullExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  if (argc != 1) {
-//    RAISEF(
-//        kRuntimeError,
-//        "wrong number of arguments for isnull. expected: 1, got: $0", argc);
-//  }
-//
-//  if (argv[0].getType() == SType::NIL) {
-//    *out = SValue(SValue::BoolType(true));
-//  } else {
-//    *out = SValue(SValue::BoolType(false));
-//  }
-//}
 
-}
-}
+} // namespace expressions
+} // namespace csql
+

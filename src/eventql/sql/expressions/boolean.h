@@ -38,7 +38,10 @@ extern const SFunction cmp_uint64;
 extern const SFunction cmp_timestamp64;
 
 extern const SFunction eq_uint64;
+extern const SFunction eq_int64;
+extern const SFunction eq_float64;
 extern const SFunction eq_timestamp64;
+
 extern const SFunction lt_uint64;
 extern const SFunction lt_timestamp64;
 extern const SFunction lte_uint64;

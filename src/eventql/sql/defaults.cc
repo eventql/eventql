@@ -36,6 +36,7 @@ namespace csql {
 void installDefaultSymbols(SymbolTable* rt) {
   /* implicit conversions */
   rt->registerImplicitConversion(SType::UINT64, SType::NIL);
+  rt->registerImplicitConversion(SType::UINT64, SType::INT64);
   rt->registerImplicitConversion(SType::INT64, SType::NIL);
   rt->registerImplicitConversion(SType::FLOAT64, SType::NIL);
   rt->registerImplicitConversion(SType::BOOL, SType::NIL);
@@ -53,6 +54,8 @@ void installDefaultSymbols(SymbolTable* rt) {
   rt->registerFunction("cmp",  expressions::cmp_uint64);
   rt->registerFunction("cmp",  expressions::cmp_timestamp64);
   rt->registerFunction("eq",  expressions::eq_uint64);
+  rt->registerFunction("eq",  expressions::eq_int64);
+  rt->registerFunction("eq",  expressions::eq_float64);
   rt->registerFunction("eq",  expressions::eq_timestamp64);
 
   //rt->registerFunction("neq", PureFunction(&expressions::neqExpr));
