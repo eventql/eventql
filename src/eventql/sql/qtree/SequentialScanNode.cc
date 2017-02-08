@@ -225,7 +225,7 @@ size_t SequentialScanNode::getComputedColumnIndex(
     }
   }
 
-  auto input_idx = getInputColumnIndex(col);
+  auto input_idx = getInputColumnIndex(col, allow_add);
   if (input_idx != size_t(-1)) {
     auto slnode = new SelectListNode(
         new ColumnReferenceNode(input_idx, getInputColumnType(input_idx)));

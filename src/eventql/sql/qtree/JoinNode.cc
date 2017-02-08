@@ -22,11 +22,10 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/eventql.h"
 #include <eventql/sql/qtree/JoinNode.h>
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
 #include <eventql/sql/qtree/QueryTreeUtil.h>
-
-#include "eventql/eventql.h"
 
 namespace csql {
 

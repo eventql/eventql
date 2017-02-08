@@ -1227,7 +1227,7 @@ QueryTreeNode* QueryPlanBuilder::buildJoinTableReference(
                   &JoinNode::getInputColumnInfo,
                   join_node.get(),
                   std::placeholders::_1,
-                  false),
+                  true),
               std::bind(
                   &JoinNode::getInputColumnType,
                   join_node.get(),
