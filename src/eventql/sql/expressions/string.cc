@@ -94,6 +94,40 @@ const SFunction rtrim(
     { SType::STRING },
     SType::STRING,
     &rtrim_call);
+
+void substring_call(sql_txn* ctx, VMStack* stack) {
+  auto cur = popInt64(stack);
+  auto str = popString(stack);
+  int64_t strlen = static_cast<int64_t>(str.size());
+
+  if (cur == 0 || strlen == 0) {
+    pushString(stack, "");
+    return;
+  }
+
+  if (cur < 0) {
+    cur += strlen;
+    if (cur < 0) {
+      pushString(stack, "");
+      return;
+    }
+  } else {
+    cur = std::min(cur - 1, strlen - 1);
+  }
+
+  int64_t len = strlen - cur;
+  if (len == 0) {
+    pushString(stack, "");
+  } else {
+    pushString(stack, str.substr(cur, len));
+  }
+}
+
+const SFunction substring(
+    { SType::STRING, SType::INT64 },
+    SType::STRING,
+    &substring_call);
+
 //
 //void subStringExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
 //  if (argc < 2 || argc > 3) {
@@ -134,15 +168,17 @@ const SFunction rtrim(
 //  }
 //}
 //
-//
-//void concatExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  std::string str;
-//  for (int i = 0; i < argc; ++i) {
-//    str += argv[i].getString();
-//  }
-//
-//  *out = SValue::newString(str);
-//}
+void concat_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popString(stack);
+  auto left = popString(stack);
+  auto concat = left + right;
+  pushString(stack, concat);
+}
+
+const SFunction concat(
+    { SType::STRING, SType::STRING },
+    SType::STRING,
+    &concat_call);
 
 }
 }
