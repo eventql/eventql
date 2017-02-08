@@ -1051,10 +1051,7 @@ QueryTreeNode* QueryPlanBuilder::buildJoinTableReference(
                 join_node.get(),
                 std::placeholders::_1,
                 true),
-            std::bind(
-                &JoinNode::getInputColumnType,
-                join_node.get(),
-                std::placeholders::_1)));
+            [&join_node] (size_t i) { return join_node->getInputColumnType(i); }));
   }
 
   Vector<QualifiedColumn> all_columns;
@@ -1188,10 +1185,7 @@ QueryTreeNode* QueryPlanBuilder::buildJoinTableReference(
                       join_node.get(),
                       std::placeholders::_1,
                       true),
-                  std::bind(
-                      &JoinNode::getInputColumnType,
-                      join_node.get(),
-                      std::placeholders::_1)));
+                  [&join_node] (size_t i) { return join_node->getInputColumnType(i); }));
 
           break;
         }
@@ -1232,10 +1226,7 @@ QueryTreeNode* QueryPlanBuilder::buildJoinTableReference(
                   join_node.get(),
                   std::placeholders::_1,
                   true),
-              std::bind(
-                  &JoinNode::getInputColumnType,
-                  join_node.get(),
-                  std::placeholders::_1)));
+              [&join_node] (size_t i) { return join_node->getInputColumnType(i); }));
     }
   }
 
@@ -1424,10 +1415,7 @@ QueryTreeNode* QueryPlanBuilder::buildSeqscanTableReference(
                 seqscan.get(),
                 std::placeholders::_1,
                 true),
-            std::bind(
-                &SequentialScanNode::getInputColumnType,
-                seqscan.get(),
-                std::placeholders::_1)));
+            [seqscan] (size_t i) { return seqscan->getInputColumnType(i); }));
 
     // FIXME skip if literal true expression
     seqscan->setWhereExpression(pred);
@@ -1464,10 +1452,7 @@ QueryTreeNode* QueryPlanBuilder::buildSeqscanTableReference(
                   seqscan.get(),
                   std::placeholders::_1,
                   true),
-              std::bind(
-                  &SequentialScanNode::getInputColumnType,
-                  seqscan.get(),
-                  std::placeholders::_1)));
+              [seqscan] (size_t i) { return seqscan->getInputColumnType(i); }));
     }
   }
 
