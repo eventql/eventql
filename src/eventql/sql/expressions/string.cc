@@ -38,6 +38,16 @@ const SFunction lcase(
     SType::STRING,
     &lcase_call);
 
+void ucase_call(sql_txn* ctx, VMStack* stack) {
+  auto str = popString(stack);
+  StringUtil::toUpper(&str);
+  pushString(stack, str);
+}
+
+const SFunction ucase(
+    { SType::STRING },
+    SType::STRING,
+    &ucase_call);
 //static void checkArgs(const char* symbol, int argc, int argc_expected) {
 //  if (argc != argc_expected) {
 //    RAISE(
@@ -61,20 +71,6 @@ const SFunction lcase(
 //
 //  auto val = StringUtil::endsWith(argv[0].getString(), argv[1].getString());
 //  *out = SValue(SValue::BoolType(val));
-//}
-//
-//void upperCaseExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  checkArgs("UPPERCASE", argc, 1);
-//  auto val = argv[0].getString();
-//  StringUtil::toUpper(&val);
-//  *out = SValue(val);
-//}
-//
-//void lowerCaseExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  checkArgs("LOWERCASE", argc, 1);
-//  auto val = argv[0].getString();
-//  StringUtil::toLower(&val);
-//  *out = SValue(val);
 //}
 //
 //void subStringExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {

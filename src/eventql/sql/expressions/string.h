@@ -31,6 +31,7 @@ namespace csql {
 namespace expressions {
 
 extern const SFunction lcase;
+extern const SFunction ucase;
 //void startsWithExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
 //
 //void endsWithExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
