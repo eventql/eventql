@@ -23,13 +23,9 @@ The valid time units are:
 
 Examples:
 
-    SELECT date_trunc('hour', TIMESTAMP '2001-02-16 20:38:40');
-    Result: 2001-02-16 20:00:00
+    SELECT date_trunc('hour', FROM_TIMESTAMP(1486553343));
+    Result: 2017-02-08 11:00:00
 
-    SELECT date_trunc('30mins', TIMESTAMP '2001-02-16 20:38:40');
-    Result: 2001-02-16 20:30:00
-
-    SELECT date_trunc('year', TIMESTAMP '2001-02-16 20:38:40');
-    Result: 2001-01-01 00:00:00
-
+    SELECT date_trunc('10min', 1486553343000000);
+    Result: 2001-02-16 11:20:00
 
