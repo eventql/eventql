@@ -136,17 +136,17 @@ uint64_t date_trunc_call(std::string window, uint64_t timestamp) {
   return truncated;
 }
 
-void date_trunc_int64_call(sql_txn* ctx, VMStack* stack) {
-  auto timestamp = popInt64(stack);
+void date_trunc_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto timestamp = popUInt64(stack);
   auto window = popString(stack);
   auto truncated = date_trunc_call(window, timestamp);
   pushTimestamp64(stack, truncated);
 }
 
-const SFunction date_trunc_int64(
-    { SType::STRING, SType::INT64 },
+const SFunction date_trunc_uint64(
+    { SType::STRING, SType::UINT64 },
     SType::TIMESTAMP64,
-    &date_trunc_int64_call);
+    &date_trunc_uint64_call);
 
 void date_trunc_timestamp64_call(sql_txn* ctx, VMStack* stack) {
   auto timestamp = popTimestamp64(stack);
