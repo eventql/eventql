@@ -46,6 +46,13 @@ extern const SFunction to_int64_float64;
 extern const SFunction to_int64_bool;
 extern const SFunction to_int64_timestamp64;
 
+extern const SFunction to_string_nil;
+extern const SFunction to_string_uint64;
+extern const SFunction to_string_int64;
+extern const SFunction to_string_float64;
+extern const SFunction to_string_bool;
+extern const SFunction to_string_timestamp64;
+
 void toStringExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
 void toIntExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
 void toFloatExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);

@@ -178,7 +178,7 @@ void popVector(VMStack* stack, SVector* vector);
 void pushBoxed(VMStack* stack, const SValue* value);
 void pushUnboxed(VMStack* stack, SType type, const void* value);
 
-void popNil();
+void popNil(VMStack* stack);
 void popNil(STag* tag);
 void popNilBoxed(VMStack* stack, SValue* value);
 void popNilVector(VMStack* stack, SVector* vector);

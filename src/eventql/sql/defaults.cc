@@ -99,6 +99,12 @@ void installDefaultSymbols(SymbolTable* rt) {
   rt->registerFunction("to_int64", expressions::to_int64_float64);
   rt->registerFunction("to_int64", expressions::to_int64_bool);
   rt->registerFunction("to_int64", expressions::to_int64_timestamp64);
+  rt->registerFunction("to_string", expressions::to_string_nil);
+  rt->registerFunction("to_string", expressions::to_string_uint64);
+  rt->registerFunction("to_string", expressions::to_string_int64);
+  rt->registerFunction("to_string", expressions::to_string_float64);
+  rt->registerFunction("to_string", expressions::to_string_bool);
+  rt->registerFunction("to_string", expressions::to_string_timestamp64);
 
   /* expressions/datetime.h */
   rt->registerFunction("now", expressions::now);

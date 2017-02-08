@@ -33,6 +33,7 @@ namespace expressions {
  * COUNT() expression
  */
 void count_acc(sql_txn* ctx, void* self, VMStack* stack) {
+  popNil(stack);
   ++(*static_cast<uint64_t*>(self));
 }
 
