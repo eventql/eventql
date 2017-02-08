@@ -35,46 +35,32 @@
 namespace csql {
 namespace expressions {
 
-static const std::unordered_map<std::string, std::string> time_window_names = {
-  {"ms", "ms"},
-  {"msec", "ms"},
-  {"millisecond", "ms"},
-  {"milliseconds", "ms"},
-  {"s", "S"},
-  {"sec", "S"},
-  {"second", "S"},
-  {"seconds", "S"},
-  {"M", "M"},
-  {"min", "M"},
-  {"mins", "M"},
-  {"minute", "M"},
-  {"minutes", "M"},
-  {"h", "H"},
-  {"hour", "H"},
-  {"hours", "H"},
-  {"d", "d"},
-  {"day", "d"},
-  {"days", "d"},
-  {"w", "w"},
-  {"week", "w"},
-  {"weeks", "w"},
-  {"m", "m"},
-  {"month", "m"},
-  {"months", "m"},
-  {"y", "y"},
-  {"year", "y"},
-  {"years", "y"}
-};
-
 static const std::unordered_map<std::string, uint64_t> time_windows = {
   {"ms", kMicrosPerMilli},
-  {"S", kMicrosPerSecond},
-  {"M", kMicrosPerMinute},
-  {"H", kMicrosPerHour},
+  {"msec", kMicrosPerMilli},
+  {"millisecond", kMicrosPerMilli},
+  {"milliseconds", kMicrosPerMilli},
+  {"s", kMicrosPerSecond},
+  {"sec", kMicrosPerSecond},
+  {"second", kMicrosPerSecond},
+  {"seconds", kMicrosPerSecond},
+  {"min", kMicrosPerMinute},
+  {"minute", kMicrosPerMinute},
+  {"minutes", kMicrosPerMinute},
+  {"h", kMicrosPerHour},
+  {"hour", kMicrosPerHour},
+  {"hours", kMicrosPerHour},
   {"d", kMicrosPerDay},
+  {"day", kMicrosPerDay},
+  {"days", kMicrosPerDay},
   {"w", kMicrosPerWeek},
-  {"m", kMicrosPerDay * 30},
-  {"y", kMicrosPerYear}
+  {"week", kMicrosPerWeek},
+  {"weeks", kMicrosPerWeek},
+  {"month", kMicrosPerDay * 30},
+  {"months", kMicrosPerDay * 30},
+  {"y", kMicrosPerYear},
+  {"year", kMicrosPerYear},
+  {"years", kMicrosPerYear}
 };
 
 void now_call(sql_txn* ctx, VMStack* stack) {
@@ -139,13 +125,7 @@ uint64_t date_trunc_call(std::string window, uint64_t timestamp) {
     window_name = window;
   }
 
-  auto window_name_alias = time_window_names.find(window_name);
-  if (window_name_alias == time_window_names.end()) {
-    throw std::runtime_error(
-        StringUtil::format("unknown time window $0", window));
-  }
-
-  auto window_value = time_windows.find(window_name_alias->second);
+  auto window_value = time_windows.find(window_name);
   if (window_value == time_windows.end()) {
     throw std::runtime_error(
         StringUtil::format("unknown time window $0", window));
