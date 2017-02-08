@@ -139,8 +139,8 @@ void installDefaultSymbols(SymbolTable* rt) {
   rt->registerFunction("pow", expressions::pow_float64);
 
   /* expressions/string.h */
-  //rt->registerFunction("startswith", PureFunction(&expressions::startsWithExpr));
-  //rt->registerFunction("endswith", PureFunction(&expressions::endsWithExpr));
+  rt->registerFunction("startswith", expressions::startswith);
+  rt->registerFunction("endswith", expressions::endswith);
   rt->registerFunction("lcase", expressions::lcase);
   rt->registerFunction("lowercase", expressions::lcase);
   rt->registerFunction("ucase", expressions::ucase);

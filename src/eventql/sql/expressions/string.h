@@ -32,10 +32,8 @@ namespace expressions {
 
 extern const SFunction lcase;
 extern const SFunction ucase;
-//void startsWithExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
-//
-//void endsWithExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
-//
+extern const SFunction startswith;
+extern const SFunction endswith;
 //void upperCaseExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
 //
 //void lowerCaseExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);

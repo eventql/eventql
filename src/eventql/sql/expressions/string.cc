@@ -48,30 +48,30 @@ const SFunction ucase(
     { SType::STRING },
     SType::STRING,
     &ucase_call);
-//static void checkArgs(const char* symbol, int argc, int argc_expected) {
-//  if (argc != argc_expected) {
-//    RAISE(
-//        kRuntimeError,
-//        "wrong number of arguments for %s. expected: %i, got: %i",
-//        symbol,
-//        argc_expected,
-//        argc);
-//  }
-//}
-//
-//void startsWithExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  checkArgs("STARTSWITH", argc, 2);
-//
-//  auto val = StringUtil::beginsWith(argv[0].getString(), argv[1].getString());
-//  *out = SValue(SValue::BoolType(val));
-//}
-//
-//void endsWithExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  checkArgs("ENDSWITH", argc, 2);
-//
-//  auto val = StringUtil::endsWith(argv[0].getString(), argv[1].getString());
-//  *out = SValue(SValue::BoolType(val));
-//}
+
+void startswith_call(sql_txn* ctx, VMStack* stack) {
+  auto substr = popString(stack);
+  auto str = popString(stack);
+  auto startswith = StringUtil::beginsWith(str, substr);
+  pushBool(stack, startswith);
+}
+
+const SFunction startswith(
+    { SType::STRING, SType::STRING },
+    SType::BOOL,
+    &startswith_call);
+
+void endswith_call(sql_txn* ctx, VMStack* stack) {
+  auto substr = popString(stack);
+  auto str = popString(stack);
+  auto endswith = StringUtil::endsWith(str, substr);
+  pushBool(stack, endswith);
+}
+
+const SFunction endswith(
+    { SType::STRING, SType::STRING },
+    SType::BOOL,
+    &endswith_call);
 //
 //void subStringExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
 //  if (argc < 2 || argc > 3) {
