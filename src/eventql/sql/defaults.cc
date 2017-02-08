@@ -28,6 +28,7 @@
 #include <eventql/sql/expressions/conversion.h>
 #include <eventql/sql/expressions/datetime.h>
 #include <eventql/sql/expressions/math.h>
+#include <eventql/sql/expressions/string.h>
 
 #include "eventql/eventql.h"
 
@@ -138,16 +139,16 @@ void installDefaultSymbols(SymbolTable* rt) {
   rt->registerFunction("pow", expressions::pow_float64);
 
   /* expressions/string.h */
-  //rt->registerFunction("startswith", PureFunction(&expressions::startsWithExpr));
-  //rt->registerFunction("endswith", PureFunction(&expressions::endsWithExpr));
-  //rt->registerFunction("uppercase", PureFunction(&expressions::upperCaseExpr));
-  //rt->registerFunction("ucase", PureFunction(&expressions::upperCaseExpr));
-  //rt->registerFunction("lowercase", PureFunction(&expressions::lowerCaseExpr));
-  //rt->registerFunction("lcase", PureFunction(&expressions::lowerCaseExpr));
+  rt->registerFunction("startswith", expressions::startswith);
+  rt->registerFunction("endswith", expressions::endswith);
+  rt->registerFunction("lcase", expressions::lcase);
+  rt->registerFunction("lowercase", expressions::lcase);
+  rt->registerFunction("ucase", expressions::ucase);
+  rt->registerFunction("uppercase", expressions::ucase);
   //rt->registerFunction("substring", PureFunction(&expressions::subStringExpr));
   //rt->registerFunction("substr", PureFunction(&expressions::subStringExpr));
-  //rt->registerFunction("ltrim", PureFunction(&expressions::ltrimExpr));
-  //rt->registerFunction("rtrim", PureFunction(&expressions::rtrimExpr));
+  rt->registerFunction("ltrim", expressions::ltrim);
+  rt->registerFunction("rtrim", expressions::rtrim);
   //rt->registerFunction("concat", PureFunction(&expressions::concatExpr));
 
   /* expressions/miscellaneous.h */

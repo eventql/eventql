@@ -3,3 +3,5 @@
 00003_test_error_message
 00004_test_draw_linechart
 00005_test_date_trunc
+00006_test_lcase_ucase
+00007_test_starts_ends_with
