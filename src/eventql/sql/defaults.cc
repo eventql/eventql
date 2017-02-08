@@ -145,8 +145,8 @@ void installDefaultSymbols(SymbolTable* rt) {
   rt->registerFunction("lowercase", expressions::lcase);
   rt->registerFunction("ucase", expressions::ucase);
   rt->registerFunction("uppercase", expressions::ucase);
-  //rt->registerFunction("substring", PureFunction(&expressions::subStringExpr));
-  //rt->registerFunction("substr", PureFunction(&expressions::subStringExpr));
+  rt->registerFunction("substring", expressions::substring);
+  rt->registerFunction("substr", expressions::substring);
   rt->registerFunction("ltrim", expressions::ltrim);
   rt->registerFunction("rtrim", expressions::rtrim);
   rt->registerFunction("concat", expressions::concat);
