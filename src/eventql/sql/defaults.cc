@@ -147,8 +147,8 @@ void installDefaultSymbols(SymbolTable* rt) {
   rt->registerFunction("uppercase", expressions::ucase);
   //rt->registerFunction("substring", PureFunction(&expressions::subStringExpr));
   //rt->registerFunction("substr", PureFunction(&expressions::subStringExpr));
-  //rt->registerFunction("ltrim", PureFunction(&expressions::ltrimExpr));
-  //rt->registerFunction("rtrim", PureFunction(&expressions::rtrimExpr));
+  rt->registerFunction("ltrim", expressions::ltrim);
+  rt->registerFunction("rtrim", expressions::rtrim);
   //rt->registerFunction("concat", PureFunction(&expressions::concatExpr));
 
   /* expressions/miscellaneous.h */

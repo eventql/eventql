@@ -34,6 +34,8 @@ extern const SFunction lcase;
 extern const SFunction ucase;
 extern const SFunction startswith;
 extern const SFunction endswith;
+extern const SFunction ltrim;
+extern const SFunction rtrim;
 //void upperCaseExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
 //
 //void lowerCaseExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);

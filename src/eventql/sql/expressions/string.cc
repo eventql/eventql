@@ -72,6 +72,28 @@ const SFunction endswith(
     { SType::STRING, SType::STRING },
     SType::BOOL,
     &endswith_call);
+
+void ltrim_call(sql_txn* ctx, VMStack* stack) {
+  auto str = popString(stack);
+  StringUtil::ltrim(&str);
+  pushString(stack, str);
+}
+
+const SFunction ltrim(
+    { SType::STRING },
+    SType::STRING,
+    &ltrim_call);
+
+void rtrim_call(sql_txn* ctx, VMStack* stack) {
+  auto str = popString(stack);
+  StringUtil::rtrim(&str);
+  pushString(stack, str);
+}
+
+const SFunction rtrim(
+    { SType::STRING },
+    SType::STRING,
+    &rtrim_call);
 //
 //void subStringExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
 //  if (argc < 2 || argc > 3) {
@@ -112,37 +134,6 @@ const SFunction endswith(
 //  }
 //}
 //
-//void ltrimExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  if (argc != 1) {
-//    RAISEF(
-//        kRuntimeError,
-//        "wrong number of arguments for ltrim. expected: 1, got: $0",
-//        argc);
-//  }
-//
-//  String str = argv[0].getString();
-//  while (str.front() == ' ') {
-//    str = str.substr(1);
-//  }
-//
-//  *out = SValue::newString(str);
-//}
-//
-//void rtrimExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  if (argc != 1) {
-//    RAISEF(
-//        kRuntimeError,
-//        "wrong number of arguments for ltrim. expected: 1, got: $0",
-//        argc);
-//  }
-//
-//  String str = argv[0].getString();
-//  while (str.back() == ' ') {
-//    str.pop_back();
-//  }
-//
-//  *out = SValue::newString(str);
-//}
 //
 //void concatExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
 //  std::string str;
