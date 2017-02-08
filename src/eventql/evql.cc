@@ -25,10 +25,12 @@
 #include <unistd.h>
 #include <signal.h>
 #include <poll.h>
+#include <thread>
 
 #include "eventql/eventql.h"
 #include "eventql/util/application.h"
 #include "eventql/util/logging.h"
+#include "eventql/util/io/fileutil.h"
 #include "eventql/util/io/TerminalOutputStream.h"
 #include "eventql/util/wallclock.h"
 #include "eventql/util/cli/CLI.h"
@@ -36,8 +38,6 @@
 #include "eventql/util/cli/term.h"
 #include "eventql/cli/console.h"
 #include "eventql/cli/cli_config.h"
-
-thread::EventLoop ev;
 
 static bool hasSTDIN() {
   struct pollfd p = {

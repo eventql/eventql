@@ -533,7 +533,7 @@ size_t sql_sizeof(SType type, const void* data) {
 size_t sql_sizeof_static(SType type) {
   switch (type) {
     case SType::STRING:
-      throw std::runtime_error("invalid call of sql_sizeof_static(STRING)");
+      return sizeof(uint32_t) + sizeof(STag);
     case SType::NIL:
       return 0 + sizeof(STag);
     case SType::FLOAT64:
@@ -734,8 +734,6 @@ String sql_escape(const String& orig_str) {
 
 void copyBoxed(const SValue* val, SVector* vector) {
   vector->append(val->getData(), val->getSize());
-  auto tag = val->getTag();
-  vector->append(&tag, sizeof(STag));
 }
 
 void popBoxed(VMStack* stack, SValue* value) {

@@ -22,11 +22,10 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/eventql.h"
 #include <eventql/sql/qtree/JoinNode.h>
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
 #include <eventql/sql/qtree/QueryTreeUtil.h>
-
-#include "eventql/eventql.h"
 
 namespace csql {
 
@@ -137,7 +136,7 @@ size_t JoinNode::getComputedColumnIndex(
     }
   }
 
-  auto input_idx = getInputColumnIndex(column_name);
+  auto input_idx = getInputColumnIndex(column_name, allow_add);
   if (input_idx != size_t(-1)) {
     auto slnode = new SelectListNode(
         new ColumnReferenceNode(input_idx, getInputColumnType(input_idx)));

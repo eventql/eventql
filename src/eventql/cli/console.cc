@@ -38,7 +38,6 @@
 #include "eventql/util/cli/CLI.h"
 #include "eventql/util/cli/flagparser.h"
 #include "eventql/util/cli/term.h"
-#include "eventql/server/sql/codec/binary_codec.h"
 #include "eventql/sql/result_list.h"
 #include "eventql/sql/parser/tokenize.h"
 #include "linenoise/linenoise.h"

@@ -1227,7 +1227,7 @@ QueryTreeNode* QueryPlanBuilder::buildJoinTableReference(
                   &JoinNode::getInputColumnInfo,
                   join_node.get(),
                   std::placeholders::_1,
-                  false),
+                  true),
               std::bind(
                   &JoinNode::getInputColumnType,
                   join_node.get(),
@@ -1390,7 +1390,7 @@ QueryTreeNode* QueryPlanBuilder::buildSeqscanTableReference(
   }
 
   /* get where expression */
-  if (where_clause) {
+  if (where_clause && !in_join) {
     if (!(*where_clause == ASTNode::T_WHERE)) {
       return nullptr;
     }
@@ -1424,27 +1424,6 @@ QueryTreeNode* QueryPlanBuilder::buildSeqscanTableReference(
                 &SequentialScanNode::getInputColumnType,
                 seqscan.get(),
                 std::placeholders::_1)));
-
-    if (in_join) {
-      Set<String> valid_columns;
-      for (const auto& col : table.get().columns) {
-        valid_columns.insert(col.column_name);
-        valid_columns.insert(table_name + "." + col.column_name);
-        if (!table_alias.empty()) {
-          valid_columns.insert(table_alias + "." + col.column_name);
-        }
-      }
-
-      auto rc = QueryTreeUtil::prunePredicateExpression(
-          txn,
-          pred,
-          valid_columns,
-          &pred);
-
-      if (!rc.isSuccess()) {
-        RAISE(kRuntimeError, rc.getMessage());
-      }
-    }
 
     // FIXME skip if literal true expression
     seqscan->setWhereExpression(pred);
