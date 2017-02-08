@@ -137,6 +137,86 @@ const SFunction to_int64_bool(
     &to_int64_bool_call);
 
 
+/**
+ * to_string(uint64) -> string
+ * to_string(timestamp64) -> string
+ */
+void to_string_nil_call(sql_txn* ctx, VMStack* stack) {
+  popNil(stack);
+  pushString(stack, "NULL");
+}
+
+const SFunction to_string_nil(
+    { SType::NIL },
+    SType::STRING,
+    &to_string_nil_call);
+
+/**
+ * to_string(uint64) -> string
+ * to_string(timestamp64) -> string
+ */
+void to_string_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto str = sql_tostring(SType::UINT64, stack->top);
+  popUInt64(stack);
+  pushString(stack, str);
+}
+
+const SFunction to_string_uint64(
+    { SType::UINT64 },
+    SType::STRING,
+    &to_string_uint64_call);
+
+const SFunction to_string_timestamp64(
+    { SType::TIMESTAMP64 },
+    SType::STRING,
+    &to_string_uint64_call);
+
+
+/**
+ * to_string(int64) -> string
+ */
+void to_string_int64_call(sql_txn* ctx, VMStack* stack) {
+  auto str = sql_tostring(SType::INT64, stack->top);
+  popInt64(stack);
+  pushString(stack, str);
+}
+
+const SFunction to_string_int64(
+    { SType::INT64 },
+    SType::STRING,
+    &to_string_int64_call);
+
+
+/**
+ * to_string(float64) -> string
+ */
+void to_string_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto str = sql_tostring(SType::FLOAT64, stack->top);
+  popFloat64(stack);
+  pushString(stack, str);
+}
+
+const SFunction to_string_float64(
+    { SType::FLOAT64 },
+    SType::STRING,
+    &to_string_float64_call);
+
+
+/**
+ * to_string(bool) -> string
+ */
+void to_string_bool_call(sql_txn* ctx, VMStack* stack) {
+  auto str = sql_tostring(SType::BOOL, stack->top);
+  popBool(stack);
+  pushString(stack, str);
+}
+
+const SFunction to_string_bool(
+    { SType::BOOL },
+    SType::STRING,
+    &to_string_bool_call);
+
+
 } // namespace expressions
 } // namespace csql
 
