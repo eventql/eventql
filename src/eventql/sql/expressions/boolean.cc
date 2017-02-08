@@ -90,6 +90,48 @@ const SFunction cmp_timestamp64(
 
 
 /**
+ * cmp(int64, int64) -> int64
+ */
+void cmp_int64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popInt64(stack);
+  auto left = popInt64(stack);
+  if (left < right) {
+    pushInt64(stack, -1);
+  } else if (left > right) {
+    pushInt64(stack, 1);
+  } else {
+    pushInt64(stack, 0);
+  }
+}
+
+const SFunction cmp_int64(
+    { SType::INT64, SType::INT64 },
+    SType::INT64,
+    &cmp_int64_call);
+
+
+/**
+ * cmp(float64, float64) -> int64
+ */
+void cmp_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popFloat64(stack);
+  auto left = popFloat64(stack);
+  if (left < right) {
+    pushInt64(stack, -1);
+  } else if (left > right) {
+    pushInt64(stack, 1);
+  } else {
+    pushInt64(stack, 0);
+  }
+}
+
+const SFunction cmp_float64(
+    { SType::FLOAT64, SType::FLOAT64 },
+    SType::INT64,
+    &cmp_float64_call);
+
+
+/**
  * eq(uint64, uint64) -> bool
  * eq(timestamp64, timestamp64) -> bool
  */
@@ -141,6 +183,87 @@ const SFunction eq_float64(
 
 
 /**
+ * eq(bool, bool) -> bool
+ */
+void eq_bool_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popBool(stack);
+  auto left = popBool(stack);
+  pushBool(stack, left == right);
+}
+
+const SFunction eq_bool(
+    { SType::BOOL, SType::BOOL },
+    SType::BOOL,
+    &eq_bool_call);
+
+
+/**
+ * neq(uint64, uint64) -> bool
+ * neq(timestamp64, timestamp64) -> bool
+ */
+void neq_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  pushBool(stack, left != right);
+}
+
+const SFunction neq_uint64(
+    { SType::UINT64, SType::UINT64 },
+    SType::BOOL,
+    &neq_uint64_call);
+
+const SFunction neq_timestamp64(
+    { SType::TIMESTAMP64, SType::TIMESTAMP64 },
+    SType::BOOL,
+    &neq_uint64_call);
+
+
+/**
+ * neq(int64, int64) -> bool
+ */
+void neq_int64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popInt64(stack);
+  auto left = popInt64(stack);
+  pushBool(stack, left != right);
+}
+
+const SFunction neq_int64(
+    { SType::INT64, SType::INT64 },
+    SType::BOOL,
+    &neq_int64_call);
+
+
+/**
+ * neq(float64, float64) -> bool
+ */
+void neq_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popFloat64(stack);
+  auto left = popFloat64(stack);
+  pushBool(stack, left != right);
+}
+
+const SFunction neq_float64(
+    { SType::FLOAT64, SType::FLOAT64 },
+    SType::BOOL,
+    &neq_float64_call);
+
+
+/**
+ * neq(bool, bool) -> bool
+ */
+void neq_bool_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popBool(stack);
+  auto left = popBool(stack);
+  pushBool(stack, left != right);
+}
+
+const SFunction neq_bool(
+    { SType::BOOL, SType::BOOL },
+    SType::BOOL,
+    &neq_bool_call);
+
+
+/**
  * lt(uint64, uint64) -> bool
  * lt(timestamp64, timestamp4) -> bool
  */
@@ -159,6 +282,36 @@ const SFunction lt_timestamp64(
     { SType::TIMESTAMP64, SType::TIMESTAMP64 },
     SType::BOOL,
     &lt_uint64_call);
+
+
+/**
+ * lt(int64, int64) -> bool
+ */
+void lt_int64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popInt64(stack);
+  auto left = popInt64(stack);
+  pushBool(stack, left < right);
+}
+
+const SFunction lt_int64(
+    { SType::INT64, SType::INT64 },
+    SType::BOOL,
+    &lt_int64_call);
+
+
+/**
+ * lt(float64, float64) -> bool
+ */
+void lt_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popFloat64(stack);
+  auto left = popFloat64(stack);
+  pushBool(stack, left < right);
+}
+
+const SFunction lt_float64(
+    { SType::FLOAT64, SType::FLOAT64 },
+    SType::BOOL,
+    &lt_float64_call);
 
 
 /**
@@ -181,17 +334,47 @@ const SFunction lte_timestamp64(
     SType::BOOL,
     &lte_uint64_call);
 
-void gt_uint64_call(sql_txn* ctx, VMStack* stack) {
-  auto right = popUInt64(stack);
-  auto left = popUInt64(stack);
-  pushBool(stack, left > right);
+
+/**
+ * lte(int64, int64) -> bool
+ */
+void lte_int64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popInt64(stack);
+  auto left = popInt64(stack);
+  pushBool(stack, left <= right);
 }
+
+const SFunction lte_int64(
+    { SType::INT64, SType::INT64 },
+    SType::BOOL,
+    &lte_int64_call);
+
+
+/**
+ * lte(float64, float64) -> bool
+ */
+void lte_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popFloat64(stack);
+  auto left = popFloat64(stack);
+  pushBool(stack, left <= right);
+}
+
+const SFunction lte_float64(
+    { SType::FLOAT64, SType::FLOAT64 },
+    SType::BOOL,
+    &lte_float64_call);
 
 
 /**
  * gt(uint64, uint64) -> bool
  * gt(timestamp64, timestamp4) -> bool
  */
+void gt_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  pushBool(stack, left > right);
+}
+
 const SFunction gt_uint64(
     { SType::UINT64, SType::UINT64 },
     SType::BOOL,
@@ -201,6 +384,36 @@ const SFunction gt_timestamp64(
     { SType::TIMESTAMP64, SType::TIMESTAMP64 },
     SType::BOOL,
     &gt_uint64_call);
+
+
+/**
+ * gt(int64, int64) -> bool
+ */
+void gt_int64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popInt64(stack);
+  auto left = popInt64(stack);
+  pushBool(stack, left > right);
+}
+
+const SFunction gt_int64(
+    { SType::INT64, SType::INT64 },
+    SType::BOOL,
+    &gt_int64_call);
+
+
+/**
+ * gt(float64, float64) -> bool
+ */
+void gt_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popFloat64(stack);
+  auto left = popFloat64(stack);
+  pushBool(stack, left > right);
+}
+
+const SFunction gt_float64(
+    { SType::FLOAT64, SType::FLOAT64 },
+    SType::BOOL,
+    &gt_float64_call);
 
 
 /**
@@ -222,6 +435,36 @@ const SFunction gte_timestamp64(
     { SType::TIMESTAMP64, SType::TIMESTAMP64 },
     SType::BOOL,
     &gte_uint64_call);
+
+
+/**
+ * gte(int64, int64) -> bool
+ */
+void gte_int64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popInt64(stack);
+  auto left = popInt64(stack);
+  pushBool(stack, left >= right);
+}
+
+const SFunction gte_int64(
+    { SType::INT64, SType::INT64 },
+    SType::BOOL,
+    &gte_int64_call);
+
+
+/**
+ * gt(float64, float64) -> bool
+ */
+void gte_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popFloat64(stack);
+  auto left = popFloat64(stack);
+  pushBool(stack, left >= right);
+}
+
+const SFunction gte_float64(
+    { SType::FLOAT64, SType::FLOAT64 },
+    SType::BOOL,
+    &gte_float64_call);
 
 
 } // namespace expressions
