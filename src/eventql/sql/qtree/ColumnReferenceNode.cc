@@ -91,11 +91,11 @@ RefPtr<QueryTreeNode> ColumnReferenceNode::deepCopy() const {
 }
 
 String ColumnReferenceNode::toSQL() const {
-  if (!column_index_.isEmpty() && column_index_.get() != size_t(-1)) {
+  if (column_name_.empty()) {
     return StringUtil::format("subquery_column($0)", column_index_.get());
+  } else {
+    return "`" + column_name_ + "`";
   }
-
-  return "`" + column_name_ + "`";
 }
 
 SType ColumnReferenceNode::getReturnType() const {

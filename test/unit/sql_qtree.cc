@@ -331,7 +331,7 @@ TEST_CASE(QTreeTest, TestExtractMultipleConstraints, [] () {
     auto constraint = constraints[1];
     EXPECT_EQ(constraint.column_name, "session_id");
     EXPECT_TRUE(constraint.type == ScanConstraintType::NOT_EQUAL_TO);
-    EXPECT_EQ(constraint.value.toString(), "444");
+    EXPECT_EQ(constraint.value.toString(), "blah");
   }
 
   {
@@ -402,7 +402,7 @@ TEST_CASE(QTreeTest, TestPruneConstraints, [] () {
     ScanConstraint constraint;
     constraint.column_name = "time";
     constraint.type = ScanConstraintType::GREATER_THAN_OR_EQUAL_TO;
-    constraint.value = SValue::newInt64(6666);
+    constraint.value = SValue::newUInt64(6666);
     RefPtr<ValueExpressionNode> pruned_expr;
     auto rc = QueryTreeUtil::removeConstraintFromPredicate(
         txn.get(),
@@ -413,14 +413,14 @@ TEST_CASE(QTreeTest, TestPruneConstraints, [] () {
     EXPECT(rc.isSuccess());
     EXPECT_EQ(
         pruned_expr->toSQL(),
-        "logical_and(gt(1234,`time`),neq(`session_id`,'444'))");
+        "logical_and(gt(1234,`time`),neq(`session_id`,\"444\"))");
   }
 
   {
     ScanConstraint constraint;
     constraint.column_name = "time";
     constraint.type = ScanConstraintType::LESS_THAN;
-    constraint.value = SValue(SValue::newInt64(1234));
+    constraint.value = SValue(SValue::newUInt64(1234));
     RefPtr<ValueExpressionNode> pruned_expr;
     auto rc = QueryTreeUtil::removeConstraintFromPredicate(
         txn.get(),
@@ -430,7 +430,7 @@ TEST_CASE(QTreeTest, TestPruneConstraints, [] () {
 
     EXPECT_EQ(
         pruned_expr->toSQL(),
-        "logical_and(neq(`session_id`,'444'),gte(`time`,6666))");
+        "logical_and(neq(`session_id`,\"444\"),gte(`time`,6666))");
   }
 });
 
