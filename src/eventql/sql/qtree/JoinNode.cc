@@ -136,7 +136,7 @@ size_t JoinNode::getComputedColumnIndex(
     }
   }
 
-  auto input_idx = getInputColumnIndex(column_name);
+  auto input_idx = getInputColumnIndex(column_name, allow_add);
   if (input_idx != size_t(-1)) {
     auto slnode = new SelectListNode(
         new ColumnReferenceNode(input_idx, getInputColumnType(input_idx)));
