@@ -73,16 +73,16 @@ void installDefaultSymbols(SymbolTable* rt) {
   rt->registerFunction("lt", expressions::lt_float64);
   rt->registerFunction("lt", expressions::lt_timestamp64);
   rt->registerFunction("lte", expressions::lte_uint64);
-  rt->registerFunction("lte", expressions::lt_float64);
-  rt->registerFunction("lte", expressions::lt_timestamp64);
+  rt->registerFunction("lte", expressions::lte_float64);
+  rt->registerFunction("lte", expressions::lte_timestamp64);
   rt->registerFunction("lte", expressions::lte_timestamp64);
   rt->registerFunction("gt", expressions::gt_uint64);
   rt->registerFunction("gt", expressions::gt_int64);
   rt->registerFunction("gt", expressions::gt_float64);
   rt->registerFunction("gt", expressions::gt_timestamp64);
   rt->registerFunction("gte", expressions::gte_uint64);
-  rt->registerFunction("gte", expressions::gt_int64);
-  rt->registerFunction("gte", expressions::gt_float64);
+  rt->registerFunction("gte", expressions::gte_int64);
+  rt->registerFunction("gte", expressions::gte_float64);
   rt->registerFunction("gte", expressions::gte_timestamp64);
   //rt->registerFunction("isnull", PureFunction(&expressions::isNullExpr));
 
@@ -93,11 +93,10 @@ void installDefaultSymbols(SymbolTable* rt) {
   rt->registerFunction("to_nil", expressions::to_nil_bool);
   rt->registerFunction("to_nil", expressions::to_nil_string);
   rt->registerFunction("to_nil", expressions::to_nil_timestamp64);
-  //rt->registerFunction("to_str", PureFunction(&expressions::toStringExpr));
-  //rt->registerFunction("to_integer", PureFunction(&expressions::toIntExpr));
-  //rt->registerFunction("to_int", PureFunction(&expressions::toIntExpr));
-  //rt->registerFunction("to_float", PureFunction(&expressions::toFloatExpr));
-  //rt->registerFunction("to_bool", PureFunction(&expressions::toBoolExpr));
+  rt->registerFunction("to_int64", expressions::to_int64_uint64);
+  rt->registerFunction("to_int64", expressions::to_int64_float64);
+  rt->registerFunction("to_int64", expressions::to_int64_bool);
+  rt->registerFunction("to_int64", expressions::to_int64_timestamp64);
 
   /* expressions/datetime.h */
   //rt->registerFunction("now", PureFunction(&expressions::nowExpr));
