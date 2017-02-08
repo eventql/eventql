@@ -88,7 +88,7 @@ ReturnCode performOperation_QUERY_PARTIALAGGR(
 
       while ((eof = !cursor->isValid()) == false) {
         ++num_rows;
-        os->appendLenencString(cursor->getColumnString(0));
+        os->appendString(cursor->getColumnString(0));
         os->appendString(cursor->getColumnString(1));
 
         auto rc = cursor->next();
