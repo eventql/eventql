@@ -26,6 +26,6 @@ Examples:
     SELECT date_trunc('hour', FROM_TIMESTAMP(1486553343));
     Result: 2017-02-08 11:00:00
 
-    SELECT date_trunc('10min', 1486553343000000);
+    SELECT date_trunc('10min', FROM_TIMESTAMP(1486553343));
     Result: 2001-02-16 11:20:00
 

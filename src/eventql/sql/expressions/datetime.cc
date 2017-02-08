@@ -112,8 +112,9 @@ const SFunction to_timestamp_float64(
     SType::TIMESTAMP64,
     &to_timestamp_float64_call);
 
-
-uint64_t date_trunc_call(std::string window, uint64_t timestamp) {
+void date_trunc_timestamp64_call(sql_txn* ctx, VMStack* stack) {
+  auto timestamp = popTimestamp64(stack);
+  auto window = popString(stack);
   uint64_t window_multiplicator;
   std::string window_name;
   try {
@@ -132,26 +133,7 @@ uint64_t date_trunc_call(std::string window, uint64_t timestamp) {
   }
 
   auto truncater = window_value->second * window_multiplicator;
-  auto truncated = (timestamp / truncater) * truncater;
-  return truncated;
-}
-
-void date_trunc_uint64_call(sql_txn* ctx, VMStack* stack) {
-  auto timestamp = popUInt64(stack);
-  auto window = popString(stack);
-  auto truncated = date_trunc_call(window, timestamp);
-  pushTimestamp64(stack, truncated);
-}
-
-const SFunction date_trunc_uint64(
-    { SType::STRING, SType::UINT64 },
-    SType::TIMESTAMP64,
-    &date_trunc_uint64_call);
-
-void date_trunc_timestamp64_call(sql_txn* ctx, VMStack* stack) {
-  auto timestamp = popTimestamp64(stack);
-  auto window = popString(stack);
-  auto truncated = date_trunc_call(window, timestamp);
+  auto truncated = ((uint64_t)timestamp / truncater) * truncater;
   pushTimestamp64(stack, truncated);
 }
 

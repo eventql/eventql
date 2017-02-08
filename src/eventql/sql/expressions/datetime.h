@@ -37,7 +37,6 @@ extern const SFunction from_timestamp_int64;
 extern const SFunction from_timestamp_float64;
 extern const SFunction to_timestamp_int64;
 extern const SFunction to_timestamp_float64;
-extern const SFunction date_trunc_uint64;
 extern const SFunction date_trunc_timestamp64;
 //void dateAddExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
 //void dateSubExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
