@@ -119,6 +119,10 @@ ReturnCode SymbolTable::resolve(
 
       match = candidate;
       for (size_t i = 0; i < arguments.size(); ++i) {
+        if (arguments[i] == candidate_fn->arg_types[i]) {
+          continue;
+        }
+
         if (!hasImplicitConversion(arguments[i], candidate_fn->arg_types[i])) {
           match = nullptr;
           break;
