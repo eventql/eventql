@@ -53,6 +53,7 @@ void installDefaultSymbols(SymbolTable* rt) {
   /* expressions/boolean.h */
   rt->registerFunction("logical_and", expressions::logical_and);
   rt->registerFunction("logical_or", expressions::logical_or);
+  rt->registerFunction("neg", expressions::neg);
   rt->registerFunction("cmp",  expressions::cmp_uint64);
   rt->registerFunction("cmp",  expressions::cmp_int64);
   rt->registerFunction("cmp",  expressions::cmp_float64);
@@ -83,8 +84,6 @@ void installDefaultSymbols(SymbolTable* rt) {
   rt->registerFunction("gte", expressions::gt_int64);
   rt->registerFunction("gte", expressions::gt_float64);
   rt->registerFunction("gte", expressions::gte_timestamp64);
-  //rt->registerFunction("neq", PureFunction(&expressions::neqExpr));
-  //rt->registerFunction("neg", PureFunction(&expressions::negExpr));
   //rt->registerFunction("isnull", PureFunction(&expressions::isNullExpr));
 
   /* expressions/conversion.h */

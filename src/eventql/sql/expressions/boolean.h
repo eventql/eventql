@@ -32,6 +32,7 @@ namespace expressions {
 
 extern const SFunction logical_and;
 extern const SFunction logical_or;
+extern const SFunction neg;
 
 extern const SFunction cmp_uint64;
 extern const SFunction cmp_int64;

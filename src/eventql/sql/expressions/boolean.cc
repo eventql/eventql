@@ -63,6 +63,20 @@ const SFunction logical_or(
 
 
 /**
+ * neg(bool) -> bool
+ */
+void neg_call(sql_txn* ctx, VMStack* stack) {
+  auto arg = popBool(stack);
+  pushBool(stack, !arg);
+}
+
+const SFunction neg(
+    { SType::BOOL },
+    SType::BOOL,
+    &neg_call);
+
+
+/**
  * cmp(uint64, uint64) -> int64
  * cmp(timestamp64, timestamp64) -> int64
  */
