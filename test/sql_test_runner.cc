@@ -100,7 +100,7 @@ Status checkTableResult(
   for (size_t i = 0; i < returned_columns.size(); ++i) {
     if (returned_columns[i] != columns[i]) {
       return Status(eRuntimeError, StringUtil::format(
-          "wrong columns name, expected $0 to be $1",
+          "wrong column name, expected $0 to be $1",
           returned_columns[i],
           columns[i]));
     }
