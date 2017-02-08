@@ -28,7 +28,6 @@
 #include <eventql/util/cli/CLICommand.h>
 #include <eventql/util/status.h>
 #include <eventql/cli/cli_config.h>
-#include "eventql/server/sql/codec/binary_codec.h"
 #include "eventql/sql/result_list.h"
 #include "eventql/util/io/TerminalOutputStream.h"
 #include "eventql/util/return_code.h"

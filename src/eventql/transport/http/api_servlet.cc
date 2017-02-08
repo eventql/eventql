@@ -42,7 +42,6 @@
 #include "eventql/db/table_config.pb.h"
 #include "eventql/server/sql/codec/json_codec.h"
 #include "eventql/server/sql/codec/json_sse_codec.h"
-#include "eventql/server/sql/codec/binary_codec.h"
 #include "eventql/transport/http/http_auth.h"
 #include <eventql/io/cstable/cstable_writer.h>
 #include <eventql/io/cstable/RecordShredder.h>
