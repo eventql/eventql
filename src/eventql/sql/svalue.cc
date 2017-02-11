@@ -501,7 +501,9 @@ size_t SVector::next(void** cursor) const {
 }
 
 size_t sql_strlen(const void* str) {
-  return *((const uint32_t*) str);
+  uint32_t strlen;
+  memcpy(&strlen, str, sizeof(uint32_t));
+  return strlen;
 }
 
 char* sql_cstr(void* str) {
