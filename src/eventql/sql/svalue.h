@@ -151,6 +151,8 @@ public:
   static size_t next(SType type, void** cursor);
   size_t next(void** cursor) const;
 
+  std::string debugString() const;
+
 protected:
   SType type_;
   void* data_;

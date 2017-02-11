@@ -497,6 +497,18 @@ size_t SVector::next(void** cursor) const {
   return next(type_, cursor);
 }
 
+std::string SVector::debugString() const {
+  std::string debug;
+  auto cur = getData();
+  auto end = (const char*) getData() + getSize();
+  while ((const char*) cur < end) {
+    debug += sql_tostring(type_, cur) + ",";
+    next(const_cast<void**>(&cur));
+  }
+
+  return debug;
+}
+
 size_t sql_strlen(const void* str) {
   uint32_t strlen;
   memcpy(&strlen, str, sizeof(uint32_t));
