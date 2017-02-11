@@ -28,7 +28,6 @@
 #include <string>
 #include <ctime>
 #include <stdint.h>
-#include <iostream>
 #include <eventql/util/inspect.h>
 #include <eventql/util/human.h>
 #include <eventql/sql/svalue.h>
@@ -486,8 +485,6 @@ void SVector::append(const void* data, size_t size) {
 
 void SVector::append(const SValue& svalue) {
   append(svalue.getData(), svalue.getSize());
-  auto tag = svalue.getTag();
-  append(&tag, sizeof(STag));
 }
 
 size_t SVector::next(SType type, void** cursor) {
