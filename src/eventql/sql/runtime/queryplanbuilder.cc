@@ -447,11 +447,8 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(
 
   auto select_list = ast->getChildren()[0]->deepCopy();
 
-  /* generate select list for child */
-  auto child_sl = new ASTNode(ASTNode::T_SELECT_LIST);
-  buildGroupBySelectList(select_list, child_sl);
-
   /* copy ast for child and swap out select lists*/
+  auto child_sl = new ASTNode(ASTNode::T_SELECT_LIST);
   auto child_ast = ast->deepCopy();
   child_ast->removeChildrenByType(ASTNode::T_GROUP_BY);
   child_ast->removeChildByIndex(0);
@@ -522,89 +519,6 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(
       select_list_expressions,
       group_expressions,
       subtree);
-}
-
-bool QueryPlanBuilder::buildGroupBySelectList(
-    ASTNode* node,
-    ASTNode* target_select_list) {
-  /* search recursively */
-  switch (node->getType()) {
-
-    /* push down WITHIN RECORD aggregations into child select list */
-    case ASTNode::T_METHOD_CALL_WITHIN_RECORD: {
-      auto derived = new ASTNode(ASTNode::T_DERIVED_COLUMN);
-      derived->appendChild(node->deepCopy());
-      target_select_list->appendChild(derived);
-      auto col_index = target_select_list->getChildren().size() - 1;
-      node->setType(ASTNode::T_RESOLVED_COLUMN);
-      node->setID(col_index);
-      node->clearChildren();
-      node->clearToken();
-      return true;
-    }
-
-    /* push down referenced columns into the child select list */
-    case ASTNode::T_COLUMN_NAME: {
-      auto derived = new ASTNode(ASTNode::T_DERIVED_COLUMN); // LEAK
-      derived->appendChild(node->deepCopy());
-
-      /* check if this column already exists in the select list */
-      auto col_index = -1;
-      const auto& candidates = target_select_list->getChildren();
-      for (int i = 0; i < candidates.size(); ++i) {
-        if (derived->compare(candidates[i])) {
-          col_index = i;
-          break;
-        }
-      }
-
-      /* otherwise add this column to the select list */
-      if (col_index < 0) {
-        target_select_list->appendChild(derived);
-        col_index = target_select_list->getChildren().size() - 1;
-      }
-
-      node->setType(ASTNode::T_RESOLVED_COLUMN);
-      node->setID(col_index);
-      node->clearChildren();
-      node->clearToken();
-      return true;
-    }
-
-    /* push down aggregate function arguments */
-    case ASTNode::T_METHOD_CALL:
-      if (node->getToken() == nullptr) {
-        RAISE(kRuntimeError, "corrupt AST");
-      }
-
-      if (symbol_table_->isAggregateFunction(node->getToken()->getString())) {
-        auto derived = new ASTNode(ASTNode::T_DERIVED_COLUMN);
-        for (auto& cld : node->getChildren()) {
-          derived->appendChild(cld->deepCopy());
-          target_select_list->appendChild(derived);
-          auto col_index = target_select_list->getChildren().size() - 1;
-          cld->setType(ASTNode::T_RESOLVED_COLUMN);
-          cld->setID(col_index);
-          cld->clearChildren();
-          cld->clearToken();
-        }
-
-        return true;
-      } else {
-        /* fallthrough */
-      }
-
-    default: {
-      for (const auto& child : node->getChildren()) {
-        if (!buildGroupBySelectList(child, target_select_list)) {
-          return false;
-        }
-      }
-
-      return true;
-    }
-
-  }
 }
 
 QueryTreeNode* QueryPlanBuilder::buildLimitClause(

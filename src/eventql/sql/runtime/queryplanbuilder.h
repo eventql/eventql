@@ -297,18 +297,6 @@ public:
       ColumnResolver resolver,
       ColumnTypeResolver type_resolver);
 
-  /**
-   * Recursively walk the provided ast and search for column references. For
-   * each found column reference, add the column reference to the provided
-   * select list and replace the original column reference with an index into
-   * the new select list.
-   *
-   * This is used to create child select lists for nested query plan nodes.
-   */
-  bool buildGroupBySelectList(
-      ASTNode* ast,
-      ASTNode* select_list);
-
 protected:
   QueryPlanBuilderOptions opts_;
   SymbolTable* symbol_table_;
