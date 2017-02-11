@@ -769,9 +769,11 @@ ReturnCode FastCSTableScan::nextBatch(
 
     /* fetch input columns */
     for (size_t i = 0; i < column_buffers_.size(); ++i) {
+      column_buffers_[i].clear();
+
       auto rc = ReturnCode::success();
 
-      switch (column_types_[i]) {
+      switch (column_buffers_[i].getType()) {
         case SType::NIL:
           return ReturnCode::error("EARG", "illegal column type: NIL");
         case SType::UINT64:
@@ -822,8 +824,8 @@ ReturnCode FastCSTableScan::nextBatch(
     }
 
     if (filter_enabled_) {
-      for (size_t i = batch_offset; i < batch_offset + batch_size; ++i) {
-        if (!filter_[i] && filter_set[i]) {
+      for (size_t i = 0; i < batch_size; ++i) {
+        if (!filter_[i + batch_offset] && filter_set[i]) {
           filter_set[i] = false;
           --filter_set_count;
         }
