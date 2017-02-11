@@ -141,7 +141,7 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
           max_concurrent_tasks,
           max_concurrent_tasks_per_host));
 
-  auto shards = pipelineExpression(txn, node.get());
+  auto shards = pipelineExpression(txn, node->inputTable().get());
   for (size_t i = 0; i < shards.size(); ++i) {
     auto group_by_copy = mkRef(
         new csql::GroupByNode(
@@ -167,12 +167,16 @@ Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
   auto seqscan = csql::QueryTreeUtil::findNode<csql::SequentialScanNode>(
       qtree.get());
   if (!seqscan) {
-    RAISE(kIllegalStateError, "can't pipeline query tree");
+    RAISE(
+        kIllegalStateError,
+        "can't pipeline query tree: no seqscan found");
   }
 
   auto table_ref = TSDBTableRef::parse(seqscan->tableName());
   if (!table_ref.partition_key.isEmpty()) {
-    RAISE(kIllegalStateError, "can't pipeline query tree");
+    RAISE(
+        kIllegalStateError,
+        "can't pipeline query tree: already has a partition key");
   }
 
   auto user_data = txn->getUserData();
@@ -184,7 +188,7 @@ Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
       static_cast<Session*>(txn->getUserData())->getEffectiveNamespace(),
       table_ref.table_key);
   if (table.isEmpty()) {
-    RAISE(kIllegalStateError, "can't pipeline query tree");
+    RAISE(kIllegalStateError, "can't pipeline query tree: invalid table");
   }
 
   auto session = static_cast<Session*>(txn->getUserData());
@@ -249,7 +253,7 @@ Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
 
     PipelinedQueryTree pipelined {
       .is_local = local_partitions.count(p.first) > 0,
-      .qtree = shard,
+      .qtree = qtree_copy,
       .hosts = p.second
     };
 
