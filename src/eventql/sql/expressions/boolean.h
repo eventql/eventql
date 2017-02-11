@@ -62,21 +62,25 @@ extern const SFunction neq_timestamp64;
 extern const SFunction lt_uint64;
 extern const SFunction lt_int64;
 extern const SFunction lt_float64;
+extern const SFunction lt_string;
 extern const SFunction lt_timestamp64;
 
 extern const SFunction lte_uint64;
 extern const SFunction lte_int64;
 extern const SFunction lte_float64;
+extern const SFunction lte_string;
 extern const SFunction lte_timestamp64;
 
 extern const SFunction gt_uint64;
 extern const SFunction gt_int64;
 extern const SFunction gt_float64;
+extern const SFunction gt_string;
 extern const SFunction gt_timestamp64;
 
 extern const SFunction gte_uint64;
 extern const SFunction gte_int64;
 extern const SFunction gte_float64;
+extern const SFunction gte_string;
 extern const SFunction gte_timestamp64;
 
 } // namespace expressions

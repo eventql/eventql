@@ -74,18 +74,22 @@ void installDefaultSymbols(SymbolTable* rt) {
   rt->registerFunction("lt", expressions::lt_uint64);
   rt->registerFunction("lt", expressions::lt_int64);
   rt->registerFunction("lt", expressions::lt_float64);
+  rt->registerFunction("lt", expressions::lt_string);
   rt->registerFunction("lt", expressions::lt_timestamp64);
   rt->registerFunction("lte", expressions::lte_uint64);
+  rt->registerFunction("lte", expressions::lte_int64);
   rt->registerFunction("lte", expressions::lte_float64);
-  rt->registerFunction("lte", expressions::lte_timestamp64);
+  rt->registerFunction("lte", expressions::lte_string);
   rt->registerFunction("lte", expressions::lte_timestamp64);
   rt->registerFunction("gt", expressions::gt_uint64);
   rt->registerFunction("gt", expressions::gt_int64);
   rt->registerFunction("gt", expressions::gt_float64);
+  rt->registerFunction("gt", expressions::gt_string);
   rt->registerFunction("gt", expressions::gt_timestamp64);
   rt->registerFunction("gte", expressions::gte_uint64);
   rt->registerFunction("gte", expressions::gte_int64);
   rt->registerFunction("gte", expressions::gte_float64);
+  rt->registerFunction("gte", expressions::gte_string);
   rt->registerFunction("gte", expressions::gte_timestamp64);
   //rt->registerFunction("isnull", PureFunction(&expressions::isNullExpr));
 
@@ -150,6 +154,7 @@ void installDefaultSymbols(SymbolTable* rt) {
   rt->registerFunction("ltrim", expressions::ltrim);
   rt->registerFunction("rtrim", expressions::rtrim);
   rt->registerFunction("concat", expressions::concat);
+  rt->registerFunction("add", expressions::concat);
 
   /* expressions/miscellaneous.h */
   //rt->registerFunction("usleep", PureFunction(&expressions::usleepExpr, true));

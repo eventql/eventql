@@ -408,6 +408,30 @@ const SFunction lt_float64(
 
 
 /**
+ * lt(string, string) -> bool
+ */
+void lt_string_call(sql_txn* ctx, VMStack* stack) {
+  const char* right;
+  size_t right_len;
+  popString(stack, &right, &right_len);
+
+  const char* left;
+  size_t left_len;
+  popString(stack, &left, &left_len);
+
+  auto cmp = strncmp(left, right, std::min(left_len, right_len));
+  pushBool(stack, cmp < 0 || (cmp == 0 && left_len < right_len));
+}
+
+const SFunction lt_string(
+    { SType::STRING, SType::STRING },
+    SType::BOOL,
+    &lt_string_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
  * lte(uint64, uint64) -> bool
  * lte(timestamp64, timestamp64) -> bool
  */
@@ -462,6 +486,30 @@ const SFunction lte_float64(
     { SType::FLOAT64, SType::FLOAT64 },
     SType::BOOL,
     &lte_float64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
+ * lte(string, string) -> bool
+ */
+void lte_string_call(sql_txn* ctx, VMStack* stack) {
+  const char* right;
+  size_t right_len;
+  popString(stack, &right, &right_len);
+
+  const char* left;
+  size_t left_len;
+  popString(stack, &left, &left_len);
+
+  auto cmp = strncmp(left, right, std::min(left_len, right_len));
+  pushBool(stack, cmp < 0 || (cmp == 0 && left_len <= right_len));
+}
+
+const SFunction lte_string(
+    { SType::STRING, SType::STRING },
+    SType::BOOL,
+    &lte_string_call,
     false,  /* has_side_effects*/
     false); /* allow_argument_conversion */
 
@@ -526,6 +574,30 @@ const SFunction gt_float64(
 
 
 /**
+ * gt(string, string) -> bool
+ */
+void gt_string_call(sql_txn* ctx, VMStack* stack) {
+  const char* right;
+  size_t right_len;
+  popString(stack, &right, &right_len);
+
+  const char* left;
+  size_t left_len;
+  popString(stack, &left, &left_len);
+
+  auto cmp = strncmp(left, right, std::min(left_len, right_len));
+  pushBool(stack, cmp > 0 || (cmp == 0 && left_len > right_len));
+}
+
+const SFunction gt_string(
+    { SType::STRING, SType::STRING },
+    SType::BOOL,
+    &gt_string_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
  * gte(uint64, uint64) -> bool
  * gte(timestamp64, timestamp64) -> bool
  */
@@ -568,7 +640,7 @@ const SFunction gte_int64(
 
 
 /**
- * gt(float64, float64) -> bool
+ * gte(float64, float64) -> bool
  */
 void gte_float64_call(sql_txn* ctx, VMStack* stack) {
   auto right = popFloat64(stack);
@@ -580,6 +652,30 @@ const SFunction gte_float64(
     { SType::FLOAT64, SType::FLOAT64 },
     SType::BOOL,
     &gte_float64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
+ * gte(string, string) -> bool
+ */
+void gte_string_call(sql_txn* ctx, VMStack* stack) {
+  const char* right;
+  size_t right_len;
+  popString(stack, &right, &right_len);
+
+  const char* left;
+  size_t left_len;
+  popString(stack, &left, &left_len);
+
+  auto cmp = strncmp(left, right, std::min(left_len, right_len));
+  pushBool(stack, cmp > 0 || (cmp == 0 && left_len >= right_len));
+}
+
+const SFunction gte_string(
+    { SType::STRING, SType::STRING },
+    SType::BOOL,
+    &gte_string_call,
     false,  /* has_side_effects*/
     false); /* allow_argument_conversion */
 
