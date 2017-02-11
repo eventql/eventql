@@ -126,6 +126,7 @@ size_t SubqueryNode::getComputedColumnIndex(
 
     slnode->setAlias(col);
     select_list_.emplace_back(slnode);
+    column_names_.emplace_back(col);
     return select_list_.size() - 1;
   }
 
