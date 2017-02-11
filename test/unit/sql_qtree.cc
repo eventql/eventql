@@ -351,7 +351,7 @@ TEST_CASE(QTreeTest, TestSimpleConstantFolding, [] () {
           "testtable",
           "sql_testdata/testtbl.cst"));
 
-  String query = "select 1 + 2 + 3 from testtable where time > ucase('fu') + lcase('Bar');";
+  String query = "select 1 + 2 + 3 from testtable where session_id > ucase('fu') + lcase('Bar');";
 
   csql::Parser parser;
   parser.parse(query.data(), query.size());
@@ -370,7 +370,7 @@ TEST_CASE(QTreeTest, TestSimpleConstantFolding, [] () {
 
   auto where_expr = seqscan->whereExpression();
   EXPECT_FALSE(where_expr.isEmpty());
-  EXPECT_EQ(where_expr.get()->toSQL(), "gt(`time`,\"FUbar\")");
+  EXPECT_EQ(where_expr.get()->toSQL(), "gt(`session_id`,\"FUbar\")");
 });
 
 TEST_CASE(QTreeTest, TestPruneConstraints, [] () {
@@ -443,7 +443,7 @@ TEST_CASE(QTreeTest, TestSerialization, [] () {
           "testtable",
           "sql_testdata/testtbl.cst"));
 
-  String query = "select 1 + 2 + 3 from testtable where time > ucase('fu') + lcase('Bar') limit 10;";
+  String query = "select 1 + 2 + 3 from testtable where session_id > ucase('fu') + lcase('Bar') limit 10;";
 
   csql::Parser parser;
   parser.parse(query.data(), query.size());
