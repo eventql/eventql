@@ -605,7 +605,7 @@ ReturnCode GroupByMergeExpression::execute() {
         if (e.program()->method_accumulate.offset > 0) {
           VM::loadInstanceState(txn_, e.program(), remote_group[i], &is);
           VM::mergeInstance(txn_, e.program(), group[i], remote_group[i]);
-        } else if (group_new) {
+        } else {
           static_cast<SValue*>(group[i])->decode(&is);
         }
       }
