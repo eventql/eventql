@@ -29,6 +29,7 @@
 #include <eventql/sql/expressions/datetime.h>
 #include <eventql/sql/expressions/math.h>
 #include <eventql/sql/expressions/string.h>
+#include <eventql/sql/expressions/miscellaneous.h>
 
 #include "eventql/eventql.h"
 
@@ -158,7 +159,7 @@ void installDefaultSymbols(SymbolTable* rt) {
 
   /* expressions/miscellaneous.h */
   //rt->registerFunction("usleep", PureFunction(&expressions::usleepExpr, true));
-  //rt->registerFunction("fnv32", PureFunction(&expressions::fnv32Expr));
+  rt->registerFunction("fnv32", expressions::fnv32);
 
   /* expressions/internal.h */
   //rt->registerFunction("repeat_value", expressions::kRepeatValueExpr);
