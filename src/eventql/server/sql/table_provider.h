@@ -26,6 +26,7 @@
 #include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/runtime/tablerepository.h>
+#include <eventql/sql/SFunction.h>
 #include <eventql/auth/internal_auth.h>
 #include <eventql/db/table_ref.h>
 #include <eventql/db/partition_map.h>
@@ -93,6 +94,7 @@ protected:
   csql::TableInfo tableInfoForTable(const TableDefinition& table) const;
 
   RefPtr<csql::ValueExpressionNode> simplifyWhereExpression(
+      csql::Transaction* txn,
       RefPtr<Table> table,
       const String& keyrange_begin,
       const String& keyrange_end,
@@ -105,6 +107,6 @@ protected:
   InternalAuth* auth_;
 };
 
-void evqlVersionExpr(sql_txn* ctx, int argc, csql::SValue* argv, csql::SValue* out);
+extern const csql::SFunction evqlVersionExpr;
 
 } // namespace csql

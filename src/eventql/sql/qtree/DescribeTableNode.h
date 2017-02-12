@@ -34,6 +34,8 @@ namespace csql {
 class DescribeTableNode : public TableExpressionNode {
 public:
 
+  static const std::vector<std::pair<std::string, SType>> kOutputColumns;
+
   DescribeTableNode(const String& table_name);
 
   Vector<RefPtr<QueryTreeNode>> inputTables() const;
@@ -53,6 +55,8 @@ public:
       bool allow_add = false) override;
 
   size_t getNumComputedColumns() const override;
+
+  SType getColumnType(size_t idx) const override;
 
   static void encode(
       QueryTreeCoder* coder,

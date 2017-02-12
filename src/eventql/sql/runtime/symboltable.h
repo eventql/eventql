@@ -27,74 +27,42 @@
 #include <eventql/sql/SFunction.h>
 
 namespace csql {
-class SymbolTableEntry;
-class SValue;
 
 class SymbolTableEntry {
 public:
 
-  SymbolTableEntry(
-      const std::string& symbol,
-      void (*method)(sql_txn*, void*, int, SValue*, SValue*));
+  SymbolTableEntry(const std::string& function_name, SFunction fun);
 
-  SymbolTableEntry(
-      const std::string& symbol,
-      void (*method)(sql_txn*, void*, int, SValue*, SValue*),
-      size_t scratchpad_size,
-      void (*free_method)(sql_txn*, void*));
-
-  inline void call(
-      sql_txn* ctx,
-      void* scratchpad,
-      int argc,
-      SValue* argv,
-      SValue* out) const {
-    call_(ctx, scratchpad, argc, argv, out);
-  }
-
-  bool isAggregate() const;
-  void (*getFnPtr() const)(sql_txn* ctx, void*, int, SValue*, SValue*);
-  size_t getScratchpadSize() const;
+  const SFunction* getFunction() const;
+  const std::string& getSymbol() const;
 
 protected:
-  void (*call_)(sql_txn*, void*, int, SValue*, SValue*);
-  const size_t scratchpad_size_;
+  SFunction fun_;
+  std::string symbol_;
 };
 
 class SymbolTable : public RefCounted {
 public:
 
-  SymbolTableEntry const* lookupSymbol(const std::string& symbol) const;
+  void registerFunction(const std::string& function_name, SFunction fn);
+  void registerImplicitConversion(SType source_type, SType target_type);
 
-  SFunction lookup(const String& symbol) const;
+  ReturnCode resolve(
+      const std::string& function_name,
+      const std::vector<SType>& arguments,
+      const SymbolTableEntry** entry,
+      bool allow_conversion = true) const;
 
-  bool isAggregateFunction(const String& symbol) const;
+  const SymbolTableEntry* lookup(const std::string& symbol) const;
 
-  void registerSymbol(
-      const std::string& symbol,
-      void (*method)(sql_txn*, void*, int, SValue*, SValue*));
-
-  void registerSymbol(
-      const std::string& symbol,
-      void (*method)(sql_txn* ctx, void*, int, SValue*, SValue*),
-      size_t scratchpad_size,
-      void (*free_method)(sql_txn* ctx, void*));
-
-  void registerFunction(
-      const String& symbol,
-      void (*fn)(sql_txn*, int, SValue*, SValue*));
-
-  void registerFunction(
-      const String& symbol,
-      AggregateFunction fn);
-
-  void registerFunction(
-      const String& symbol,
-      SFunction fn);
+  bool isAggregateFunction(const std::string& function_name) const;
+  bool hasImplicitConversion(SType source, SType target) const;
 
 protected:
-  std::unordered_map<std::string, SymbolTableEntry> symbols_;
-  HashMap<String, SFunction> syms_;
+  mutable std::mutex mutex_;
+  std::map<std::string, std::vector<const SymbolTableEntry*>> functions_;
+  std::map<std::string, std::unique_ptr<SymbolTableEntry>> symbols_;
+  std::map<SType, std::set<SType>> implicit_conversions_;
 };
 
 }

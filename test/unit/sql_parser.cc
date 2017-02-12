@@ -864,7 +864,7 @@ TEST_CASE(ParserTest, TestDrawStatementWithTitle, [] () {
   auto title = runtime->evaluateConstExpression(
       txn.get(),
       title_expr).toString();
-  EXPECT_EQ(title.getString(), "fnordtitle");
+  EXPECT_EQ(title, "fnordtitle");
 });
 
 TEST_CASE(ParserTest, TestDrawStatementWithSubtitle, [] () {
@@ -884,7 +884,7 @@ TEST_CASE(ParserTest, TestDrawStatementWithSubtitle, [] () {
   auto title = runtime->evaluateConstExpression(
       txn.get(),
       title_expr).toString();
-  EXPECT_EQ(title.getString(), "fnordsubtitle");
+  EXPECT_EQ(title, "fnordsubtitle");
 });
 
 TEST_CASE(ParserTest, TestDrawStatementWithTitleAndSubtitle, [] () {
@@ -905,7 +905,7 @@ TEST_CASE(ParserTest, TestDrawStatementWithTitleAndSubtitle, [] () {
   auto title = runtime->evaluateConstExpression(
       txn.get(),
       title_expr).toString();
-  EXPECT_EQ(title.getString(), "fnordtitle");
+  EXPECT_EQ(title, "fnordtitle");
 
   EXPECT(*stmt->getChildren()[1] == ASTNode::T_PROPERTY);
   EXPECT(stmt->getChildren()[1]->getChildren().size() == 1);
@@ -913,7 +913,7 @@ TEST_CASE(ParserTest, TestDrawStatementWithTitleAndSubtitle, [] () {
   auto subtitle = runtime->evaluateConstExpression(
       txn.get(),
       subtitle_expr).toString();
-  EXPECT_EQ(subtitle.getString(), "fnordsubtitle");
+  EXPECT_EQ(subtitle, "fnordsubtitle");
 });
 
 TEST_CASE(ParserTest, TestDrawStatementWithAxisTitle, [] () {
@@ -937,7 +937,7 @@ TEST_CASE(ParserTest, TestDrawStatementWithAxisTitle, [] () {
   auto title = runtime->evaluateConstExpression(
       txn.get(),
       title_expr).toString();
-  EXPECT_EQ(title.getString(), "axistitle");
+  EXPECT_EQ(title, "axistitle");
 });
 
 TEST_CASE(ParserTest, TestDrawStatementWithAxisLabelPos, [] () {
@@ -989,7 +989,7 @@ TEST_CASE(ParserTest, TestDrawStatementWithAxisLabelRotate, [] () {
   auto deg = runtime->evaluateConstExpression(
       txn.get(),
       deg_expr).toString();
-  EXPECT_EQ(deg.getString(), "45");
+  EXPECT_EQ(deg, "45");
 });
 
 TEST_CASE(ParserTest, TestDrawStatementWithAxisLabelPosAndRotate, [] () {
@@ -1022,7 +1022,7 @@ TEST_CASE(ParserTest, TestDrawStatementWithAxisLabelPosAndRotate, [] () {
   auto deg = runtime->evaluateConstExpression(
       txn.get(),
       deg_expr).toString();
-  EXPECT_EQ(deg.getString(), "45");
+  EXPECT_EQ(deg, "45");
 });
 
 TEST_CASE(ParserTest, TestDrawStatementWithSimpleLegend, [] () {
@@ -1077,7 +1077,7 @@ TEST_CASE(ParserTest, TestDrawStatementWithLegendWithTitle, [] () {
   auto title = runtime->evaluateConstExpression(
       txn.get(),
       title_expr).toString();
-  EXPECT_EQ(title.getString(), "fnordylegend");
+  EXPECT_EQ(title, "fnordylegend");
 });
 
 TEST_CASE(ParserTest, TestCreateTableStatement, [] () {

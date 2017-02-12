@@ -36,7 +36,7 @@
 
 namespace eventql {
 
-class PartitionCursor : public csql::ResultCursor {
+class PartitionCursor : public csql::TableExpression {
 public:
 
   PartitionCursor(
@@ -46,9 +46,11 @@ public:
       RefPtr<PartitionSnapshot> snap,
       RefPtr<csql::SequentialScanNode> stmt);
 
-  bool next(csql::SValue* row, int row_len) override;
+  ReturnCode execute() override;
+  ReturnCode nextBatch(csql::SVector* columns, size_t* len) override;
 
-  size_t getNumColumns() override;
+  size_t getColumnCount() const override;
+  csql::SType getColumnType(size_t idx) const override;
 
 protected:
 
@@ -61,12 +63,12 @@ protected:
   RefPtr<csql::SequentialScanNode> stmt_;
   Set<SHA1Hash> id_set_;
   size_t cur_table_;
-  ScopedPtr<csql::ResultCursor> cur_cursor_;
-  ScopedPtr<csql::CSTableScan> cur_scan_;
+  ScopedPtr<csql::AbstractCSTableScan> cur_scan_;
   ScopedPtr<PartitionArena::SkiplistReader> cur_skiplist_;
+  bool fast_scan_enabled_;
 };
 
-class RemotePartitionCursor : public csql::ResultCursor {
+class RemotePartitionCursor : public csql::TableExpression {
 public:
 
   RemotePartitionCursor(
@@ -77,14 +79,13 @@ public:
       RefPtr<csql::SequentialScanNode> stmt,
       const std::vector<std::string>& servers);
 
-  bool next(csql::SValue* row, int row_len) override;
+  ReturnCode execute() override;
+  ReturnCode nextBatch(csql::SVector* columns, size_t* len) override;
 
-  size_t getNumColumns() override;
+  size_t getColumnCount() const override;
+  csql::SType getColumnType(size_t idx) const override;
 
 protected:
-
-  ReturnCode fetchRows();
-
   csql::Transaction* txn_;
   csql::ExecutionContext* execution_context_;
   std::string database_;
@@ -99,29 +100,5 @@ protected:
   native_transport::TCPClient client_;
 };
 
-class StaticPartitionCursor : public csql::ResultCursor {
-public:
+} // namespace eventql
 
-  StaticPartitionCursor(
-      csql::Transaction* txn,
-      csql::ExecutionContext* execution_context,
-      RefPtr<Table> table,
-      RefPtr<PartitionSnapshot> snap,
-      RefPtr<csql::SequentialScanNode> stmt);
-
-  bool next(csql::SValue* row, int row_len) override;
-
-  size_t getNumColumns() override;
-
-protected:
-
-  csql::Transaction* txn_;
-  csql::ExecutionContext* execution_context_;
-  RefPtr<Table> table_;
-  RefPtr<PartitionSnapshot> snap_;
-  RefPtr<csql::SequentialScanNode> stmt_;
-  ScopedPtr<csql::ResultCursor> cur_cursor_;
-  ScopedPtr<csql::CSTableScan> cur_scan_;
-};
-
-}

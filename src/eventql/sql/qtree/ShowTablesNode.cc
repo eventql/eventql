@@ -22,9 +22,9 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include <eventql/sql/qtree/ShowTablesNode.h>
-
 #include "eventql/eventql.h"
+#include <eventql/sql/qtree/ShowTablesNode.h>
+#include <eventql/sql/statements/show_tables.h>
 
 namespace csql {
 
@@ -37,20 +37,18 @@ RefPtr<QueryTreeNode> ShowTablesNode::deepCopy() const {
 }
 
 Vector<String> ShowTablesNode::getResultColumns() const {
-  return Vector<String>{
-    "table_name",
-    "description"
-  };
+  std::vector<std::string> list;
+  for (const auto& e : ShowTablesExpression::kOutputColumns) {
+    list.emplace_back(e.first);
+  }
+  return list;
 }
 
 Vector<QualifiedColumn> ShowTablesNode::getAvailableColumns() const {
   Vector<QualifiedColumn> cols;
 
-  for (const auto& c : getResultColumns()) {
-    QualifiedColumn  qc;
-    qc.short_name = c;
-    qc.qualified_name = c;
-    cols.emplace_back(qc);
+  for (const auto& e : ShowTablesExpression::kOutputColumns) {
+    cols.emplace_back(e.first, e.first, e.second);
   }
 
   return cols;
@@ -63,7 +61,12 @@ size_t ShowTablesNode::getComputedColumnIndex(
 }
 
 size_t ShowTablesNode::getNumComputedColumns() const {
-  return 2;
+  return ShowTablesExpression::kOutputColumns.size();
+}
+
+SType ShowTablesNode::getColumnType(size_t idx) const {
+  assert(idx < ShowTablesExpression::kOutputColumns.size());
+  return ShowTablesExpression::kOutputColumns[idx].second;
 }
 
 String ShowTablesNode::toString() const {

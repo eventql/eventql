@@ -36,8 +36,8 @@ class ColumnReferenceNode : public ValueExpressionNode {
 public:
 
   explicit ColumnReferenceNode(const ColumnReferenceNode& other);
-  explicit ColumnReferenceNode(const String& column_name);
-  explicit ColumnReferenceNode(size_t column_index_);
+  explicit ColumnReferenceNode(const String& column_name, SType type);
+  explicit ColumnReferenceNode(size_t column_index_, SType type);
 
   const String& fieldName() const; // DEPRECATED
 
@@ -55,6 +55,8 @@ public:
 
   String toSQL() const override;
 
+  SType getReturnType() const override;
+
   static void encode(
       QueryTreeCoder* coder,
       const ColumnReferenceNode& node,
@@ -67,6 +69,7 @@ public:
 protected:
   String column_name_;
   Option<size_t> column_index_;
+  SType type_;
 };
 
 } // namespace csql

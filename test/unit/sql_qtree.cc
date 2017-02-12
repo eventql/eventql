@@ -22,6 +22,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/exception.h>
 #include <eventql/util/wallclock.h>
@@ -45,9 +46,8 @@
 #include "eventql/sql/qtree/nodes/cluster_show_servers.h"
 #include "eventql/sql/qtree/nodes/show_databases.h"
 #include "eventql/sql/CSTableScanProvider.h"
-#include "eventql/sql/backends/csv/CSVTableProvider.h"
+#include "eventql/sql/drivers/csv/CSVTableProvider.h"
 
-#include "eventql/eventql.h"
 using namespace csql;
 
 UNIT_TEST(QTreeTest);
@@ -76,7 +76,7 @@ TEST_CASE(QTreeTest, TestExtractEqualsConstraint, [] () {
         parser.getStatements(),
         txn->getTableProvider());
 
-    EXPECT_EQ(qtrees.size(), 1);
+    EXPECT(!qtrees.empty());
     auto qtree = qtrees[0];
     EXPECT_TRUE(dynamic_cast<SequentialScanNode*>(qtree.get()) != nullptr);
     auto seqscan = qtree.asInstanceOf<SequentialScanNode>();
@@ -88,7 +88,7 @@ TEST_CASE(QTreeTest, TestExtractEqualsConstraint, [] () {
     auto constraint = constraints[0];
     EXPECT_EQ(constraint.column_name, "time");
     EXPECT_TRUE(constraint.type == ScanConstraintType::EQUAL_TO);
-    EXPECT_EQ(constraint.value.getString(), "1234");
+    EXPECT_EQ(constraint.value.toString(), "1234");
   }
 });
 
@@ -128,7 +128,7 @@ TEST_CASE(QTreeTest, TestExtractNotEqualsConstraint, [] () {
     auto constraint = constraints[0];
     EXPECT_EQ(constraint.column_name, "time");
     EXPECT_TRUE(constraint.type == ScanConstraintType::NOT_EQUAL_TO);
-    EXPECT_EQ(constraint.value.getString(), "1234");
+    EXPECT_EQ(constraint.value.toString(), "1234");
   }
 });
 
@@ -168,7 +168,7 @@ TEST_CASE(QTreeTest, TestExtractLessThanConstraint, [] () {
     auto constraint = constraints[0];
     EXPECT_EQ(constraint.column_name, "time");
     EXPECT_TRUE(constraint.type == ScanConstraintType::LESS_THAN);
-    EXPECT_EQ(constraint.value.getString(), "1234");
+    EXPECT_EQ(constraint.value.toString(), "1234");
   }
 });
 
@@ -208,7 +208,7 @@ TEST_CASE(QTreeTest, TestExtractLessThanOrEqualToConstraint, [] () {
     auto constraint = constraints[0];
     EXPECT_EQ(constraint.column_name, "time");
     EXPECT_TRUE(constraint.type == ScanConstraintType::LESS_THAN_OR_EQUAL_TO);
-    EXPECT_EQ(constraint.value.getString(), "1234");
+    EXPECT_EQ(constraint.value.toString(), "1234");
   }
 });
 
@@ -248,7 +248,7 @@ TEST_CASE(QTreeTest, TestExtractGreaterThanConstraint, [] () {
     auto constraint = constraints[0];
     EXPECT_EQ(constraint.column_name, "time");
     EXPECT_TRUE(constraint.type == ScanConstraintType::GREATER_THAN);
-    EXPECT_EQ(constraint.value.getString(), "1234");
+    EXPECT_EQ(constraint.value.toString(), "1234");
   }
 });
 
@@ -288,7 +288,7 @@ TEST_CASE(QTreeTest, TestExtractGreaterThanOrEqualToConstraint, [] () {
     auto constraint = constraints[0];
     EXPECT_EQ(constraint.column_name, "time");
     EXPECT_TRUE(constraint.type == ScanConstraintType::GREATER_THAN_OR_EQUAL_TO);
-    EXPECT_EQ(constraint.value.getString(), "1234");
+    EXPECT_EQ(constraint.value.toString(), "1234");
   }
 });
 
@@ -301,7 +301,7 @@ TEST_CASE(QTreeTest, TestExtractMultipleConstraints, [] () {
           "testtable",
           "sql_testdata/testtbl.cst"));
 
-  String query = "select 1 from testtable where 1000 + 200 + 30 + 4 > time AND session_id != 400 + 44 AND time >= 1111 * 6;";
+  String query = "select 1 from testtable where 1000 + 200 + 30 + 4 > time AND session_id != 'blah' AND time >= 1111 * 6;";
 
   csql::Parser parser;
   parser.parse(query.data(), query.size());
@@ -325,21 +325,21 @@ TEST_CASE(QTreeTest, TestExtractMultipleConstraints, [] () {
     auto constraint = constraints[0];
     EXPECT_EQ(constraint.column_name, "time");
     EXPECT_TRUE(constraint.type == ScanConstraintType::LESS_THAN);
-    EXPECT_EQ(constraint.value.getString(), "1234");
+    EXPECT_EQ(constraint.value.toString(), "1234");
   }
 
   {
     auto constraint = constraints[1];
     EXPECT_EQ(constraint.column_name, "session_id");
     EXPECT_TRUE(constraint.type == ScanConstraintType::NOT_EQUAL_TO);
-    EXPECT_EQ(constraint.value.getString(), "444");
+    EXPECT_EQ(constraint.value.toString(), "blah");
   }
 
   {
     auto constraint = constraints[2];
     EXPECT_EQ(constraint.column_name, "time");
     EXPECT_TRUE(constraint.type == ScanConstraintType::GREATER_THAN_OR_EQUAL_TO);
-    EXPECT_EQ(constraint.value.getString(), "6666");
+    EXPECT_EQ(constraint.value.toString(), "6666");
   }
 });
 
@@ -352,7 +352,7 @@ TEST_CASE(QTreeTest, TestSimpleConstantFolding, [] () {
           "testtable",
           "sql_testdata/testtbl.cst"));
 
-  String query = "select 1 + 2 + 3 from testtable where time > ucase('fu') + lcase('Bar');";
+  String query = "select 1 + 2 + 3 from testtable where session_id > ucase('fu') + lcase('Bar');";
 
   csql::Parser parser;
   parser.parse(query.data(), query.size());
@@ -371,7 +371,7 @@ TEST_CASE(QTreeTest, TestSimpleConstantFolding, [] () {
 
   auto where_expr = seqscan->whereExpression();
   EXPECT_FALSE(where_expr.isEmpty());
-  EXPECT_EQ(where_expr.get()->toSQL(), "gt(`time`,\"FUbar\")");
+  EXPECT_EQ(where_expr.get()->toSQL(), "gt(`session_id`,\"FUbar\")");
 });
 
 TEST_CASE(QTreeTest, TestPruneConstraints, [] () {
@@ -383,7 +383,7 @@ TEST_CASE(QTreeTest, TestPruneConstraints, [] () {
           "testtable",
           "sql_testdata/testtbl.cst"));
 
-  String query = "select 1 from testtable where 1000 + 200 + 30 + 4 > time AND session_id != 400 + 44 AND time >= 1111 * 6;";
+  String query = "select 1 from testtable where 1000 + 200 + 30 + 4 > time AND session_id != to_string(400 + 44) AND time >= 1111 * 6;";
   csql::Parser parser;
   parser.parse(query.data(), query.size());
 
@@ -403,28 +403,35 @@ TEST_CASE(QTreeTest, TestPruneConstraints, [] () {
     ScanConstraint constraint;
     constraint.column_name = "time";
     constraint.type = ScanConstraintType::GREATER_THAN_OR_EQUAL_TO;
-    constraint.value = SValue(SValue::IntegerType(6666));
-    auto pruned_expr = QueryTreeUtil::removeConstraintFromPredicate(
+    constraint.value = SValue::newUInt64(6666);
+    RefPtr<ValueExpressionNode> pruned_expr;
+    auto rc = QueryTreeUtil::removeConstraintFromPredicate(
+        txn.get(),
         where_expr,
-        constraint);
+        constraint,
+        &pruned_expr);
 
+    EXPECT(rc.isSuccess());
     EXPECT_EQ(
         pruned_expr->toSQL(),
-        "logical_and(gt(1234,`time`),neq(`session_id`,444))");
+        "logical_and(gt(1234,`time`),neq(`session_id`,\"444\"))");
   }
 
   {
     ScanConstraint constraint;
     constraint.column_name = "time";
     constraint.type = ScanConstraintType::LESS_THAN;
-    constraint.value = SValue(SValue::IntegerType(1234));
-    auto pruned_expr = QueryTreeUtil::removeConstraintFromPredicate(
+    constraint.value = SValue(SValue::newUInt64(1234));
+    RefPtr<ValueExpressionNode> pruned_expr;
+    auto rc = QueryTreeUtil::removeConstraintFromPredicate(
+        txn.get(),
         where_expr,
-        constraint);
+        constraint,
+        &pruned_expr);
 
     EXPECT_EQ(
         pruned_expr->toSQL(),
-        "logical_and(neq(`session_id`,444),gte(`time`,6666))");
+        "logical_and(neq(`session_id`,\"444\"),gte(`time`,6666))");
   }
 });
 
@@ -437,7 +444,7 @@ TEST_CASE(QTreeTest, TestSerialization, [] () {
           "testtable",
           "sql_testdata/testtbl.cst"));
 
-  String query = "select 1 + 2 + 3 from testtable where time > ucase('fu') + lcase('Bar') limit 10;";
+  String query = "select 1 + 2 + 3 from testtable where session_id > ucase('fu') + lcase('Bar') limit 10;";
 
   csql::Parser parser;
   parser.parse(query.data(), query.size());

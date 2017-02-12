@@ -22,6 +22,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/sql/svalue.h"
 #include "eventql/server/sql/partition_cursor.h"
 #include "eventql/transport/native/frames/error.h"
 #include "eventql/transport/native/frames/query_remote.h"
@@ -41,24 +42,42 @@ PartitionCursor::PartitionCursor(
     table_(table),
     snap_(snap),
     stmt_(stmt),
-    cur_table_(0) {};
+    cur_table_(0),
+    fast_scan_enabled_(true) {
+  if (stmt_->aggregationStrategy() != csql::AggregationStrategy::NO_AGGREGATION) {
+    fast_scan_enabled_ = false;
+  }
+}
 
-bool PartitionCursor::next(csql::SValue* row, int row_len) {
+ReturnCode PartitionCursor::execute() {
+  return ReturnCode::success();
+}
+
+ReturnCode PartitionCursor::nextBatch(
+    csql::SVector* columns,
+    size_t* nrows) {
   for (;;) {
-    if (cur_cursor_.get() == nullptr) {
+    if (cur_scan_.get() == nullptr) {
       if (!openNextTable()) {
         break;
       }
     }
 
-    if (cur_cursor_->next(row, row_len)) {
-      return true;
-    } else {
-      cur_cursor_.reset(nullptr);
+    auto rc = cur_scan_->nextBatch(columns, nrows);
+    if (!rc.isSuccess()) {
+      return rc;
     }
+
+    if (!*nrows) {
+      cur_scan_.reset(nullptr);
+      continue;
+    }
+
+    return ReturnCode::success();
   }
 
-  return false;
+  *nrows = 0;
+  return ReturnCode::success();
 }
 
 bool PartitionCursor::openNextTable() {
@@ -68,6 +87,7 @@ bool PartitionCursor::openNextTable() {
 
   cur_skiplist_.reset();
 
+  bool needs_filter = true;
   switch (cur_table_) {
     case 0: {
       if (snap_->head_arena.get() &&
@@ -115,8 +135,8 @@ bool PartitionCursor::openNextTable() {
       if (cur_table_ >= snap_->state.lsm_tables().size() + 2) {
         return false;
       }
-      const auto& tbl = (snap_->state.lsm_tables().data())[
-          snap_->state.lsm_tables().size() - (cur_table_ - 1)];
+      auto tblidx = snap_->state.lsm_tables().size() - (cur_table_ - 1);
+      const auto& tbl = (snap_->state.lsm_tables().data())[tblidx];
       auto cstable_file = FileUtil::joinPaths(
           snap_->base_path,
           tbl->filename() + ".cst");
@@ -125,82 +145,93 @@ bool PartitionCursor::openNextTable() {
       if (tbl->has_skiplist()) {
         skip_col = cstable->getColumnReader("__lsm_skip");
       }
+
+      if (!tbl->has_skiplist() && tblidx == 0 && id_set_.empty()) {
+        needs_filter = false;
+      }
+
+      if (!tbl->has_skiplist() && !tbl->has_updates() && id_set_.empty()) {
+        needs_filter = false;
+      }
       break;
     }
   }
 
-  auto id_col = cstable->getColumnReader("__lsm_id");
-  auto is_update_col = cstable->getColumnReader("__lsm_is_update");
-  cur_scan_.reset(
-      new csql::CSTableScan(
-          txn_,
-          execution_context_,
-          stmt_,
-          cstable,
-          cstable_filename));
+  /* read filter */
+  std::vector<bool> filter(cstable->numRecords(), true);
+  if (needs_filter) {
+    auto id_col = cstable->getColumnReader("__lsm_id");
+    auto is_update_col = cstable->getColumnReader("__lsm_is_update");
+    for (size_t i = 0; i < filter.size(); ++i) {
+      uint64_t rlvl;
+      uint64_t dlvl;
 
-  cur_scan_->setFilter([this, id_col, is_update_col, skip_col] () -> bool {
-    uint64_t rlvl;
-    uint64_t dlvl;
+      String id_str;
+      id_col->readString(&rlvl, &dlvl, &id_str);
+      SHA1Hash id(id_str.data(), id_str.size());
 
-    String id_str;
-    id_col->readString(&rlvl, &dlvl, &id_str);
-    SHA1Hash id(id_str.data(), id_str.size());
+      bool is_update;
+      is_update_col->readBoolean(&rlvl, &dlvl, &is_update);
 
-    bool is_update;
-    is_update_col->readBoolean(&rlvl, &dlvl, &is_update);
-
-    bool skip = false;
-    if (skip_col.get()) {
-      skip_col->readBoolean(&rlvl, &dlvl, &skip);
-    }
-
-    if (cur_skiplist_) {
-      skip = cur_skiplist_->readNext();
-    }
-
-    if (skip || id_set_.count(id) > 0) {
-      return false;
-    } else {
-      if (is_update) {
-        id_set_.emplace(id);
+      bool skip = false;
+      if (skip_col.get()) {
+        skip_col->readBoolean(&rlvl, &dlvl, &skip);
       }
-      return true;
-    }
-  });
 
-  for (const auto& col : table_->schema()->columns()) {
-    switch (col.second.type) {
-      case msg::FieldType::BOOLEAN:
-        cur_scan_->setColumnType(col.first, SQL_BOOL);
-        break;
-      case msg::FieldType::UINT32:
-        cur_scan_->setColumnType(col.first, SQL_INTEGER);
-        break;
-      case msg::FieldType::UINT64:
-        cur_scan_->setColumnType(col.first, SQL_INTEGER);
-        break;
-      case msg::FieldType::STRING:
-        cur_scan_->setColumnType(col.first, SQL_STRING);
-        break;
-      case msg::FieldType::DOUBLE:
-        cur_scan_->setColumnType(col.first, SQL_FLOAT);
-        break;
-      case msg::FieldType::DATETIME:
-        cur_scan_->setColumnType(col.first, SQL_TIMESTAMP);
-        break;
-      case msg::FieldType::OBJECT:
-        break;
+      if (cur_skiplist_) {
+        skip = cur_skiplist_->readNext();
+      }
+
+      if (skip || id_set_.count(id) > 0) {
+        filter[i] = false;
+      } else {
+        if (is_update) {
+          id_set_.emplace(id);
+        }
+
+        filter[i] = true;
+      }
     }
   }
 
+  if (fast_scan_enabled_) {
+    cur_scan_.reset(
+        new csql::FastCSTableScan(
+            txn_,
+            execution_context_,
+            stmt_,
+            cstable,
+            cstable_filename));
+  } else {
+    cur_scan_.reset(
+        new csql::CSTableScan(
+            txn_,
+            execution_context_,
+            stmt_,
+            cstable,
+            cstable_filename));
+  }
+
+  if (needs_filter) {
+    cur_scan_->setFilter(std::move(filter));
+  }
+
   ++cur_table_;
-  cur_cursor_ = cur_scan_->execute();
+
+  auto rc = cur_scan_->execute();
+  if (!rc.isSuccess()) {
+    RAISE(kRuntimeError, rc.getMessage());
+  }
+
   return true;
 }
 
-size_t PartitionCursor::getNumColumns() {
+size_t PartitionCursor::getColumnCount() const {
   return stmt_->getNumComputedColumns();
+}
+
+csql::SType PartitionCursor::getColumnType(size_t idx) const {
+  return stmt_->getColumnType(idx);
 }
 
 RemotePartitionCursor::RemotePartitionCursor(
@@ -232,33 +263,18 @@ RemotePartitionCursor::RemotePartitionCursor(
             "server.s2s_idle_timeout",
             0)) {}
 
-bool RemotePartitionCursor::next(csql::SValue* row, int row_len) {
-  if (row_buf_pos_ == row_buf_.size() && !done_) {
-    auto rc = fetchRows();
-    if (!rc.isSuccess()) {
-      RAISE(kRuntimeError, rc.getMessage());
-    }
-  }
-
-  if (row_buf_pos_ == row_buf_.size()) {
-    return false;
-  } else {
-    assert(row_buf_pos_ + ncols_ <= row_buf_.size());
-    auto n = std::min(ncols_, (size_t) row_len);
-    for (size_t i = 0; i < n; ++i) {
-      row[i] = row_buf_[row_buf_pos_ + i];
-    }
-
-    row_buf_pos_ += ncols_;
-    return true;
-  }
+ReturnCode RemotePartitionCursor::execute() {
+  return ReturnCode::success();
 }
 
-size_t RemotePartitionCursor::getNumColumns() {
-  return ncols_;
-}
+ReturnCode RemotePartitionCursor::nextBatch(
+    csql::SVector* output,
+    size_t* output_len) {
+  if (done_) {
+    *output_len = 0;
+    return ReturnCode::success();
+  }
 
-ReturnCode RemotePartitionCursor::fetchRows() {
   if (running_) {
     auto rc = client_.sendFrame(EVQL_OP_QUERY_CONTINUE, 0, nullptr, 0);
     if (!rc.isSuccess()) {
@@ -333,7 +349,7 @@ ReturnCode RemotePartitionCursor::fetchRows() {
         return ReturnCode::error("ERUNTIME", eframe.getError());
       }
       default:
-        return ReturnCode::error("ERUNTIME", "invalid opcode");
+        return ReturnCode::error("ERUNTIME", "invalid opcode in PartitionCursor::nextBatch");
     }
   }
 
@@ -344,78 +360,21 @@ ReturnCode RemotePartitionCursor::fetchRows() {
     return ReturnCode::error("ERUNTIME", "invalid column count");
   }
 
-  auto is = r_frame.getRowDataInputStream();
-  auto n = r_frame.getRowCount() * ncols_;
-  row_buf_.clear();
-  row_buf_.resize(n);
-  row_buf_pos_ = 0;
-  try {
-    for (size_t i = 0; i < n; ++i) {
-        row_buf_[i].decode(is.get());
-    }
-  } catch (const std::exception& e) {
-    return ReturnCode::error("ERUNTIME", e.what());
+  for (size_t i = 0; i < ncols_; ++i) {
+    const auto& coldata = r_frame.getColumnData(i);
+    output[i].append(coldata.data(), coldata.size());
   }
 
+  *output_len = r_frame.getRowCount();
   return ReturnCode::success();
 }
 
-StaticPartitionCursor::StaticPartitionCursor(
-    csql::Transaction* txn,
-    csql::ExecutionContext* execution_context,
-    RefPtr<Table> table,
-    RefPtr<PartitionSnapshot> snap,
-    RefPtr<csql::SequentialScanNode> stmt) :
-    txn_(txn),
-    execution_context_(execution_context),
-    table_(table),
-    snap_(snap),
-    stmt_(stmt) {};
-
-bool StaticPartitionCursor::next(csql::SValue* row, int row_len) {
-  if (cur_cursor_.get() == nullptr) {
-    auto cstable_file = FileUtil::joinPaths(snap_->base_path, "_cstable");
-    if (!FileUtil::exists(cstable_file)) {
-      return false;
-    }
-
-    auto cstable = cstable::CSTableReader::openFile(cstable_file);
-
-    cur_scan_.reset(
-        new csql::CSTableScan(txn_, execution_context_, stmt_, cstable));
-
-    //for (const auto& col : table_->schema()->columns()) {
-    //  switch (col.second.type) {
-    //    case msg::FieldType::BOOLEAN:
-    //      cur_scan_->setColumnType(col.first, SQL_BOOL);
-    //      break;
-    //    case msg::FieldType::UINT32:
-    //      cur_scan_->setColumnType(col.first, SQL_INTEGER);
-    //      break;
-    //    case msg::FieldType::UINT64:
-    //      cur_scan_->setColumnType(col.first, SQL_INTEGER);
-    //      break;
-    //    case msg::FieldType::STRING:
-    //      cur_scan_->setColumnType(col.first, SQL_STRING);
-    //      break;
-    //    case msg::FieldType::DOUBLE:
-    //      cur_scan_->setColumnType(col.first, SQL_FLOAT);
-    //      break;
-    //    case msg::FieldType::DATETIME:
-    //      cur_scan_->setColumnType(col.first, SQL_TIMESTAMP);
-    //      break;
-    //  }
-    //}
-
-    cur_cursor_ = cur_scan_->execute();
-  }
-
-  return cur_cursor_->next(row, row_len);
+size_t RemotePartitionCursor::getColumnCount() const {
+  return stmt_->getNumComputedColumns();
 }
 
-
-size_t StaticPartitionCursor::getNumColumns() {
-  return stmt_->getNumComputedColumns();
+csql::SType RemotePartitionCursor::getColumnType(size_t idx) const {
+  return stmt_->getColumnType(idx);
 }
 
 }

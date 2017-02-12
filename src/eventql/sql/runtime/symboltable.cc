@@ -30,132 +30,187 @@
 
 namespace csql {
 
-void SymbolTable::registerFunction(
-    const String& symbol,
-    void (*fn)(sql_txn*, int, SValue*, SValue*)) {
-  PureFunction sym;
-  sym.call = fn;
-  registerFunction(symbol, sym);
+SymbolTableEntry::SymbolTableEntry(
+    const std::string& function_name,
+    SFunction fun) :
+    fun_(fun) {
+  symbol_ = function_name + "#" + sql_typename(fun_.return_type) + "/";
+
+  for (const auto& t : fun_.arg_types) {
+    symbol_ += sql_typename(t) + ";";
+  }
+}
+
+const SFunction* SymbolTableEntry::getFunction() const {
+  return &fun_;
+}
+
+const std::string& SymbolTableEntry::getSymbol() const {
+  return symbol_;
 }
 
 void SymbolTable::registerFunction(
-    const String& symbol,
-    AggregateFunction fn) {
-  AggregateFunction sym;
-  sym.scratch_size = fn.scratch_size;
-  sym.accumulate = fn.accumulate;
-  sym.get = fn.get;
-  sym.reset = fn.reset;
-  sym.init = fn.init;
-  sym.free = fn.free;
-  sym.merge = fn.merge;
-  sym.loadstate = fn.loadstate;
-  sym.savestate = fn.savestate;
-  registerFunction(symbol, SFunction(sym));
+    const std::string& function_name,
+    SFunction fn) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  std::unique_ptr<SymbolTableEntry> entry(
+      new SymbolTableEntry(function_name, fn));
+
+  auto symbol = entry->getSymbol();
+  functions_[function_name].emplace_back(entry.get());
+  symbols_.emplace(symbol, std::move(entry));
 }
 
-void SymbolTable::registerFunction(const String& symbol, SFunction fn) {
+void SymbolTable::registerImplicitConversion(
+    SType source_type,
+    SType target_type) {
+  std::unique_lock<std::mutex> lk(mutex_);
+  implicit_conversions_[source_type].insert(target_type);
+}
+
+ReturnCode SymbolTable::resolve(
+    const std::string& function_name,
+    const std::vector<SType>& arguments,
+    const SymbolTableEntry** entry,
+    bool allow_conversion /* = true */) const {
+  std::string function_name_downcase = function_name;
+  StringUtil::toLower(&function_name_downcase);
+
+  std::vector<const SymbolTableEntry*> candidates;
+  {
+    std::unique_lock<std::mutex> lk(mutex_);
+    auto iter = functions_.find(function_name_downcase);
+    if (iter == functions_.end()) {
+      return ReturnCode::errorf("EARG", "method not found: $0", function_name);
+    }
+
+    candidates = iter->second;
+  }
+
+  const SymbolTableEntry* match = nullptr;
+
+  /* scan the candidates looking for an exact match */
+  for (const auto& candidate : candidates) {
+    auto candidate_fn = candidate->getFunction();
+    if (candidate_fn->arg_types.size() != arguments.size()) {
+      continue;
+    }
+
+    match = candidate;
+    for (size_t i = 0; i < arguments.size(); ++i) {
+      if (candidate_fn->arg_types[i] != arguments[i]) {
+        match = nullptr;
+        break;
+      }
+    }
+
+    if (match) {
+      break;
+    }
+  }
+
+  /* scan the candidates looking for a match using implicit conversions */
+  if (!match && allow_conversion) {
+    for (const auto& candidate : candidates) {
+      auto candidate_fn = candidate->getFunction();
+      if (candidate_fn->arg_types.size() != arguments.size()) {
+        continue;
+      }
+
+      if (!candidate_fn->allow_arg_conversion) {
+        continue;
+      }
+
+      match = candidate;
+      for (size_t i = 0; i < arguments.size(); ++i) {
+        if (arguments[i] == candidate_fn->arg_types[i]) {
+          continue;
+        }
+
+        if (!hasImplicitConversion(arguments[i], candidate_fn->arg_types[i])) {
+          match = nullptr;
+          break;
+        }
+      }
+
+      if (match) {
+        break;
+      }
+    }
+  }
+
+  if (match) {
+    *entry = match;
+    return ReturnCode::success();
+  } else {
+    std::vector<std::string> expected_types;
+    for (const auto& candidate : candidates) {
+      std::vector<std::string> candidate_types;
+      auto candidate_fn = candidate->getFunction();
+
+      for (const auto& type : candidate_fn->arg_types) {
+        candidate_types.emplace_back(sql_typename(type));
+      }
+
+      expected_types.emplace_back(
+          function_name + "<" + StringUtil::join(candidate_types, ", ") + ">");
+    }
+
+    std::vector<std::string> actual_types;
+    for (auto type : arguments) {
+      actual_types.emplace_back(sql_typename(type));
+    }
+
+    return ReturnCode::errorf(
+        "ERUNTIME",
+        "type error for $0<$1>; expected: $2",
+        function_name,
+        StringUtil::join(actual_types, ", "),
+        StringUtil::join(expected_types, " or "));
+  }
+}
+
+const SymbolTableEntry* SymbolTable::lookup(const std::string& symbol) const {
   std::string symbol_downcase = symbol;
   StringUtil::toLower(&symbol_downcase);
 
-  syms_.emplace(symbol_downcase, fn);
-}
-
-void SymbolTable::registerSymbol(
-    const std::string& symbol,
-    void (*method)(sql_txn*, void*, int, SValue*, SValue*)) {
-  std::string symbol_downcase = symbol;
-  std::transform(
-      symbol_downcase.begin(),
-      symbol_downcase.end(),
-      symbol_downcase.begin(),
-      ::tolower);
-
-  symbols_.emplace(
-      std::make_pair(
-          symbol_downcase,
-          SymbolTableEntry(symbol_downcase, method)));
-}
-
-void SymbolTable::registerSymbol(
-    const std::string& symbol,
-    void (*method)(sql_txn* ctx, void*, int, SValue*, SValue*),
-    size_t scratchpad_size,
-    void (*free_method)(sql_txn* ctx, void*)) {
-  std::string symbol_downcase = symbol;
-  StringUtil::toLower(&symbol_downcase);
-
-  symbols_.emplace(
-      std::make_pair(
-          symbol_downcase,
-          SymbolTableEntry(
-              symbol_downcase,
-              method,
-              scratchpad_size,
-              free_method)));
-}
-
-SymbolTableEntry const* SymbolTable::lookupSymbol(const std::string& symbol)
-    const {
-  std::string symbol_downcase = symbol;
-  StringUtil::toLower(&symbol_downcase);
-
+  std::unique_lock<std::mutex> lk(mutex_);
   auto iter = symbols_.find(symbol_downcase);
-
   if (iter == symbols_.end()) {
-    RAISE(kRuntimeError, "symbol not found: %s", symbol.c_str());
     return nullptr;
   } else {
-    return &iter->second;
+    return iter->second.get();
   }
 }
 
-SFunction SymbolTable::lookup(const String& symbol) const {
-  std::string symbol_downcase = symbol;
-  StringUtil::toLower(&symbol_downcase);
+bool SymbolTable::isAggregateFunction(const std::string& function_name) const {
+  std::unique_lock<std::mutex> lk(mutex_);
 
-  auto iter = syms_.find(symbol_downcase);
-  if (iter == syms_.end()) {
-    RAISEF(kRuntimeError, "symbol not found: $0", symbol);
+  std::string function_name_downcase = function_name;
+  StringUtil::toLower(&function_name_downcase);
+
+  auto iter = functions_.find(function_name_downcase);
+  if (iter != functions_.end()) {
+    for (const auto& f : iter->second) {
+      if (f->getFunction()->type == FN_AGGREGATE) {
+        return true;
+      }
+    }
   }
 
-  return iter->second;
+  return false;
 }
 
-bool SymbolTable::isAggregateFunction(const String& symbol) const {
-  auto sf = lookup(symbol);
+bool SymbolTable::hasImplicitConversion(SType source, SType target) const {
+  std::unique_lock<std::mutex> lk(mutex_);
 
-  switch (sf.type) {
-    case FN_AGGREGATE:
-      return true;
-    case FN_PURE:
-      return false;
+  auto iter = implicit_conversions_.find(source);
+  if (iter == implicit_conversions_.end()) {
+    return false;
+  } else {
+    return iter->second.count(target) > 0;
   }
 }
 
-SymbolTableEntry::SymbolTableEntry(
-    const std::string& symbol,
-    void (*method)(sql_txn*, void*, int, SValue*, SValue*),
-    size_t scratchpad_size,
-    void (*free_method)(sql_txn*, void*)) :
-    call_(method),
-    scratchpad_size_(scratchpad_size) {}
+} // namespace csql
 
-SymbolTableEntry::SymbolTableEntry(
-    const std::string& symbol,
-    void (*method)(sql_txn*, void*, int, SValue*, SValue*)) :
-    SymbolTableEntry(symbol, method, 0, nullptr) {}
-
-bool SymbolTableEntry::isAggregate() const {
-  return scratchpad_size_ > 0;
-}
-
-void (*SymbolTableEntry::getFnPtr() const)(sql_txn* ctx, void*, int, SValue*, SValue*) {
-  return call_;
-}
-
-size_t SymbolTableEntry::getScratchpadSize() const {
-  return scratchpad_size_;
-}
-
-}

@@ -22,6 +22,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <assert.h>
 #include <eventql/sql/qtree/GroupByNode.h>
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
 
@@ -89,7 +90,11 @@ size_t GroupByNode::getComputedColumnIndex(
       ->getComputedColumnIndex(column_name, allow_add);
 
   if (child_idx != size_t(-1)) {
-    auto slnode = new SelectListNode(new ColumnReferenceNode(child_idx));
+    auto slnode = new SelectListNode(
+        new ColumnReferenceNode(
+            child_idx,
+            table_.asInstanceOf<TableExpressionNode>()->getColumnType(child_idx)));
+
     slnode->setAlias(column_name);
     select_list_.emplace_back(slnode);
     return select_list_.size() - 1;
@@ -100,6 +105,11 @@ size_t GroupByNode::getComputedColumnIndex(
 
 size_t GroupByNode::getNumComputedColumns() const {
   return select_list_.size();
+}
+
+SType GroupByNode::getColumnType(size_t idx) const {
+  assert(idx < select_list_.size());
+  return select_list_[idx]->expression()->getReturnType();
 }
 
 Vector<RefPtr<ValueExpressionNode>> GroupByNode::groupExpressions() const {

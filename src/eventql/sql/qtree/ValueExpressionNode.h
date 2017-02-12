@@ -23,10 +23,10 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/sql/qtree/QueryTreeNode.h>
-
-#include "eventql/eventql.h"
+#include "eventql/sql/svalue.h"
 
 namespace csql {
 
@@ -36,6 +36,8 @@ public:
   virtual Vector<RefPtr<ValueExpressionNode>> arguments() const = 0;
 
   virtual String toSQL() const = 0;
+
+  virtual SType getReturnType() const = 0;
 
   virtual String toString() const override {
     return StringUtil::format("(expr $0)", toSQL());

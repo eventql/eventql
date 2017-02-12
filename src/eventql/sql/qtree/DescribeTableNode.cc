@@ -23,6 +23,7 @@
  * code of your own applications
  */
 #include <eventql/sql/qtree/DescribeTableNode.h>
+#include <eventql/sql/statements/describe_table.h>
 
 #include "eventql/eventql.h"
 
@@ -45,24 +46,18 @@ const String& DescribeTableNode::tableName() const {
 }
 
 Vector<String> DescribeTableNode::getResultColumns() const {
-  return Vector<String> {
-    "column_name",
-    "type",
-    "nullable",
-    "primary_key",
-    "description",
-    "encoding"
-  };
+  std::vector<std::string> list;
+  for (const auto& e : DescribeTableStatement::kOutputColumns) {
+    list.emplace_back(e.first);
+  }
+  return list;
 }
 
 Vector<QualifiedColumn> DescribeTableNode::getAvailableColumns() const {
   Vector<QualifiedColumn> cols;
 
-  for (const auto& c : getResultColumns()) {
-    QualifiedColumn  qc;
-    qc.short_name = c;
-    qc.qualified_name = c;
-    cols.emplace_back(qc);
+  for (const auto& e : DescribeTableStatement::kOutputColumns) {
+    cols.emplace_back(e.first, e.first, e.second);
   }
 
   return cols;
@@ -75,7 +70,12 @@ size_t DescribeTableNode::getComputedColumnIndex(
 }
 
 size_t DescribeTableNode::getNumComputedColumns() const {
-  return 4;
+  return DescribeTableStatement::kOutputColumns.size();
+}
+
+SType DescribeTableNode::getColumnType(size_t idx) const {
+  assert(idx < DescribeTableStatement::kOutputColumns.size());
+  return DescribeTableStatement::kOutputColumns[idx].second;
 }
 
 String DescribeTableNode::toString() const {

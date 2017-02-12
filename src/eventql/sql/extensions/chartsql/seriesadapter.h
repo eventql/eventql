@@ -90,7 +90,7 @@ public:
       series = series_iter->second;
     }
 
-    if (row[y_ind_].getType() == SQL_NULL) {
+    if (row[y_ind_].getType() == SType::NIL) {
       // FIXPAUL better handling of missing/NULL values!
     } else {
       series->addDatum(

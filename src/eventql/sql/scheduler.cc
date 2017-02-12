@@ -25,6 +25,8 @@
 #include "eventql/eventql.h"
 #include <eventql/sql/scheduler.h>
 #include <eventql/sql/query_plan.h>
+#include <eventql/sql/qtree/constraints.h>
+#include <eventql/sql/qtree/QueryTreeUtil.h>
 #include "eventql/server/session.h"
 #include "eventql/db/database.h"
 #include "eventql/auth/client_auth.h"
@@ -95,11 +97,26 @@ ScopedPtr<TableExpression> DefaultScheduler::buildOrderByExpression(
     ExecutionContext* execution_context,
     RefPtr<OrderByNode> node) {
   Vector<OrderByExpression::SortExpr> sort_exprs;
+  Vector<PureSFunctionPtr> comparators;
   for (const auto& ss : node->sortSpecs()) {
     OrderByExpression::SortExpr se;
     se.descending = ss.descending;
     se.expr = txn->getCompiler()->buildValueExpression(txn, ss.expr);
+
+    const SymbolTableEntry* symbol;
+    auto rc = txn->getSymbolTable()->resolve(
+        "cmp",
+        { se.expr.getReturnType(), se.expr.getReturnType() },
+        &symbol,
+        false);
+
+    if (!rc.isSuccess()) {
+      RAISE(kRuntimeError, rc.getMessage());
+    }
+
+    assert(symbol->getFunction()->return_type == SType::INT64);
     sort_exprs.emplace_back(std::move(se));
+    comparators.emplace_back(symbol->getFunction()->vtable.call);
   }
 
   return mkScoped(
@@ -107,6 +124,7 @@ ScopedPtr<TableExpression> DefaultScheduler::buildOrderByExpression(
           txn,
           execution_context,
           std::move(sort_exprs),
+          comparators,
           buildTableExpression(
               txn,
               execution_context,
@@ -167,42 +185,91 @@ ScopedPtr<TableExpression> DefaultScheduler::buildJoinExpression(
     Transaction* ctx,
     ExecutionContext* execution_context,
     RefPtr<JoinNode> node) {
+  auto compiler = ctx->getCompiler();
+
   Vector<String> column_names;
   Vector<ValueExpression> select_expressions;
 
   for (const auto& slnode : node->selectList()) {
     select_expressions.emplace_back(
-        ctx->getCompiler()->buildValueExpression(ctx, slnode->expression()));
+        compiler->buildValueExpression(ctx, slnode->expression()));
   }
 
+  std::vector<JoinConjunction> conjunctions;
   Option<ValueExpression> where_expr;
   if (!node->whereExpression().isEmpty()) {
     where_expr = std::move(Option<ValueExpression>(
-        ctx->getCompiler()->buildValueExpression(ctx, node->whereExpression().get())));
+        compiler->buildValueExpression(ctx, node->whereExpression().get())));
+
+    findJoinConjunctions(
+        node.get(),
+        node->whereExpression().get().get(),
+        &conjunctions);
   }
 
   Option<ValueExpression> join_cond_expr;
   if (!node->joinCondition().isEmpty()) {
     join_cond_expr = std::move(Option<ValueExpression>(
-        ctx->getCompiler()->buildValueExpression(ctx, node->joinCondition().get())));
+        compiler->buildValueExpression(ctx, node->joinCondition().get())));
+
+    findJoinConjunctions(
+        node.get(),
+        node->joinCondition().get().get(),
+        &conjunctions);
   }
 
-  return mkScoped(
-      new NestedLoopJoin(
-          ctx,
-          node->joinType(),
-          node->inputColumnMap(),
-          std::move(select_expressions),
-          std::move(join_cond_expr),
-          std::move(where_expr),
-          buildTableExpression(
-              ctx,
-              execution_context,
-              node->baseTable().asInstanceOf<TableExpressionNode>()),
-          buildTableExpression(
-              ctx,
-              execution_context,
-              node->joinedTable().asInstanceOf<TableExpressionNode>())));
+  std::vector<JoinConjunction> equi_conjunctions;
+  for (const auto& c : conjunctions) {
+    if (c.type == JoinConjunctionType::EQUAL_TO) {
+      equi_conjunctions.emplace_back(c);
+    }
+  }
+
+  if (equi_conjunctions.size() > 0) {
+    /* hash join for equi-joins */
+    std::vector<std::pair<ValueExpression, ValueExpression>> conjunction_exprs;
+    for (const auto& c : equi_conjunctions) {
+      conjunction_exprs.emplace_back(
+          compiler->buildValueExpression(ctx, c.base_table_expr.get()),
+          compiler->buildValueExpression(ctx, c.joined_table_expr.get()));
+    }
+
+    return mkScoped(
+        new HashJoin(
+            ctx,
+            node->joinType(),
+            node->inputColumnMap(),
+            std::move(select_expressions),
+            std::move(join_cond_expr),
+            std::move(where_expr),
+            std::move(conjunction_exprs),
+            buildTableExpression(
+                ctx,
+                execution_context,
+                node->baseTable().asInstanceOf<TableExpressionNode>()),
+            buildTableExpression(
+                ctx,
+                execution_context,
+                node->joinedTable().asInstanceOf<TableExpressionNode>())));
+  } else {
+    /* default to nested loop join */
+    return mkScoped(
+        new NestedLoopJoin(
+            ctx,
+            node->joinType(),
+            node->inputColumnMap(),
+            std::move(select_expressions),
+            std::move(join_cond_expr),
+            std::move(where_expr),
+            buildTableExpression(
+                ctx,
+                execution_context,
+                node->baseTable().asInstanceOf<TableExpressionNode>()),
+            buildTableExpression(
+                ctx,
+                execution_context,
+                node->joinedTable().asInstanceOf<TableExpressionNode>())));
+  }
 }
 
 ScopedPtr<TableExpression> DefaultScheduler::buildTableExpression(
@@ -291,7 +358,7 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeSelect(
     ExecutionContext* execution_context,
     RefPtr<TableExpressionNode> select) {
   return mkScoped(
-      new TableExpressionResultCursor(
+      new ResultCursor(
           buildTableExpression(
               txn,
               execution_context,
@@ -320,7 +387,7 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeDraw(
   }
 
   return mkScoped(
-      new TableExpressionResultCursor(
+      new ResultCursor(
           mkScoped(
               new ChartExpression(
                   txn,
@@ -339,7 +406,7 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeCreateTable(
   }
 
   // FIXME return result...
-  return mkScoped(new EmptyResultCursor());
+  return mkScoped(new ResultCursor());
 }
 
 ScopedPtr<ResultCursor> DefaultScheduler::executeCreateDatabase(
@@ -353,7 +420,7 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeCreateDatabase(
   }
 
   // FIXME return result...
-  return mkScoped(new EmptyResultCursor());
+  return mkScoped(new ResultCursor());
 }
 
 ScopedPtr<ResultCursor> DefaultScheduler::executeUseDatabase(
@@ -380,7 +447,7 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeUseDatabase(
   }
 
   // FIXME return result...
-  return mkScoped(new EmptyResultCursor());
+  return mkScoped(new ResultCursor());
 }
 
 ScopedPtr<ResultCursor> DefaultScheduler::executeDropTable(
@@ -394,7 +461,7 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeDropTable(
   }
 
   // FIXME return result...
-  return mkScoped(new EmptyResultCursor());
+  return mkScoped(new ResultCursor());
 }
 
 ScopedPtr<ResultCursor> DefaultScheduler::executeInsertInto(
@@ -403,17 +470,28 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeInsertInto(
     RefPtr<InsertIntoNode> insert_into) {
   Vector<Pair<String, SValue>> data;
   auto value_specs = insert_into->getValueSpecs();
+  VMStack vm_stack;
   for (auto spec : value_specs) {
-    auto expr = txn->getCompiler()->buildValueExpression(txn, spec.expr);
-    auto program = expr.program();
-    if (program->has_aggregate_) {
+    if (!QueryTreeUtil::isConstantExpression(txn, spec.expr)) {
       RAISE(
           kRuntimeError,
-          "insert into expression must not contain aggregation"); //FIXME better msg
+          "insert into expression must contain only constant expressions");
     }
 
-    SValue value;
-    VM::evaluate(txn, program, 0, nullptr, &value);
+    auto expr = txn->getCompiler()->buildValueExpression(txn, spec.expr);
+    auto program = expr.program();
+
+    VM::evaluate(
+        txn,
+        program,
+        program->method_call,
+        &vm_stack,
+        nullptr,
+        0,
+        nullptr);
+
+    SValue value(program->return_type);
+    popBoxed(&vm_stack, &value);
 
     Pair<String, SValue> result;
     result.first = spec.column;
@@ -430,7 +508,7 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeInsertInto(
   }
 
   // FIXME return result...
-  return mkScoped(new EmptyResultCursor());
+  return mkScoped(new ResultCursor());
 }
 
 ScopedPtr<ResultCursor> DefaultScheduler::executeInsertJSON(
@@ -446,7 +524,7 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeInsertJSON(
   }
 
   // FIXME return result...
-  return mkScoped(new EmptyResultCursor());
+  return mkScoped(new ResultCursor());
 }
 
 ScopedPtr<ResultCursor> DefaultScheduler::executeAlterTable(
@@ -459,7 +537,7 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeAlterTable(
   }
 
   // FIXME return result...
-  return mkScoped(new EmptyResultCursor());
+  return mkScoped(new ResultCursor());
 }
 
 ScopedPtr<ResultCursor> DefaultScheduler::execute(

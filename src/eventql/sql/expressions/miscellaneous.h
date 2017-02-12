@@ -23,13 +23,15 @@
  */
 #pragma once
 #include <eventql/sql/svalue.h>
+#include <eventql/sql/SFunction.h>
 #include <eventql/sql/transaction.h>
+#include <eventql/sql/runtime/vm.h>
 
 namespace csql {
 namespace expressions {
 
-void usleepExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
-void fnv32Expr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
+//void usleepExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
+extern const SFunction fnv32;
 
 }
 }

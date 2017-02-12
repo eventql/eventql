@@ -49,7 +49,12 @@ public:
   void executeStatement(
       Transaction* txn,
       RefPtr<TableExpressionNode> stmt,
-      ScopedPtr<ResultCursor> result_cursor) {
+      TableExpression* result_cursor) {
+    auto rc = result_cursor->execute();
+    if (!rc.isSuccess()) {
+      RAISE(kRuntimeError, rc.getMessage());
+    }
+
     name_ind_ = stmt->getComputedColumnIndex("series");
 
     x_ind_ = stmt->getComputedColumnIndex("x");
@@ -108,7 +113,8 @@ public:
     }
 
     bool first = true;
-    Vector<SValue> row(result_cursor->getNumColumns());
+    Vector<SValue> row(result_cursor->getColumnCount());
+    /*
     while (result_cursor->next(row.data(), row.size())) {
       if (first) {
         first = false;
@@ -133,6 +139,7 @@ public:
 
       adapter_->nextRow(row.data(), row.size());
     }
+    */
   }
 
   virtual util::chart::Drawable* getChart() const = 0;
@@ -140,6 +147,7 @@ public:
 
 protected:
 
+/*
   AnySeriesAdapter* mkSeriesAdapter(SValue* row) {
     AnySeriesAdapter* a = nullptr;
     if (!a) a = mkSeriesAdapter1D<SValue::TimeType>(row);
@@ -267,6 +275,8 @@ protected:
       return chart;
     }
   }
+
+  */
 
   void preconditionCheck() const {
     if (adapter_.get() == nullptr) {

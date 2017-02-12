@@ -166,7 +166,7 @@ int main(int argc, const char** argv) {
         "   -C name=value             Define a config value on the command line\n"
         "   -?, --help <topic>        Display a command's help text and exit\n"
         "   -v, --version             Display the version of this binary and exit\n\n"
-        "evqctl commands:\n"
+        "evqlctl commands:\n"
       );
 
       for (const auto c : commands) {

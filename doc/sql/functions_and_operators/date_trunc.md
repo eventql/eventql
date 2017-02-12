@@ -12,23 +12,20 @@ to make the window a multiple of the unit.
 
 The valid time units are:
 
-    s/sec/secs/second/seconds
-    m/min/mins/minute/minutes
+    ms/msec/millisecond/milliseconds
+    s/sec/second/seconds
+    min/minute/minutes
     h/hour/hours
     d/day/days
     w/week/weeks
-    m/month/months
+    month/months
     y/year/years
 
 Examples:
 
-    SELECT date_trunc('hour', TIMESTAMP '2001-02-16 20:38:40');
-    Result: 2001-02-16 20:00:00
+    SELECT date_trunc('hour', FROM_TIMESTAMP(1486553343));
+    Result: 2017-02-08 11:00:00
 
-    SELECT date_trunc('30mins', TIMESTAMP '2001-02-16 20:38:40');
-    Result: 2001-02-16 20:30:00
-
-    SELECT date_trunc('year', TIMESTAMP '2001-02-16 20:38:40');
-    Result: 2001-01-01 00:00:00
-
+    SELECT date_trunc('10min', FROM_TIMESTAMP(1486553343));
+    Result: 2001-02-16 11:20:00
 

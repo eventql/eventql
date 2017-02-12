@@ -28,7 +28,6 @@
 #include <eventql/util/cli/CLICommand.h>
 #include <eventql/util/status.h>
 #include <eventql/cli/cli_config.h>
-#include "eventql/server/sql/codec/binary_codec.h"
 #include "eventql/sql/result_list.h"
 #include "eventql/util/io/TerminalOutputStream.h"
 #include "eventql/util/return_code.h"
@@ -78,9 +77,6 @@ public:
   Status runJS(const String& query);
 
 protected:
-
-  Status sendRequest(const String& query, csql::BinaryResultParser* res_parser);
-
   CLIConfig cfg_;
   evql_client_t* client_;
 };

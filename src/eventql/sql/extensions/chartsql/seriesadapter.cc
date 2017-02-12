@@ -46,7 +46,7 @@ void AnySeriesAdapter::applyProperties(
       RAISE(kRuntimeError, "invalid index for property");
     }
 
-    series->setProperty(prop.first, point, row[prop.second].getString());
+    series->setProperty(prop.first, point, row[prop.second].toString());
   }
 }
 

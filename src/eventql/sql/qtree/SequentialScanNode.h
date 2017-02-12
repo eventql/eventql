@@ -99,6 +99,10 @@ public:
 
   SequentialScanNode(
       const TableInfo& table_info,
+      RefPtr<TableProvider> table_provider);
+
+  SequentialScanNode(
+      const TableInfo& table_info,
       RefPtr<TableProvider> table_provider,
       Vector<RefPtr<SelectListNode>> select_list,
       Option<RefPtr<ValueExpressionNode>> where_expr);
@@ -118,7 +122,9 @@ public:
   void setTableAlias(const String& table_alias);
 
   Vector<RefPtr<SelectListNode>> selectList() const;
-  Set<String> selectedColumns() const;
+  void addSelectList(RefPtr<SelectListNode> sl);
+
+  Vector<String> selectedColumns() const;
 
   Vector<String> getResultColumns() const override;
 
@@ -132,6 +138,18 @@ public:
       bool allow_add = false) override;
 
   size_t getNumComputedColumns() const override;
+
+  SType getColumnType(size_t idx) const override;
+
+  size_t getInputColumnIndex(
+      const String& column_name,
+      bool allow_add = false);
+
+  SType getInputColumnType(size_t idx) const;
+
+  std::pair<size_t, SType> getInputColumnInfo(
+      const String& column_name,
+      bool allow_add = false);
 
   Option<RefPtr<ValueExpressionNode>> whereExpression() const;
   void setWhereExpression(RefPtr<ValueExpressionNode> e);
@@ -159,17 +177,12 @@ public:
       InputStream* os);
 
 protected:
-
-  void findSelectedColumnNames(
-    RefPtr<ValueExpressionNode> expr,
-    Set<String>* columns) const;
-
   String table_name_;
   String table_alias_;
-  Vector<String> table_columns_;
-  RefPtr<TableProvider> table_provider_;
+  Vector<std::pair<std::string, SType>> table_columns_;
   Vector<RefPtr<SelectListNode>> select_list_;
   Vector<String> output_columns_;
+  Vector<std::pair<std::string, SType>> input_columns_;
   Option<RefPtr<ValueExpressionNode>> where_expr_;
   AggregationStrategy aggr_strategy_;
   Vector<ScanConstraint> constraints_;

@@ -31,51 +31,51 @@
 namespace csql {
 namespace expressions {
 
-static const uint64_t kUSleepIntervalUs = 1000;
-void usleepExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  if (argc != 1) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for usleep expected: 1, got: %i", argc);
-  }
-
-  if (argv[0].getInteger() < 0) {
-    RAISE(
-        kRuntimeError,
-        "wrong argument for usleep, must be positive integer, got %i",
-        argv[0].getInteger());
-  }
-
-  uint64_t total_sleep = argv[0].getInteger();
-  uint64_t begin = MonotonicClock::now();
-  for (;;) {
-    uint64_t now = MonotonicClock::now();
-    if (begin + total_sleep <= now) {
-      break;
-    }
-
-    auto rc = Transaction::get(ctx)->triggerHeartbeat();
-    if (!rc.isSuccess()) {
-      RAISE(kRuntimeError, rc.getMessage());
-    }
-
-    uint64_t remaining = total_sleep - (now - begin);
-    usleep(std::min(remaining, kUSleepIntervalUs));
-  }
-
-  *out = SValue::newInteger(0);
-}
-
-void fnv32Expr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  if (argc != 1) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for usleep expected: 1, got: %i", argc);
-  }
-
+//static const uint64_t kUSleepIntervalUs = 1000;
+//void usleepExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
+//  if (argc != 1) {
+//    RAISE(
+//        kRuntimeError,
+//        "wrong number of arguments for usleep expected: 1, got: %i", argc);
+//  }
+//
+//  if (argv[0].getInteger() < 0) {
+//    RAISE(
+//        kRuntimeError,
+//        "wrong argument for usleep, must be positive integer, got %i",
+//        argv[0].getInteger());
+//  }
+//
+//  uint64_t total_sleep = argv[0].getInteger();
+//  uint64_t begin = MonotonicClock::now();
+//  for (;;) {
+//    uint64_t now = MonotonicClock::now();
+//    if (begin + total_sleep <= now) {
+//      break;
+//    }
+//
+//    auto rc = Transaction::get(ctx)->triggerHeartbeat();
+//    if (!rc.isSuccess()) {
+//      RAISE(kRuntimeError, rc.getMessage());
+//    }
+//
+//    uint64_t remaining = total_sleep - (now - begin);
+//    usleep(std::min(remaining, kUSleepIntervalUs));
+//  }
+//
+//  *out = SValue::newInteger(0);
+//}
+void fnv32_call(sql_txn* ctx, VMStack* stack) {
+  auto str = popString(stack);
+  StringUtil::rtrim(&str);
   FNV<uint32_t> fnv;
-  *out = SValue::newInteger(fnv.hash(argv[0].getString()));
+  pushUInt64(stack, fnv.hash(str));
 }
+
+const SFunction fnv32(
+    { SType::STRING },
+    SType::UINT64,
+    &fnv32_call);
 
 } //expressions
 } //csql

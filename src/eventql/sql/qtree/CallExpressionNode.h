@@ -24,26 +24,39 @@
  */
 #pragma once
 #include <eventql/util/stdtypes.h>
+#include <eventql/util/return_code.h>
 #include <eventql/sql/qtree/ValueExpressionNode.h>
 #include <eventql/sql/qtree/qtree_coder.h>
-
+#include <eventql/sql/SFunction.h>
 #include "eventql/eventql.h"
 
 namespace csql {
+class SymbolTableEntry;
 
 class CallExpressionNode : public ValueExpressionNode {
 public:
 
-  CallExpressionNode(
-      const String& symbol,
-      Vector<RefPtr<ValueExpressionNode>> arguments);
+  static ReturnCode newNode (
+      Transaction* txn,
+      const std::string& function_name,
+      Vector<RefPtr<ValueExpressionNode>> arguments,
+      RefPtr<ValueExpressionNode>* node);
 
+  static ReturnCode newNode (
+      Transaction* txn,
+      const std::string& function_name,
+      const SymbolTableEntry* symbol,
+      Vector<RefPtr<ValueExpressionNode>> arguments,
+      RefPtr<ValueExpressionNode>* node);
+
+  const String& getFunctionName() const;
+  const String& getSymbol() const;
+  SType getReturnType() const override;
+  bool isPureFunction() const;
+  bool isAggregateFunction() const;
   Vector<RefPtr<ValueExpressionNode>> arguments() const override;
 
-  const String& symbol() const;
-
   RefPtr<QueryTreeNode> deepCopy() const override;
-
   String toSQL() const override;
 
   static void encode(
@@ -56,7 +69,20 @@ public:
       InputStream* is);
 
 protected:
+
+  CallExpressionNode(
+      const String& function_name,
+      const String& symbol,
+      SType return_type,
+      bool is_pure,
+      bool is_aggregate,
+      Vector<RefPtr<ValueExpressionNode>> arguments);
+
+  String function_name_;
   String symbol_;
+  SType return_type_;
+  bool is_pure_;
+  bool is_aggregate_;
   Vector<RefPtr<ValueExpressionNode>> arguments_;
 };
 

@@ -31,16 +31,21 @@ namespace csql {
 ColumnReferenceNode::ColumnReferenceNode(
     const ColumnReferenceNode& other) :
     column_name_(other.column_name_),
-    column_index_(other.column_index_) {}
+    column_index_(other.column_index_),
+    type_(other.type_) {}
 
 ColumnReferenceNode::ColumnReferenceNode(
-    const String& column_name) :
-    column_name_(column_name) {}
+    const String& column_name,
+    SType type) :
+    column_name_(column_name),
+    type_(type) {}
 
 ColumnReferenceNode::ColumnReferenceNode(
-    size_t column_index) :
+    size_t column_index,
+    SType type) :
     column_name_(StringUtil::toString(column_index)),
-    column_index_(Some(column_index)) {}
+    column_index_(Some(column_index)),
+    type_(type) {}
 
 const String& ColumnReferenceNode::fieldName() const {
   return column_name_;
@@ -86,11 +91,15 @@ RefPtr<QueryTreeNode> ColumnReferenceNode::deepCopy() const {
 }
 
 String ColumnReferenceNode::toSQL() const {
-  if (!column_index_.isEmpty() && column_index_.get() != size_t(-1)) {
+  if (column_name_.empty()) {
     return StringUtil::format("subquery_column($0)", column_index_.get());
+  } else {
+    return "`" + column_name_ + "`";
   }
+}
 
-  return "`" + column_name_ + "`";
+SType ColumnReferenceNode::getReturnType() const {
+  return type_;
 }
 
 void ColumnReferenceNode::encode(
@@ -98,6 +107,7 @@ void ColumnReferenceNode::encode(
     const ColumnReferenceNode& node,
     OutputStream* os) {
   os->appendLenencString(node.column_name_);
+  os->appendVarUInt((uint8_t) node.type_);
 
   if (!node.column_index_.isEmpty() && node.column_index_.get() != size_t(-1)) {
     os->appendUInt8(1);
@@ -110,9 +120,9 @@ void ColumnReferenceNode::encode(
 RefPtr<QueryTreeNode> ColumnReferenceNode::decode (
     QueryTreeCoder* coder,
     InputStream* is) {
-
   auto column_name = is->readLenencString();
-  auto node = new ColumnReferenceNode(column_name);
+  auto type = (SType) is->readVarUInt();
+  auto node = new ColumnReferenceNode(column_name, type);
 
   if (is->readUInt8()) {
     node->setColumnIndex(is->readVarUInt());

@@ -63,6 +63,10 @@ size_t LimitNode::getNumComputedColumns() const {
   return table_.asInstanceOf<TableExpressionNode>()->getNumComputedColumns();
 }
 
+SType LimitNode::getColumnType(size_t idx) const {
+  return table_.asInstanceOf<TableExpressionNode>()->getColumnType(idx);
+}
+
 RefPtr<QueryTreeNode> LimitNode::deepCopy() const {
   return new LimitNode(
       limit_,

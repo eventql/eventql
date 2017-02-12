@@ -21,13 +21,14 @@ INIH_LDADD = ${top_builddir}/deps/3rdparty/inih/libinih.a
 
 
 TESTS = \
-  unit_metadata_file \
-  unit_metadata_store \
-  unit_metadata_operation_split \
-  unit_metadata_operation_createpartition \
-  unit_partition_discovery \
-  unit_sql_parser \
-  unit_sql_qtree
+  evql-test-unit-metadata_file \
+  evql-test-unit-metadata_store \
+  evql-test-unit-metadata_operation_split \
+  evql-test-unit-metadata_operation_createpartition \
+  evql-test-unit-partition_discovery \
+  evql-test-unit-sql_parser \
+  evql-test-unit-sql_qtree \
+  evql-test-sql
 
 check_PROGRAMS = $(TESTS)
 
@@ -40,8 +41,8 @@ check_PROGRAMS = $(TESTS)
 #    $(LMDB_LDADD) \
 #    $(PROTOBUF_LDADD)
 
-unit_metadata_file_SOURCES = unit/metadata_file.cc
-unit_metadata_file_LDADD = \
+evql_test_unit_metadata_file_SOURCES = unit/metadata_file.cc
+evql_test_unit_metadata_file_LDADD = \
     @top_builddir@/src/libevqlcore.a \
     @top_builddir@/src/libevqlclient.la \
     $(INIH_LDADD) \
@@ -49,8 +50,8 @@ unit_metadata_file_LDADD = \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD)
 
-unit_metadata_store_SOURCES = unit/metadata_store.cc
-unit_metadata_store_LDADD = \
+evql_test_unit_metadata_store_SOURCES = unit/metadata_store.cc
+evql_test_unit_metadata_store_LDADD = \
     @top_builddir@/src/libevqlcore.a \
     @top_builddir@/src/libevqlclient.la \
     $(INIH_LDADD) \
@@ -58,8 +59,8 @@ unit_metadata_store_LDADD = \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD)
 
-unit_metadata_operation_split_SOURCES = unit/metadata_operation_split.cc
-unit_metadata_operation_split_LDADD = \
+evql_test_unit_metadata_operation_split_SOURCES = unit/metadata_operation_split.cc
+evql_test_unit_metadata_operation_split_LDADD = \
     @top_builddir@/src/libevqlcore.a \
     @top_builddir@/src/libevqlclient.la \
     $(INIH_LDADD) \
@@ -67,8 +68,8 @@ unit_metadata_operation_split_LDADD = \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD)
 
-unit_metadata_operation_createpartition_SOURCES = unit/metadata_operation_createpartition.cc
-unit_metadata_operation_createpartition_LDADD = \
+evql_test_unit_metadata_operation_createpartition_SOURCES = unit/metadata_operation_createpartition.cc
+evql_test_unit_metadata_operation_createpartition_LDADD = \
     @top_builddir@/src/libevqlcore.a \
     @top_builddir@/src/libevqlclient.la \
     $(INIH_LDADD) \
@@ -76,8 +77,8 @@ unit_metadata_operation_createpartition_LDADD = \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD)
 
-unit_partition_discovery_SOURCES = unit/partition_discovery.cc
-unit_partition_discovery_LDADD = \
+evql_test_unit_partition_discovery_SOURCES = unit/partition_discovery.cc
+evql_test_unit_partition_discovery_LDADD = \
     @top_builddir@/src/libevqlcore.a \
     @top_builddir@/src/libevqlclient.la \
     $(INIH_LDADD) \
@@ -85,8 +86,8 @@ unit_partition_discovery_LDADD = \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD)
 
-unit_sql_parser_SOURCES = unit/sql_parser.cc
-unit_sql_parser_LDADD = \
+evql_test_unit_sql_parser_SOURCES = unit/sql_parser.cc
+evql_test_unit_sql_parser_LDADD = \
     @top_builddir@/src/libevqlcore.a \
     @top_builddir@/src/libevqlclient.la \
     $(INIH_LDADD) \
@@ -94,8 +95,17 @@ unit_sql_parser_LDADD = \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD)
 
-unit_sql_qtree_SOURCES = unit/sql_qtree.cc
-unit_sql_qtree_LDADD = \
+evql_test_unit_sql_qtree_SOURCES = unit/sql_qtree.cc
+evql_test_unit_sql_qtree_LDADD = \
+    @top_builddir@/src/libevqlcore.a \
+    @top_builddir@/src/libevqlclient.la \
+    $(INIH_LDADD) \
+    $(SIMDCOMP_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD)
+
+evql_test_sql_SOURCES = sql_test_runner.cc
+evql_test_sql_LDADD = \
     @top_builddir@/src/libevqlcore.a \
     @top_builddir@/src/libevqlclient.la \
     $(INIH_LDADD) \

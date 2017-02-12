@@ -45,7 +45,7 @@ Option<ScopedPtr<TableExpression>> CSTableScanProvider::buildSequentialScan(
 
   return Option<ScopedPtr<TableExpression>>(
       ScopedPtr<TableExpression>(
-          new CSTableScan(
+          new FastCSTableScan(
               txn,
               execution_context,
               node,
@@ -81,27 +81,27 @@ csql::TableInfo CSTableScanProvider::tableInfo() const {
     switch (col.logical_type) {
 
       case cstable::ColumnType::BOOLEAN:
-        ci.type = "bool";
+        ci.type = SType::BOOL;
         break;
 
       case cstable::ColumnType::UNSIGNED_INT:
-        ci.type = "uint64";
+        ci.type = SType::UINT64;
         break;
 
       case cstable::ColumnType::SIGNED_INT:
-        ci.type = "int64";
+        ci.type = SType::INT64;
         break;
 
       case cstable::ColumnType::FLOAT:
-        ci.type = "double";
+        ci.type = SType::FLOAT64;
         break;
 
       case cstable::ColumnType::STRING:
-        ci.type = "string";
+        ci.type = SType::STRING;
         break;
 
       case cstable::ColumnType::DATETIME:
-        ci.type = "datetime";
+        ci.type = SType::UINT64;
         break;
 
     }

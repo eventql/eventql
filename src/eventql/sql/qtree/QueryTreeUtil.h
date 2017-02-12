@@ -28,6 +28,7 @@
 #include <eventql/sql/qtree/ValueExpressionNode.h>
 #include <eventql/sql/qtree/ColumnReferenceNode.h>
 #include <eventql/sql/qtree/SequentialScanNode.h>
+#include <eventql/sql/qtree/CallExpressionNode.h>
 #include <eventql/sql/transaction.h>
 
 #include "eventql/eventql.h"
@@ -36,17 +37,6 @@ namespace csql {
 
 class QueryTreeUtil {
 public:
-
-  /**
-   * Walks the provided value expression and calls the provided resolver
-   * function for each unresolved column name. The resolver must return a column
-   * index for each column name
-   *
-   * This method will modify the provided expression in place
-   */
-  static void resolveColumns(
-      RefPtr<ValueExpressionNode> expr,
-      Function<size_t (const String&)> resolver);
 
   /**
    * Walks the provided value expression and calls the provided function for
@@ -79,9 +69,11 @@ public:
    * the original expression did. However, it is guaranteed that all inputs
    * that match the original expression will still match the pruned expression.
    */
-  static RefPtr<ValueExpressionNode> prunePredicateExpression(
+  static ReturnCode prunePredicateExpression(
+      Transaction* txn,
       RefPtr<ValueExpressionNode> expr,
-      const Set<String>& column_whitelist);
+      const Set<String>& column_whitelist,
+      RefPtr<ValueExpressionNode>* out);
 
   /**
    * Removes the provided scan constraint from the provided predicate
@@ -92,9 +84,14 @@ public:
    * the original expression did. However, it is guaranteed that all inputs
    * that match the original expression will still match the pruned expression.
    */
-  static RefPtr<ValueExpressionNode> removeConstraintFromPredicate(
+  static ReturnCode removeConstraintFromPredicate(
+      Transaction* txn,
       RefPtr<ValueExpressionNode> expr,
-      const ScanConstraint& constraint);
+      const ScanConstraint& constraint,
+      RefPtr<ValueExpressionNode>* out);
+
+  static const CallExpressionNode* findAggregateExpression(
+      const ValueExpressionNode* expr);
 
   /**
    * Extracts all constraints from the provided predicate expression

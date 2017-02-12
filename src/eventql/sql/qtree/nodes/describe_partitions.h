@@ -52,6 +52,8 @@ public:
 
   size_t getNumComputedColumns() const override;
 
+  SType getColumnType(size_t idx) const override;
+
   static void encode(
       QueryTreeCoder* coder,
       const DescribePartitionsNode& node,
@@ -60,6 +62,7 @@ public:
   static RefPtr<QueryTreeNode> decode (
       QueryTreeCoder* coder,
       InputStream* is);
+
 protected:
   String table_name_;
 };

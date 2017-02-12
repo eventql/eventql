@@ -57,6 +57,8 @@ public:
 
   size_t getNumComputedColumns() const override;
 
+  SType getColumnType(size_t idx) const override;
+
   Option<RefPtr<ValueExpressionNode>> whereExpression() const;
 
   RefPtr<QueryTreeNode> deepCopy() const override;

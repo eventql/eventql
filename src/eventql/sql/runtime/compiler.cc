@@ -21,10 +21,12 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <assert.h>
 #include <stdlib.h>
 #include <eventql/util/RegExp.h>
 #include <eventql/sql/parser/astnode.h>
 #include <eventql/sql/parser/token.h>
+#include <eventql/sql/qtree/QueryTreeUtil.h>
 #include <eventql/sql/runtime/compiler.h>
 #include <eventql/sql/runtime/symboltable.h>
 #include <eventql/sql/runtime/LikePattern.h>
@@ -32,225 +34,218 @@
 
 namespace csql {
 
-ScopedPtr<VM::Program> Compiler::compile(
+ScopedPtr<vm::Program> Compiler::compile(
     Transaction* ctx,
     RefPtr<ValueExpressionNode> node,
     SymbolTable* symbol_table) {
-  ScratchMemory static_storage;
-  size_t dynamic_storage_size = 0;
+  std::unique_ptr<vm::Program> output;
+  auto rc = compile(ctx, node, symbol_table, &output);
+  if (!rc.isSuccess()) {
+    RAISE(kRuntimeError, rc.getMessage());
+  }
 
-  auto expr = compileValueExpression(
-      node,
-      &dynamic_storage_size,
-      &static_storage,
-      symbol_table);
-
-  return mkScoped(
-      new VM::Program(
-          ctx,
-          expr,
-          std::move(static_storage),
-          dynamic_storage_size));
+  return std::move(output);
 }
 
-VM::Instruction* Compiler::compileValueExpression(
-   RefPtr<ValueExpressionNode> node,
-   size_t* dynamic_storage_size,
-   ScratchMemory* static_storage,
-   SymbolTable* symbol_table) {
-  if (dynamic_cast<ColumnReferenceNode*>(node.get())) {
+ReturnCode Compiler::compile(
+    Transaction* ctx,
+    RefPtr<ValueExpressionNode> node,
+    SymbolTable* symbol_table,
+    std::unique_ptr<vm::Program>* output) {
+  auto program = mkScoped(new vm::Program());
+  program->return_type = node->getReturnType();
+  program->method_call = vm::EntryPoint(0);
+
+  /* compile root expression */
+  auto rc = compileExpression(node.get(), program.get(), symbol_table);
+  if (!rc.isSuccess()) {
+    return rc;
+  }
+
+  program->instructions.emplace_back(vm::X_RETURN, intptr_t(0));
+
+  /* compile aggregate/accumulate subexpression */
+  auto aggr_expr = QueryTreeUtil::findAggregateExpression(node.get());
+  if (aggr_expr) {
+    auto symbol = symbol_table->lookup(aggr_expr->getSymbol());
+    if (!symbol) {
+      return ReturnCode::errorf(
+          "ERUNTIME",
+          "symbol not found: $0",
+          aggr_expr->getSymbol());
+    }
+
+    auto aggr_fun = symbol->getFunction();
+    program->method_accumulate = vm::EntryPoint(program->instructions.size());
+    program->instance_reset = aggr_fun->vtable.reset;
+    program->instance_init = aggr_fun->vtable.init;
+    program->instance_free = aggr_fun->vtable.free;
+    program->instance_merge = aggr_fun->vtable.merge;
+    program->instance_savestate = aggr_fun->vtable.savestate;
+    program->instance_loadstate = aggr_fun->vtable.loadstate;
+    program->instance_storage_size = aggr_fun->instance_size;
+
+    for (auto e : aggr_expr->arguments()) {
+      auto rc = compileExpression(e.get(), program.get(), symbol_table);
+      if (!rc.isSuccess()) {
+        return rc;
+      }
+    }
+
+    program->instructions.emplace_back(
+        vm::X_CALL_INSTANCE,
+        intptr_t(aggr_fun->vtable.accumulate));
+
+    program->instructions.emplace_back(vm::X_RETURN, intptr_t(0));
+  }
+
+  *output = std::move(program);
+  return ReturnCode::success();
+}
+
+ReturnCode Compiler::compileExpression(
+    const ValueExpressionNode* node,
+    vm::Program* program,
+    SymbolTable* symbol_table) {
+  if (dynamic_cast<const ColumnReferenceNode*>(node)) {
     return compileColumnReference(
-        node.asInstanceOf<ColumnReferenceNode>(),
-        static_storage,
+        dynamic_cast<const ColumnReferenceNode*>(node),
+        program,
         symbol_table);
   }
 
-  if (dynamic_cast<LiteralExpressionNode*>(node.get())) {
+  if (dynamic_cast<const LiteralExpressionNode*>(node)) {
     return compileLiteral(
-        node.asInstanceOf<LiteralExpressionNode>(),
-        dynamic_storage_size,
-        static_storage,
+        dynamic_cast<const LiteralExpressionNode*>(node),
+        program,
         symbol_table);
   }
 
-  if (dynamic_cast<IfExpressionNode*>(node.get())) {
-    return compileIfStatement(
-        node.asInstanceOf<IfExpressionNode>(),
-        dynamic_storage_size,
-        static_storage,
+  if (dynamic_cast<const IfExpressionNode*>(node)) {
+    return compileIfExpression(
+        dynamic_cast<const IfExpressionNode*>(node),
+        program,
         symbol_table);
   }
 
-  if (dynamic_cast<CallExpressionNode*>(node.get())) {
+  if (dynamic_cast<const CallExpressionNode*>(node)) {
     return compileMethodCall(
-        node.asInstanceOf<CallExpressionNode>(),
-        dynamic_storage_size,
-        static_storage,
+        dynamic_cast<const CallExpressionNode*>(node),
+        program,
         symbol_table);
   }
 
-  if (dynamic_cast<RegexExpressionNode*>(node.get())) {
-    return compileRegexOperator(
-        node.asInstanceOf<RegexExpressionNode>(),
-        dynamic_storage_size,
-        static_storage,
-        symbol_table);
-  }
-
-  if (dynamic_cast<LikeExpressionNode*>(node.get())) {
-    return compileLikeOperator(
-        node.asInstanceOf<LikeExpressionNode>(),
-        dynamic_storage_size,
-        static_storage,
-        symbol_table);
-  }
-
-  RAISE(kRuntimeError, "internal error: can't compile expression");
+  return ReturnCode::error(
+      "ERUNTIME",
+      "internal error: can't compile expression");
 }
 
-VM::Instruction* Compiler::compileLiteral(
-    RefPtr<LiteralExpressionNode> node,
-    size_t* dynamic_storage_size,
-    ScratchMemory* static_storage,
-   SymbolTable* symbol_table) {
-  auto ins = static_storage->construct<VM::Instruction>();
-  ins->type = VM::X_LITERAL;
-  ins->arg0 = static_storage->construct<SValue>(node->value());
-  ins->child = nullptr;
-  ins->next  = nullptr;
-
-  return ins;
-}
-
-VM::Instruction* Compiler::compileColumnReference(
-    RefPtr<ColumnReferenceNode> node,
-    ScratchMemory* static_storage,
-   SymbolTable* symbol_table) {
+ReturnCode Compiler::compileColumnReference(
+    const ColumnReferenceNode* node,
+    vm::Program* program,
+    SymbolTable* symbol_table) {
   auto col_idx = node->columnIndex();
+  assert(col_idx != size_t(-1));
 
-  if (col_idx == size_t(-1)) {
-    auto ins = static_storage->construct<VM::Instruction>();
-    ins->type = VM::X_LITERAL;
-    ins->arg0 = static_storage->construct<SValue>();
-    ins->child = nullptr;
-    ins->next  = nullptr;
-    return ins;
-  } else {
-    auto ins = static_storage->construct<VM::Instruction>();
-    ins->type = VM::X_INPUT;
-    ins->arg0 = (void *) col_idx;
-    ins->argn = 0;
-    ins->child = nullptr;
-    ins->next  = nullptr;
-    return ins;
-  }
+  program->instructions.emplace_back(
+      vm::X_INPUT,
+      intptr_t(col_idx),
+      node->getReturnType());
+
+  return ReturnCode::success();
 }
 
-VM::Instruction* Compiler::compileMethodCall(
-    RefPtr<CallExpressionNode> node,
-    size_t* dynamic_storage_size,
-    ScratchMemory* static_storage,
-   SymbolTable* symbol_table) {
-  auto symbol = symbol_table->lookup(node->symbol());
-  const auto& args = node->arguments();
+ReturnCode Compiler::compileLiteral(
+    const LiteralExpressionNode* node,
+    vm::Program* program,
+    SymbolTable* symbol_table) {
+  const auto& val = node->value();
+  auto static_alloc = program->static_storage.alloc(val.getSize());
+  memcpy(static_alloc, val.getData(), val.getSize());
 
-  auto op = static_storage->construct<VM::Instruction>();
-  op->arg0  = nullptr;
-  op->argn  = args.size();
-  op->child = nullptr;
-  op->next  = nullptr;
+  program->instructions.emplace_back(
+      vm::X_LITERAL,
+      intptr_t(static_alloc),
+      node->getReturnType());
 
-  switch (symbol.type) {
+  return ReturnCode::success();
+}
+
+ReturnCode Compiler::compileIfExpression(
+    const IfExpressionNode* node,
+    vm::Program* program,
+    SymbolTable* symbol_table) {
+  {
+    auto rc = compileExpression(node->conditional().get(), program, symbol_table);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  auto jump_idx = program->instructions.size();
+  program->instructions.emplace_back(vm::X_CJUMP, intptr_t(0));
+
+  {
+    auto rc = compileExpression(node->falseBranch().get(), program, symbol_table);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  program->instructions[jump_idx].arg0 = program->instructions.size() + 1;
+  program->instructions.emplace_back(vm::X_JUMP, intptr_t(0));
+  jump_idx = program->instructions.size() - 1;
+
+  {
+    auto rc = compileExpression(node->trueBranch().get(), program, symbol_table);
+    if (!rc.isSuccess()) {
+      return rc;
+    }
+  }
+
+  program->instructions[jump_idx].arg0 = program->instructions.size();
+
+  return ReturnCode::success();
+}
+
+ReturnCode Compiler::compileMethodCall(
+    const CallExpressionNode* node,
+    vm::Program* program,
+    SymbolTable* symbol_table) {
+  auto entry = symbol_table->lookup(node->getSymbol());
+  if (!entry) {
+    return ReturnCode::errorf(
+        "ERUNTIME",
+        "symbol not found: $0",
+        node->getSymbol());
+  }
+
+  auto fun = entry->getFunction();
+  switch (fun->type) {
+
     case FN_PURE:
-      op->type = VM::X_CALL_PURE;
-      op->vtable.t_pure = symbol.vtable.t_pure;
+      for (auto e : node->arguments()) {
+        auto rc = compileExpression(e.get(), program, symbol_table);
+        if (!rc.isSuccess()) {
+          return rc;
+        }
+      }
+
+      program->instructions.emplace_back(
+          vm::X_CALL_PURE,
+          intptr_t(fun->vtable.call));
       break;
+
     case FN_AGGREGATE:
-      op->type = VM::X_CALL_AGGREGATE;
-      op->arg0 = (void *) *dynamic_storage_size;
-      op->vtable.t_aggregate = symbol.vtable.t_aggregate;
-      *dynamic_storage_size += symbol.vtable.t_aggregate.scratch_size;
+      program->instructions.emplace_back(
+          vm::X_CALL_INSTANCE,
+          intptr_t(fun->vtable.get));
       break;
+
   }
 
-  auto cur = &op->child;
-  for (auto e : args) {
-    auto next = compileValueExpression(
-        e,
-        dynamic_storage_size,
-        static_storage,
-        symbol_table);
-
-    *cur = next;
-    cur = &next->next;
-  }
-
-  return op;
+  return ReturnCode::success();
 }
 
-VM::Instruction* Compiler::compileIfStatement(
-    RefPtr<IfExpressionNode> node,
-    size_t* dynamic_storage_size,
-    ScratchMemory* static_storage,
-   SymbolTable* symbol_table) {
-  const auto& args = node->arguments();
+} // namespace csql
 
-  auto op = static_storage->construct<VM::Instruction>();
-  op->type = VM::X_IF;
-  op->arg0  = nullptr;
-  op->argn  = args.size();
-  op->child = nullptr;
-  op->next  = nullptr;
-
-  auto cur = &op->child;
-  for (auto e : args) {
-    auto next = compileValueExpression(
-        e,
-        dynamic_storage_size,
-        static_storage,
-        symbol_table);
-
-    *cur = next;
-    cur = &next->next;
-  }
-
-  return op;
-}
-
-VM::Instruction* Compiler::compileRegexOperator(
-    RefPtr<RegexExpressionNode> node,
-    size_t* dynamic_storage_size,
-    ScratchMemory* static_storage,
-   SymbolTable* symbol_table) {
-  auto ins = static_storage->construct<VM::Instruction>();
-  ins->type = VM::X_REGEX;
-  ins->arg0 = static_storage->construct<RegExp>(node->pattern());
-  ins->next  = nullptr;
-  ins->child = compileValueExpression(
-      node->subject(),
-      dynamic_storage_size,
-      static_storage,
-      symbol_table);
-
-  return ins;
-}
-
-VM::Instruction* Compiler::compileLikeOperator(
-    RefPtr<LikeExpressionNode> node,
-    size_t* dynamic_storage_size,
-    ScratchMemory* static_storage,
-   SymbolTable* symbol_table) {
-  auto ins = static_storage->construct<VM::Instruction>();
-  ins->type = VM::X_LIKE;
-  ins->arg0 = static_storage->construct<LikePattern>(node->pattern());
-  ins->next  = nullptr;
-  ins->child = compileValueExpression(
-      node->subject(),
-      dynamic_storage_size,
-      static_storage,
-      symbol_table);
-
-  return ins;
-}
-
-}

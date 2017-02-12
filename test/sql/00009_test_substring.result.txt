@@ -1,0 +1,2 @@
+substr_result
+ntql
