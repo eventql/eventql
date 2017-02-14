@@ -8,3 +8,4 @@
 00008_test_concat
 00009_test_substring
 00010_test_fnv32
+00011_test_date_add
