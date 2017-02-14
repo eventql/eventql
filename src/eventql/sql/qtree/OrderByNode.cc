@@ -60,6 +60,10 @@ size_t OrderByNode::getNumComputedColumns() const {
   return table_.asInstanceOf<TableExpressionNode>()->getNumComputedColumns();
 }
 
+SType OrderByNode::getColumnType(size_t idx) const {
+  return table_.asInstanceOf<TableExpressionNode>()->getColumnType(idx);
+}
+
 const Vector<OrderByNode::SortSpec>& OrderByNode::sortSpecs() const {
   return sort_specs_;
 }

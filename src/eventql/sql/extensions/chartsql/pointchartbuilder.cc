@@ -39,6 +39,7 @@ util::chart::Drawable* PointChartBuilder::getChart() const {
 util::chart::Drawable* PointChartBuilder::findChartType() const {
   preconditionCheck();
 
+/*
   if (auto c = tryType2D<util::chart::PointChart2D<
         SValue::TimeType,
         SValue::TimeType>>())
@@ -137,6 +138,7 @@ util::chart::Drawable* PointChartBuilder::findChartType() const {
         SValue::StringType,
         SValue::FloatType>>())
     return c;
+*/
 
   invalidType();
   return nullptr;

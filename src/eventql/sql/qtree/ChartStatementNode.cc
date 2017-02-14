@@ -55,12 +55,7 @@ Vector<String> ChartStatementNode::getResultColumns() const {
 }
 
 Vector<QualifiedColumn> ChartStatementNode::getAvailableColumns() const {
-  return {
-    {
-      .qualified_name = kColumnName,
-      .short_name = kColumnName
-    }
-  };
+  return {{ kColumnName, kColumnName, SType::STRING }};
 }
 
 size_t ChartStatementNode::getComputedColumnIndex(
@@ -76,6 +71,10 @@ size_t ChartStatementNode::getComputedColumnIndex(
 
 size_t ChartStatementNode::getNumComputedColumns() const {
   return 1;
+}
+
+SType ChartStatementNode::getColumnType(size_t idx) const {
+  return SType::STRING;
 }
 
 RefPtr<QueryTreeNode> ChartStatementNode::deepCopy() const {

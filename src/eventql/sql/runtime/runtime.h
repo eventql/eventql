@@ -21,8 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _FNORDMETRIC_SQL_RUNTIME_H
-#define _FNORDMETRIC_SQL_RUNTIME_H
+#pragma once
 #include <stdlib.h>
 #include <string>
 #include <vector>
@@ -60,35 +59,6 @@ public:
       Transaction* ctx,
       Vector<RefPtr<csql::QueryTreeNode>> statements);
 
-  SValue evaluateScalarExpression(
-      Transaction* ctx,
-      const String& expr,
-      int argc,
-      const SValue* argv);
-
-  SValue evaluateScalarExpression(
-      Transaction* ctx,
-      ASTNode* expr,
-      int argc,
-      const SValue* argv);
-
-  SValue evaluateScalarExpression(
-      Transaction* ctx,
-      RefPtr<ValueExpressionNode> expr,
-      int argc,
-      const SValue* argv);
-
-  SValue evaluateScalarExpression(
-      Transaction* ctx,
-      const ValueExpression& expr,
-      int argc,
-      const SValue* argv);
-
-  SValue evaluateConstExpression(Transaction* ctx, const String& expr);
-  SValue evaluateConstExpression(Transaction* ctx, ASTNode* expr);
-  SValue evaluateConstExpression(Transaction* ctx, RefPtr<ValueExpressionNode> expr);
-  SValue evaluateConstExpression(Transaction* ctx, const ValueExpression& expr);
-
   Option<String> cacheDir() const;
   void setCacheDir(const String& cachedir);
 
@@ -104,6 +74,9 @@ public:
   QueryCache* getQueryCache() const;
   void setQueryCache(QueryCache* cache);
 
+  SValue evaluateConstExpression(Transaction* txn, ASTNode* expr);
+  SValue evaluateConstExpression(Transaction* txn, RefPtr<ValueExpressionNode> expr);
+
 protected:
   thread::ThreadPool tpool_;
   RefPtr<SymbolTable> symbol_table_;
@@ -114,5 +87,5 @@ protected:
   QueryCache* query_cache_;
 };
 
-}
-#endif
+} // namespace sql
+

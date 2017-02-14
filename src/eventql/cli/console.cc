@@ -38,7 +38,6 @@
 #include "eventql/util/cli/CLI.h"
 #include "eventql/util/cli/flagparser.h"
 #include "eventql/util/cli/term.h"
-#include "eventql/server/sql/codec/binary_codec.h"
 #include "eventql/sql/result_list.h"
 #include "eventql/sql/parser/tokenize.h"
 #include "linenoise/linenoise.h"
@@ -320,53 +319,6 @@ Status Console::runQuery(const String& query) {
   }
 }
 
-Status Console::sendRequest(const String& query, csql::BinaryResultParser* res_parser) {
-  try {
-    auto url = StringUtil::format(
-        "http://$0:$1/api/v1/sql",
-        cfg_.getHost(),
-        cfg_.getPort());
-
-    auto db = cfg_.getDatabase().isEmpty() ? "" : cfg_.getDatabase().get();
-    auto postdata = StringUtil::format(
-          "format=binary&query=$0&database=$1",
-          URI::urlEncode(query),
-          URI::urlEncode(db));
-
-    http::HTTPMessage::HeaderList auth_headers;
-    if (!cfg_.getAuthToken().isEmpty()) {
-      auth_headers.emplace_back(
-          "Authorization",
-          StringUtil::format("Token $0", cfg_.getAuthToken().get()));
-    } else if (!cfg_.getUser().isEmpty() && !cfg_.getPassword().isEmpty()) {
-      auth_headers.emplace_back(
-          "Authorization",
-          StringUtil::format("Basic $0",
-              util::Base64::encode(
-                  cfg_.getUser().get() + ":" + cfg_.getPassword().get())));
-    }
-
-    http::HTTPClient http_client(nullptr);
-    auto req = http::HTTPRequest::mkPost(url, postdata, auth_headers);
-    auto res = http_client.executeRequest(
-        req,
-        http::StreamingResponseHandler::getFactory(
-            std::bind(
-                &csql::BinaryResultParser::parse,
-                res_parser,
-                std::placeholders::_1,
-                std::placeholders::_2)));
-
-    if (!res_parser->eof()) {
-      return Status(eIOError, "connection to server lost");
-    }
-
-    return Status::success();
-
-  } catch (const StandardException& e) {
-    return Status(eIOError, StringUtil::format(" $0\n", e.what()));
-  }
-}
 
 Status Console::runJS(const String& program_source) {
   auto stdout_os = OutputStream::getStdout();

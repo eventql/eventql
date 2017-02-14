@@ -46,8 +46,6 @@ ScopedPtr<csql::TableExpression> Scheduler::buildTableExpression(
     csql::Transaction* txn,
     csql::ExecutionContext* execution_context,
     RefPtr<csql::TableExpressionNode> node) {
-  rewriteTableTimeSuffix(node.get());
-
   return DefaultScheduler::buildTableExpression(
       txn,
       execution_context,
@@ -143,7 +141,7 @@ ScopedPtr<csql::TableExpression> Scheduler::buildPipelineGroupByExpression(
           max_concurrent_tasks,
           max_concurrent_tasks_per_host));
 
-  auto shards = pipelineExpression(txn, node.get());
+  auto shards = pipelineExpression(txn, node->inputTable().get());
   for (size_t i = 0; i < shards.size(); ++i) {
     auto group_by_copy = mkRef(
         new csql::GroupByNode(
@@ -169,12 +167,16 @@ Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
   auto seqscan = csql::QueryTreeUtil::findNode<csql::SequentialScanNode>(
       qtree.get());
   if (!seqscan) {
-    RAISE(kIllegalStateError, "can't pipeline query tree");
+    RAISE(
+        kIllegalStateError,
+        "can't pipeline query tree: no seqscan found");
   }
 
   auto table_ref = TSDBTableRef::parse(seqscan->tableName());
   if (!table_ref.partition_key.isEmpty()) {
-    RAISE(kIllegalStateError, "can't pipeline query tree");
+    RAISE(
+        kIllegalStateError,
+        "can't pipeline query tree: already has a partition key");
   }
 
   auto user_data = txn->getUserData();
@@ -186,7 +188,7 @@ Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
       static_cast<Session*>(txn->getUserData())->getEffectiveNamespace(),
       table_ref.table_key);
   if (table.isEmpty()) {
-    RAISE(kIllegalStateError, "can't pipeline query tree");
+    RAISE(kIllegalStateError, "can't pipeline query tree: invalid table");
   }
 
   auto session = static_cast<Session*>(txn->getUserData());
@@ -251,7 +253,7 @@ Vector<Scheduler::PipelinedQueryTree> Scheduler::pipelineExpression(
 
     PipelinedQueryTree pipelined {
       .is_local = local_partitions.count(p.first) > 0,
-      .qtree = shard,
+      .qtree = qtree_copy,
       .hosts = p.second
     };
 
@@ -277,59 +279,6 @@ bool Scheduler::isPipelineable(const csql::QueryTreeNode& qtree) {
 
   return false;
 }
-
-void Scheduler::rewriteTableTimeSuffix(RefPtr<csql::QueryTreeNode> node) {
-  auto seqscan = dynamic_cast<csql::SequentialScanNode*>(node.get());
-  if (seqscan) {
-    auto table_ref = TSDBTableRef::parse(seqscan->tableName());
-    if (!table_ref.keyrange_begin.isEmpty() &&
-        !table_ref.keyrange_limit.isEmpty()) {
-      seqscan->setTableName(table_ref.table_key);
-
-      auto pred = mkRef(
-          new csql::CallExpressionNode(
-              "logical_and",
-              Vector<RefPtr<csql::ValueExpressionNode>>{
-                new csql::CallExpressionNode(
-                    "gte",
-                    Vector<RefPtr<csql::ValueExpressionNode>>{
-                      new csql::ColumnReferenceNode("time"),
-                      new csql::LiteralExpressionNode(
-                          csql::SValue(csql::SValue::IntegerType(
-                              std::stoull(table_ref.keyrange_begin.get()))))
-                    }),
-                new csql::CallExpressionNode(
-                    "lte",
-                    Vector<RefPtr<csql::ValueExpressionNode>>{
-                      new csql::ColumnReferenceNode("time"),
-                      new csql::LiteralExpressionNode(
-                          csql::SValue(csql::SValue::IntegerType(
-                              std::stoull(table_ref.keyrange_limit.get()))))
-                    })
-              }));
-
-      auto where_expr = seqscan->whereExpression();
-      if (!where_expr.isEmpty()) {
-        pred = mkRef(
-            new csql::CallExpressionNode(
-                "logical_and",
-                Vector<RefPtr<csql::ValueExpressionNode>>{
-                  where_expr.get(),
-                  pred.asInstanceOf<csql::ValueExpressionNode>()
-                }));
-      }
-
-      seqscan->setWhereExpression(
-          pred.asInstanceOf<csql::ValueExpressionNode>());
-    }
-  }
-
-  auto ntables = node->numChildren();
-  for (int i = 0; i < ntables; ++i) {
-    rewriteTableTimeSuffix(node->child(i));
-  }
-}
-
 
 } // namespace eventql
 

@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #include <eventql/sql/qtree/nodes/describe_partitions.h>
+#include <eventql/sql/statements/describe_partitions.h>
 
 namespace csql {
 
@@ -42,23 +43,18 @@ const String& DescribePartitionsNode::tableName() const {
 }
 
 Vector<String> DescribePartitionsNode::getResultColumns() const {
-  return Vector<String> {
-    "Partition id",
-    "Servers",
-    "Keyrange Begin",
-    "Keyrange End",
-    "Extra info"
-  };
+  std::vector<std::string> list;
+  for (const auto& e : DescribePartitionsExpression::kOutputColumns) {
+    list.emplace_back(e.first);
+  }
+  return list;
 }
 
 Vector<QualifiedColumn> DescribePartitionsNode::getAvailableColumns() const {
   Vector<QualifiedColumn> cols;
 
-  for (const auto& c : getResultColumns()) {
-    QualifiedColumn  qc;
-    qc.short_name = c;
-    qc.qualified_name = c;
-    cols.emplace_back(qc);
+  for (const auto& e : DescribePartitionsExpression::kOutputColumns) {
+    cols.emplace_back(e.first, e.first, e.second);
   }
 
   return cols;
@@ -71,7 +67,12 @@ size_t DescribePartitionsNode::getComputedColumnIndex(
 }
 
 size_t DescribePartitionsNode::getNumComputedColumns() const {
-  return 4;
+  return DescribePartitionsExpression::kOutputColumns.size();
+}
+
+SType DescribePartitionsNode::getColumnType(size_t idx) const {
+  assert(idx < DescribePartitionsExpression::kOutputColumns.size());
+  return DescribePartitionsExpression::kOutputColumns[idx].second;
 }
 
 String DescribePartitionsNode::toString() const {

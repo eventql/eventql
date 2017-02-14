@@ -25,7 +25,7 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/protobuf/MessageSchema.h>
 #include <eventql/sql/qtree/SequentialScanNode.h>
-#include <eventql/sql/expressions/table_expression.h>
+#include <eventql/sql/table_expression.h>
 #include <eventql/sql/runtime/ValueExpression.h>
 #include <eventql/io/cstable/cstable_reader.h>
 
@@ -33,8 +33,17 @@
 
 namespace csql {
 
-class CSTableScan : public TableExpression {
+class AbstractCSTableScan : public TableExpression {
 public:
+
+  virtual void setFilter(std::vector<bool>&& filter) = 0;
+
+};
+
+class CSTableScan : public AbstractCSTableScan {
+public:
+
+  static const size_t kOutputBatchSize = 1024;
 
   CSTableScan(
       Transaction* txn,
@@ -49,26 +58,26 @@ public:
       RefPtr<cstable::CSTableReader> cstable,
       const String& cstable_filename = "<unknown>");
 
-  ScopedPtr<ResultCursor> execute() override;
+  ReturnCode execute() override;
+  ReturnCode nextBatch(SVector* columns, size_t* len) override;
+
+  size_t getColumnCount() const override;
+  SType getColumnType(size_t idx) const override;
 
   virtual Vector<String> columnNames() const;
-  size_t getNumColumns() const override;
 
   size_t rowsScanned() const;
 
-  void setFilter(Function<bool ()> filter_fn);
-  void setColumnType(String column, sql_type type);
+  void setFilter(std::vector<bool>&& filter) override;
+  void setColumnType(String column, SType type);
 
 protected:
 
-  void open();
-  bool next(SValue* out, int out_len);
-
   struct ColumnRef {
-    ColumnRef(RefPtr<cstable::ColumnReader> r, size_t i, sql_type t);
+    ColumnRef(RefPtr<cstable::ColumnReader> r, size_t i, SType t);
     RefPtr<cstable::ColumnReader> reader;
     size_t index;
-    sql_type type;
+    SType type;
   };
 
   struct ExpressionRef {
@@ -87,22 +96,22 @@ protected:
     VM::Instance instance;
   };
 
-  bool fetchNext(SValue* out, int out_len);
-  bool fetchNextWithoutColumns(SValue* out, int out_len);
+  void open();
+  void fetch();
+  bool next(SVector* out);
+  bool fetchNext(SVector* out);
+  bool fetchNextWithoutColumns(SVector* out);
 
   void findColumns(
       RefPtr<ValueExpressionNode> expr,
       Set<String>* column_names) const;
 
-  void resolveColumns(RefPtr<ValueExpressionNode> expr) const;
-
   uint64_t findMaxRepetitionLevel(RefPtr<ValueExpressionNode> expr) const;
-
-  void fetch();
 
   Transaction* txn_;
   ExecutionContext* execution_context_;
   Vector<String> column_names_;
+  Vector<SType> column_types_;
   ScratchMemory scratch_;
   RefPtr<SequentialScanNode> stmt_;
   String cstable_filename_;
@@ -115,14 +124,68 @@ protected:
   Option<SHA1Hash> cache_key_;
   size_t rows_scanned_;
   size_t num_records_;
-  Function<bool ()> filter_fn_;
+  std::vector<bool> filter_;
+  bool filter_enabled_;
+  size_t filter_pos_;
   bool opened_;
   uint64_t cur_select_level_;
   uint64_t cur_fetch_level_;
   bool cur_filter_pred_;
   Vector<SValue> cur_buf_;
   size_t cur_pos_;
+  VMStack vm_stack_;
 };
 
+class FastCSTableScan : public AbstractCSTableScan {
+public:
+
+  static const size_t kOutputBatchSize = 1024;
+
+  FastCSTableScan(
+      Transaction* txn,
+      ExecutionContext* execution_context,
+      RefPtr<SequentialScanNode> stmt,
+      const String& cstable_filename);
+
+  FastCSTableScan(
+      Transaction* txn,
+      ExecutionContext* execution_context,
+      RefPtr<SequentialScanNode> stmt,
+      RefPtr<cstable::CSTableReader> cstable,
+      const String& cstable_filename = "<unknown>");
+
+  ~FastCSTableScan();
+
+  ReturnCode execute() override;
+  ReturnCode nextBatch(SVector* columns, size_t* len) override;
+
+  size_t getColumnCount() const override;
+  SType getColumnType(size_t idx) const override;
+
+  void setFilter(std::vector<bool>&& filter) override;
+
+protected:
+
+  ReturnCode fetchColumnUInt64(size_t idx, size_t batch_size);
+  ReturnCode fetchColumnFloat64(size_t idx, size_t batch_size);
+  ReturnCode fetchColumnBool(size_t idx, size_t batch_size);
+  ReturnCode fetchColumnString(size_t idx, size_t batch_size);
+
+  Transaction* txn_;
+  ExecutionContext* execution_context_;
+  RefPtr<SequentialScanNode> stmt_;
+  String cstable_filename_;
+  RefPtr<cstable::CSTableReader> cstable_;
+  std::vector<ValueExpression> select_list_;
+  ValueExpression where_expr_;
+  size_t records_remaining_;
+  size_t records_consumed_;
+  std::vector<SType> column_types_;
+  std::vector<SVector> column_buffers_;
+  std::vector<RefPtr<cstable::ColumnReader>> column_readers_;
+  VMStack vm_stack_;
+  std::vector<bool> filter_;
+  bool filter_enabled_;
+};
 
 } // namespace csql

@@ -31,394 +31,655 @@
 namespace csql {
 namespace expressions {
 
-void eqExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  if (argc != 2) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for eq. expected: 2, got: %i", argc);
-  }
 
-  SValue* lhs = argv;
-  SValue* rhs = argv + 1;
-
-  if (lhs->getType() == SQL_NULL ^ rhs->getType() == SQL_NULL) {
-    *out = SValue::newBool(false);
-    return;
-  }
-
-  if (lhs->isConvertibleToNumeric() && rhs->isConvertibleToNumeric()) {
-    *out = SValue::newBool(lhs->getFloat() == rhs->getFloat());
-    return;
-  }
-
-  if (lhs->getType() == SQL_STRING || rhs->getType() == SQL_STRING) {
-    *out = SValue::newBool(lhs->getString() == rhs->getString());
-    return;
-  }
-
-  if (lhs->isConvertibleToBool() || rhs->isConvertibleToBool()) {
-    *out = SValue::newBool(lhs->getBool() == rhs->getBool());
-    return;
-  }
-
-  RAISE(kRuntimeError, "can't compare %s with %s",
-      lhs->getTypeName(),
-      rhs->getTypeName());
+/**
+ * logical_and(bool, bool) -> bool
+ */
+void logical_and_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popBool(stack);
+  auto left = popBool(stack);
+  pushBool(stack, left && right);
 }
 
-void neqExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  SValue ret;
-  eqExpr(ctx, argc, argv, &ret);
-  *out = SValue(!ret.getValue<bool>());
+const SFunction logical_and(
+    { SType::BOOL, SType::BOOL },
+    SType::BOOL,
+    &logical_and_call);
+
+
+/**
+ * logical_or(bool, bool) -> bool
+ */
+void logical_or_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popBool(stack);
+  auto left = popBool(stack);
+  pushBool(stack, left || right);
 }
 
-void andExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  if (argc != 2) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for AND. expected: 2, got: %i", argc);
-  }
+const SFunction logical_or(
+    { SType::BOOL, SType::BOOL },
+    SType::BOOL,
+    &logical_or_call);
 
-  SValue* lhs = argv;
-  SValue* rhs = argv + 1;
-  *out = SValue(lhs->getBool() && rhs->getBool());
+
+/**
+ * neg(bool) -> bool
+ */
+void neg_call(sql_txn* ctx, VMStack* stack) {
+  auto arg = popBool(stack);
+  pushBool(stack, !arg);
 }
 
-void orExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  if (argc != 2) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for or. expected: 2, got: %i", argc);
-  }
+const SFunction neg(
+    { SType::BOOL },
+    SType::BOOL,
+    &neg_call);
 
-  SValue* lhs = argv;
-  SValue* rhs = argv + 1;
-  *out = SValue(lhs->getBool() || rhs->getBool());
-}
 
-void negExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  if (argc != 1) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for neg. expected: 1, got: %i", argc);
-  }
-
-  SValue* val = argv;
-
-  switch(val->getType()) {
-    case SQL_INTEGER:
-      *out = SValue(val->getInteger() * -1);
-      return;
-    case SQL_FLOAT:
-      *out = SValue(val->getFloat() * -1.0f);
-      return;
-    case SQL_BOOL:
-      *out = SValue(!val->getBool());
-      return;
-    case SQL_NULL:
-      *out = SValue();
-      return;
-    default:
-      break;
-  }
-
-  RAISE(kRuntimeError, "can't negate %s",
-      val->getTypeName());
-}
-
-void ltExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  if (argc != 2) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for ltExpr. expected: 2, got: %i", argc);
-  }
-
-  SValue* lhs = argv;
-  SValue* rhs = argv + 1;
-
-  switch(lhs->getType()) {
-    case SQL_INTEGER:
-    case SQL_TIMESTAMP:
-      switch(rhs->getType()) {
-        case SQL_INTEGER:
-        case SQL_TIMESTAMP:
-          *out = SValue(lhs->getInteger() < rhs->getInteger());
-          return;
-        case SQL_FLOAT:
-          *out = SValue(lhs->getFloat() < rhs->getFloat());
-          return;
-        case SQL_NULL:
-          *out = SValue(lhs->getFloat() < 0.0f);
-          return;
-        default:
-          break;
-      }
-      break;
-    case SQL_FLOAT:
-      switch(rhs->getType()) {
-        case SQL_INTEGER:
-        case SQL_FLOAT:
-        case SQL_TIMESTAMP:
-          *out = SValue(lhs->getFloat() < rhs->getFloat());
-          return;
-        case SQL_NULL:
-          *out = SValue(lhs->getFloat() < 0.0f);
-          return;
-        default:
-          break;
-      }
-      break;
-    case SQL_NULL:
-      switch(rhs->getType()) {
-        case SQL_INTEGER:
-        case SQL_FLOAT:
-        case SQL_TIMESTAMP:
-          *out = SValue(0.0f < rhs->getFloat());
-          return;
-        case SQL_NULL:
-          *out = SValue(SValue::BoolType(false));
-          return;
-        default:
-          break;
-      }
-    default:
-      break;
-  }
-
-  if (lhs->getType() == SQL_STRING ||
-      rhs->getType() == SQL_STRING) {
-    *out = SValue(lhs->getString() < rhs->getString());
-    return;
-  }
-
-  RAISE(kRuntimeError, "can't compare %s with %s",
-      lhs->getTypeName(),
-      rhs->getTypeName());
-}
-
-void lteExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  if (argc != 2) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for lteExpr. expected: 2, got: %i", argc);
-  }
-
-  SValue* lhs = argv;
-  SValue* rhs = argv + 1;
-
-  switch(lhs->getType()) {
-    case SQL_INTEGER:
-    case SQL_TIMESTAMP:
-      switch(rhs->getType()) {
-        case SQL_INTEGER:
-        case SQL_TIMESTAMP:
-          *out = SValue(lhs->getInteger() <= rhs->getInteger());
-          return;
-        case SQL_FLOAT:
-          *out = SValue(lhs->getFloat() <= rhs->getFloat());
-          return;
-        case SQL_NULL:
-          *out = SValue(lhs->getFloat() <= 0.0f);
-          return;
-        default:
-          break;
-      }
-      break;
-    case SQL_FLOAT:
-      switch(rhs->getType()) {
-        case SQL_INTEGER:
-        case SQL_FLOAT:
-        case SQL_TIMESTAMP:
-          *out = SValue(lhs->getFloat() <= rhs->getFloat());
-          return;
-        case SQL_NULL:
-          *out = SValue(lhs->getFloat() <= 0.0f);
-          return;
-        default:
-          break;
-      }
-      break;
-    case SQL_NULL:
-      switch(rhs->getType()) {
-        case SQL_INTEGER:
-        case SQL_FLOAT:
-        case SQL_TIMESTAMP:
-          *out = SValue(0.0f <= rhs->getFloat());
-          return;
-        case SQL_NULL:
-          *out = SValue(SValue::BoolType(true));
-          return;
-        default:
-          break;
-      }
-    default:
-      break;
-  }
-
-  if (lhs->getType() == SQL_STRING ||
-      rhs->getType() == SQL_STRING) {
-    *out = SValue(lhs->getString() <= rhs->getString());
-    return;
-  }
-
-  RAISE(kRuntimeError, "can't compare %s with %s",
-      lhs->getTypeName(),
-      rhs->getTypeName());
-}
-
-void gtExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  if (argc != 2) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for gtExpr. expected: 2, got: %i", argc);
-  }
-
-  SValue* lhs = argv;
-  SValue* rhs = argv + 1;
-
-  switch(lhs->getType()) {
-    case SQL_INTEGER:
-    case SQL_TIMESTAMP:
-      switch(rhs->getType()) {
-        case SQL_INTEGER:
-        case SQL_TIMESTAMP:
-          *out = SValue(lhs->getInteger() > rhs->getInteger());
-          return;
-        case SQL_FLOAT:
-          *out = SValue(lhs->getFloat() > rhs->getFloat());
-          return;
-        case SQL_NULL:
-          *out = SValue(lhs->getFloat() > 0.0f);
-          return;
-        default:
-          break;
-      }
-      break;
-    case SQL_FLOAT:
-      switch(rhs->getType()) {
-        case SQL_INTEGER:
-        case SQL_FLOAT:
-        case SQL_TIMESTAMP:
-          *out = SValue(lhs->getFloat() > rhs->getFloat());
-          return;
-        case SQL_NULL:
-          *out = SValue(lhs->getFloat() > 0.0f);
-          return;
-        default:
-          break;
-      }
-      break;
-    case SQL_NULL:
-      switch(rhs->getType()) {
-        case SQL_INTEGER:
-        case SQL_FLOAT:
-        case SQL_TIMESTAMP:
-          *out = SValue(0.0f > rhs->getFloat());
-          return;
-        case SQL_NULL:
-          *out = SValue(SValue::BoolType(false));
-          return;
-        default:
-          break;
-      }
-    default:
-      break;
-  }
-
-  if (lhs->getType() == SQL_STRING ||
-      rhs->getType() == SQL_STRING) {
-    *out = SValue(lhs->getString() > rhs->getString());
-    return;
-  }
-
-  RAISE(kRuntimeError, "can't compare %s with %s",
-      lhs->getTypeName(),
-      rhs->getTypeName());
-}
-
-void gteExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  if (argc != 2) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for gteExpr. expected: 2, got: %i", argc);
-  }
-
-  SValue* lhs = argv;
-  SValue* rhs = argv + 1;
-
-  switch(lhs->getType()) {
-    case SQL_INTEGER:
-    case SQL_TIMESTAMP:
-      switch(rhs->getType()) {
-        case SQL_INTEGER:
-        case SQL_TIMESTAMP:
-          *out = SValue(lhs->getInteger() >= rhs->getInteger());
-          return;
-        case SQL_FLOAT:
-          *out = SValue(lhs->getFloat() >= rhs->getFloat());
-          return;
-        case SQL_NULL:
-          *out = SValue(lhs->getFloat() >= 0.0f);
-          return;
-        default:
-          break;
-      }
-      break;
-    case SQL_FLOAT:
-      switch(rhs->getType()) {
-        case SQL_INTEGER:
-        case SQL_FLOAT:
-        case SQL_TIMESTAMP:
-          *out = SValue(lhs->getFloat() >= rhs->getFloat());
-          return;
-        case SQL_NULL:
-          *out = SValue(lhs->getFloat() >= 0.0f);
-          return;
-        default:
-          break;
-      }
-      break;
-    case SQL_NULL:
-      switch(rhs->getType()) {
-        case SQL_INTEGER:
-        case SQL_FLOAT:
-        case SQL_TIMESTAMP:
-          *out = SValue(0.0f >= rhs->getFloat());
-          return;
-        case SQL_NULL:
-          *out = SValue(SValue::BoolType(true));
-          return;
-        default:
-          break;
-      }
-    default:
-      break;
-  }
-
-  if (lhs->getType() == SQL_STRING ||
-      rhs->getType() == SQL_STRING) {
-    *out = SValue(lhs->getString() >= rhs->getString());
-    return;
-  }
-
-  RAISE(kRuntimeError, "can't compare %s with %s",
-      lhs->getTypeName(),
-      rhs->getTypeName());
-}
-
-void isNullExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  if (argc != 1) {
-    RAISEF(
-        kRuntimeError,
-        "wrong number of arguments for isnull. expected: 1, got: $0", argc);
-  }
-
-  if (argv[0].getType() == SQL_NULL) {
-    *out = SValue(SValue::BoolType(true));
+/**
+ * cmp(uint64, uint64) -> int64
+ * cmp(timestamp64, timestamp64) -> int64
+ */
+void cmp_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  if (left < right) {
+    pushInt64(stack, -1);
+  } else if (left > right) {
+    pushInt64(stack, 1);
   } else {
-    *out = SValue(SValue::BoolType(false));
+    pushInt64(stack, 0);
   }
 }
 
+const SFunction cmp_uint64(
+    { SType::UINT64, SType::UINT64 },
+    SType::INT64,
+    &cmp_uint64_call);
+
+const SFunction cmp_timestamp64(
+    { SType::TIMESTAMP64, SType::TIMESTAMP64 },
+    SType::INT64,
+    &cmp_uint64_call);
+
+
+/**
+ * cmp(int64, int64) -> int64
+ */
+void cmp_int64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popInt64(stack);
+  auto left = popInt64(stack);
+  if (left < right) {
+    pushInt64(stack, -1);
+  } else if (left > right) {
+    pushInt64(stack, 1);
+  } else {
+    pushInt64(stack, 0);
+  }
 }
+
+const SFunction cmp_int64(
+    { SType::INT64, SType::INT64 },
+    SType::INT64,
+    &cmp_int64_call);
+
+
+/**
+ * cmp(float64, float64) -> int64
+ */
+void cmp_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popFloat64(stack);
+  auto left = popFloat64(stack);
+  if (left < right) {
+    pushInt64(stack, -1);
+  } else if (left > right) {
+    pushInt64(stack, 1);
+  } else {
+    pushInt64(stack, 0);
+  }
 }
+
+const SFunction cmp_float64(
+    { SType::FLOAT64, SType::FLOAT64 },
+    SType::INT64,
+    &cmp_float64_call);
+
+
+/**
+ * eq(uint64, uint64) -> bool
+ * eq(timestamp64, timestamp64) -> bool
+ */
+void eq_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  pushBool(stack, left == right);
+}
+
+const SFunction eq_uint64(
+    { SType::UINT64, SType::UINT64 },
+    SType::BOOL,
+    &eq_uint64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+const SFunction eq_timestamp64(
+    { SType::TIMESTAMP64, SType::TIMESTAMP64 },
+    SType::BOOL,
+    &eq_uint64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+/**
+ * eq(int64, int64) -> bool
+ */
+void eq_int64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popInt64(stack);
+  auto left = popInt64(stack);
+  pushBool(stack, left == right);
+}
+
+const SFunction eq_int64(
+    { SType::INT64, SType::INT64 },
+    SType::BOOL,
+    &eq_int64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
+ * eq(float64, float64) -> bool
+ */
+void eq_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popFloat64(stack);
+  auto left = popFloat64(stack);
+  pushBool(stack, left == right);
+}
+
+const SFunction eq_float64(
+    { SType::FLOAT64, SType::FLOAT64 },
+    SType::BOOL,
+    &eq_float64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
+ * eq(string, string) -> bool
+ */
+void eq_string_call(sql_txn* ctx, VMStack* stack) {
+  const char* right;
+  size_t right_len;
+  popString(stack, &right, &right_len);
+
+  const char* left;
+  size_t left_len;
+  popString(stack, &left, &left_len);
+
+  if (left_len != right_len) {
+    pushBool(stack, false);
+  } else {
+    pushBool(stack, memcmp(left, right, left_len) == 0);
+  }
+}
+
+const SFunction eq_string(
+    { SType::STRING, SType::STRING },
+    SType::BOOL,
+    &eq_string_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
+ * eq(bool, bool) -> bool
+ */
+void eq_bool_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popBool(stack);
+  auto left = popBool(stack);
+  pushBool(stack, left == right);
+}
+
+const SFunction eq_bool(
+    { SType::BOOL, SType::BOOL },
+    SType::BOOL,
+    &eq_bool_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
+ * neq(uint64, uint64) -> bool
+ * neq(timestamp64, timestamp64) -> bool
+ */
+void neq_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  pushBool(stack, left != right);
+}
+
+const SFunction neq_uint64(
+    { SType::UINT64, SType::UINT64 },
+    SType::BOOL,
+    &neq_uint64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+const SFunction neq_timestamp64(
+    { SType::TIMESTAMP64, SType::TIMESTAMP64 },
+    SType::BOOL,
+    &neq_uint64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
+ * neq(int64, int64) -> bool
+ */
+void neq_int64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popInt64(stack);
+  auto left = popInt64(stack);
+  pushBool(stack, left != right);
+}
+
+const SFunction neq_int64(
+    { SType::INT64, SType::INT64 },
+    SType::BOOL,
+    &neq_int64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
+ * neq(float64, float64) -> bool
+ */
+void neq_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popFloat64(stack);
+  auto left = popFloat64(stack);
+  pushBool(stack, left != right);
+}
+
+const SFunction neq_float64(
+    { SType::FLOAT64, SType::FLOAT64 },
+    SType::BOOL,
+    &neq_float64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
+ * neq(bool, bool) -> bool
+ */
+void neq_bool_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popBool(stack);
+  auto left = popBool(stack);
+  pushBool(stack, left != right);
+}
+
+const SFunction neq_bool(
+    { SType::BOOL, SType::BOOL },
+    SType::BOOL,
+    &neq_bool_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
+ * eq(string, string) -> bool
+ */
+void neq_string_call(sql_txn* ctx, VMStack* stack) {
+  const char* right;
+  size_t right_len;
+  popString(stack, &right, &right_len);
+
+  const char* left;
+  size_t left_len;
+  popString(stack, &left, &left_len);
+
+  if (left_len != right_len) {
+    pushBool(stack, true);
+  } else {
+    pushBool(stack, memcmp(left, right, left_len) != 0);
+  }
+}
+
+const SFunction neq_string(
+    { SType::STRING, SType::STRING },
+    SType::BOOL,
+    &neq_string_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
+ * lt(uint64, uint64) -> bool
+ * lt(timestamp64, timestamp4) -> bool
+ */
+void lt_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  pushBool(stack, left < right);
+}
+
+const SFunction lt_uint64(
+    { SType::UINT64, SType::UINT64 },
+    SType::BOOL,
+    &lt_uint64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+const SFunction lt_timestamp64(
+    { SType::TIMESTAMP64, SType::TIMESTAMP64 },
+    SType::BOOL,
+    &lt_uint64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
+ * lt(int64, int64) -> bool
+ */
+void lt_int64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popInt64(stack);
+  auto left = popInt64(stack);
+  pushBool(stack, left < right);
+}
+
+const SFunction lt_int64(
+    { SType::INT64, SType::INT64 },
+    SType::BOOL,
+    &lt_int64_call);
+
+
+/**
+ * lt(float64, float64) -> bool
+ */
+void lt_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popFloat64(stack);
+  auto left = popFloat64(stack);
+  pushBool(stack, left < right);
+}
+
+const SFunction lt_float64(
+    { SType::FLOAT64, SType::FLOAT64 },
+    SType::BOOL,
+    &lt_float64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
+ * lt(string, string) -> bool
+ */
+void lt_string_call(sql_txn* ctx, VMStack* stack) {
+  const char* right;
+  size_t right_len;
+  popString(stack, &right, &right_len);
+
+  const char* left;
+  size_t left_len;
+  popString(stack, &left, &left_len);
+
+  auto cmp = strncmp(left, right, std::min(left_len, right_len));
+  pushBool(stack, cmp < 0 || (cmp == 0 && left_len < right_len));
+}
+
+const SFunction lt_string(
+    { SType::STRING, SType::STRING },
+    SType::BOOL,
+    &lt_string_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
+ * lte(uint64, uint64) -> bool
+ * lte(timestamp64, timestamp64) -> bool
+ */
+void lte_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  pushBool(stack, left <= right);
+}
+
+const SFunction lte_uint64(
+    { SType::UINT64, SType::UINT64 },
+    SType::BOOL,
+    &lte_uint64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+const SFunction lte_timestamp64(
+    { SType::TIMESTAMP64, SType::TIMESTAMP64 },
+    SType::BOOL,
+    &lte_uint64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
+ * lte(int64, int64) -> bool
+ */
+void lte_int64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popInt64(stack);
+  auto left = popInt64(stack);
+  pushBool(stack, left <= right);
+}
+
+const SFunction lte_int64(
+    { SType::INT64, SType::INT64 },
+    SType::BOOL,
+    &lte_int64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
+ * lte(float64, float64) -> bool
+ */
+void lte_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popFloat64(stack);
+  auto left = popFloat64(stack);
+  pushBool(stack, left <= right);
+}
+
+const SFunction lte_float64(
+    { SType::FLOAT64, SType::FLOAT64 },
+    SType::BOOL,
+    &lte_float64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
+ * lte(string, string) -> bool
+ */
+void lte_string_call(sql_txn* ctx, VMStack* stack) {
+  const char* right;
+  size_t right_len;
+  popString(stack, &right, &right_len);
+
+  const char* left;
+  size_t left_len;
+  popString(stack, &left, &left_len);
+
+  auto cmp = strncmp(left, right, std::min(left_len, right_len));
+  pushBool(stack, cmp < 0 || (cmp == 0 && left_len <= right_len));
+}
+
+const SFunction lte_string(
+    { SType::STRING, SType::STRING },
+    SType::BOOL,
+    &lte_string_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
+ * gt(uint64, uint64) -> bool
+ * gt(timestamp64, timestamp4) -> bool
+ */
+void gt_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  pushBool(stack, left > right);
+}
+
+const SFunction gt_uint64(
+    { SType::UINT64, SType::UINT64 },
+    SType::BOOL,
+    &gt_uint64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+const SFunction gt_timestamp64(
+    { SType::TIMESTAMP64, SType::TIMESTAMP64 },
+    SType::BOOL,
+    &gt_uint64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
+ * gt(int64, int64) -> bool
+ */
+void gt_int64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popInt64(stack);
+  auto left = popInt64(stack);
+  pushBool(stack, left > right);
+}
+
+const SFunction gt_int64(
+    { SType::INT64, SType::INT64 },
+    SType::BOOL,
+    &gt_int64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
+ * gt(float64, float64) -> bool
+ */
+void gt_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popFloat64(stack);
+  auto left = popFloat64(stack);
+  pushBool(stack, left > right);
+}
+
+const SFunction gt_float64(
+    { SType::FLOAT64, SType::FLOAT64 },
+    SType::BOOL,
+    &gt_float64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
+ * gt(string, string) -> bool
+ */
+void gt_string_call(sql_txn* ctx, VMStack* stack) {
+  const char* right;
+  size_t right_len;
+  popString(stack, &right, &right_len);
+
+  const char* left;
+  size_t left_len;
+  popString(stack, &left, &left_len);
+
+  auto cmp = strncmp(left, right, std::min(left_len, right_len));
+  pushBool(stack, cmp > 0 || (cmp == 0 && left_len > right_len));
+}
+
+const SFunction gt_string(
+    { SType::STRING, SType::STRING },
+    SType::BOOL,
+    &gt_string_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
+ * gte(uint64, uint64) -> bool
+ * gte(timestamp64, timestamp64) -> bool
+ */
+void gte_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  pushBool(stack, left >= right);
+}
+
+const SFunction gte_uint64(
+    { SType::UINT64, SType::UINT64 },
+    SType::BOOL,
+    &gte_uint64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+const SFunction gte_timestamp64(
+    { SType::TIMESTAMP64, SType::TIMESTAMP64 },
+    SType::BOOL,
+    &gte_uint64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
+ * gte(int64, int64) -> bool
+ */
+void gte_int64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popInt64(stack);
+  auto left = popInt64(stack);
+  pushBool(stack, left >= right);
+}
+
+const SFunction gte_int64(
+    { SType::INT64, SType::INT64 },
+    SType::BOOL,
+    &gte_int64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
+ * gte(float64, float64) -> bool
+ */
+void gte_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popFloat64(stack);
+  auto left = popFloat64(stack);
+  pushBool(stack, left >= right);
+}
+
+const SFunction gte_float64(
+    { SType::FLOAT64, SType::FLOAT64 },
+    SType::BOOL,
+    &gte_float64_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+/**
+ * gte(string, string) -> bool
+ */
+void gte_string_call(sql_txn* ctx, VMStack* stack) {
+  const char* right;
+  size_t right_len;
+  popString(stack, &right, &right_len);
+
+  const char* left;
+  size_t left_len;
+  popString(stack, &left, &left_len);
+
+  auto cmp = strncmp(left, right, std::min(left_len, right_len));
+  pushBool(stack, cmp > 0 || (cmp == 0 && left_len >= right_len));
+}
+
+const SFunction gte_string(
+    { SType::STRING, SType::STRING },
+    SType::BOOL,
+    &gte_string_call,
+    false,  /* has_side_effects*/
+    false); /* allow_argument_conversion */
+
+
+} // namespace expressions
+} // namespace csql
+

@@ -346,6 +346,14 @@
               visible_in_toc: false
               source: "/sql/functions_and_operators/and.md"
             -
+              url: "/sql/functions-and-operators/concat"
+              title: "concat"
+              type: page
+              doc_type: "sql_function"
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/sql/functions_and_operators/concat.md"
+            -
               url: "/sql/functions-and-operators/count"
               title: "count"
               type: page

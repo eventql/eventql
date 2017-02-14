@@ -23,10 +23,35 @@
  */
 #pragma once
 #include <eventql/sql/svalue.h>
+#include <eventql/sql/SFunction.h>
 #include <eventql/sql/transaction.h>
+#include <eventql/sql/runtime/vm.h>
 
 namespace csql {
 namespace expressions {
+
+extern const SFunction to_nil;
+
+extern const SFunction to_nil_uint64;
+extern const SFunction to_nil_int64;
+extern const SFunction to_nil_float64;
+extern const SFunction to_nil_bool;
+extern const SFunction to_nil_string;
+extern const SFunction to_nil_timestamp64;
+extern const SFunction to_timestamp64_int64;
+extern const SFunction to_timestamp64_float64;
+
+extern const SFunction to_int64_uint64;
+extern const SFunction to_int64_float64;
+extern const SFunction to_int64_bool;
+extern const SFunction to_int64_timestamp64;
+
+extern const SFunction to_string_nil;
+extern const SFunction to_string_uint64;
+extern const SFunction to_string_int64;
+extern const SFunction to_string_float64;
+extern const SFunction to_string_bool;
+extern const SFunction to_string_timestamp64;
 
 void toStringExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);
 void toIntExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out);

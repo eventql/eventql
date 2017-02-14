@@ -22,6 +22,7 @@
  * code of your own applications
  */
 #include <eventql/sql/qtree/nodes/show_databases.h>
+#include "eventql/sql/statements/show_databases.h"
 
 namespace csql {
 
@@ -34,17 +35,18 @@ RefPtr<QueryTreeNode> ShowDatabasesNode::deepCopy() const {
 }
 
 Vector<String> ShowDatabasesNode::getResultColumns() const {
-  return Vector<String> { "Name" };
+  std::vector<std::string> list;
+  for (const auto& e : ShowDatabasesExpression::kOutputColumns) {
+    list.emplace_back(e.first);
+  }
+  return list;
 }
 
 Vector<QualifiedColumn> ShowDatabasesNode::getAvailableColumns() const {
   Vector<QualifiedColumn> cols;
 
-  for (const auto& c : getResultColumns()) {
-    QualifiedColumn  qc;
-    qc.short_name = c;
-    qc.qualified_name = c;
-    cols.emplace_back(qc);
+  for (const auto& e : ShowDatabasesExpression::kOutputColumns) {
+    cols.emplace_back(e.first, e.first, e.second);
   }
 
   return cols;
@@ -57,7 +59,12 @@ size_t ShowDatabasesNode::getComputedColumnIndex(
 }
 
 size_t ShowDatabasesNode::getNumComputedColumns() const {
-  return 1;
+  return ShowDatabasesExpression::kOutputColumns.size();
+}
+
+SType ShowDatabasesNode::getColumnType(size_t idx) const {
+  assert(idx < ShowDatabasesExpression::kOutputColumns.size());
+  return ShowDatabasesExpression::kOutputColumns[idx].second;
 }
 
 String ShowDatabasesNode::toString() const {

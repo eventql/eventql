@@ -83,110 +83,6 @@ ScopedPtr<QueryPlan> Runtime::buildQueryPlan(
   return std::move(qplan);
 }
 
-SValue Runtime::evaluateScalarExpression(
-    Transaction* txn,
-    ASTNode* expr,
-    int argc,
-    const SValue* argv) {
-  auto val_expr = query_plan_builder_->buildValueExpression(txn, expr);
-  auto compiled = query_builder_->buildValueExpression(txn, val_expr);
-
-  SValue out;
-  VM::evaluate(txn, compiled.program(), argc, argv, &out);
-  return out;
-}
-
-SValue Runtime::evaluateScalarExpression(
-    Transaction* txn,
-    const String& expr,
-    int argc,
-    const SValue* argv) {
-  csql::Parser parser;
-  parser.parseValueExpression(expr.data(), expr.size());
-
-  auto stmts = parser.getStatements();
-  if (stmts.size() != 1) {
-    RAISE(
-        kParseError,
-        "static expression must consist of exactly one statement");
-  }
-
-  auto val_expr = query_plan_builder_->buildValueExpression(txn, stmts[0]);
-  auto compiled = query_builder_->buildValueExpression(txn, val_expr);
-
-  SValue out;
-  VM::evaluate(txn, compiled.program(), argc, argv, &out);
-  return out;
-}
-
-SValue Runtime::evaluateScalarExpression(
-    Transaction* txn,
-    RefPtr<ValueExpressionNode> expr,
-    int argc,
-    const SValue* argv) {
-  auto compiled = query_builder_->buildValueExpression(txn, expr);
-
-  SValue out;
-  VM::evaluate(txn, compiled.program(), argc, argv, &out);
-  return out;
-}
-
-SValue Runtime::evaluateScalarExpression(
-    Transaction* txn,
-    const ValueExpression& expr,
-    int argc,
-    const SValue* argv) {
-  SValue out;
-  VM::evaluate(txn, expr.program(), argc, argv, &out);
-  return out;
-}
-
-SValue Runtime::evaluateConstExpression(Transaction* txn, ASTNode* expr) {
-  auto val_expr = query_plan_builder_->buildValueExpression(txn,expr);
-  auto compiled = query_builder_->buildValueExpression(txn, val_expr);
-
-  SValue out;
-  VM::evaluate(txn, compiled.program(), 0, nullptr, &out);
-  return out;
-}
-
-SValue Runtime::evaluateConstExpression(Transaction* txn, const String& expr) {
-  csql::Parser parser;
-  parser.parseValueExpression(expr.data(), expr.size());
-
-  auto stmts = parser.getStatements();
-  if (stmts.size() != 1) {
-    RAISE(
-        kParseError,
-        "static expression must consist of exactly one statement");
-  }
-
-  auto val_expr = query_plan_builder_->buildValueExpression(txn, stmts[0]);
-  auto compiled = query_builder_->buildValueExpression(txn, val_expr);
-
-  SValue out;
-  VM::evaluate(txn, compiled.program(), 0, nullptr, &out);
-  return out;
-}
-
-SValue Runtime::evaluateConstExpression(
-    Transaction* txn,
-    RefPtr<ValueExpressionNode> expr) {
-  auto compiled = query_builder_->buildValueExpression(txn, expr);
-
-  SValue out;
-  VM::evaluate(txn, compiled.program(), 0, nullptr, &out);
-  return out;
-}
-
-SValue Runtime::evaluateConstExpression(
-    Transaction* txn,
-    const ValueExpression& expr) {
-  SValue out;
-  VM::evaluate(txn, expr.program(), 0, nullptr, &out);
-  return out;
-}
-
 Option<String> Runtime::cacheDir() const {
   return cachedir_;
 }
@@ -227,5 +123,31 @@ void Runtime::setQueryCache(QueryCache* cache) {
   query_cache_ = cache;
 }
 
+SValue Runtime::evaluateConstExpression(Transaction* txn, ASTNode* expr) {
+  auto val_expr = query_plan_builder_->buildValueExpression(txn,expr);
+  return evaluateConstExpression(txn, val_expr);
 }
+
+SValue Runtime::evaluateConstExpression(
+    Transaction* txn,
+    RefPtr<ValueExpressionNode> expr) {
+  auto compiled = query_builder_->buildValueExpression(txn, expr);
+
+  VMStack stack;
+  VM::evaluate(
+      txn,
+      compiled.program(),
+      compiled.program()->method_call,
+      &stack,
+      nullptr,
+      0,
+      nullptr);
+
+  SValue out(expr->getReturnType());
+  popBoxed(&stack, &out);
+
+  return out;
+}
+
+} // namespace sql
 

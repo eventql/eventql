@@ -31,235 +31,226 @@
 namespace csql {
 namespace expressions {
 
-void addExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  if (argc != 2) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for add. expected: 2, got: %i", argc);
-  }
-
-  SValue* lhs = argv;
-  SValue* rhs = argv + 1;
-
-  if (lhs->getType() == SQL_NULL || rhs->getType() == SQL_NULL) {
-    *out = SValue();
-    return;
-  }
-
-  if (!lhs->isConvertibleToNumeric() || !rhs->isConvertibleToNumeric()) {
-    *out = SValue(lhs->getString() + rhs->getString());
-    return;
-  }
-
-  SValue lhs_num = lhs->toNumeric();
-  SValue rhs_num = rhs->toNumeric();
-
-  if (lhs_num.getType() == SQL_INTEGER && rhs_num.getType() == SQL_INTEGER) {
-    *out = SValue((int64_t) (lhs_num.getInteger() + rhs_num.getInteger()));
-  } else {
-    *out = SValue((double) (lhs_num.getFloat() + rhs_num.getFloat()));
-  }
+void add_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  pushUInt64(stack, left + right);
 }
 
-void subExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  if (argc != 2) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for sub. expected: 2, got: %i", argc);
-  }
+const SFunction add_uint64(
+    { SType::UINT64, SType::UINT64 },
+    SType::UINT64,
+    &add_uint64_call);
 
-  SValue* lhs = argv;
-  SValue* rhs = argv + 1;
-
-  if (lhs->getType() == SQL_NULL || rhs->getType() == SQL_NULL) {
-    *out = SValue();
-    return;
-  }
-
-  if (!lhs->isConvertibleToNumeric() || !rhs->isConvertibleToNumeric()) {
-    RAISE(kRuntimeError, "can't subtract %s and %s",
-      lhs->getTypeName(),
-      rhs->getTypeName());
-  }
-
-  SValue lhs_num = lhs->toNumeric();
-  SValue rhs_num = rhs->toNumeric();
-
-  if (lhs_num.getType() == SQL_INTEGER && rhs_num.getType() == SQL_INTEGER) {
-    *out = SValue((int64_t) (lhs_num.getInteger() - rhs_num.getInteger()));
-  } else {
-    *out = SValue((double) (lhs_num.getFloat() - rhs_num.getFloat()));
-  }
+void add_int64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popInt64(stack);
+  auto left = popInt64(stack);
+  pushInt64(stack, left + right);
 }
 
-void mulExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  if (argc != 2) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for mul. expected: 2, got: %i", argc);
-  }
+const SFunction add_int64(
+    { SType::INT64, SType::INT64 },
+    SType::INT64,
+    &add_int64_call);
 
-  SValue* lhs = argv;
-  SValue* rhs = argv + 1;
-
-  if (lhs->getType() == SQL_NULL || rhs->getType() == SQL_NULL) {
-    *out = SValue();
-    return;
-  }
-
-  if (!lhs->isConvertibleToNumeric() || !rhs->isConvertibleToNumeric()) {
-    RAISE(kRuntimeError, "can't multiply %s and %s",
-      lhs->getTypeName(),
-      rhs->getTypeName());
-  }
-
-  SValue lhs_num = lhs->toNumeric();
-  SValue rhs_num = rhs->toNumeric();
-
-  if (lhs_num.getType() == SQL_INTEGER && rhs_num.getType() == SQL_INTEGER) {
-    *out = SValue((int64_t) (lhs_num.getInteger() * rhs_num.getInteger()));
-  } else {
-    *out = SValue((double) (lhs_num.getFloat() * rhs_num.getFloat()));
-  }
+void add_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popFloat64(stack);
+  auto left = popFloat64(stack);
+  pushFloat64(stack, left + right);
 }
 
-void divExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  if (argc != 2) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for div. expected: 2, got: %i", argc);
-  }
+const SFunction add_float64(
+    { SType::FLOAT64, SType::FLOAT64 },
+    SType::FLOAT64,
+    &add_float64_call);
 
-  SValue* lhs = argv;
-  SValue* rhs = argv + 1;
 
-  if (lhs->getType() == SQL_NULL || rhs->getType() == SQL_NULL) {
-    *out = SValue();
-    return;
-  }
-
-  if (!lhs->isConvertibleToNumeric() || !rhs->isConvertibleToNumeric()) {
-    RAISE(kRuntimeError, "can't divide %s and %s",
-      lhs->getTypeName(),
-      rhs->getTypeName());
-  }
-
-  SValue lhs_num = lhs->toNumeric();
-  SValue rhs_num = rhs->toNumeric();
-
-  *out = SValue((double) (lhs_num.getFloat() / rhs_num.getFloat()));
+void sub_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  pushUInt64(stack, left - right);
 }
 
-void modExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  if (argc != 2) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for mod. expected: 2, got: %i", argc);
-  }
+const SFunction sub_uint64(
+    { SType::UINT64, SType::UINT64 },
+    SType::UINT64,
+    &sub_uint64_call);
 
-  SValue* lhs = argv;
-  SValue* rhs = argv + 1;
-
-  if (lhs->getType() == SQL_NULL || rhs->getType() == SQL_NULL) {
-    *out = SValue();
-    return;
-  }
-
-  if (!lhs->isConvertibleToNumeric() || !rhs->isConvertibleToNumeric()) {
-    RAISE(kRuntimeError, "can't modulo %s and %s",
-      lhs->getTypeName(),
-      rhs->getTypeName());
-  }
-
-  SValue lhs_num = lhs->toNumeric();
-  SValue rhs_num = rhs->toNumeric();
-
-  if (lhs_num.getType() == SQL_INTEGER && rhs_num.getType() == SQL_INTEGER) {
-    *out = SValue((int64_t) (lhs_num.getInteger() % rhs_num.getInteger()));
-  } else {
-    *out = SValue((double) fmod(lhs_num.getFloat(), rhs_num.getFloat()));
-  }
+void sub_int64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popInt64(stack);
+  auto left = popInt64(stack);
+  pushInt64(stack, left - right);
 }
 
-void powExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  if (argc != 2) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for pow. expected: 2, got: %i", argc);
-  }
+const SFunction sub_int64(
+    { SType::INT64, SType::INT64 },
+    SType::INT64,
+    &sub_int64_call);
 
-  SValue* lhs = argv;
-  SValue* rhs = argv + 1;
-
-  if (lhs->getType() == SQL_NULL || rhs->getType() == SQL_NULL) {
-    *out = SValue();
-    return;
-  }
-
-  if (!lhs->isConvertibleToNumeric() || !rhs->isConvertibleToNumeric()) {
-    RAISE(kRuntimeError, "can't modulo %s and %s",
-      lhs->getTypeName(),
-      rhs->getTypeName());
-  }
-
-  SValue lhs_num = lhs->toNumeric();
-  SValue rhs_num = rhs->toNumeric();
-
-  if (lhs_num.getType() == SQL_INTEGER && rhs_num.getType() == SQL_INTEGER) {
-    *out = SValue((int64_t) pow(lhs_num.getInteger(), rhs_num.getInteger()));
-  } else {
-    *out = SValue((double) pow(lhs_num.getFloat(), rhs_num.getFloat()));
-  }
+void sub_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popFloat64(stack);
+  auto left = popFloat64(stack);
+  pushFloat64(stack, left - right);
 }
 
-void roundExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  switch (argc) {
+const SFunction sub_float64(
+    { SType::FLOAT64, SType::FLOAT64 },
+    SType::FLOAT64,
+    &sub_float64_call);
 
-    // round to integer
-    case 1:
-      RAISE(kNotYetImplementedError);
 
-    // round to arbitrary precision float
-    case 2:
-      RAISE(kNotYetImplementedError);
+void mul_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  pushUInt64(stack, left * right);
+}
 
-    default:
-      RAISE(
-          kRuntimeError,
-          "wrong number of arguments for ROUND. expected: 1 or 2, got: %i", argc);
+const SFunction mul_uint64(
+    { SType::UINT64, SType::UINT64 },
+    SType::UINT64,
+    &mul_uint64_call);
+
+void mul_int64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popInt64(stack);
+  auto left = popInt64(stack);
+  pushInt64(stack, left * right);
+}
+
+const SFunction mul_int64(
+    { SType::INT64, SType::INT64 },
+    SType::INT64,
+    &mul_int64_call);
+
+void mul_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popFloat64(stack);
+  auto left = popFloat64(stack);
+  pushFloat64(stack, left * right);
+}
+
+const SFunction mul_float64(
+    { SType::FLOAT64, SType::FLOAT64 },
+    SType::FLOAT64,
+    &mul_float64_call);
+
+
+void div_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  if (right == 0) {
+    RAISE(kRuntimeError, "division by zero");
   }
+
+  pushUInt64(stack, left / right);
 }
 
-void truncateExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  switch (argc) {
+const SFunction div_uint64(
+    { SType::UINT64, SType::UINT64 },
+    SType::UINT64,
+    &div_uint64_call);
 
-    // truncate to integer
-    case 1: {
-      SValue* val = argv;
-      switch(val->getType()) {
-        case SQL_INTEGER:
-        case SQL_FLOAT:
-          *out = SValue(SValue::IntegerType(val->getFloat()));
-          return;
-        case SQL_NULL:
-          *out = SValue();
-          return;
-        default:
-          RAISE(kRuntimeError, "can't TRUNCATE %s", val->getTypeName());
-      }
-    }
-
-    // truncate to specified number of decimal places
-    case 2:
-      RAISE(kNotYetImplementedError);
-
-    default:
-      RAISE(
-          kRuntimeError,
-          "wrong number of arguments for TRUNCATE. expected: 1 or 2, got: %i", argc);
+void div_int64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popInt64(stack);
+  auto left = popInt64(stack);
+  if (right == 0) {
+    RAISE(kRuntimeError, "division by zero");
   }
+
+  pushInt64(stack, left / right);
 }
 
+const SFunction div_int64(
+    { SType::INT64, SType::INT64 },
+    SType::INT64,
+    &div_int64_call);
 
+void div_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popFloat64(stack);
+  auto left = popFloat64(stack);
+  pushFloat64(stack, left / right); // division by zero permitted for FLOAT64
 }
+
+const SFunction div_float64(
+    { SType::FLOAT64, SType::FLOAT64 },
+    SType::FLOAT64,
+    &div_float64_call);
+
+
+void mod_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  if (right == 0) {
+    RAISE(kRuntimeError, "modulo by zero");
+  }
+
+  pushUInt64(stack, left % right);
 }
+
+const SFunction mod_uint64(
+    { SType::UINT64, SType::UINT64 },
+    SType::UINT64,
+    &mod_uint64_call);
+
+void mod_int64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popInt64(stack);
+  auto left = popInt64(stack);
+  if (right == 0) {
+    RAISE(kRuntimeError, "modulo by zero");
+  }
+
+  pushInt64(stack, left % right);
+}
+
+const SFunction mod_int64(
+    { SType::INT64, SType::INT64 },
+    SType::INT64,
+    &mod_int64_call);
+
+void mod_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popFloat64(stack);
+  auto left = popFloat64(stack);
+  pushFloat64(stack, fmod(left, right)); // modulo by zero permitted for FLOAT64
+}
+
+const SFunction mod_float64(
+    { SType::FLOAT64, SType::FLOAT64 },
+    SType::FLOAT64,
+    &mod_float64_call);
+
+
+void pow_uint64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popUInt64(stack);
+  auto left = popUInt64(stack);
+  pushUInt64(stack, pow(left, right));
+}
+
+const SFunction pow_uint64(
+    { SType::UINT64, SType::UINT64 },
+    SType::UINT64,
+    &pow_uint64_call);
+
+void pow_int64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popInt64(stack);
+  auto left = popInt64(stack);
+  pushInt64(stack, pow(left, right));
+}
+
+const SFunction pow_int64(
+    { SType::INT64, SType::INT64 },
+    SType::INT64,
+    &pow_int64_call);
+
+void pow_float64_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popFloat64(stack);
+  auto left = popFloat64(stack);
+  pushFloat64(stack, pow(left, right));
+}
+
+const SFunction pow_float64(
+    { SType::FLOAT64, SType::FLOAT64 },
+    SType::FLOAT64,
+    &pow_float64_call);
+
+
+} // namespace expressions
+} // namespace csql
+

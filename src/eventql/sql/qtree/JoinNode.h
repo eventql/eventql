@@ -38,6 +38,29 @@ enum class JoinType {
   CARTESIAN, INNER, OUTER
 };
 
+enum class JoinConjunctionType : uint8_t {
+  EQUAL_TO,
+  NOT_EQUAL_TO,
+  LESS_THAN,
+  LESS_THAN_OR_EQUAL_TO,
+  GREATER_THAN,
+  GREATER_THAN_OR_EQUAL_TO
+};
+
+/**
+ * Describes a "join conjunction", i.e.a predicate expression that implies a
+ * logical relation (equal/less than/greather than) between columns (or
+ * projections of columns) of the two input tables of the join.
+ */
+struct JoinConjunction {
+  JoinConjunctionType type;
+  RefPtr<ValueExpressionNode> base_table_expr;
+  RefPtr<ValueExpressionNode> joined_table_expr;
+
+  bool operator==(const JoinConjunction& other) const;
+  bool operator!=(const JoinConjunction& other) const;
+};
+
 class JoinNode : public TableExpressionNode {
 public:
 
@@ -45,10 +68,16 @@ public:
     String column;
     size_t table_idx;
     size_t column_idx;
+    SType type;
   };
 
   static const uint8_t kHasWhereExprFlag = 1;
   static const uint8_t kHasJoinExprFlag = 2;
+
+  JoinNode(
+      JoinType join_type,
+      RefPtr<QueryTreeNode> base_table,
+      RefPtr<QueryTreeNode> joined_table);
 
   JoinNode(
       JoinType join_type,
@@ -61,11 +90,13 @@ public:
   JoinNode(const JoinNode& other);
 
   JoinType joinType() const;
+  void setJoinType(JoinType type);
 
   RefPtr<QueryTreeNode> baseTable() const;
   RefPtr<QueryTreeNode> joinedTable() const;
 
   Vector<RefPtr<SelectListNode>> selectList() const;
+  void addSelectList(RefPtr<SelectListNode> sl);
 
   Vector<String> getResultColumns() const override;
 
@@ -79,12 +110,23 @@ public:
 
   size_t getNumComputedColumns() const override;
 
+  SType getColumnType(size_t idx) const override;
+
   size_t getInputColumnIndex(
       const String& column_name,
       bool allow_add = false);
 
+  SType getInputColumnType(size_t idx) const;
+
+  std::pair<size_t, SType> getInputColumnInfo(
+      const String& column_name,
+      bool allow_add = false);
+
   Option<RefPtr<ValueExpressionNode>> whereExpression() const;
+  void setWhereExpression(RefPtr<ValueExpressionNode> expr);
+
   Option<RefPtr<ValueExpressionNode>> joinCondition() const;
+  void setJoinCondition(RefPtr<ValueExpressionNode> expr);
 
   RefPtr<QueryTreeNode> deepCopy() const override;
 

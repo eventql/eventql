@@ -53,6 +53,8 @@ public:
 
   size_t getNumComputedColumns() const override;
 
+  SType getColumnType(size_t idx) const override;
+
   size_t limit() const;
 
   size_t offset() const;

@@ -22,16 +22,16 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
+#include "eventql/sql/svalue.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/option.h>
 
 namespace csql {
 
-#include "eventql/eventql.h"
-
 struct ColumnInfo {
   String column_name;
-  String type;
+  SType type;
   bool is_nullable;
   size_t type_size;
   bool is_primary_key;

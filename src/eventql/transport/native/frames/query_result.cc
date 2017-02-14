@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <assert.h>
 #include "eventql/transport/native/frames/query_result.h"
 
 namespace eventql {
@@ -33,13 +34,10 @@ QueryResultFrame::QueryResultFrame(
     has_pending_stmt_(false),
     num_rows_(0) {}
 
-void QueryResultFrame::addRow(const std::vector<csql::SValue>& row) {
+void QueryResultFrame::addRow(const std::vector<std::string>& row) {
   for (size_t i = 0; i < columns_.size(); ++i) {
-    if (i < row.size()) {
-      data_.appendLenencString(row[i].getString());
-    } else {
-      data_.appendLenencString("");
-    }
+    assert(i < row.size());
+    data_.appendLenencString(row[i]);
   }
 
   ++num_rows_;

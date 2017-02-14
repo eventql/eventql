@@ -27,7 +27,7 @@
 #include <eventql/sql/svalue.h>
 #include <eventql/sql/table_schema.h>
 #include <eventql/sql/TableInfo.h>
-#include <eventql/sql/expressions/table_expression.h>
+#include <eventql/sql/table_expression.h>
 #include <eventql/sql/qtree/SequentialScanNode.h>
 #include <eventql/sql/scheduler/execution_context.h>
 #include "eventql/sql/qtree/nodes/alter_table.h"

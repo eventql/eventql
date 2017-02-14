@@ -109,13 +109,6 @@ protected:
       http::HTTPResponse* res,
       RefPtr<http::HTTPResponseStream> res_stream);
 
-  void executeSQL_BINARY(
-      const std::string& query,
-      const std::string& database,
-      Session* session,
-      http::HTTPResponse* res,
-      RefPtr<http::HTTPResponseStream> res_stream);
-
   void executeSQL_JSON(
       const std::string& query,
       const std::string& database,

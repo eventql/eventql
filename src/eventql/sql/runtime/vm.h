@@ -29,174 +29,144 @@
 namespace csql {
 class SValue;
 class ScratchMemory;
+class Transaction;
+
+struct VMStack {
+  VMStack();
+  ~VMStack();
+  char* data;
+  char* top;
+  char* limit;
+};
+
+namespace vm {
+
+enum InstructionType {
+  X_CALL_PURE = 1,
+  X_CALL_INSTANCE = 2,
+  X_LITERAL = 3,
+  X_INPUT = 4,
+  X_JUMP = 5,
+  X_CJUMP = 6,
+  X_RETURN = 7
+};
+
+struct Instruction {
+  Instruction(InstructionType _type, intptr_t _arg0);
+  Instruction(InstructionType _type, intptr_t _arg0, SType _argt);
+  InstructionType type;
+  intptr_t arg0;
+  SType argt;
+};
+
+struct EntryPoint {
+  EntryPoint();
+  EntryPoint(size_t offset);
+  size_t offset;
+};
+
+struct Program {
+  Program();
+  std::vector<vm::Instruction> instructions;
+  vm::EntryPoint method_call;
+  vm::EntryPoint method_accumulate;
+  ScratchMemory static_storage;
+  size_t instance_storage_size;
+  SType return_type;
+  void (*instance_reset)(sql_txn*, void* self);
+  void (*instance_init)(sql_txn*, void* self);
+  void (*instance_free)(sql_txn*, void* self);
+  void (*instance_merge)(sql_txn*, void* self, const void* other);
+  void (*instance_savestate)(sql_txn*, const void* self, OutputStream* os);
+  void (*instance_loadstate)(sql_txn*, void* self, InputStream* is);
+};
+
+static const size_t kStackBlockSize = 512 * 1024; // 512k
+
+void growStack(VMStack* stack, size_t bytes);
+void popStack(VMStack* stack, size_t bytes);
+
+} // namespace vm
 
 class VM {
 public:
 
-  enum kInstructionType {
-    X_CALL_PURE,
-    X_CALL_AGGREGATE,
-    X_LITERAL,
-    X_INPUT,
-    X_IF,
-    X_REGEX,
-    X_LIKE
-  };
-
-  struct Instruction {
-    Instruction() : vtable{ .t_pure = nullptr } {}
-    kInstructionType type;
-    void* arg0;
-    size_t argn;
-    Instruction* next;
-    Instruction* child;
-    union {
-      PureFunction t_pure;
-      AggregateFunction t_aggregate;
-    } vtable;
-  };
-
-  struct Program {
-    Program(
-        Transaction* ctx,
-        Instruction* entry,
-        ScratchMemory&& static_storage,
-        size_t dynamic_storage_size);
-
-    ~Program();
-
-    Transaction* ctx_;
-    Instruction* entry_;
-    ScratchMemory static_storage_;
-    size_t dynamic_storage_size_;
-    bool has_aggregate_;
-  };
-
-  struct Instance {
-    void* scratch;
-  };
+  typedef void* Instance;
 
   static void evaluate(
       Transaction* ctx,
-      const Program* program,
+      const vm::Program* program,
+      vm::EntryPoint entrypoint,
+      VMStack* stack,
+      Instance instance,
       int argc,
-      const SValue* argv,
-      SValue* out);
+      void** argv);
+
+  static void evaluateBoxed(
+      Transaction* ctx,
+      const vm::Program* program,
+      vm::EntryPoint entrypoint,
+      VMStack* stack,
+      Instance instance,
+      int argc,
+      const SValue* argv);
+
+  static void evaluateVector(
+      Transaction* ctx,
+      const vm::Program* program,
+      vm::EntryPoint entrypoint,
+      VMStack* stack,
+      Instance instance,
+      int argc,
+      const SVector* argv,
+      size_t vlen,
+      SVector* out,
+      const std::vector<bool>* filter = nullptr);
+
+  static void evaluatePredicateVector(
+      Transaction* ctx,
+      const vm::Program* program,
+      vm::EntryPoint entrypoint,
+      VMStack* stack,
+      Instance instance,
+      int argc,
+      const SVector* argv,
+      size_t vlen,
+      std::vector<bool>* out,
+      size_t* out_cardinality);
 
   static Instance allocInstance(
       Transaction* ctx,
-      const Program* program,
+      const vm::Program* program,
       ScratchMemory* scratch);
 
   static void freeInstance(
       Transaction* ctx,
-      const Program* program,
-      Instance* instance);
-
-  static void accumulate(
-      Transaction* ctx,
-      const Program* program,
-      Instance* instance,
-      int argc,
-      const SValue* argv);
-
-  static void result(
-      Transaction* ctx,
-      const Program* program,
-      const Instance* instance,
-      SValue* out);
-
-  static void reset(
-      Transaction* ctx,
-      const Program* program,
-      Instance* instance);
-
-  // rename to mergeStat
-  static void merge(
-      Transaction* ctx,
-      const Program* program,
-      Instance* dst,
-      const Instance* src);
-
-  static void saveState(
-      Transaction* ctx,
-      const Program* program,
-      const Instance* instance,
-      OutputStream* os);
-
-  static void loadState(
-      Transaction* ctx,
-      const Program* program,
-      Instance* instance,
-      InputStream* os);
-
-protected:
-
-  static void evaluate(
-      Transaction* ctx,
-      const Program* program,
-      Instance* instance,
-      Instruction* expr,
-      int argc,
-      const SValue* argv,
-      SValue* out);
-
-  static void accumulate(
-      Transaction* ctx,
-      const Program* program,
-      Instance* instance,
-      Instruction* expr,
-      int argc,
-      const SValue* argv);
-
-  static void initInstance(
-      Transaction* ctx,
-      const Program* program,
-      Instruction* e,
-      Instance* instance);
-
-  static void freeInstance(
-      Transaction* ctx,
-      const Program* program,
-      Instruction* e,
-      Instance* instance);
+      const vm::Program* program,
+      Instance instance);
 
   static void resetInstance(
       Transaction* ctx,
-      const Program* program,
-      Instruction* e,
-      Instance* instance);
-
-  static void initProgram(
-      Transaction* ctx,
-      Program* program,
-      Instruction* e);
-
-  static void freeProgram(
-      Transaction* ctx,
-      const Program* program,
-      Instruction* e);
+      const vm::Program* program,
+      Instance instance);
 
   static void mergeInstance(
       Transaction* ctx,
-      const Program* program,
-      Instruction* e,
-      Instance* dst,
-      const Instance* src);
+      const vm::Program* program,
+      Instance dst,
+      Instance src);
 
-  static void saveInstance(
+  static void saveInstanceState(
       Transaction* ctx,
-      const Program* program,
-      Instruction* e,
-      const Instance* instance,
+      const vm::Program* program,
+      Instance instance,
       OutputStream* os);
 
-  static void loadInstance(
+  static void loadInstanceState(
       Transaction* ctx,
-      const Program* program,
-      Instruction* e,
-      Instance* instance,
-      InputStream* is);
+      const vm::Program* program,
+      Instance instance,
+      InputStream* os);
 
 };
 

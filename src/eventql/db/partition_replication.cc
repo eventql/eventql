@@ -825,7 +825,7 @@ ReturnCode LSMPartitionReplication::uploadBatchTo(
       return ReturnCode::error("ERUNTIME", eframe.getError());
     }
     default:
-      return ReturnCode::error("ERUNTIME", "invalid opcode");
+      return ReturnCode::error("ERUNTIME", "invalid opcode in PartitionReplication::uploadBatchTo");
   }
 
   return ReturnCode::success();

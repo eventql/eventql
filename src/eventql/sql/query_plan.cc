@@ -68,9 +68,18 @@ void QueryPlan::execute(size_t stmt_idx, ResultList* result_list) {
   result_list->addHeader(getStatementgetResultColumns(stmt_idx));
 
   auto cursor = execute(stmt_idx);
-  Vector<SValue> tmp(cursor->getNumColumns());
-  while (cursor->next(tmp.data(), tmp.size())) {
-    result_list->addRow(tmp.data(), tmp.size());
+
+  std::vector<std::string> row(cursor->getColumnCount());
+  while (cursor->isValid()) {
+    for (size_t i = 0; i < cursor->getColumnCount(); ++i) {
+      row[i] = cursor->getColumnString(i);
+    }
+
+    result_list->addRow(row);
+    auto rc = cursor->next();
+    if (!rc.isSuccess()) {
+      RAISE(kRuntimeError, rc.getMessage());
+    }
   }
 }
 

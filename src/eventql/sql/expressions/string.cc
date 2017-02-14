@@ -27,66 +27,88 @@
 namespace csql {
 namespace expressions {
 
-static void checkArgs(const char* symbol, int argc, int argc_expected) {
-  if (argc != argc_expected) {
-    RAISE(
-        kRuntimeError,
-        "wrong number of arguments for %s. expected: %i, got: %i",
-        symbol,
-        argc_expected,
-        argc);
-  }
+void lcase_call(sql_txn* ctx, VMStack* stack) {
+  auto str = popString(stack);
+  StringUtil::toLower(&str);
+  pushString(stack, str);
 }
 
-void startsWithExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  checkArgs("STARTSWITH", argc, 2);
+const SFunction lcase(
+    { SType::STRING },
+    SType::STRING,
+    &lcase_call);
 
-  auto val = StringUtil::beginsWith(argv[0].getString(), argv[1].getString());
-  *out = SValue(SValue::BoolType(val));
+void ucase_call(sql_txn* ctx, VMStack* stack) {
+  auto str = popString(stack);
+  StringUtil::toUpper(&str);
+  pushString(stack, str);
 }
 
-void endsWithExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  checkArgs("ENDSWITH", argc, 2);
+const SFunction ucase(
+    { SType::STRING },
+    SType::STRING,
+    &ucase_call);
 
-  auto val = StringUtil::endsWith(argv[0].getString(), argv[1].getString());
-  *out = SValue(SValue::BoolType(val));
+void startswith_call(sql_txn* ctx, VMStack* stack) {
+  auto substr = popString(stack);
+  auto str = popString(stack);
+  auto startswith = StringUtil::beginsWith(str, substr);
+  pushBool(stack, startswith);
 }
 
-void upperCaseExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  checkArgs("UPPERCASE", argc, 1);
-  auto val = argv[0].getString();
-  StringUtil::toUpper(&val);
-  *out = SValue(val);
+const SFunction startswith(
+    { SType::STRING, SType::STRING },
+    SType::BOOL,
+    &startswith_call);
+
+void endswith_call(sql_txn* ctx, VMStack* stack) {
+  auto substr = popString(stack);
+  auto str = popString(stack);
+  auto endswith = StringUtil::endsWith(str, substr);
+  pushBool(stack, endswith);
 }
 
-void lowerCaseExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  checkArgs("LOWERCASE", argc, 1);
-  auto val = argv[0].getString();
-  StringUtil::toLower(&val);
-  *out = SValue(val);
+const SFunction endswith(
+    { SType::STRING, SType::STRING },
+    SType::BOOL,
+    &endswith_call);
+
+void ltrim_call(sql_txn* ctx, VMStack* stack) {
+  auto str = popString(stack);
+  StringUtil::ltrim(&str);
+  pushString(stack, str);
 }
 
-void subStringExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  if (argc < 2 || argc > 3) {
-    RAISEF(
-        kRuntimeError,
-        "wrong number of arguments for substr. expected: 2 or 3, got: $0",
-        argc);
-  }
+const SFunction ltrim(
+    { SType::STRING },
+    SType::STRING,
+    &ltrim_call);
 
-  String str = argv[0].getString();
+void rtrim_call(sql_txn* ctx, VMStack* stack) {
+  auto str = popString(stack);
+  StringUtil::rtrim(&str);
+  pushString(stack, str);
+}
+
+const SFunction rtrim(
+    { SType::STRING },
+    SType::STRING,
+    &rtrim_call);
+
+void substring_call(sql_txn* ctx, VMStack* stack) {
+  auto cur = popInt64(stack);
+  auto str = popString(stack);
   int64_t strlen = static_cast<int64_t>(str.size());
-  int64_t cur = argv[1].getInteger();
 
   if (cur == 0 || strlen == 0) {
-    *out = SValue::newString("");
+    pushString(stack, "");
     return;
   }
 
   if (cur < 0) {
     cur += strlen;
     if (cur < 0) {
-      *out = SValue::newString("");
+      pushString(stack, "");
       return;
     }
   } else {
@@ -94,57 +116,69 @@ void subStringExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
   }
 
   int64_t len = strlen - cur;
-  if (argc == 3) {
-    len = std::min(argv[2].getInteger(), len);
-  }
-
   if (len == 0) {
-    *out = SValue::newString("");
+    pushString(stack, "");
   } else {
-    *out = SValue::newString(str.substr(cur, len));
+    pushString(stack, str.substr(cur, len));
   }
 }
 
-void ltrimExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  if (argc != 1) {
-    RAISEF(
-        kRuntimeError,
-        "wrong number of arguments for ltrim. expected: 1, got: $0",
-        argc);
-  }
+const SFunction substring(
+    { SType::STRING, SType::INT64 },
+    SType::STRING,
+    &substring_call);
 
-  String str = argv[0].getString();
-  while (str.front() == ' ') {
-    str = str.substr(1);
-  }
-
-  *out = SValue::newString(str);
+//
+//void subStringExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
+//  if (argc < 2 || argc > 3) {
+//    RAISEF(
+//        kRuntimeError,
+//        "wrong number of arguments for substr. expected: 2 or 3, got: $0",
+//        argc);
+//  }
+//
+//  String str = argv[0].getString();
+//  int64_t strlen = static_cast<int64_t>(str.size());
+//  int64_t cur = argv[1].getInteger();
+//
+//  if (cur == 0 || strlen == 0) {
+//    *out = SValue::newString("");
+//    return;
+//  }
+//
+//  if (cur < 0) {
+//    cur += strlen;
+//    if (cur < 0) {
+//      *out = SValue::newString("");
+//      return;
+//    }
+//  } else {
+//    cur = std::min(cur - 1, strlen - 1);
+//  }
+//
+//  int64_t len = strlen - cur;
+//  if (argc == 3) {
+//    len = std::min(argv[2].getInteger(), len);
+//  }
+//
+//  if (len == 0) {
+//    *out = SValue::newString("");
+//  } else {
+//    *out = SValue::newString(str.substr(cur, len));
+//  }
+//}
+//
+void concat_call(sql_txn* ctx, VMStack* stack) {
+  auto right = popString(stack);
+  auto left = popString(stack);
+  auto concat = left + right;
+  pushString(stack, concat);
 }
 
-void rtrimExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  if (argc != 1) {
-    RAISEF(
-        kRuntimeError,
-        "wrong number of arguments for ltrim. expected: 1, got: $0",
-        argc);
-  }
-
-  String str = argv[0].getString();
-  while (str.back() == ' ') {
-    str.pop_back();
-  }
-
-  *out = SValue::newString(str);
-}
-
-void concatExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-  std::string str;
-  for (int i = 0; i < argc; ++i) {
-    str += argv[i].getString();
-  }
-
-  *out = SValue::newString(str);
-}
+const SFunction concat(
+    { SType::STRING, SType::STRING },
+    SType::STRING,
+    &concat_call);
 
 }
 }

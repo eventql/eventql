@@ -42,7 +42,6 @@
 #include "eventql/db/table_config.pb.h"
 #include "eventql/server/sql/codec/json_codec.h"
 #include "eventql/server/sql/codec/json_sse_codec.h"
-#include "eventql/server/sql/codec/binary_codec.h"
 #include "eventql/transport/http/http_auth.h"
 #include <eventql/io/cstable/cstable_writer.h>
 #include <eventql/io/cstable/RecordShredder.h>
@@ -879,9 +878,7 @@ void APIServlet::executeSQL(
       }
     }
 
-    if (format == "binary") {
-      executeSQL_BINARY(query, database, session, res, res_stream);
-    } else if (format == "json") {
+     if (format == "json") {
       executeSQL_JSON(query, database, session, res, res_stream);
     } else if (format == "json_sse") {
       executeSQL_JSONSSE(query, database, session, res, res_stream);
@@ -934,59 +931,6 @@ void APIServlet::executeSQL_ASCII(
 //    res->addBody(StringUtil::format("error: $0", e.what()));
 //    res_stream->writeResponse(*res);
 //  }
-}
-
-void APIServlet::executeSQL_BINARY(
-    const std::string& query,
-    const std::string& database,
-    Session* session,
-    http::HTTPResponse* res,
-    RefPtr<http::HTTPResponseStream> res_stream) {
-  auto dbctx = session->getDatabaseContext();
-
-  res->setStatus(http::kStatusOK);
-  res->setHeader("Connection", "close");
-  res->setHeader("Content-Type", "application/octet-stream");
-  res->setHeader("Cache-Control", "no-cache");
-  res->setHeader("Access-Control-Allow-Origin", "*");
-  res_stream->startResponse(*res);
-
-  {
-    auto write_cb = [res_stream] (const void* data, size_t size) {
-      res_stream->writeBodyChunk(data, size);
-    };
-
-    csql::BinaryResultFormat result_format(write_cb, true);
-
-    if (!database.empty()) {
-      auto rc = session->changeNamespace(database);
-      if (!rc.isSuccess()) {
-        result_format.sendError(rc.message());
-        res_stream->finishResponse();
-        return;
-      }
-    }
-
-    if (session->getEffectiveNamespace().empty()) {
-      result_format.sendError("No database selected");
-      res_stream->finishResponse();
-      return;
-    }
-
-    try {
-      auto txn = dbctx->sql_service->startTransaction(session);
-      auto qplan = dbctx->sql_runtime->buildQueryPlan(txn.get(), query);
-      qplan->setProgressCallback([&result_format, &qplan] () {
-        result_format.sendProgress(qplan->getProgress());
-      });
-
-      result_format.sendResults(qplan.get());
-    } catch (const StandardException& e) {
-      result_format.sendError(e.what());
-    }
-  }
-
-  res_stream->finishResponse();
 }
 
 void APIServlet::executeSQL_JSON(

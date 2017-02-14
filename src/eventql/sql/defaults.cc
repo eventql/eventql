@@ -23,108 +23,146 @@
  * code of your own applications
  */
 #include <eventql/sql/defaults.h>
+#include <eventql/sql/expressions/aggregate.h>
+#include <eventql/sql/expressions/boolean.h>
+#include <eventql/sql/expressions/conversion.h>
+#include <eventql/sql/expressions/datetime.h>
+#include <eventql/sql/expressions/math.h>
+#include <eventql/sql/expressions/string.h>
+#include <eventql/sql/expressions/miscellaneous.h>
 
 #include "eventql/eventql.h"
 
 namespace csql {
 
 void installDefaultSymbols(SymbolTable* rt) {
+  /* implicit conversions */
+  rt->registerImplicitConversion(SType::UINT64, SType::NIL);
+  rt->registerImplicitConversion(SType::UINT64, SType::INT64);
+  rt->registerImplicitConversion(SType::INT64, SType::NIL);
+  rt->registerImplicitConversion(SType::FLOAT64, SType::NIL);
+  rt->registerImplicitConversion(SType::BOOL, SType::NIL);
+  rt->registerImplicitConversion(SType::STRING, SType::NIL);
+  rt->registerImplicitConversion(SType::TIMESTAMP64, SType::NIL);
+
   /* expressions/aggregate.h */
-  rt->registerFunction("count", expressions::kCountExpr);
-  rt->registerFunction("sum", expressions::kSumExpr);
-  rt->registerFunction("max", expressions::kMaxExpr);
-  rt->registerFunction("min", expressions::kMinExpr);
-
-  //rt->registerSymbol(
-  //    "mean",
-  //    &expressions::meanExpr,
-  //    expressions::meanExprScratchpadSize(),
-  //    &expressions::meanExprFree);
-
-  //rt->registerSymbol(
-  //    "avg",
-  //    &expressions::meanExpr,
-  //    expressions::meanExprScratchpadSize(),
-  //    &expressions::meanExprFree);
-
-  //rt->registerSymbol(
-  //    "average",
-  //    &expressions::meanExpr,
-  //    expressions::meanExprScratchpadSize(),
-  //    &expressions::meanExprFree);
-
-  //rt->registerSymbol(
-  //    "min",
-  //    &expressions::minExpr,
-  //    expressions::minExprScratchpadSize(),
-  //    &expressions::minExprFree);
-
-  //rt->registerSymbol(
-  //    "max",
-  //    &expressions::maxExpr,
-  //    expressions::maxExprScratchpadSize(),
-  //    &expressions::maxExprFree);
+  rt->registerFunction("count", expressions::count);
+  rt->registerFunction("sum", expressions::sum_int64);
+  rt->registerFunction("sum", expressions::sum_uint64);
+  //rt->registerFunction("max", expressions::kMaxExpr);
+  //rt->registerFunction("min", expressions::kMinExpr);
 
   /* expressions/boolean.h */
-  rt->registerFunction("eq",  PureFunction(&expressions::eqExpr));
-  rt->registerFunction("neq", PureFunction(&expressions::neqExpr));
-  rt->registerFunction("logical_and", PureFunction(&expressions::andExpr));
-  rt->registerFunction("logical_or", PureFunction(&expressions::orExpr));
-  rt->registerFunction("neg", PureFunction(&expressions::negExpr));
-  rt->registerFunction("lt",  PureFunction(&expressions::ltExpr));
-  rt->registerFunction("lte", PureFunction(&expressions::lteExpr));
-  rt->registerFunction("gt",  PureFunction(&expressions::gtExpr));
-  rt->registerFunction("gte", PureFunction(&expressions::gteExpr));
-  rt->registerFunction("isnull", PureFunction(&expressions::isNullExpr));
+  rt->registerFunction("logical_and", expressions::logical_and);
+  rt->registerFunction("logical_or", expressions::logical_or);
+  rt->registerFunction("neg", expressions::neg);
+  rt->registerFunction("cmp",  expressions::cmp_uint64);
+  rt->registerFunction("cmp",  expressions::cmp_int64);
+  rt->registerFunction("cmp",  expressions::cmp_float64);
+  rt->registerFunction("cmp",  expressions::cmp_timestamp64);
+  rt->registerFunction("eq",  expressions::eq_uint64);
+  rt->registerFunction("eq",  expressions::eq_int64);
+  rt->registerFunction("eq",  expressions::eq_float64);
+  rt->registerFunction("eq",  expressions::eq_bool);
+  rt->registerFunction("eq",  expressions::eq_string);
+  rt->registerFunction("eq",  expressions::eq_timestamp64);
+  rt->registerFunction("neq",  expressions::neq_uint64);
+  rt->registerFunction("neq",  expressions::neq_int64);
+  rt->registerFunction("neq",  expressions::neq_float64);
+  rt->registerFunction("neq",  expressions::neq_bool);
+  rt->registerFunction("neq",  expressions::neq_string);
+  rt->registerFunction("neq",  expressions::neq_timestamp64);
+  rt->registerFunction("lt", expressions::lt_uint64);
+  rt->registerFunction("lt", expressions::lt_int64);
+  rt->registerFunction("lt", expressions::lt_float64);
+  rt->registerFunction("lt", expressions::lt_string);
+  rt->registerFunction("lt", expressions::lt_timestamp64);
+  rt->registerFunction("lte", expressions::lte_uint64);
+  rt->registerFunction("lte", expressions::lte_int64);
+  rt->registerFunction("lte", expressions::lte_float64);
+  rt->registerFunction("lte", expressions::lte_string);
+  rt->registerFunction("lte", expressions::lte_timestamp64);
+  rt->registerFunction("gt", expressions::gt_uint64);
+  rt->registerFunction("gt", expressions::gt_int64);
+  rt->registerFunction("gt", expressions::gt_float64);
+  rt->registerFunction("gt", expressions::gt_string);
+  rt->registerFunction("gt", expressions::gt_timestamp64);
+  rt->registerFunction("gte", expressions::gte_uint64);
+  rt->registerFunction("gte", expressions::gte_int64);
+  rt->registerFunction("gte", expressions::gte_float64);
+  rt->registerFunction("gte", expressions::gte_string);
+  rt->registerFunction("gte", expressions::gte_timestamp64);
+  //rt->registerFunction("isnull", PureFunction(&expressions::isNullExpr));
 
   /* expressions/conversion.h */
-  rt->registerFunction("to_string", PureFunction(&expressions::toStringExpr));
-  rt->registerFunction("to_str", PureFunction(&expressions::toStringExpr));
-  rt->registerFunction("to_integer", PureFunction(&expressions::toIntExpr));
-  rt->registerFunction("to_int", PureFunction(&expressions::toIntExpr));
-  rt->registerFunction("to_float", PureFunction(&expressions::toFloatExpr));
-  rt->registerFunction("to_bool", PureFunction(&expressions::toBoolExpr));
+  rt->registerFunction("to_nil", expressions::to_nil_uint64);
+  rt->registerFunction("to_nil", expressions::to_nil_int64);
+  rt->registerFunction("to_nil", expressions::to_nil_float64);
+  rt->registerFunction("to_nil", expressions::to_nil_bool);
+  rt->registerFunction("to_nil", expressions::to_nil_string);
+  rt->registerFunction("to_nil", expressions::to_nil_timestamp64);
+  rt->registerFunction("to_int64", expressions::to_int64_uint64);
+  rt->registerFunction("to_int64", expressions::to_int64_float64);
+  rt->registerFunction("to_int64", expressions::to_int64_bool);
+  rt->registerFunction("to_int64", expressions::to_int64_timestamp64);
+  rt->registerFunction("to_string", expressions::to_string_nil);
+  rt->registerFunction("to_string", expressions::to_string_uint64);
+  rt->registerFunction("to_string", expressions::to_string_int64);
+  rt->registerFunction("to_string", expressions::to_string_float64);
+  rt->registerFunction("to_string", expressions::to_string_bool);
+  rt->registerFunction("to_string", expressions::to_string_timestamp64);
+  rt->registerFunction("to_timestamp64", expressions::to_timestamp64_int64);
+  rt->registerFunction("to_timestamp64", expressions::to_timestamp64_float64);
 
   /* expressions/datetime.h */
-  rt->registerFunction("now", PureFunction(&expressions::nowExpr));
-  rt->registerFunction(
-      "FROM_TIMESTAMP",
-      PureFunction(&expressions::fromTimestamp));
-  rt->registerFunction("date_trunc", PureFunction(&expressions::dateTruncExpr));
-  rt->registerFunction("date_add", PureFunction(&expressions::dateAddExpr));
-  rt->registerFunction("date_sub", PureFunction(&expressions::dateAddExpr));
-  rt->registerFunction("time_at", PureFunction(&expressions::timeAtExpr));
+  rt->registerFunction("now", expressions::now);
+  rt->registerFunction("from_timestamp", expressions::from_timestamp_int64);
+  rt->registerFunction("from_timestamp", expressions::from_timestamp_float64);
+  rt->registerFunction("date_trunc", expressions::date_trunc_timestamp64);
+  //rt->registerFunction("date_add", PureFunction(&expressions::dateAddExpr));
+  //rt->registerFunction("date_sub", PureFunction(&expressions::dateAddExpr));
+  rt->registerFunction("time_at", expressions::time_at);
 
   /* expressions/math.h */
-  rt->registerFunction("add", PureFunction(&expressions::addExpr));
-  rt->registerFunction("sub", PureFunction(&expressions::subExpr));
-  rt->registerFunction("mul", PureFunction(&expressions::mulExpr));
-  rt->registerFunction("div", PureFunction(&expressions::divExpr));
-  rt->registerFunction("mod", PureFunction(&expressions::modExpr));
-  rt->registerFunction("pow", PureFunction(&expressions::powExpr));
-
-  rt->registerFunction("round", PureFunction(&expressions::roundExpr));
-  rt->registerFunction("truncate", PureFunction(&expressions::truncateExpr));
+  rt->registerFunction("add", expressions::add_uint64);
+  rt->registerFunction("add", expressions::add_int64);
+  rt->registerFunction("add", expressions::add_float64);
+  rt->registerFunction("sub", expressions::sub_uint64);
+  rt->registerFunction("sub", expressions::sub_int64);
+  rt->registerFunction("sub", expressions::sub_float64);
+  rt->registerFunction("mul", expressions::mul_uint64);
+  rt->registerFunction("mul", expressions::mul_int64);
+  rt->registerFunction("mul", expressions::mul_float64);
+  rt->registerFunction("div", expressions::div_uint64);
+  rt->registerFunction("div", expressions::div_int64);
+  rt->registerFunction("div", expressions::div_float64);
+  rt->registerFunction("mod", expressions::mod_uint64);
+  rt->registerFunction("mod", expressions::mod_int64);
+  rt->registerFunction("mod", expressions::mod_float64);
+  rt->registerFunction("pow", expressions::pow_uint64);
+  rt->registerFunction("pow", expressions::pow_int64);
+  rt->registerFunction("pow", expressions::pow_float64);
 
   /* expressions/string.h */
-  rt->registerFunction("startswith", PureFunction(&expressions::startsWithExpr));
-  rt->registerFunction("endswith", PureFunction(&expressions::endsWithExpr));
-  rt->registerFunction("uppercase", PureFunction(&expressions::upperCaseExpr));
-  rt->registerFunction("ucase", PureFunction(&expressions::upperCaseExpr));
-  rt->registerFunction("lowercase", PureFunction(&expressions::lowerCaseExpr));
-  rt->registerFunction("lcase", PureFunction(&expressions::lowerCaseExpr));
-  rt->registerFunction("substring", PureFunction(&expressions::subStringExpr));
-  rt->registerFunction("substr", PureFunction(&expressions::subStringExpr));
-  rt->registerFunction("ltrim", PureFunction(&expressions::ltrimExpr));
-  rt->registerFunction("rtrim", PureFunction(&expressions::rtrimExpr));
-  rt->registerFunction("concat", PureFunction(&expressions::concatExpr));
+  rt->registerFunction("startswith", expressions::startswith);
+  rt->registerFunction("endswith", expressions::endswith);
+  rt->registerFunction("lcase", expressions::lcase);
+  rt->registerFunction("lowercase", expressions::lcase);
+  rt->registerFunction("ucase", expressions::ucase);
+  rt->registerFunction("uppercase", expressions::ucase);
+  rt->registerFunction("substring", expressions::substring);
+  rt->registerFunction("substr", expressions::substring);
+  rt->registerFunction("ltrim", expressions::ltrim);
+  rt->registerFunction("rtrim", expressions::rtrim);
+  rt->registerFunction("concat", expressions::concat);
+  rt->registerFunction("add", expressions::concat);
 
   /* expressions/miscellaneous.h */
-  rt->registerFunction("usleep", PureFunction(&expressions::usleepExpr, true));
-  rt->registerFunction("fnv32", PureFunction(&expressions::fnv32Expr));
+  //rt->registerFunction("usleep", PureFunction(&expressions::usleepExpr, true));
+  rt->registerFunction("fnv32", expressions::fnv32);
 
   /* expressions/internal.h */
-  rt->registerFunction("repeat_value", expressions::kRepeatValueExpr);
+  //rt->registerFunction("repeat_value", expressions::kRepeatValueExpr);
 
 }
 

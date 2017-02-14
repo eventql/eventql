@@ -68,16 +68,6 @@ void ResultList::addHeader(const std::vector<std::string>& columns) {
   columns_ = columns;
 }
 
-bool ResultList::addRow(const csql::SValue* row, int row_len) {
-  Vector<String> str_row;
-  for (int i = 0; i < row_len; ++i) {
-    str_row.emplace_back(row[i].getString());
-  }
-
-  rows_.emplace_back(str_row);
-  return true;
-}
-
 void ResultList::addRow(const std::vector<std::string>& row) {
   rows_.emplace_back(row);
 }

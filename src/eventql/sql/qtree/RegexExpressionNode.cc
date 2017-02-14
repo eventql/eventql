@@ -60,6 +60,10 @@ String RegexExpressionNode::toSQL() const {
       sql_escape(pattern_));
 }
 
+SType RegexExpressionNode::getReturnType() const {
+  return SType::BOOL;
+}
+
 void RegexExpressionNode::encode(
     QueryTreeCoder* coder,
     const RegexExpressionNode& node,

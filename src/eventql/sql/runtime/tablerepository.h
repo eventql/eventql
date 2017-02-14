@@ -22,9 +22,8 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
 #include <eventql/util/option.h>
-#include <eventql/sql/backends/backend.h>
-#include <eventql/sql/backends/tableref.h>
 #include <eventql/sql/TableInfo.h>
 #include <eventql/sql/table_provider.h>
 
@@ -33,21 +32,8 @@ class QueryBuilder;
 class Transaction;
 class SequentialScanNode;
 
-#include "eventql/eventql.h"
-
 class TableRepository : public TableProvider {
 public:
-
-  virtual TableRef* getTableRef(const std::string& table_name) const;
-
-  void addTableRef(
-      const std::string& table_name,
-      std::unique_ptr<TableRef>&& table_ref);
-
-  void import(
-      const std::vector<std::string>& tables,
-      const std::string& source_uri,
-      const std::vector<std::unique_ptr<Backend>>& backends);
 
   void addProvider(RefPtr<TableProvider> provider);
 
@@ -61,9 +47,8 @@ public:
       RefPtr<SequentialScanNode> seqscan) const override;
 
 protected:
-  std::unordered_map<std::string, std::unique_ptr<TableRef>> table_refs_;
-
   Vector<RefPtr<TableProvider>> providers_;
 };
 
 } // namespace csql
+

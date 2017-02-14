@@ -54,6 +54,8 @@ public:
 
   const Vector<RefPtr<QueryTreeNode>>& getDrawStatements();
 
+  SType getColumnType(size_t idx) const override;
+
 protected:
   Vector<RefPtr<QueryTreeNode>> draw_stmts_;
 };

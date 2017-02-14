@@ -22,12 +22,12 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/autoref.h>
 #include <eventql/util/SHA1.h>
+#include <eventql/util/return_code.h>
 #include <eventql/sql/svalue.h>
-
-#include "eventql/eventql.h"
 
 namespace csql {
 class TableExpression;
@@ -35,57 +35,40 @@ class TableExpression;
 class ResultCursor {
 public:
 
+  ResultCursor();
+  ResultCursor(ScopedPtr<TableExpression> table_expression);
+
   /**
-   * Fetch the next row from the cursor. Returns true if a row was returned
-   * into the provided storage and false if the last row of the query has been
-   * read (EOF). If this method returns false the provided storage will remain
-   * unchanged.
-   *
-   * This method will block until the next row is available.
+   * Returns true if the cursor is pointing to a valid row
    */
-  virtual bool next(SValue* row, int row_len) = 0;
+  bool isValid() const;
 
-  virtual size_t getNumColumns() = 0;
+  /**
+   * Fetch the next row from the cursor. This method will block until the next
+   * row is available.
+   */
+  ReturnCode next();
 
-};
+  ReturnCode nextBatch();
 
-class DefaultResultCursor : public ResultCursor {
-public:
+  size_t getColumnCount() const;
+  SType getColumnType(size_t idx) const;
+  const std::string& getColumnName(size_t idx) const;
 
-  DefaultResultCursor(
-      size_t num_columns,
-      Function<bool(SValue*, int)> next_fn);
+  std::string getColumnString(size_t idx) const;
+  const void* getColumnData(size_t idx) const;
 
-  bool next(SValue* row, int row_len) override;
-
-  size_t getNumColumns() override;
-
-protected:
-  size_t num_columns_;
-  Function<bool(SValue*, int)> next_fn_;
-};
-
-class TableExpressionResultCursor : public ResultCursor {
-public:
-
-  TableExpressionResultCursor(ScopedPtr<TableExpression> table_expression);
-
-  bool next(SValue* row, int row_len) override;
-
-  size_t getNumColumns() override;
+  size_t getBufferCount() const;
+  const void* getColumnBuffer(size_t idx) const;
+  size_t getColumnBufferSize(size_t idx) const;
 
 protected:
   ScopedPtr<TableExpression> table_expression_;
-  ScopedPtr<ResultCursor> cursor_;
+  bool eof_;
+  std::vector<SVector> buffer_;
+  std::vector<const void*> buffer_cur_;
+  size_t buffer_len_;
 };
 
-class EmptyResultCursor : public ResultCursor {
-public:
+} // namespace csql
 
-  bool next(SValue* row, int row_len) override;
-
-  size_t getNumColumns() override;
-
-};
-
-}

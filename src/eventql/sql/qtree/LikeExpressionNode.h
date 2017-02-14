@@ -47,6 +47,8 @@ public:
 
   String toSQL() const override;
 
+  SType getReturnType() const override;
+
 protected:
   RefPtr<ValueExpressionNode> subject_;
   String pattern_;

@@ -32,11 +32,5 @@ std::string svalueToHuman(const SValue& value);
 std::string formatTime(SValue::TimeType time, const char* fmt = nullptr);
 std::string formatTimeWithRange(SValue::TimeType time, int range);
 
-// FIXPAUL clean up...
-template <typename T>
-std::string toHuman(T value) {
-  SValue sval(value);
-  return sval.getString();
-}
+} // namespace csql
 
-}
