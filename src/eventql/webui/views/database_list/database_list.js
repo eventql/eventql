@@ -65,13 +65,12 @@ EventQL.DatabaseList = function(elem, params) {
 
     query.addEventListener('query_error', function(e) {
       query_mgr.close(query_id);
-      console.log(JSON.parse(e.data).error);
-      //renderQueryError(JSON.parse(e.data).error);
+      renderError("Query Error: " + JSON.parse(e.data).error);
     });
 
     query.addEventListener('error', function(e) {
       query_mgr.close(query_id);
-      //renderQueryError("Server Error");
+      renderError("Server Error");
     });
 
     query.addEventListener('status', function(e) {
@@ -109,7 +108,6 @@ EventQL.DatabaseList = function(elem, params) {
     query.addEventListener('result', function(e) {
       query_mgr.close(query_id);
       var data = JSON.parse(e.data);
-      console.log(data);
       fetchData();
     });
 
@@ -127,6 +125,14 @@ EventQL.DatabaseList = function(elem, params) {
     query.addEventListener('status', function(e) {
       ///renderQueryProgress(JSON.parse(e.data));
     });
+  }
+
+  function renderError(error_txt) {
+    var error_elem = elem.querySelector(".result");
+    var error_message = new EventQL.ErrorMessage(error_elem, {
+      info: error_txt
+    });
+    error_message.render();
   }
 
 };
