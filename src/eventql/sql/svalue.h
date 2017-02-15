@@ -110,6 +110,7 @@ public:
   int64_t getInt64() const;
   double getFloat64() const;
   bool getBool() const;
+  uint64_t getTimestamp64() const;
 
   std::string toString() const;
 

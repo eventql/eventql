@@ -292,6 +292,13 @@ bool SValue::getBool() const {
   return val;
 }
 
+uint64_t SValue::getTimestamp64() const {
+  assert(type_ == SType::TIMESTAMP64);
+  uint64_t val;
+  memcpy(&val, data_, sizeof(uint64_t));
+  return val;
+}
+
 std::string SValue::toString() const {
   return sql_tostring(type_, getData());
 }

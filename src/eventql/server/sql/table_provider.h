@@ -105,6 +105,8 @@ protected:
   InternalAuth* auth_;
 };
 
+std::string encodePartitionKeySQL(KeyspaceType keyspace, const csql::SValue& val);
+
 extern const csql::SFunction evqlVersionExpr;
 
 } // namespace csql
