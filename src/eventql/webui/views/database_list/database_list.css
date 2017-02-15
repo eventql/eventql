@@ -32,7 +32,10 @@
 
 .evql_database_list .evql_modal .body {
   font-size: 13px;
-  line-height: 28px;
+  line-height: 35px;
+  display: flex;
+  flex-direction: row;
+  flex: 1;
 }
 
 .evql_database_list .evql_modal .body label {
@@ -40,3 +43,14 @@
   display: inline-block;
   vertical-align: top;
 }
+
+.evql_database_list .evql_modal .body .input_container {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+}
+
+.evql_database_list .evql_modal .body input.txt {
+  width: 100%;
+}
+
