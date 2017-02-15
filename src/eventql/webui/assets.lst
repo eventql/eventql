@@ -38,6 +38,9 @@ widgets/modal/modal.js
 widgets/navbar/navbar.css
 widgets/navbar/navbar.html
 widgets/navbar/navbar.js
+widgets/error_message/error_message.css
+widgets/error_message/error_message.html
+widgets/error_message/error_message.js
 views/console/console.css
 views/console/console.html
 views/console/console.js

@@ -1,0 +1,46 @@
+.evql_error_message {
+  text-align: center;
+}
+
+.evql_error_message .inner {
+  margin: auto;
+  vertical-align: middle;
+  margin-top: 5%;
+  border-radius: 4px;
+  border: 1px solid #e1e1e1;
+  box-shadow: 0 1px 2px rgba(0,0,0,.09);
+  padding: 50px 100px;
+  text-align: center;
+  display: inline-block;
+}
+
+.evql_error_message h2 {
+  font-weight: 200;
+  font-size: 18px;
+  color: #3e8ad3;
+  text-transform: uppercase;
+}
+
+.evql_error_message h1 {
+  font-size: 22px;
+  font-weight: 400;
+  color: #3e8ad3;
+  margin: 0 0 35px 0;
+}
+
+.evql_error_message p {
+  margin: auto;
+  color: #697886;
+}
+
+.evql_error_message p + p {
+  margin-top: 10px;
+}
+
+.evql_error_message button.btn {
+  margin-top: 30px;
+}
+
+.evql_error_message button.btn.hidden {
+  display: none;
+}
