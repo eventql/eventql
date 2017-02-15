@@ -64,7 +64,7 @@ INIH_LDADD = ${top_builddir}/deps/3rdparty/inih/libinih.a
 MURMURHASH_CFLAGS = -I$(top_srcdir)/deps/3rdparty
 MURMURHASH_LDADD = ${top_builddir}/deps/3rdparty/murmurhash/libmurmurhash.a
 
-AM_CXXFLAGS = -DEVQL_VERSION=\"v@PACKAGE_VERSION@\" -DEVQL_BUILDID=\"$(EVQL_BUILDID)\" $(MYSQL_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -Wno-invalid-offsetof -g -fvisibility=hidden -I@builddir@
+AM_CXXFLAGS = -DEVQL_VERSION=\"v@PACKAGE_VERSION@\" -DEVQL_BUILDID=\"$(EVQL_BUILDID)\" $(MYSQL_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wdelete-non-virtual-dtor -g -fvisibility=hidden -I@builddir@
 AM_CFLAGS = $(SPIDERMONKEY_CFLAGS) $(MYSQL_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -D_GNU_SOURCE -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -g
 AM_LDFLAGS = $(PTHREAD_CFLAGS) -ldl
 
