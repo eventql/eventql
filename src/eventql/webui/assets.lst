@@ -35,6 +35,9 @@ widgets/dropdown/dropdown.css
 widgets/dropdown/dropdown.js
 widgets/modal/modal.css
 widgets/modal/modal.js
+widgets/navbar/navbar.css
+widgets/navbar/navbar.html
+widgets/navbar/navbar.js
 views/console/console.css
 views/console/console.html
 views/console/console.js

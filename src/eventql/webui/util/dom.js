@@ -119,4 +119,3 @@ DOMUtil.textareaSetCursor = function(elem, pos) {
     return;
   }
 };
-

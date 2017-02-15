@@ -35,6 +35,7 @@ EventQL = (function() {
   var router;
   var viewport_elem;
   var current_view;
+  var navbar;
   var api_stubs = {};
 
   var init = function() {
@@ -42,13 +43,14 @@ EventQL = (function() {
 
     api_stubs.evql = new API({});
 
+    navbar = new EventQL.Navbar(document.querySelector(".navbar"));
+    navbar.render();
+
     document.querySelector(".navbar").style.display = "block";
     showLoader();
 
     viewport_elem = document.getElementById("evql_viewport");
     setPath(window.location.pathname + window.location.search);
-
-    DOMUtil.handleLinks(document.querySelector(".navbar"), navigateTo);
 
     /* handle history entry change */
     setTimeout(function() {
@@ -84,6 +86,11 @@ EventQL = (function() {
   };
 
   /** PRIVATE **/
+  function setDatabase(db) {
+    api_stubs.evql.setDatabase(db);
+    navbar.setDatabase(db);
+  }
+
   function setPath(path) {
     if (path == current_path) {
       return;
@@ -98,7 +105,7 @@ EventQL = (function() {
 
     var m = path.match(/\/ui\/([a-z0-9A-Z_-]+)(\/?.*)/);
     if (m) {
-      api_stubs.evql.setDatabase(m[1]);
+      setDatabase(m[1]);
       params.vpath = "/ui/<database>" + m[2];
     } else {
       params.vpath = path;
@@ -182,4 +189,16 @@ EventQL = (function() {
   return this;
 }).apply(EventQL);
 
+EventQL.util = EventQL.util || {};
+EventQL.util.rewriteLinks = function(elem, database) {
+  var elems = elem.querySelectorAll("a");
+  for (var i = 0; i < elems.length; ++i) {
+    elems[i].href = elems[i].href.replace("%database%", database);
+  }
+};
+
+EventQL.util.rewriteAndHandleLinks = function(elem, database) {
+  EventQL.util.rewriteLinks(elem, database);
+  DOMUtil.handleLinks(elem, EventQL.navigateTo);
+}
 
