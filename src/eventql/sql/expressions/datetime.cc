@@ -381,51 +381,14 @@ static Option<uint64_t> parseInterval(String time_interval) {
       time_interval);
   }
 
-  if (unit == "sec" ||
-      unit == "secs" ||
-      unit == "second" ||
-      unit == "seconds") {
-    return Some(num * kMicrosPerSecond);
+  auto unit_value = time_windows.find(unit);
+  if (unit_value != time_windows.end()) {
+    return Some(num * unit_value->second);
+  } else {
+    return None<uint64_t>();
   }
-
-  if (unit == "min" ||
-      unit == "mins" ||
-      unit == "minute" ||
-      unit == "minutes") {
-    return Some(num * kMicrosPerMinute);
-  }
-
-  if (unit == "h" ||
-      unit == "hour" ||
-      unit == "hours") {
-    return Some(num * kMicrosPerHour);
-  }
-
-  if (unit == "d" ||
-      unit == "day" ||
-      unit == "days") {
-    return Some(num * kMicrosPerDay);
-  }
-
-  if (unit == "w" ||
-      unit == "week" ||
-      unit == "weeks") {
-    return Some(num * kMicrosPerWeek);
-  }
-
-  if (unit == "month" ||
-      unit == "months") {
-    return Some(num * kMicrosPerDay * 31);
-  }
-
-  if (unit == "y" ||
-      unit == "year" ||
-      unit == "years") {
-    return Some(num * kMicrosPerYear);
-  }
-
-  return None<uint64_t>();
 }
+
 //
 //void dateSubExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
 //  checkArgs("DATE_SUB", argc, 3);
