@@ -26,7 +26,6 @@
 
 #include "eventql/eventql.h"
 #include "eventql/transport/http/api_servlet.h"
-#include "eventql/util/Language.h"
 #include "eventql/util/human.h"
 #include "eventql/util/wallclock.h"
 #include "eventql/util/io/fileutil.h"
@@ -38,7 +37,6 @@
 #include "eventql/util/protobuf/DynamicMessage.h"
 #include "eventql/util/protobuf/MessageEncoder.h"
 #include "eventql/util/csv/CSVInputStream.h"
-#include "eventql/util/csv/BinaryCSVInputStream.h"
 #include "eventql/db/table_config.pb.h"
 #include "eventql/server/sql/codec/json_codec.h"
 #include "eventql/server/sql/codec/json_sse_codec.h"

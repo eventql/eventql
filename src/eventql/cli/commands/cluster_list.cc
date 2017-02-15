@@ -178,7 +178,7 @@ Status ClusterList::execute(
       goto exit;
     }
 
-    for (int i = 0; ret == 0 && i < result_ncols; ++i) {
+    for (size_t i = 0; ret == 0 && i < result_ncols; ++i) {
       const char* colname;
       size_t colname_len;
       ret = evql_column_name(client, i, &colname, &colname_len);
@@ -201,7 +201,7 @@ Status ClusterList::execute(
 
       ++result_nrows;
       std::vector<std::string> row;
-      for (int i = 0; i < result_ncols; ++i) {
+      for (size_t i = 0; i < result_ncols; ++i) {
         row.emplace_back(fields[i], field_lens[i]);
       }
 

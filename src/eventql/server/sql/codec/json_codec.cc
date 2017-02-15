@@ -38,7 +38,7 @@ void JSONCodec::printResultTable(
   json_->addObjectEntry("columns");
   json_->beginArray();
 
-  for (int n = 0; n < header.size(); ++n) {
+  for (size_t n = 0; n < header.size(); ++n) {
     if (n > 0) {
       json_->addComma();
     }

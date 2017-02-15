@@ -120,8 +120,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/util/ISO8601.h \
     eventql/util/InternMap.cc \
     eventql/util/InternMap.h \
-    eventql/util/Language.cc \
-    eventql/util/Language.h \
     eventql/util/RegExp.cc \
     eventql/util/RegExp.h \
     eventql/util/SHA1.cc \
@@ -190,10 +188,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/util/cli/term.h \
     eventql/util/cidr.cc \
     eventql/util/cidr.h \
-    eventql/util/csv/BinaryCSVInputStream.cc \
-    eventql/util/csv/BinaryCSVInputStream.h \
-    eventql/util/csv/BinaryCSVOutputStream.cc \
-    eventql/util/csv/BinaryCSVOutputStream.h \
     eventql/util/csv/CSVInputStream.cc \
     eventql/util/csv/CSVInputStream.h \
     eventql/util/csv/CSVOutputStream.cc \
@@ -237,8 +231,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/util/io/mmappedfile.h \
     eventql/util/io/outputstream.cc \
     eventql/util/io/outputstream.h \
-    eventql/util/io/pagemanager.cc \
-    eventql/util/io/pagemanager.h \
     eventql/util/json/flatjsonreader.cc \
     eventql/util/json/flatjsonreader.h \
     eventql/util/json/json.cc \
@@ -530,7 +522,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/io/sstable/MetaPage.h \
     eventql/io/sstable/RowWriter.cc \
     eventql/io/sstable/RowWriter.h \
-    eventql/io/sstable/SSTableEditor_impl.h \
     eventql/io/sstable/SSTableServlet.cc \
     eventql/io/sstable/SSTableServlet.h \
     eventql/io/sstable/binaryformat.h \
@@ -540,8 +531,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/io/sstable/SSTableColumnSchema.h \
     eventql/io/sstable/SSTableColumnWriter.cc \
     eventql/io/sstable/SSTableColumnWriter.h \
-    eventql/io/sstable/SSTableEditor.cc \
-    eventql/io/sstable/SSTableEditor.h \
     eventql/io/sstable/SSTableScan.cc \
     eventql/io/sstable/SSTableScan.h \
     eventql/io/sstable/SSTableWriter.cc \
@@ -825,8 +814,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/db/partition_writer.h \
     eventql/db/partition_arena.cc \
     eventql/db/partition_arena.h \
-    eventql/db/record_set.cc \
-    eventql/db/record_set.h \
     eventql/db/replication_state.cc \
     eventql/db/replication_state.h \
     eventql/db/replication_worker.cc \

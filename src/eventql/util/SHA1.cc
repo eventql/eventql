@@ -37,7 +37,7 @@ SHA1Hash SHA1Hash::fromHexString(const String& str) {
   };
 
   size_t off = 0;
-  for (int i = 0; i < str.size() && off < SHA1Hash::kSize; i += 2) {
+  for (size_t i = 0; i < str.size() && off < SHA1Hash::kSize; i += 2) {
     hash.hash[off++] = (decode_char(str[i]) << 4) + decode_char(str[i + 1]);
   }
 

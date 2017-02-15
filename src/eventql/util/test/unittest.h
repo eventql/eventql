@@ -192,7 +192,7 @@ public:
 
     fprintf(stderr, "%s\n", name_);
 
-    int num_tests_passed = 0;
+    size_t num_tests_passed = 0;
     std::unordered_map<const TestCase*, Exception> errors;
 
     for (auto test_case : cases_) {
@@ -225,9 +225,10 @@ public:
         }
       }
 
-      fprintf(stderr, 
+      fprintf(
+          stderr,
           "\n\033[1;31m[FAIL] %i/%i tests failed :(\e[0m\n",
-          (int) cases_.size() - num_tests_passed,
+          (int) (cases_.size() - num_tests_passed),
           (int) cases_.size());
       return 1;
     }

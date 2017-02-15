@@ -24,10 +24,8 @@
 #pragma once
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/io/file.h>
-#include <eventql/util/io/pagemanager.h>
 #include <eventql/io/sstable/MetaPage.h>
 #include <eventql/util/exception.h>
-
 
 namespace sstable {
 

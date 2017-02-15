@@ -155,7 +155,7 @@ size_t File::read(Buffer* buf) {
 void File::write(const void* buf, size_t buf_len) {
   int res = ::write(fd_, buf, buf_len);
 
-  if (res < 0 || res != buf_len) {
+  if (res < 0 || size_t(res) != buf_len) {
     RAISE_ERRNO(kIOError, "write(%i) failed", fd_);
   }
 }
@@ -171,7 +171,7 @@ void File::write(const String& buf) {
 void File::pwrite(uint64_t position, const void* buf, size_t buf_len) {
   int res = ::pwrite(fd_, buf, buf_len, position);
 
-  if (res < 0 || res != buf_len) {
+  if (res < 0 || size_t(res) != buf_len) {
     RAISE_ERRNO(kIOError, "write(%i) failed", fd_);
   }
 }

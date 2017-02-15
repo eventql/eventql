@@ -129,7 +129,7 @@ Set<SHA1Hash> LSMPartitionWriter::insertRecords(
 
   snap = head_->getSnapshot();
   const auto& tables = snap->state.lsm_tables();
-  if (tables.size() > kMaxLSMTables) {
+  if (size_t(tables.size()) > kMaxLSMTables) {
     RAISE(kRuntimeError, "partition is overloaded, can't insert");
   }
 
@@ -396,7 +396,7 @@ bool LSMPartitionWriter::compact(bool force /* = false */) {
   ScopedLock<std::mutex> write_lk(mutex_);
   snap = head_->getSnapshot()->clone();
 
-  if (snap->state.lsm_tables().size() < old_tables.size()) {
+  if (size_t(snap->state.lsm_tables().size()) < old_tables.size()) {
     RAISE(kConcurrentModificationError, "concurrent compaction");
   }
 
