@@ -19,6 +19,8 @@ LMDB_LDADD = ${top_builddir}/deps/3rdparty/liblmdb/liblmdb.a
 INIH_CFLAGS = -I$(top_srcdir)/deps/3rdparty
 INIH_LDADD = ${top_builddir}/deps/3rdparty/inih/libinih.a
 
+MURMURHASH_CFLAGS = -I$(top_srcdir)/deps/3rdparty
+MURMURHASH_LDADD = ${top_builddir}/deps/3rdparty/murmurhash/libmurmurhash.a
 
 TESTS = \
   evql-test-unit-metadata_file \
@@ -46,6 +48,7 @@ evql_test_unit_metadata_file_LDADD = \
     @top_builddir@/src/libevqlcore.a \
     @top_builddir@/src/libevqlclient.la \
     $(INIH_LDADD) \
+    $(MURMURHASH_LDADD) \
     $(SIMDCOMP_LDADD) \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD)
@@ -55,6 +58,7 @@ evql_test_unit_metadata_store_LDADD = \
     @top_builddir@/src/libevqlcore.a \
     @top_builddir@/src/libevqlclient.la \
     $(INIH_LDADD) \
+    $(MURMURHASH_LDADD) \
     $(SIMDCOMP_LDADD) \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD)
@@ -64,6 +68,7 @@ evql_test_unit_metadata_operation_split_LDADD = \
     @top_builddir@/src/libevqlcore.a \
     @top_builddir@/src/libevqlclient.la \
     $(INIH_LDADD) \
+    $(MURMURHASH_LDADD) \
     $(SIMDCOMP_LDADD) \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD)
@@ -73,6 +78,7 @@ evql_test_unit_metadata_operation_createpartition_LDADD = \
     @top_builddir@/src/libevqlcore.a \
     @top_builddir@/src/libevqlclient.la \
     $(INIH_LDADD) \
+    $(MURMURHASH_LDADD) \
     $(SIMDCOMP_LDADD) \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD)
@@ -82,6 +88,7 @@ evql_test_unit_partition_discovery_LDADD = \
     @top_builddir@/src/libevqlcore.a \
     @top_builddir@/src/libevqlclient.la \
     $(INIH_LDADD) \
+    $(MURMURHASH_LDADD) \
     $(SIMDCOMP_LDADD) \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD)
@@ -91,6 +98,7 @@ evql_test_unit_sql_parser_LDADD = \
     @top_builddir@/src/libevqlcore.a \
     @top_builddir@/src/libevqlclient.la \
     $(INIH_LDADD) \
+    $(MURMURHASH_LDADD) \
     $(SIMDCOMP_LDADD) \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD)
@@ -100,6 +108,7 @@ evql_test_unit_sql_qtree_LDADD = \
     @top_builddir@/src/libevqlcore.a \
     @top_builddir@/src/libevqlclient.la \
     $(INIH_LDADD) \
+    $(MURMURHASH_LDADD) \
     $(SIMDCOMP_LDADD) \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD)
@@ -109,6 +118,7 @@ evql_test_sql_LDADD = \
     @top_builddir@/src/libevqlcore.a \
     @top_builddir@/src/libevqlclient.la \
     $(INIH_LDADD) \
+    $(MURMURHASH_LDADD) \
     $(SIMDCOMP_LDADD) \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD)
