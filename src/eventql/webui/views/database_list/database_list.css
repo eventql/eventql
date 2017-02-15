@@ -24,10 +24,20 @@
 
 .evql_database_list table.evql_table {
   border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
 }
 
 .evql_database_list table.evql_table th {
   background: transparent;
+}
+
+.evql_database_list .empty_result {
+  margin-top: 30px;
+}
+
+.evql_database_list .empty_result p.info {
+  text-align: center;
+  color: #697886;
 }
 
 .evql_database_list .evql_modal .body {

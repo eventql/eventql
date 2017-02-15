@@ -206,6 +206,11 @@ table.evql_table tbody tr:first-child td {
   border-top: none;
 }
 
+table.evql_table tbody tr:hover td {
+  cursor: pointer;
+  background-color: rgba(113, 32, 147, .07);
+}
+
 button.btn {
   color: #fff;
   cursor: pointer;
