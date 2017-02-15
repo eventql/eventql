@@ -22,8 +22,15 @@
  * code of your own applications
  */
 #include <eventql/sql/statements/select/hash_join.h>
+#include <murmurhash/murmur3.h>
 
 namespace csql {
+
+static uint32_t computeHash(const char* data, size_t size) {
+  uint32_t hash;
+  MurmurHash3_x86_32(data, size, 42, &hash);
+  return hash;
+}
 
 HashJoin::HashJoin(
     Transaction* txn,
@@ -164,7 +171,7 @@ ReturnCode HashJoin::computeInnerJoin(
         hash_key_tpl_types.data(),
         hash_key_tpl_types.size());
 
-    auto hash_key = SHA1::compute(vm_stack_.top, hash_key_tpl_len);
+    auto hash_key = computeHash(vm_stack_.top, hash_key_tpl_len);
     vm::popStack(&vm_stack_, hash_key_tpl_len);
 
     auto joined_data_range = joined_tbl_data_.equal_range(hash_key);
@@ -320,7 +327,7 @@ ReturnCode HashJoin::readJoinedTable() {
           hash_key_tpl_types.data(),
           hash_key_tpl_types.size());
 
-      auto hash_key = SHA1::compute(vm_stack_.top, hash_key_tpl_len);
+      auto hash_key = computeHash(vm_stack_.top, hash_key_tpl_len);
       vm::popStack(&vm_stack_, hash_key_tpl_len);
 
       joined_tbl_data_.emplace(hash_key, row);
