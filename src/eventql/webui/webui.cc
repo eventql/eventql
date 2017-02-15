@@ -49,10 +49,10 @@ void WebUIServlet::handleHTTPRequest(
     return;
   }
 
-  if (uri.path() == "/ui/favicon.ico") {
+  if (uri.path() == "/ui/favicon.png") {
     res.setStatus(http::kStatusOK);
     res.addHeader("Content-Type", "image/x-icon");
-    res.addBody(getAssetFile("favicon.ico"));
+    res.addBody(getAssetFile("favicon.png"));
     res_stream->writeResponse(res);
     return;
   }
