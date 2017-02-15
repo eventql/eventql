@@ -269,10 +269,11 @@ Status runTest(const std::string& test, OutputFormat output_format) {
       tables->addProvider(new CSTableScanProvider(table_name, table_path));
     }
 
-    sql_is->readUntilEOF(&query);
   } else {
     query = sql_first_line;
   }
+
+  sql_is->readUntilEOF(&query);
 
 
   /* execute query */
