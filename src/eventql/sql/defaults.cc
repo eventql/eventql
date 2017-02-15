@@ -120,7 +120,7 @@ void installDefaultSymbols(SymbolTable* rt) {
   rt->registerFunction("from_timestamp", expressions::from_timestamp_float64);
   rt->registerFunction("date_trunc", expressions::date_trunc_timestamp64);
   rt->registerFunction("date_add", expressions::date_add_timestamp64);
-  //rt->registerFunction("date_sub", PureFunction(&expressions::dateAddExpr));
+  rt->registerFunction("date_sub", expressions::date_sub_timestamp64);
   rt->registerFunction("time_at", expressions::time_at);
 
   /* expressions/math.h */
