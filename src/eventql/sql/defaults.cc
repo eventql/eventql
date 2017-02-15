@@ -47,6 +47,7 @@ void installDefaultSymbols(SymbolTable* rt) {
 
   /* expressions/aggregate.h */
   rt->registerFunction("count", expressions::count);
+  rt->registerFunction("count_distinct", expressions::count_distinct_uint64);
   rt->registerFunction("sum", expressions::sum_int64);
   rt->registerFunction("sum", expressions::sum_uint64);
   //rt->registerFunction("max", expressions::kMaxExpr);

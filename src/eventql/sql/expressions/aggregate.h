@@ -30,6 +30,8 @@ namespace csql {
 namespace expressions {
 
 extern const SFunction count;
+extern const SFunction count_distinct_uint64;
+
 extern const SFunction sum_int64;
 extern const SFunction sum_uint64;
 
