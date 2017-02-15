@@ -19,6 +19,17 @@ else
   AC_MSG_RESULT(["disabled"])
 fi
 
+# --enable-jsengine
+AC_MSG_CHECKING([Feature: builtin javascript engine])
+AC_ARG_ENABLE([jsengine], AS_HELP_STRING([--enable-jsengine], [Enable javascript engine]))
+AM_CONDITIONAL([ENABLE_JSENGINE], [test "x$enable_jsengine" = "xyes"])
+AC_SUBST(ENABLE_JSENGINE)
+if test "x$enable_jsengine" = "xyes"; then
+  AC_MSG_RESULT(["enabled"])
+else
+  AC_MSG_RESULT(["disabled"])
+fi
+
 # --enable-embedded-server
 AC_MSG_CHECKING([Feature: Build Embedded Server: libevql_server.a])
 AC_ARG_ENABLE([embedded-server], AS_HELP_STRING([--enable-embedded-server], [Enable embedded server]))

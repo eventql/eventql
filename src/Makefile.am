@@ -1,5 +1,3 @@
-# Process this file with automake to produce Makefile.in
-
 bin_PROGRAMS = evql evqld evqlctl evqlbench evqlslap cstable_tool
 lib_LTLIBRARIES = libevqlclient.la
 check_LIBRARIES = libevqlcore.a
@@ -37,8 +35,13 @@ else
 GETHOSTBYNAME_R_DEF =
 endif
 
-SPIDERMONKEY_CFLAGS = -I$(top_builddir)/deps/3rdparty/spidermonkey/out/dist/include
+if ENABLE_JSENGINE
+SPIDERMONKEY_CFLAGS = -I$(top_builddir)/deps/3rdparty/spidermonkey/out/dist/include -DENABLE_JSENGINE
 SPIDERMONKEY_LDADD = ${top_builddir}/deps/3rdparty/spidermonkey/out/dist/lib/libjs_static.a
+else
+SPIDERMONKEY_CFLAGS =
+SPIDERMONKEY_LDADD =
+endif
 
 ZOOKEEPER_CFLAGS = -I$(top_srcdir)/deps/3rdparty/zookeeper/source/include -I$(top_srcdir)/deps/3rdparty/zookeeper/source/generated
 ZOOKEEPER_LDADD = ${top_builddir}/deps/3rdparty/zookeeper/libzkmt.a ${top_builddir}/deps/3rdparty/zookeeper/libhashtable.a

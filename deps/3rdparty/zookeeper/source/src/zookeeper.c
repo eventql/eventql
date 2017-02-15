@@ -723,7 +723,9 @@ static void log_env() {
   uid_t uid = 0;
 #endif
 
+#ifdef PACKAGE_STRING
   LOG_INFO(("Client environment:zookeeper.version=%s", PACKAGE_STRING));
+#endif
 
 #ifdef HAVE_GETHOSTNAME
   gethostname(buf, sizeof(buf));

@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <pthread.h>
 #include <eventql/db/database.h>
 #include <eventql/util/autoref.h>
 #include "eventql/util/io/FileLock.h"
@@ -67,15 +68,17 @@
 #include "eventql/auth/client_auth_legacy.h"
 #include "eventql/auth/internal_auth.h"
 #include "eventql/auth/internal_auth_trust.h"
-#include <jsapi.h>
 #include "eventql/mapreduce/mapreduce_preludejs.cc"
 #include "eventql/eventql.h"
 #include "eventql/db/file_tracker.h"
-#include <pthread.h>
+
+#ifdef ENABLE_JSENGINE
+#include <jsapi.h>
 
 namespace js {
 void DisableExtraThreads();
 }
+#endif
 
 namespace eventql {
 
@@ -373,8 +376,10 @@ ReturnCode DatabaseImpl::start() {
   }
 
   /* spidermonkey javascript runtime */
+#ifdef ENABLE_JSENGINE
   JS_Init();
   js::DisableExtraThreads();
+#endif
   __eventql_mapreduce_prelude_js.registerAsset();
 
   /* more services */
