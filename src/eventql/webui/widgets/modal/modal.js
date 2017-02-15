@@ -47,13 +47,22 @@ EventQL.Modal = function(elem) {
     }
   };
 
+  var on_click = function(e) {
+    e.stopPropagation();
+  };
+
   this.onSubmit = function(callback_fn) {
     on_submit.push(callback_fn);
   };
 
   this.show = function() {
     elem.classList.add("active");
+
     document.addEventListener('keyup', on_escape, false);
+    elem.addEventListener("click", close, false);
+
+    var modal_window = elem.querySelector(".modal_window");
+    modal_window.addEventListener("click", on_click, false);
   };
 
   this.close = function() {
@@ -62,7 +71,12 @@ EventQL.Modal = function(elem) {
 
   function close() {
     elem.classList.remove("active");
+
     document.removeEventListener('keyup', on_escape, false);
+    elem.removeEventListener("click", close, false);
+
+    var modal_window = elem.querySelector(".modal_window");
+    modal_window.removeEventListener("click", on_click, false);
   }
 };
 

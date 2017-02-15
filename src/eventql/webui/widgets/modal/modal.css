@@ -26,6 +26,7 @@
   background: #fafafa;
   vertical-align: center;
   padding: 10px 50px;
+  border-radius: 2px;
 }
 
 .evql_modal .modal_window .header {
