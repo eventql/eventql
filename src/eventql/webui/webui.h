@@ -30,8 +30,6 @@ namespace eventql {
 class WebUIServlet : public http::StreamingHTTPService {
 public:
 
-  WebUIServlet();
-
   void handleHTTPRequest(
       RefPtr<http::HTTPRequestStream> req_stream,
       RefPtr<http::HTTPResponseStream> res_stream);

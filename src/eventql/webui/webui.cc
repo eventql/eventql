@@ -27,8 +27,6 @@
 
 namespace eventql {
 
-WebUIServlet::WebUIServlet() {}
-
 void WebUIServlet::handleHTTPRequest(
     RefPtr<http::HTTPRequestStream> req_stream,
     RefPtr<http::HTTPResponseStream> res_stream) {
