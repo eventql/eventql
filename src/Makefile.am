@@ -950,6 +950,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/http/http_auth.h \
     eventql/transport/http/status_servlet.cc \
     eventql/transport/http/status_servlet.h \
+    eventql/webui/webui.cc \
+    eventql/webui/webui.h \
     eventql/util/mdb/MDB.cc \
     eventql/util/mdb/MDB.h \
     eventql/util/mdb/MDBUtil.h \
@@ -966,8 +968,6 @@ eventql/mapreduce/mapreduce_preludejs.cc:
 evqld_SOURCES = \
     ${EVQL_CORE_SOURCES_} \
     ${EVQL_PROTO_SOURCES_} \
-    eventql/webui/webui.cc \
-    eventql/webui/webui.h \
     eventql/evqld.cc
 
 evqld_LDADD = \
