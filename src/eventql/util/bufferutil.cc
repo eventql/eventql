@@ -49,14 +49,14 @@ std::string BufferUtil::hexPrint(
   std::string str;
 
   if (reverse) {
-    for (int i = size - 1; i >= 0; --i) {
+    for (size_t i = size - 1; i-- > 0; ) {
       if (sep && i < size - 1) { str += " "; }
       auto byte = data[i];
       str += hexTable[(byte & 0xf0) >> 4];
       str += hexTable[byte & 0x0f];
     }
   } else {
-    for (int i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i) {
       if (sep && i > 0) { str += " "; }
       auto byte = data[i];
       str += hexTable[(byte & 0xf0) >> 4];

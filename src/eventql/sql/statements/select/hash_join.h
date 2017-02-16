@@ -70,7 +70,7 @@ protected:
   ScopedPtr<TableExpression> base_tbl_;
   ScopedPtr<TableExpression> joined_tbl_;
   std::vector<SVector> base_tbl_cols_;
-  std::unordered_multimap<SHA1Hash, std::vector<SValue>> joined_tbl_data_;
+  std::unordered_multimap<uint32_t, std::vector<SValue>> joined_tbl_data_;
   VMStack vm_stack_;
 };
 

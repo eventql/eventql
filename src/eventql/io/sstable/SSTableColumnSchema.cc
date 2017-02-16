@@ -23,10 +23,8 @@
  */
 #include <eventql/io/sstable/SSTableColumnSchema.h>
 #include <eventql/io/sstable/sstablereader.h>
-#include <eventql/io/sstable/SSTableEditor.h>
 #include <eventql/util/util/binarymessagereader.h>
 #include <eventql/util/util/binarymessagewriter.h>
-
 
 namespace sstable {
 
@@ -91,13 +89,6 @@ void SSTableColumnSchema::writeIndex(Buffer* buf) {
   }
 
   buf->append(writer.data(), writer.size());
-}
-
-void SSTableColumnSchema::writeIndex(SSTableEditor* sstable_writer) {
-  Buffer buf;
-  writeIndex(&buf);
-
-  sstable_writer->writeIndex(SSTableColumnSchema::kSSTableIndexID, buf);
 }
 
 void SSTableColumnSchema::loadIndex(const Buffer& buf) {

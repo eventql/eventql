@@ -135,13 +135,19 @@ ReturnCode TCPConnection::recvFrame(
     return rc;
   }
 
-  *opcode = ntohs(*((uint16_t*) &header[0]));
-  uint16_t flags = ntohs(*((uint16_t*) &header[2]));
-  uint32_t payload_len = ntohl(*((uint32_t*) &header[4]));
+  memcpy(opcode, &header[0], sizeof(uint16_t));
+  *opcode = ntohs(*opcode);
+
+  uint16_t flags;
+  memcpy(&flags, &header[2], sizeof(uint16_t));
+  flags = ntohs(flags);
   if (recvflags) {
     *recvflags = flags;
   }
 
+  uint32_t payload_len;
+  memcpy(&payload_len, &header[4], sizeof(uint32_t));
+  payload_len = ntohl(payload_len);
   if (payload_len > kMaxFrameSize) {
     close();
     return ReturnCode::error("EIO", "received invalid frame header");

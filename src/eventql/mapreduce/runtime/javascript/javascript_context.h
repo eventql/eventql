@@ -22,22 +22,25 @@
  * code of your own applications
  */
 #pragma once
+#include "eventql/eventql.h"
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/autoref.h"
 #include "eventql/util/option.h"
 #include "eventql/db/table_service.h"
 #include "eventql/mapreduce/mapreduce_task_builder.h"
 #include "eventql/mapreduce/mapreduce_scheduler.h"
+#if ENABLE_JSENGINE
 #include <jsapi.h>
-
-#include "eventql/eventql.h"
+#endif
 
 namespace eventql {
 
 class JavaScriptContext : public RefCounted {
 public:
   static const size_t kDefaultMemLimit = 1024 * 1024 * 128;
+#if ENABLE_JSENGINE
   static JSClass kGlobalJSClass;
+#endif
 
   JavaScriptContext(
       const String& customer,
@@ -71,6 +74,7 @@ public:
 
 protected:
 
+#if ENABLE_JSENGINE
   struct ReduceCollectionIter {
     static JSClass kJSClass;
     static bool hasNext(JSContext* ctx, unsigned argc, JS::Value* vp);
@@ -124,6 +128,7 @@ protected:
   String current_error_;
   size_t current_error_line_;
   size_t current_error_column_;
+#endif
 };
 
 } // namespace eventql

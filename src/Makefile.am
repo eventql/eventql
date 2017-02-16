@@ -1,5 +1,3 @@
-# Process this file with automake to produce Makefile.in
-
 bin_PROGRAMS = evql evqld evqlctl evqlbench evqlslap cstable_tool
 lib_LTLIBRARIES = libevqlclient.la
 check_LIBRARIES = libevqlcore.a
@@ -37,8 +35,13 @@ else
 GETHOSTBYNAME_R_DEF =
 endif
 
-SPIDERMONKEY_CFLAGS = -I$(top_builddir)/deps/3rdparty/spidermonkey/out/dist/include
+if ENABLE_JSENGINE
+SPIDERMONKEY_CFLAGS = -I$(top_builddir)/deps/3rdparty/spidermonkey/out/dist/include -DENABLE_JSENGINE
 SPIDERMONKEY_LDADD = ${top_builddir}/deps/3rdparty/spidermonkey/out/dist/lib/libjs_static.a
+else
+SPIDERMONKEY_CFLAGS =
+SPIDERMONKEY_LDADD =
+endif
 
 ZOOKEEPER_CFLAGS = -I$(top_srcdir)/deps/3rdparty/zookeeper/source/include -I$(top_srcdir)/deps/3rdparty/zookeeper/source/generated
 ZOOKEEPER_LDADD = ${top_builddir}/deps/3rdparty/zookeeper/libzkmt.a ${top_builddir}/deps/3rdparty/zookeeper/libhashtable.a
@@ -58,7 +61,10 @@ LMDB_LDADD = ${top_builddir}/deps/3rdparty/liblmdb/liblmdb.a
 INIH_CFLAGS = -I$(top_srcdir)/deps/3rdparty
 INIH_LDADD = ${top_builddir}/deps/3rdparty/inih/libinih.a
 
-AM_CXXFLAGS = -DEVQL_VERSION=\"v@PACKAGE_VERSION@\" -DEVQL_BUILDID=\"$(EVQL_BUILDID)\" $(MYSQL_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wno-sign-compare -Wdelete-non-virtual-dtor -Wno-predefined-identifier-outside-function -Wno-invalid-offsetof -g -fvisibility=hidden -I@builddir@
+MURMURHASH_CFLAGS = -I$(top_srcdir)/deps/3rdparty
+MURMURHASH_LDADD = ${top_builddir}/deps/3rdparty/murmurhash/libmurmurhash.a
+
+AM_CXXFLAGS = -DEVQL_VERSION=\"v@PACKAGE_VERSION@\" -DEVQL_BUILDID=\"$(EVQL_BUILDID)\" $(MYSQL_CFLAGS) $(SPIDERMONKEY_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c++0x -ftemplate-depth=500 -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -Wextra -Wno-unused-parameter -Wdelete-non-virtual-dtor -g -fvisibility=hidden -I@builddir@
 AM_CFLAGS = $(SPIDERMONKEY_CFLAGS) $(MYSQL_CFLAGS) $(ZOOKEEPER_CFLAGS) $(INIH_CFLAGS) $(SIMDCOMP_CFLAGS) $(LINENOISE_CLFAGS) $(PROTOBUF_CFLAGS) $(PTHREAD_CFLAGS) $(PTHREAD_DEF) $(SYSLOG_DEF) $(ZLIB_DEF) $(GETHOSTBYNAME_R_DEF) -std=c11 -D_GNU_SOURCE -mno-omit-leaf-frame-pointer -fno-omit-frame-pointer -Wall -pedantic -g
 AM_LDFLAGS = $(PTHREAD_CFLAGS) -ldl
 
@@ -114,8 +120,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/util/ISO8601.h \
     eventql/util/InternMap.cc \
     eventql/util/InternMap.h \
-    eventql/util/Language.cc \
-    eventql/util/Language.h \
     eventql/util/RegExp.cc \
     eventql/util/RegExp.h \
     eventql/util/SHA1.cc \
@@ -184,10 +188,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/util/cli/term.h \
     eventql/util/cidr.cc \
     eventql/util/cidr.h \
-    eventql/util/csv/BinaryCSVInputStream.cc \
-    eventql/util/csv/BinaryCSVInputStream.h \
-    eventql/util/csv/BinaryCSVOutputStream.cc \
-    eventql/util/csv/BinaryCSVOutputStream.h \
     eventql/util/csv/CSVInputStream.cc \
     eventql/util/csv/CSVInputStream.h \
     eventql/util/csv/CSVOutputStream.cc \
@@ -231,8 +231,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/util/io/mmappedfile.h \
     eventql/util/io/outputstream.cc \
     eventql/util/io/outputstream.h \
-    eventql/util/io/pagemanager.cc \
-    eventql/util/io/pagemanager.h \
     eventql/util/json/flatjsonreader.cc \
     eventql/util/json/flatjsonreader.h \
     eventql/util/json/json.cc \
@@ -524,7 +522,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/io/sstable/MetaPage.h \
     eventql/io/sstable/RowWriter.cc \
     eventql/io/sstable/RowWriter.h \
-    eventql/io/sstable/SSTableEditor_impl.h \
     eventql/io/sstable/SSTableServlet.cc \
     eventql/io/sstable/SSTableServlet.h \
     eventql/io/sstable/binaryformat.h \
@@ -534,8 +531,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/io/sstable/SSTableColumnSchema.h \
     eventql/io/sstable/SSTableColumnWriter.cc \
     eventql/io/sstable/SSTableColumnWriter.h \
-    eventql/io/sstable/SSTableEditor.cc \
-    eventql/io/sstable/SSTableEditor.h \
     eventql/io/sstable/SSTableScan.cc \
     eventql/io/sstable/SSTableScan.h \
     eventql/io/sstable/SSTableWriter.cc \
@@ -823,8 +818,6 @@ EVQL_CORE_SOURCES_ = \
     eventql/db/partition_writer.h \
     eventql/db/partition_arena.cc \
     eventql/db/partition_arena.h \
-    eventql/db/record_set.cc \
-    eventql/db/record_set.h \
     eventql/db/replication_state.cc \
     eventql/db/replication_state.h \
     eventql/db/replication_worker.cc \
@@ -981,6 +974,7 @@ evqld_LDADD = \
     $(ZOOKEEPER_LDADD) \
     $(LINENOISE_LDADD) \
     $(INIH_LDADD) \
+    $(MURMURHASH_LDADD) \
     $(SIMDCOMP_LDADD) \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD) \
@@ -1001,6 +995,7 @@ evql_LDADD = \
     $(ZOOKEEPER_LDADD) \
     $(LINENOISE_LDADD) \
     $(INIH_LDADD) \
+    $(MURMURHASH_LDADD) \
     $(SIMDCOMP_LDADD) \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD) \
@@ -1042,6 +1037,7 @@ evqlctl_LDADD = \
     libevqlclient.la \
     $(SIMDCOMP_LDADD) \
     $(INIH_LDADD) \
+    $(MURMURHASH_LDADD) \
     $(ZOOKEEPER_LDADD) \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD) \
@@ -1063,6 +1059,7 @@ evqlbench_LDADD = \
     libevqlclient.la \
     $(SIMDCOMP_LDADD) \
     $(INIH_LDADD) \
+    $(MURMURHASH_LDADD) \
     $(ZOOKEEPER_LDADD) \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD) \
@@ -1083,6 +1080,7 @@ evqlslap_LDADD = \
     $(ZOOKEEPER_LDADD) \
     $(LINENOISE_LDADD) \
     $(INIH_LDADD) \
+    $(MURMURHASH_LDADD) \
     $(SIMDCOMP_LDADD) \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD) \
@@ -1101,6 +1099,7 @@ cstable_tool_LDADD = \
     $(ZOOKEEPER_LDADD) \
     $(LINENOISE_LDADD) \
     $(INIH_LDADD) \
+    $(MURMURHASH_LDADD) \
     $(SIMDCOMP_LDADD) \
     $(LMDB_LDADD) \
     $(PROTOBUF_LDADD) \

@@ -129,7 +129,7 @@ void FlagParser::parseArgv(int argc, const char** argv) {
 
 // FIXPAUL optimize with hashmap?
 void FlagParser::parseArgv(const std::vector<std::string>& argv) {
-  for (int i = 0; i < argv.size(); i++) {
+  for (size_t i = 0; i < argv.size(); i++) {
     int eq_len = -1;
     FlagState* flag_ptr = nullptr;
     auto& arg = argv[i];
@@ -177,7 +177,7 @@ void FlagParser::parseArgv(const std::vector<std::string>& argv) {
     } else if (flag_ptr->type == T_SWITCH) {
       flag_ptr->values.emplace_back("true");
     } else if (eq_len > 0) {
-      if (arg.size() == eq_len) {
+      if (arg.size() == size_t(eq_len)) {
         RAISE(kFlagError, "flag --%s=... has no value", flag_ptr->longopt);
       }
 

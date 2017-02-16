@@ -58,20 +58,7 @@ KeyRange TSDBTableProvider::findKeyRange(
       continue;
     }
 
-    String val;
-    try {
-      auto cval_str = c.value.toString();
-      switch (keyspace) {
-        case KEYSPACE_UINT64:
-          val = encodePartitionKey(keyspace, std::to_string(std::stoull(cval_str)));
-          break;
-        case KEYSPACE_STRING:
-          val = encodePartitionKey(keyspace, cval_str);
-          break;
-      }
-    } catch (const StandardException& e) {
-      continue;
-    }
+    auto val = encodePartitionKeySQL(keyspace, c.value);
 
     switch (c.type) {
       case csql::ScanConstraintType::EQUAL_TO:
@@ -610,18 +597,7 @@ RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
       continue;
     }
 
-    std::string c_val;
-    switch (c.value.getType()) {
-      auto cval_str = c.value.toString();
-      switch (pkeyspace) {
-        case KEYSPACE_UINT64:
-          c_val = encodePartitionKey(pkeyspace, std::to_string(std::stoull(cval_str)));
-          break;
-        case KEYSPACE_STRING:
-          c_val = encodePartitionKey(pkeyspace, cval_str);
-          break;
-      }
-    }
+    auto c_val = encodePartitionKeySQL(pkeyspace, c.value);
 
     switch (c.type) {
 
@@ -641,7 +617,7 @@ RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
       case csql::ScanConstraintType::GREATER_THAN:
       case csql::ScanConstraintType::GREATER_THAN_OR_EQUAL_TO:
         if (keyrange_begin.size() > 0 &&
-            comparePartitionKeys( pkeyspace, c_val, keyrange_begin) <= 0) {
+            comparePartitionKeys(pkeyspace, c_val, keyrange_begin) <= 0) {
           break;
         } else {
           continue;
@@ -661,6 +637,27 @@ RefPtr<csql::ValueExpressionNode> TSDBTableProvider::simplifyWhereExpression(
   }
 
   return expr;
+}
+
+std::string encodePartitionKeySQL(KeyspaceType keyspace, const csql::SValue& val) {
+  switch (val.getType()) {
+    case csql::SType::UINT64:
+      return encodePartitionKey(keyspace, std::to_string(val.getUInt64()));
+    case csql::SType::INT64:
+      return encodePartitionKey(keyspace, std::to_string(val.getInt64()));
+    case csql::SType::FLOAT64:
+      return encodePartitionKey(keyspace, std::to_string(val.getFloat64()));
+    case csql::SType::BOOL:
+      return encodePartitionKey(keyspace, std::to_string(val.getBool()));
+    case csql::SType::STRING:
+      return encodePartitionKey(keyspace, val.toString());
+    case csql::SType::TIMESTAMP64:
+      return encodePartitionKey(keyspace, std::to_string(val.getTimestamp64()));
+    case csql::SType::NIL:
+      break;
+  }
+
+  throw std::runtime_error("invalid SType");
 }
 
 void evql_version(sql_txn* ctx, csql::VMStack* stack) {

@@ -131,7 +131,7 @@ ReturnCode performOperation_QUERY(
     }
 
     auto num_statements = qplan->numStatements();
-    for (int i = 0; i < num_statements; ++i) {
+    for (size_t i = 0; i < num_statements; ++i) {
       /* execute query */
       auto result_cursor = qplan->execute(i);
       QueryResultFrame r_frame(qplan->getStatementgetResultColumns(i));

@@ -173,7 +173,7 @@ void Monitor::startMonitorThread() {
       lk.lock();
 
       auto runtime = t1 - t0;
-      auto delay = dbctx_->config->getInt(
+      size_t delay = dbctx_->config->getInt(
           "server.loadinfo_publish_interval").get();
 
       if (runtime > delay) {

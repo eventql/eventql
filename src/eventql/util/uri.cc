@@ -291,7 +291,6 @@ void URI::parseURI(
   const char* end = begin + uri_str.size();
 
   /* scheme */
-  bool has_scheme = false;
   for (const char* cur = begin; cur < end; ++cur) {
     if (*cur == '/') {
       break;
@@ -300,7 +299,7 @@ void URI::parseURI(
     if (*cur == ':') {
       *scheme = std::string(begin, cur - begin);
       begin = cur + 1;
-      has_scheme = true;
+      // has_scheme = true;
       break;
     }
   }
@@ -411,7 +410,7 @@ void URI::parseQueryString(
 std::string URI::buildQueryString(const URI::ParamList& params) {
   std::string out;
 
-  for (int i = 0; i < params.size(); ++i) {
+  for (size_t i = 0; i < params.size(); ++i) {
     if (i > 0) {
       out += "&";
     }

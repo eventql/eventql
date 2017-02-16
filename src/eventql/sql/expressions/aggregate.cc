@@ -30,7 +30,7 @@ namespace csql {
 namespace expressions {
 
 /**
- * COUNT() expression
+ * count(nil)
  */
 void count_acc(sql_txn* ctx, void* self, VMStack* stack) {
   popNil(stack);
@@ -69,6 +69,73 @@ const SFunction count(
     &count_merge,
     &count_save,
     &count_load);
+
+
+/**
+ * count_distinct(uint64)
+ */
+template <typename T>
+using DistinctSetType = std::set<T>;
+
+void count_distinct_uint64_acc(sql_txn* ctx, void* self, VMStack* stack) {
+  auto val = popUInt64(stack);
+  static_cast<DistinctSetType<uint64_t>*>(self)->insert(val);
+}
+
+void count_distinct_uint64_get(sql_txn* ctx, void* self, VMStack* stack) {
+  auto cnt = static_cast<DistinctSetType<uint64_t>*>(self)->size();
+  pushUInt64(stack, cnt);
+}
+
+void count_distinct_uint64_init(sql_txn* ctx, void* self) {
+  new (self) DistinctSetType<uint64_t>();
+}
+
+void count_distinct_uint64_free(sql_txn* ctx, void* self) {
+  static_cast<DistinctSetType<uint64_t>*>(self)->~DistinctSetType<uint64_t>();
+}
+
+void count_distinct_uint64_reset(sql_txn* ctx, void* self) {
+  static_cast<DistinctSetType<uint64_t>*>(self)->clear();
+}
+
+void count_distinct_uint64_merge(sql_txn* ctx, void* self, const void* other) {
+  auto self_set = static_cast<DistinctSetType<uint64_t>*>(self);
+  auto other_set = static_cast<const DistinctSetType<uint64_t>*>(other);
+  for (const auto& v : *other_set) {
+    self_set->insert(v);
+  }
+}
+
+void count_distinct_uint64_save(sql_txn* ctx, const void* self, OutputStream* os) {
+  auto self_set = static_cast<const DistinctSetType<uint64_t>*>(self);
+  os->appendVarUInt(self_set->size());
+  for (const auto& v : *self_set) {
+    os->appendVarUInt(v);
+  }
+}
+
+void count_distinct_uint64_load(sql_txn* ctx, void* self, InputStream* is) {
+  auto self_set = static_cast<DistinctSetType<uint64_t>*>(self);
+  auto n = is->readVarUInt();
+  for (size_t i = 0; i < n; ++i) {
+    self_set->insert(is->readVarUInt());
+  }
+}
+
+const SFunction count_distinct_uint64(
+    { SType::UINT64 },
+    SType::UINT64,
+    sizeof(DistinctSetType<uint64_t>),
+    &count_distinct_uint64_acc,
+    &count_distinct_uint64_get,
+    &count_distinct_uint64_reset,
+    &count_distinct_uint64_init,
+    &count_distinct_uint64_free,
+    &count_distinct_uint64_merge,
+    &count_distinct_uint64_save,
+    &count_distinct_uint64_load);
+
 
 /**
  * SUM(int64) expression

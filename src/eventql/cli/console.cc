@@ -225,7 +225,7 @@ Status Console::runQuery(const String& query) {
     rc = evql_num_columns(client_, &result_ncols);
   }
 
-  for (int i = 0; rc == 0 && i < result_ncols; ++i) {
+  for (size_t i = 0; rc == 0 && i < result_ncols; ++i) {
     const char* colname;
     size_t colname_len;
     rc = evql_column_name(client_, i, &colname, &colname_len);
@@ -258,14 +258,14 @@ Status Console::runQuery(const String& query) {
 
     ++result_nrows;
     if (batchmode) {
-      for (int i = 0; i < result_ncols; ++i) {
+      for (size_t i = 0; i < result_ncols; ++i) {
         stdout_os->print(std::string(fields[i], field_lens[i]));
         stdout_os->print("\t");
       }
       stdout_os->print("\n");
     } else {
       std::vector<std::string> row;
-      for (int i = 0; i < result_ncols; ++i) {
+      for (size_t i = 0; i < result_ncols; ++i) {
         row.emplace_back(fields[i], field_lens[i]);
       }
 

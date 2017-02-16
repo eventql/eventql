@@ -66,12 +66,12 @@ enum class AggregationStrategy : uint8_t {
 };
 
 enum class ScanConstraintType : uint8_t {
-  EQUAL_TO,
-  NOT_EQUAL_TO,
-  LESS_THAN,
-  LESS_THAN_OR_EQUAL_TO,
-  GREATER_THAN,
-  GREATER_THAN_OR_EQUAL_TO
+  EQUAL_TO = 1,
+  NOT_EQUAL_TO = 2,
+  LESS_THAN = 3,
+  LESS_THAN_OR_EQUAL_TO = 4,
+  GREATER_THAN = 5,
+  GREATER_THAN_OR_EQUAL_TO = 6
 };
 
 /**

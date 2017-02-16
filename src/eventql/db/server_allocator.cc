@@ -159,7 +159,7 @@ Status ServerAllocator::allocateServers(
 
     if (!all_servers.empty()) {
       size_t idx = Random::singleton()->random64() % all_servers.size();
-      for (int i = 0; i < all_servers.size() && num_alloced < num_servers; ++i) {
+      for (size_t i = 0; i < all_servers.size() && num_alloced < num_servers; ++i) {
         const auto& s = all_servers[++idx % all_servers.size()];
 
         if (excluded.count(s) > 0) {
@@ -227,7 +227,7 @@ Status ServerAllocator::allocateStable(
   }
 
   // return the next N servers
-  for (int i = 0; i < all_servers.size(); ++i) {
+  for (size_t i = 0; i < all_servers.size(); ++i) {
     const auto& s = all_servers[++idx % all_servers.size()];
 
     if (exclude_servers.count(s) > 0) {

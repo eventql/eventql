@@ -273,7 +273,6 @@ void StatusServlet::renderStats(
     http::HTTPRequest* request,
     http::HTTPResponse* response) {
   auto ctx = db_->getSession()->getDatabaseContext();
-  auto cdir = ctx->config_directory;
   auto zs = evqld_stats();
   String out;
 

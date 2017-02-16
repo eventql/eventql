@@ -21,20 +21,23 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/eventql.h"
 #include "eventql/util/inspect.h"
 #include "eventql/util/assets.h"
 #include "eventql/mapreduce/runtime/javascript/javascript_context.h"
-#include "js/Conversions.h"
-#include "jsapi.h"
 #include <iostream>
 #include <locale>
 #include <string>
 #include <codecvt>
 
-#include "eventql/eventql.h"
+#if ENABLE_JSENGINE
+#include "js/Conversions.h"
+#include "jsapi.h"
+#endif
 
 namespace eventql {
 
+#if ENABLE_JSENGINE
 JSClass JavaScriptContext::kGlobalJSClass = { "global", JSCLASS_GLOBAL_FLAGS };
 
 static bool write_json_to_buf(const char16_t* str, uint32_t strlen, void* out) {
@@ -643,6 +646,51 @@ bool JavaScriptContext::ReduceCollectionIter::getNext(
     return false;
   }
 }
+#else
+JavaScriptContext::JavaScriptContext(
+    const String& customer,
+    RefPtr<MapReduceJobSpec> job,
+    TableService* tsdb,
+    RefPtr<MapReduceTaskBuilder> task_builder,
+    RefPtr<MapReduceScheduler> scheduler,
+    size_t memlimit) {
+  throw std::runtime_error("compiled without built-in jsengine support");
+}
+
+JavaScriptContext::~JavaScriptContext() {
+  throw std::runtime_error("compiled without built-in jsengine support");
+}
+
+void JavaScriptContext::loadProgram(const String& program) {
+  throw std::runtime_error("compiled without built-in jsengine support");
+}
+
+void JavaScriptContext::loadClosure(
+    const String& source,
+    const String& globals,
+    const String& params) {
+  throw std::runtime_error("compiled without built-in jsengine support");
+}
+
+void JavaScriptContext::callMapFunction(
+    const String& json_string,
+    Vector<Pair<String, String>>* tuples) {
+  throw std::runtime_error("compiled without built-in jsengine support");
+}
+
+void JavaScriptContext::callReduceFunction(
+    const String& key,
+    const Vector<String>& values,
+    Vector<Pair<String, String>>* tuples) {
+  throw std::runtime_error("compiled without built-in jsengine support");
+}
+
+String JavaScriptContext::callSerializeFunction(
+    const String& key,
+    const String& value) {
+  throw std::runtime_error("compiled without built-in jsengine support");
+}
+#endif
 
 } // namespace eventql
 

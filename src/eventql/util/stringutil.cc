@@ -149,8 +149,8 @@ void StringUtil::replaceAll(
     return;
   }
 
-  auto cur = 0;
-  while((cur = str->find(pattern, cur)) != std::string::npos) {
+  size_t cur = 0;
+  while ((cur = str->find(pattern, cur)) != std::string::npos) {
     str->replace(cur, pattern.size(), replacement);
     cur += replacement.size();
   }
@@ -181,7 +181,7 @@ std::vector<std::string> StringUtil::split(
 String StringUtil::join(const Vector<String>& list, const String& join) {
   String out;
 
-  for (int i = 0; i < list.size(); ++i) {
+  for (size_t i = 0; i < list.size(); ++i) {
     if (i > 0) {
       out += join;
     }
@@ -355,7 +355,7 @@ bool StringUtil::isNumber(const char* begin, const char* end) {
 void StringUtil::toLower(std::string* str) {
   auto& str_ref = *str;
 
-  for (int i = 0; i < str_ref.length(); ++i) {
+  for (size_t i = 0; i < str_ref.length(); ++i) {
     str_ref[i] = std::tolower(str_ref[i]);
   }
 }
@@ -363,13 +363,13 @@ void StringUtil::toLower(std::string* str) {
 void StringUtil::toUpper(std::string* str) {
   auto& str_ref = *str;
 
-  for (int i = 0; i < str_ref.length(); ++i) {
+  for (size_t i = 0; i < str_ref.length(); ++i) {
     str_ref[i] = std::toupper(str_ref[i]);
   }
 }
 
 size_t StringUtil::find(const std::string& str, char chr) {
-  for (int i = 0; i < str.length(); ++i) {
+  for (size_t i = 0; i < str.length(); ++i) {
     if (str[i] == chr) {
       return i;
     }
@@ -414,7 +414,7 @@ std::string StringUtil::formatv(
     std::vector<std::string> values) {
   std::string str = fmt;
 
-  for (int i = 0; i < values.size(); ++i) {
+  for (size_t i = 0; i < values.size(); ++i) {
     StringUtil::replaceAll(
         &str,
         "$" + std::to_string(i),

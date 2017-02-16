@@ -70,7 +70,7 @@ void TSDBClient::insertRecords(const RecordEnvelopeList& records) {
   for (const auto& r : records.records()) {
     auto& list = batches[uri_];
 
-    if (list.empty() || list.back().records().size() > kMaxInsertBachSize) {
+    if (list.empty() || size_t(list.back().records().size()) > kMaxInsertBachSize) {
       list.emplace_back();
     }
 
