@@ -33,15 +33,17 @@ TESTS = \
   evql-test-sql
 
 check_PROGRAMS = $(TESTS)
+noinst_PROGRAMS= evql-test
 
-#smoketest1_SOURCES = smoketest1.cc
-#smoketest1_LDADD = \
-#    @top_builddir@/src/libevqlcore.la \
-#    @top_builddir@/src/libevqlclient.la \
-#    $(INIH_LDADD) \
-#    $(SIMDCOMP_LDADD) \
-#    $(LMDB_LDADD) \
-#    $(PROTOBUF_LDADD)
+evql_test_SOURCES = evql_test.cc
+evql_test_LDADD = \
+    @top_builddir@/src/libevqlcore.a \
+    @top_builddir@/src/libevqlclient.la \
+    $(INIH_LDADD) \
+    $(MURMURHASH_LDADD) \
+    $(SIMDCOMP_LDADD) \
+    $(LMDB_LDADD) \
+    $(PROTOBUF_LDADD)
 
 evql_test_unit_metadata_file_SOURCES = unit/metadata_file.cc
 evql_test_unit_metadata_file_LDADD = \
