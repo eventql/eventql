@@ -33,6 +33,7 @@ void setup_unit_tests(TestRepository* repo) {
   SETUP_UNIT_TEST(metadata_store, repo);
   SETUP_UNIT_TEST(metadata_file, repo);
   SETUP_UNIT_TEST(metadata_operation_createpartition, repo);
+  SETUP_UNIT_TEST(metadata_operation_split, repo);
 }
 
 } // namespace unit

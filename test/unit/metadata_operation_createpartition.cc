@@ -33,7 +33,7 @@ namespace eventql {
 namespace test {
 namespace unit {
 
-// UNIT-METADATAOPPCREATE-001
+// UNIT-METAOP-CREATEPART-001
 static bool test_metadata_operation_createpartition_create_empty() {
   Vector<MetadataFile::PartitionMapEntry> pmap;
   MetadataFile input(
@@ -83,7 +83,7 @@ static bool test_metadata_operation_createpartition_create_empty() {
   return true;
 }
 
-// UNIT-METADATAOPPCREATE-002
+// UNIT-METAOP-CREATEPART-002
 static bool test_metadata_operation_createpartition_create_begin() {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
@@ -185,7 +185,7 @@ static bool test_metadata_operation_createpartition_create_begin() {
   return true;
 }
 
-// UNIT-METADATAOPPCREATE-003
+// UNIT-METAOP-CREATEPART-003
 static bool test_metadata_operation_createpartition_create_begin2() {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
@@ -287,7 +287,7 @@ static bool test_metadata_operation_createpartition_create_begin2() {
   return true;
 }
 
-// UNIT-METADATAOPPCREATE-004
+// UNIT-METAOP-CREATEPART-004
 static bool test_metadata_operation_createpartition_create_middle() {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
@@ -390,7 +390,7 @@ static bool test_metadata_operation_createpartition_create_middle() {
   return true;
 }
 
-// UNIT-METADATAOPPCREATE-005
+// UNIT-METAOP-CREATEPART-005
 static bool test_metadata_operation_createpartition_create_middle2() {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
@@ -492,7 +492,7 @@ static bool test_metadata_operation_createpartition_create_middle2() {
   return true;
 }
 
-// UNIT-METADATAOPPCREATE-006
+// UNIT-METAOP-CREATEPART-006
 static bool test_metadata_operation_createpartition_create_end() {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
@@ -595,7 +595,7 @@ static bool test_metadata_operation_createpartition_create_end() {
   return true;
 }
 
-// UNIT-METADATAOPPCREATE-007
+// UNIT-METAOP-CREATEPART-007
 static bool test_metadata_operation_createpartition_create_end2() {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
@@ -698,7 +698,7 @@ static bool test_metadata_operation_createpartition_create_end2() {
   return true;
 }
 
-// UNIT-METADATAOPPCREATE-008
+// UNIT-METAOP-CREATEPART-008
 static bool test_metadata_operation_createpartition_create_overlap_begin() {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
@@ -774,7 +774,7 @@ static bool test_metadata_operation_createpartition_create_overlap_begin() {
   return true;
 }
 
-// UNIT-METADATAOPPCREATE-009
+// UNIT-METAOP-CREATEPART-009
 static bool test_metadata_operation_createpartition_create_overlap_middle() {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
@@ -849,7 +849,7 @@ static bool test_metadata_operation_createpartition_create_overlap_middle() {
   return true;
 }
 
-// UNIT-METADATAOPPCREATE-010
+// UNIT-METAOP-CREATEPART-010
 static bool test_metadata_operation_createpartition_create_overlap_end() {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
@@ -924,7 +924,7 @@ static bool test_metadata_operation_createpartition_create_overlap_end() {
   return true;
 }
 
-// UNIT-METADATAOPPCREATE-011
+// UNIT-METAOP-CREATEPART-011
 static bool test_metadata_operation_createpartition_create_overlap_exact() {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
