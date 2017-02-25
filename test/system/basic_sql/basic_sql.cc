@@ -21,7 +21,9 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <unistd.h>
 #include "eventql/util/io/fileutil.h"
+#include "eventql/util/random.h"
 #include "basic_sql.h"
 #include "../../automate/process.h"
 #include "../../test_runner.h"
@@ -31,7 +33,7 @@ namespace test {
 namespace system_basic_sql {
 
 static bool init_cluster_standalone(TestContext* ctx) {
-  std::string datadir = "/tmp/__evql_test_123";
+  std::string datadir = "/tmp/__evql_test_" + Random::singleton()->hex64();
   FileUtil::mkdir_p(datadir);
 
   std::unique_ptr<Process> evqld_proc(new Process());
@@ -44,6 +46,7 @@ static bool init_cluster_standalone(TestContext* ctx) {
       });
 
   ctx->background_procs["evqld-standalone"] = std::move(evqld_proc);
+  usleep(500000); // FIXME give the process time to start
   return true;
 }
 
