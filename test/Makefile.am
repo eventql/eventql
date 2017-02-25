@@ -29,6 +29,7 @@ evql_test_SOURCES = \
     unit_tests.cc \
     unit/metadata_store.cc \
     unit/metadata_file.cc \
+    unit/metadata_operation_createpartition.cc \
     test_repository.cc \
     test_runner.cc
 
