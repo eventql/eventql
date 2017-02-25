@@ -28,7 +28,7 @@
 
 namespace eventql {
 namespace test {
-namespace regress_basic_sql {
+namespace system_basic_sql {
 
 static bool init_cluster_standalone(TestContext* ctx) {
   std::string datadir = "/tmp/__evql_test_123";
@@ -57,7 +57,7 @@ static bool init_cluster_tables(TestContext* ctx) {
         "./src/evql",
         std::vector<std::string> {
           "-d", "test",
-          "-f", "./test/regress/basic_sql/create_pageviews.sql"
+          "-f", "./test/system/basic_sql/create_pageviews.sql"
         });
 
     if (!rc.isSuccess()) {
@@ -74,7 +74,7 @@ void setup_tests(TestRepository* test_repo) {
   // standalone cluster
   {
     TestBundle t;
-    t.logfile_path = "test/regress/basic_sql/test.log";
+    t.logfile_path = "test/system/basic_sql/test.log";
 
     t.test_cases.emplace_back(TestCase {
       .test_id = "REGRESS-BASICSQL-STANDALONE-001",

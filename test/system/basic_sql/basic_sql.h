@@ -25,7 +25,7 @@
 
 namespace eventql {
 namespace test {
-namespace regress_basic_sql {
+namespace system_basic_sql {
 
 void setup_tests(TestRepository* test_repo);
 
