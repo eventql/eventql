@@ -21,40 +21,39 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "basic_sql.h"
-#include "../../automate/process.h"
+#pragma once
+#include <string>
+#include <vector>
+#include "eventql/util/return_code.h"
 
 namespace eventql {
 namespace test {
-namespace regress_basic_sql {
 
-static bool init_cluster_standalone(TestContext* ctx) {
-  Process evqld_proc;
-  evqld_proc.start(
-      "./src/evqld",
-      std::vector<std::string> {
-        "--standalone",
-        "--datadir", "/tmp/__evql_test_123"
-      });
+class Process {
+public:
 
-  return true;
-}
+  Process();
+  Process(const Process& other) = delete;
+  ~Process();
 
-void setup_tests(TestRepository* test_repo) {
-  // standalone cluster
-  {
-    std::vector<TestCase> cases;
-    cases.emplace_back(TestCase {
-      .test_id = "REGRESS-BASICSQL-STANDALONE-001",
-      .description = "Start & create cluster",
-      .fun = &init_cluster_standalone,
-      .suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE }
-    });
-    test_repo->addTestBundle(cases);
-  }
-}
+  Process& operator=(const Process& other) = delete;
 
-} // namespace unit
+  ReturnCode start(
+      const std::string filename,
+      const std::vector<std::string>& argv,
+      const std::vector<std::string>& envv = std::vector<std::string> {});
+
+  void stop();
+
+protected:
+  int pid_;
+  int stdin_pipe_[2];
+  int stdout_pipe_[2];
+  int stderr_pipe_[2];
+  std::string stdout_;
+  std::string stderr_;
+};
+
 } // namespace test
 } // namespace eventql
 
