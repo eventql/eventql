@@ -29,8 +29,8 @@ evql_test_SOURCES = \
     unit_tests.cc \
     unit/metadata_store.cc \
     unit/metadata_file.cc \
-    util/test_repository.cc \
-    util/test_runner.cc
+    test_repository.cc \
+    test_runner.cc
 
 evql_test_LDADD = \
     @top_builddir@/src/libevqlcore.a \

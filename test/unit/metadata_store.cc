@@ -26,9 +26,7 @@
 #include "eventql/util/random.h"
 #include "eventql/util/fnv.h"
 #include "eventql/db/metadata_store.h"
-
 #include "../unit_test.h"
-#include "../util/test_repository.h"
 
 namespace eventql {
 namespace test {

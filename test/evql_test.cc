@@ -25,8 +25,8 @@
 #include <iostream>
 #include "eventql/eventql.h"
 #include "eventql/util/cli/flagparser.h"
-#include "util/test_repository.h"
-#include "util/test_runner.h"
+#include "test_repository.h"
+#include "test_runner.h"
 
 using namespace eventql::test;
 

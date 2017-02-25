@@ -22,7 +22,7 @@
  * code of your own applications
  */
 #include "eventql/eventql.h"
-#include "util/test_repository.h"
+#include "test_repository.h"
 #include "unit_test.h"
 
 namespace eventql {

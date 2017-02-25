@@ -35,6 +35,7 @@
 #include "eventql/util/io/fileutil.h"
 #include "eventql/util/io/inputstream.h"
 #include "eventql/util/io/outputstream.h"
+#include "test_repository.h"
 
 const char kExpectationFailed[] = "ExpectationFailed";
 
