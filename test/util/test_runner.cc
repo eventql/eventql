@@ -59,6 +59,7 @@ bool TestRunner::runTests(
       break;
   }
 
+  std::vector<std::pair<std::string, std::string>> test_failures;
   size_t tests_passed = 0;
   size_t test_num = 0;
   for (const auto& bundle : test_repo_->getTestBundles()) {
@@ -99,6 +100,8 @@ bool TestRunner::runTests(
             break;
         }
       } else {
+        test_failures.emplace_back(test.test_id, test_message);
+
         switch (format) {
           case TestOutputFormat::ASCII:
             fprintf(
@@ -122,11 +125,20 @@ bool TestRunner::runTests(
   if (tests_count == 0 || tests_passed < tests_count) {
     switch (format) {
       case TestOutputFormat::ASCII:
+        for (const auto& fail : test_failures) {
+          fprintf(
+              stderr,
+              "\n\033[1;31m[FAIL] %s\e[0m\n  %s\n",
+              fail.first.c_str(),
+              fail.second.c_str());
+        }
+
         fprintf(
             stderr,
             "\n\033[1;31m[FAIL] %i/%i tests failed :(\e[0m\n",
             (int) (tests_count - tests_passed),
             (int) tests_count);
+
         break;
       case TestOutputFormat::TAP:
         break;
