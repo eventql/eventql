@@ -108,11 +108,6 @@ ReturnCode Process::start(
       exit(1);
     }
 
-    if (dup2(kill_pipe_[1], STDERR_FILENO) == -1) {
-      dprintf(kill_pipe_[1], "error: dup2() failed\n");
-      exit(1);
-    }
-
     if (execve(filename.c_str(), argv_cstr.data(), envv_cstr.data()) == 0) {
       exit(0);
     } else {
@@ -129,7 +124,8 @@ int Process::wait() {
   waitpid(pid_, &status, 0);
 
   std::unique_lock<std::mutex> lk(running_mutex_);
-  write(kill_pipe_[1], "X", 1);
+  int rc = write(kill_pipe_[1], "X", 1);
+  (void) rc;
   pid_ = -1;
   running_ = false;
   lk.unlock();
@@ -205,10 +201,6 @@ void Process::runLogtail() {
         break;
     }
 
-    if (p[2].revents & POLLIN) {
-      return;
-    }
-
     char buf[512];
     if (p[0].revents & POLLIN) {
       int rc = read(stdout_pipe_[0], buf, sizeof(buf));
@@ -240,6 +232,8 @@ void Process::runLogtail() {
               line.c_str());
         }
       }
+
+      continue;
     }
 
     if (p[1].revents & POLLIN) {
@@ -272,6 +266,12 @@ void Process::runLogtail() {
               line.c_str());
         }
       }
+
+      continue;
+    }
+
+    if (p[2].revents & POLLIN) {
+      return;
     }
   }
 }
