@@ -252,7 +252,7 @@ int main(int argc, const char** argv) {
   evql_conf_set(conf, "server.partitions_loading_limit_hard", "64");
   if (flags.isSet("standalone")) {
     evql_conf_set(conf, "cluster.coordinator", "standalone");
-    evql_conf_set(conf, "cluster.allowed_hosts", "255.255.255.255/32");
+    evql_conf_set(conf, "cluster.allowed_hosts", "0.0.0.0/0");
     evql_conf_set(conf, "server.name", "localhost");
     evql_conf_set(conf, "server.client_auth_backend", "trust");
     evql_conf_set(conf, "server.noleader", "true");
