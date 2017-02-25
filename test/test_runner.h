@@ -32,7 +32,9 @@ namespace test {
 enum class TestOutputFormat { TAP, ASCII };
 
 struct TestContext {
-
+  TestContext();
+  ~TestContext();
+  int log_fd;
 };
 
 class TestRunner {

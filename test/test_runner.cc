@@ -28,6 +28,14 @@
 namespace eventql {
 namespace test {
 
+TestContext::TestContext() {
+  log_fd = 2;
+}
+
+TestContext::~TestContext() {
+
+}
+
 TestRunner::TestRunner(TestRepository* test_repo) : test_repo_(test_repo) {}
 
 bool TestRunner::runTest(const std::string& test_id, TestOutputFormat format) {

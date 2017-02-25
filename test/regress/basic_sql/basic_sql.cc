@@ -23,6 +23,7 @@
  */
 #include "basic_sql.h"
 #include "../../automate/process.h"
+#include "../../test_runner.h"
 
 namespace eventql {
 namespace test {
@@ -30,12 +31,37 @@ namespace regress_basic_sql {
 
 static bool init_cluster_standalone(TestContext* ctx) {
   Process evqld_proc;
+  evqld_proc.logDebug("evqld-standalone", ctx->log_fd);
+
   evqld_proc.start(
       "./src/evqld",
       std::vector<std::string> {
         "--standalone",
         "--datadir", "/tmp/__evql_test_123"
       });
+
+  return true;
+}
+
+static bool init_cluster_tables(TestContext* ctx) {
+  // create pageviews table
+  {
+    Process evql_proc;
+    evql_proc.logDebug("evql-create-table", ctx->log_fd);
+
+    auto rc = evql_proc.start(
+        "./src/evql",
+        std::vector<std::string> {
+          "-d", "test",
+          "-f", "./test/regress/basic_sql/create_pageviews.sql"
+        });
+
+    if (!rc.isSuccess()) {
+      throw std::runtime_error(rc.getMessage());
+    }
+
+    evql_proc.waitAndExpectSuccess();
+  }
 
   return true;
 }
@@ -48,6 +74,12 @@ void setup_tests(TestRepository* test_repo) {
       .test_id = "REGRESS-BASICSQL-STANDALONE-001",
       .description = "Start & create cluster",
       .fun = &init_cluster_standalone,
+      .suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE }
+    });
+    cases.emplace_back(TestCase {
+      .test_id = "REGRESS-BASICSQL-STANDALONE-002",
+      .description = "Create tables",
+      .fun = &init_cluster_tables,
       .suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE }
     });
     test_repo->addTestBundle(cases);

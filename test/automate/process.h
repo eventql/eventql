@@ -24,6 +24,8 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <thread>
+#include <atomic>
 #include "eventql/util/return_code.h"
 
 namespace eventql {
@@ -43,15 +45,31 @@ public:
       const std::vector<std::string>& argv,
       const std::vector<std::string>& envv = std::vector<std::string> {});
 
+  int wait();
+  void waitAndExpectSuccess();
+
   void stop();
 
+  void storeSTDOUT(std::string* stdout_dst);
+  void storeSTDERR(std::string* stderr_dst);
+  void logDebug(std::string prefix, int fd);
+
 protected:
+
+  void runLogtail();
+
   int pid_;
   int stdin_pipe_[2];
   int stdout_pipe_[2];
   int stderr_pipe_[2];
-  std::string stdout_;
-  std::string stderr_;
+  std::string stdout_buf_;
+  std::string stderr_buf_;
+  std::string cmdline_;
+  std::thread logtail_thread_;
+  std::string log_prefix_;
+  int log_fd_;
+  std::mutex running_mutex_;
+  std::atomic<bool> running_;
 };
 
 } // namespace test
