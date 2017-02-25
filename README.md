@@ -112,7 +112,11 @@ To build EventQL from a git checkout:
     $ make V=1
     $ src/evql -h
 
-To run the test suite:
+To run the full (world) test suite:
 
-    $ make check
+    $ make test
+
+To run the quick (smoke) test suite:
+
+    $ make smoketest
 

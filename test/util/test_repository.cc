@@ -22,33 +22,25 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include <iostream>
 #include "test_repository.h"
 
 namespace eventql {
 namespace test {
 
-enum class TestOutputFormat { TAP, ASCII };
+TestRepository::TestRepository() : test_count_(0) {}
 
-class TestRunner {
-public:
+void TestRepository::addTestBundle(std::vector<TestCase> test_bundle) {
+  test_count_ += test_bundle.size();
+  test_bundles_.emplace_back(std::move(test_bundle));
+}
 
-  TestRunner(TestRepository* test_repo);
+const std::list<std::vector<TestCase>>& TestRepository::getTestBundles() const {
+  return test_bundles_;
+}
 
-  bool runTest(const std::string& test_id, TestOutputFormat format);
-
-  bool runTests(std::set<std::string> test_ids, TestOutputFormat format);
-
-  bool runTestSuite(const std::string& suite, TestOutputFormat format);
-
-  bool runTestSuite(TestSuite suite, TestOutputFormat format);
-
-  void printTestList();
-
-protected:
-  TestRepository* test_repo_;
-};
+size_t TestRepository::getTestCount() const {
+  return test_count_;
+}
 
 } // namespace test
 } // namespace eventql

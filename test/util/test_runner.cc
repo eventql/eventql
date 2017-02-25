@@ -22,6 +22,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/util/stringutil.h"
 #include "test_runner.h"
 
 namespace eventql {
@@ -30,21 +31,149 @@ namespace test {
 TestRunner::TestRunner(TestRepository* test_repo) : test_repo_(test_repo) {}
 
 bool TestRunner::runTest(const std::string& test_id, TestOutputFormat format) {
-  return false;
+  return runTests(std::set<std::string>{test_id}, format);
+}
+
+static void expandTestList(
+    TestRepository* test_repo,
+    std::set<std::string>* test_ids) {
 }
 
 bool TestRunner::runTests(
-    const std::set<std::string>& test_ids,
+    std::set<std::string> test_ids,
     TestOutputFormat format) {
-  return false;
+  expandTestList(test_repo_, &test_ids);
+
+  size_t tests_count = test_ids.size();
+
+  switch (format) {
+    case TestOutputFormat::ASCII:
+      fprintf(
+          stderr,
+          "\033[1;97mRunning %i/%i tests\e[0m\n\n",
+          (int) tests_count,
+          (int) test_repo_->getTestCount());
+      break;
+    case TestOutputFormat::TAP:
+      fprintf(stdout, "1..%i\n", (int) tests_count);
+      break;
+  }
+
+  size_t tests_passed = 0;
+  size_t test_num = 0;
+  for (const auto& bundle : test_repo_->getTestBundles()) {
+    for (const auto& test : bundle) {
+      if (test_ids.count(test.test_id) == 0) {
+        break;
+      }
+
+      ++test_num;
+
+      bool test_result = false;
+      std::string test_message;
+      try {
+        test_result = test.fun();
+      } catch (const std::exception& e) {
+        test_message = e.what();
+      }
+
+      StringUtil::replaceAll(&test_message, "\n", "\\n");
+      StringUtil::replaceAll(&test_message, "\r", "");
+
+      if (test_result) {
+        ++tests_passed;
+
+        switch (format) {
+          case TestOutputFormat::ASCII:
+            fprintf(
+                stderr,
+                " * %s \033[1;32m[PASS]\e[0m\n",
+                test.test_id.c_str());
+            break;
+          case TestOutputFormat::TAP:
+            fprintf(
+                stdout,
+                "ok %i - %s\n",
+                (int) test_num,
+                test.test_id.c_str());
+            break;
+        }
+      } else {
+        switch (format) {
+          case TestOutputFormat::ASCII:
+            fprintf(
+                stderr,
+                " * %s \033[1;31m[FAIL]\e[0m\n",
+                test.test_id.c_str());
+            break;
+          case TestOutputFormat::TAP:
+            fprintf(
+                stdout,
+                "not ok %i - %s # %s\n",
+                (int) test_num,
+                test.test_id.c_str(),
+                test_message.c_str());
+            break;
+        }
+      }
+    }
+  }
+
+  if (tests_count == 0 || tests_passed < tests_count) {
+    switch (format) {
+      case TestOutputFormat::ASCII:
+        fprintf(
+            stderr,
+            "\n\033[1;31m[FAIL] %i/%i tests failed :(\e[0m\n",
+            (int) (tests_count - tests_passed),
+            (int) tests_count);
+        break;
+      case TestOutputFormat::TAP:
+        break;
+    }
+
+    return false;
+  } else {
+    switch (format) {
+      case TestOutputFormat::ASCII:
+        fprintf(
+            stderr,
+            "\n\033[1;32m[PASS] %i tests passed :)\e[0m\n",
+            (int) tests_count);
+        break;
+      case TestOutputFormat::TAP:
+        break;
+    }
+
+    return true;
+  }
 }
 
 bool TestRunner::runTestSuite(const std::string& suite, TestOutputFormat format) {
+  if (suite == "world") {
+    return runTestSuite(TestSuite::WORLD, format);
+  }
+
+  if (suite == "smoke") {
+    return runTestSuite(TestSuite::WORLD, format);
+  }
+
+  std::cerr << "ERROR: invalid test suite" << std::endl;
   return false;
 }
 
 bool TestRunner::runTestSuite(TestSuite suite, TestOutputFormat format) {
-  return false;
+  std::set<std::string> test_ids;
+
+  for (const auto& bundle : test_repo_->getTestBundles()) {
+    for (const auto& test : bundle) {
+      if (test.suites.count(suite) > 0) {
+        test_ids.insert(test.test_id);
+      }
+    }
+  }
+
+  return runTests(test_ids, format);
 }
 
 void TestRunner::printTestList() {

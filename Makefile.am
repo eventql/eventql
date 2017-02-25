@@ -47,10 +47,16 @@ MAINTAINERCLEANFILES =   \
 CLEANFILES =             \
   build/target
 
+test: all
+	./test/evql-test -s world
+
+smoketest: all
+	./test/evql-test -s smoke
+
 release: clean distdir
 	./build/scripts/build_linux_x86_64.sh $(PACKAGE) $(VERSION)
 	./build/scripts/build_darwin_x86_64.sh $(PACKAGE) $(VERSION)
 	./build/scripts/package_tarballs.sh $(PACKAGE) $(VERSION)
 	./build/scripts/package_osxpkg.sh $(PACKAGE) $(VERSION)
 
-.PHONY: package
+.PHONY: test smoketest release

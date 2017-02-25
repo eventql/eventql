@@ -32,6 +32,14 @@ using namespace eventql::test;
 
 const TestOutputFormat kDefaultTestOutputFormat = TestOutputFormat::ASCII;
 
+namespace eventql {
+namespace test {
+namespace unit {
+extern void setup_unit_tests(TestRepository* repo);
+} // namespace unit
+} // namespace test
+} // namespace eventql
+
 int main(int argc, const char** argv) {
   cli::FlagParser flags;
 
@@ -101,6 +109,17 @@ int main(int argc, const char** argv) {
   }
 
   auto output_format = kDefaultTestOutputFormat;
+  if (flags.isSet("output")) {
+    auto output_format_str = flags.getString("output");
+    if (output_format_str == "ascii") {
+      output_format = TestOutputFormat::ASCII;
+    } else if (output_format_str == "tap") {
+      output_format = TestOutputFormat::TAP;
+    } else {
+      std::cerr << "ERROR: invalid output format: " << output_format_str << std::endl;
+      return 1;
+    }
+  }
 
   if (!(flags.isSet("list") ^ flags.isSet("test") ^ flags.isSet("suite"))) {
     std::cerr << "ERROR: exactly one of the --list, --test or --suite flags must be set" << std::endl;
@@ -109,6 +128,7 @@ int main(int argc, const char** argv) {
 
   /* init test repo */
   TestRepository test_repo;
+  eventql::test::unit::setup_unit_tests(&test_repo);
 
   /* run tests */
   TestRunner test_runner(&test_repo);

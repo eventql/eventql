@@ -27,12 +27,13 @@
 #include "eventql/util/fnv.h"
 #include "eventql/util/test/unittest.h"
 #include "eventql/db/metadata_store.h"
+#include "../util/test_repository.h"
 
-using namespace eventql;
+namespace eventql {
+namespace test {
+namespace unit {
 
-UNIT_TEST(MetadataStoreTest);
-
-TEST_CASE(MetadataStoreTest, TestStoreMetadataFile, [] () {
+static bool test_metadata_store() {
   auto metadata_store_path = StringUtil::format(
       "/tmp/test_metadata_store-$0",
       Random::singleton()->hex64());
@@ -151,9 +152,11 @@ TEST_CASE(MetadataStoreTest, TestStoreMetadataFile, [] () {
     EXPECT_EQ(pmap[1].split_servers_high[0].server_id, "server6");
     EXPECT_EQ(pmap[1].split_servers_high[0].placement_id, 0x456);
   }
-});
 
-TEST_CASE(MetadataStoreTest, TestMetadataCache, [] () {
+  return true;
+}
+
+static bool test_metadata_store_cache() {
   auto metadata_store_path = StringUtil::format(
       "/tmp/test_metadata_store-$0",
       Random::singleton()->hex64());
@@ -186,4 +189,26 @@ TEST_CASE(MetadataStoreTest, TestMetadataCache, [] () {
     EXPECT(rc.isSuccess());
     EXPECT(file->getTransactionID() == txid);
   }
-});
+
+  return true;
+}
+
+void setup_unit_metadata_store_tests(TestRepository* repo) {
+  repo->addTestBundle({
+    TestCase {
+      .test_id = "UNIT-METADATASTORE-001",
+      .fun = &test_metadata_store,
+      .suites =  { TestSuite::WORLD, TestSuite::SMOKE }
+    },
+    TestCase {
+      .test_id = "UNIT-METADATASTORE-002",
+      .fun = &test_metadata_store_cache,
+      .suites =  { TestSuite::WORLD, TestSuite::SMOKE }
+    }
+  });
+}
+
+} // namespace unit
+} // namespace test
+} // namespace eventql
+

@@ -1,8 +1,7 @@
 /**
- * Copyright (c) 2017 DeepCortex GmbH <legal@eventql.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
- *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -22,34 +21,23 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include <iostream>
-#include "test_repository.h"
+#include "eventql/eventql.h"
+#include "util/test_repository.h"
+
+#define SETUP_TEST(T, R) do { \
+    extern void setup_unit_##T##_tests(TestRepository* repo); \
+    setup_unit_##T##_tests((R)); \
+  } while (0)
 
 namespace eventql {
 namespace test {
+namespace unit {
 
-enum class TestOutputFormat { TAP, ASCII };
+void setup_unit_tests(TestRepository* repo) {
+  SETUP_TEST(metadata_store, repo);
+}
 
-class TestRunner {
-public:
-
-  TestRunner(TestRepository* test_repo);
-
-  bool runTest(const std::string& test_id, TestOutputFormat format);
-
-  bool runTests(std::set<std::string> test_ids, TestOutputFormat format);
-
-  bool runTestSuite(const std::string& suite, TestOutputFormat format);
-
-  bool runTestSuite(TestSuite suite, TestOutputFormat format);
-
-  void printTestList();
-
-protected:
-  TestRepository* test_repo_;
-};
-
+} // namespace unit
 } // namespace test
 } // namespace eventql
 

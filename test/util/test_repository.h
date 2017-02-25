@@ -25,6 +25,9 @@
 #pragma once
 #include <iostream>
 #include <functional>
+#include <set>
+#include <vector>
+#include <list>
 
 namespace eventql {
 namespace test {
@@ -43,8 +46,16 @@ struct TestCase {
 class TestRepository {
 public:
 
+  TestRepository();
+
   void addTestBundle(std::vector<TestCase> test_bundle);
 
+  const std::list<std::vector<TestCase>>& getTestBundles() const;
+  size_t getTestCount() const;
+
+protected:
+  std::list<std::vector<TestCase>> test_bundles_;
+  size_t test_count_;
 };
 
 } // namespace test
