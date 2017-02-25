@@ -69,20 +69,22 @@ static bool init_cluster_tables(TestContext* ctx) {
 void setup_tests(TestRepository* test_repo) {
   // standalone cluster
   {
-    std::vector<TestCase> cases;
-    cases.emplace_back(TestCase {
+    TestBundle t;
+    t.logfile_path = "test/regress/basic_sql/test.log";
+
+    t.test_cases.emplace_back(TestCase {
       .test_id = "REGRESS-BASICSQL-STANDALONE-001",
       .description = "Start & create cluster",
       .fun = &init_cluster_standalone,
       .suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE }
     });
-    cases.emplace_back(TestCase {
+    t.test_cases.emplace_back(TestCase {
       .test_id = "REGRESS-BASICSQL-STANDALONE-002",
       .description = "Create tables",
       .fun = &init_cluster_tables,
       .suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE }
     });
-    test_repo->addTestBundle(cases);
+    test_repo->addTestBundle(t);
   }
 }
 

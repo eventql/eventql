@@ -35,6 +35,8 @@ struct TestContext {
   TestContext();
   ~TestContext();
   int log_fd;
+  std::string log_file;
+  void openLogfile(const std::string& path);
 };
 
 class TestRunner {

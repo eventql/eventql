@@ -29,12 +29,18 @@ namespace test {
 
 TestRepository::TestRepository() : test_count_(0) {}
 
-void TestRepository::addTestBundle(std::vector<TestCase> test_bundle) {
-  test_count_ += test_bundle.size();
+void TestRepository::addTestBundle(std::vector<TestCase> cases) {
+  TestBundle bundle;
+  bundle.test_cases = cases;
+  addTestBundle(bundle);
+}
+
+void TestRepository::addTestBundle(TestBundle test_bundle) {
+  test_count_ += test_bundle.test_cases.size();
   test_bundles_.emplace_back(std::move(test_bundle));
 }
 
-const std::list<std::vector<TestCase>>& TestRepository::getTestBundles() const {
+const std::list<TestBundle>& TestRepository::getTestBundles() const {
   return test_bundles_;
 }
 

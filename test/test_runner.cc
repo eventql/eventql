@@ -22,18 +22,27 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include "eventql/util/stringutil.h"
 #include "test_runner.h"
 
 namespace eventql {
 namespace test {
 
-TestContext::TestContext() {
-  log_fd = 2;
-}
+TestContext::TestContext() : log_fd(-1) {}
 
 TestContext::~TestContext() {
+  if (log_fd >= 0) {
+    close(log_fd);
+  }
+}
 
+void TestContext::openLogfile(const std::string& path) {
+  log_file = path;
+  log_fd = open(log_file.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
 }
 
 TestRunner::TestRunner(TestRepository* test_repo) : test_repo_(test_repo) {}
@@ -51,6 +60,7 @@ struct TestFailure {
   std::string test_id;
   std::string description;
   std::string error;
+  std::string logfile;
 };
 
 bool TestRunner::runTests(
@@ -78,8 +88,11 @@ bool TestRunner::runTests(
   size_t test_num = 0;
   for (const auto& bundle : test_repo_->getTestBundles()) {
     TestContext test_ctx;
+    if (!bundle.logfile_path.empty()) {
+      test_ctx.openLogfile(bundle.logfile_path);
+    }
 
-    for (const auto& test : bundle) {
+    for (const auto& test : bundle.test_cases) {
       if (test_ids.count(test.test_id) == 0) {
         break;
       }
@@ -121,7 +134,8 @@ bool TestRunner::runTests(
         test_failures.emplace_back(TestFailure {
           .test_id = test.test_id,
           .description = test.description,
-          .error = test_message
+          .error = test_message,
+          .logfile = test_ctx.log_file
         });
 
         switch (format) {
@@ -156,6 +170,10 @@ bool TestRunner::runTests(
               fail.test_id.c_str(),
               fail.description.c_str(),
               fail.error.c_str());
+
+          if (!fail.logfile.empty()) {
+            fprintf(stderr, "  LOGFILE: %s\n", fail.logfile.c_str());
+          }
         }
 
         fprintf(
@@ -203,7 +221,7 @@ bool TestRunner::runTestSuite(TestSuite suite, TestOutputFormat format) {
   std::set<std::string> test_ids;
 
   for (const auto& bundle : test_repo_->getTestBundles()) {
-    for (const auto& test : bundle) {
+    for (const auto& test : bundle.test_cases) {
       if (test.suites.count(suite) > 0) {
         test_ids.insert(test.test_id);
       }

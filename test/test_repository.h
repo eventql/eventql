@@ -45,18 +45,24 @@ struct TestCase {
   std::set<TestSuite> suites;
 };
 
+struct TestBundle {
+  std::vector<TestCase> test_cases;
+  std::string logfile_path;
+};
+
 class TestRepository {
 public:
 
   TestRepository();
 
   void addTestBundle(std::vector<TestCase> test_bundle);
+  void addTestBundle(TestBundle test_bundle);
 
-  const std::list<std::vector<TestCase>>& getTestBundles() const;
+  const std::list<TestBundle>& getTestBundles() const;
   size_t getTestCount() const;
 
 protected:
-  std::list<std::vector<TestCase>> test_bundles_;
+  std::list<TestBundle> test_bundles_;
   size_t test_count_;
 };
 
