@@ -57,7 +57,6 @@ Status ClusterCreate::execute(
       }
 
       if (!rc.isSuccess()) {
-        stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
         return rc;
       }
     }
