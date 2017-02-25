@@ -66,7 +66,8 @@ ReturnCode Process::start(
 
   if (pipe(stdin_pipe_) != 0 ||
       pipe(stdout_pipe_) != 0 ||
-      pipe(stderr_pipe_) != 0) {
+      pipe(stderr_pipe_) != 0 ||
+      pipe(kill_pipe_) != 0) {
     return ReturnCode::error("EIO", "pipe() failed");
   }
 
@@ -107,6 +108,11 @@ ReturnCode Process::start(
       exit(1);
     }
 
+    if (dup2(kill_pipe_[1], STDERR_FILENO) == -1) {
+      dprintf(kill_pipe_[1], "error: dup2() failed\n");
+      exit(1);
+    }
+
     if (execve(filename.c_str(), argv_cstr.data(), envv_cstr.data()) == 0) {
       exit(0);
     } else {
@@ -123,9 +129,14 @@ int Process::wait() {
   waitpid(pid_, &status, 0);
 
   std::unique_lock<std::mutex> lk(running_mutex_);
+  write(kill_pipe_[1], "X", 1);
   pid_ = -1;
   running_ = false;
   lk.unlock();
+
+  if (logtail_thread_.joinable()) {
+    logtail_thread_.join();
+  }
 
   if (stdin_pipe_[0] >= 0) close(stdin_pipe_[0]);
   if (stdin_pipe_[1] >= 0) close(stdin_pipe_[1]);
@@ -133,10 +144,8 @@ int Process::wait() {
   if (stdout_pipe_[1] >= 0) close(stdout_pipe_[1]);
   if (stderr_pipe_[0] >= 0) close(stderr_pipe_[0]);
   if (stderr_pipe_[1] >= 0) close(stderr_pipe_[1]);
-
-  if (logtail_thread_.joinable()) {
-    logtail_thread_.join();
-  }
+  if (kill_pipe_[0] >= 0) close(kill_pipe_[0]);
+  if (kill_pipe_[1] >= 0) close(kill_pipe_[1]);
 
   return status;
 }
@@ -167,31 +176,37 @@ void Process::runLogtail() {
       }
     }
 
-    struct pollfd p[2];
+    struct pollfd p[3];
     p[0].fd = stdout_pipe_[0];
     p[0].events = POLLIN;
     p[1].fd = stderr_pipe_[0];
     p[1].events = POLLIN;
+    p[2].fd = kill_pipe_[0];
+    p[2].events = POLLIN;
 
-    int poll_rc = poll(p, 2, -1);
+    int poll_rc = poll(p, 3, 1000000);
     switch (poll_rc) {
       case -1:
         if (errno == EAGAIN || errno == EINTR) {
           continue;
         } else {
-          /* fallthrough */
+          if (running_.load() && log_fd_ >= 0) {
+            dprintf(
+                log_fd_,
+                "[%s] logtail poll() failed: %s\n",
+                log_prefix_.c_str(),
+                strerror(errno));
+          }
+          return;
         }
       case 0:
-        if (running_.load() && log_fd_ >= 0) {
-          dprintf(
-              log_fd_,
-              "[%s] logtail poll() failed: %s\n",
-              log_prefix_.c_str(),
-              strerror(errno));
-        }
-        return;
+        continue;
       default:
         break;
+    }
+
+    if (p[2].revents & POLLIN) {
+      return;
     }
 
     char buf[512];

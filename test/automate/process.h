@@ -64,6 +64,7 @@ protected:
   int stdin_pipe_[2];
   int stdout_pipe_[2];
   int stderr_pipe_[2];
+  int kill_pipe_[2];
   std::string stdout_buf_;
   std::string stderr_buf_;
   std::string cmdline_;
