@@ -39,6 +39,7 @@ enum class TestSuite {
 
 struct TestCase {
   std::string test_id;
+  std::string description;
   std::function<bool ()> fun;
   std::set<TestSuite> suites;
 };

@@ -23,18 +23,15 @@
  */
 #include "eventql/eventql.h"
 #include "util/test_repository.h"
-
-#define SETUP_TEST(T, R) do { \
-    extern void setup_unit_##T##_tests(TestRepository* repo); \
-    setup_unit_##T##_tests((R)); \
-  } while (0)
+#include "unit_test.h"
 
 namespace eventql {
 namespace test {
 namespace unit {
 
 void setup_unit_tests(TestRepository* repo) {
-  SETUP_TEST(metadata_store, repo);
+  SETUP_UNIT_TEST(metadata_store, repo);
+  SETUP_UNIT_TEST(metadata_file, repo);
 }
 
 } // namespace unit

@@ -25,15 +25,17 @@
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/random.h"
 #include "eventql/util/fnv.h"
-#include "eventql/util/test/unittest.h"
 #include "eventql/db/metadata_store.h"
+
+#include "../unit_test.h"
 #include "../util/test_repository.h"
 
 namespace eventql {
 namespace test {
 namespace unit {
 
-static bool test_metadata_store() {
+// UNIT-METADATASTORE-001
+static bool test_metadata_store_storeandload() {
   auto metadata_store_path = StringUtil::format(
       "/tmp/test_metadata_store-$0",
       Random::singleton()->hex64());
@@ -156,6 +158,7 @@ static bool test_metadata_store() {
   return true;
 }
 
+// UNIT-METADATASTORE-002
 static bool test_metadata_store_cache() {
   auto metadata_store_path = StringUtil::format(
       "/tmp/test_metadata_store-$0",
@@ -194,18 +197,10 @@ static bool test_metadata_store_cache() {
 }
 
 void setup_unit_metadata_store_tests(TestRepository* repo) {
-  repo->addTestBundle({
-    TestCase {
-      .test_id = "UNIT-METADATASTORE-001",
-      .fun = &test_metadata_store,
-      .suites =  { TestSuite::WORLD, TestSuite::SMOKE }
-    },
-    TestCase {
-      .test_id = "UNIT-METADATASTORE-002",
-      .fun = &test_metadata_store_cache,
-      .suites =  { TestSuite::WORLD, TestSuite::SMOKE }
-    }
-  });
+  std::vector<TestCase> c;
+  SETUP_UNIT_TESTCASE(&c, "UNIT-METADATASTORE-001", metadata_store, storeandload);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-METADATASTORE-002", metadata_store, cache);
+  repo->addTestBundle(c);
 }
 
 } // namespace unit

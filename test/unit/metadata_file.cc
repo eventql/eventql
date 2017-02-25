@@ -24,14 +24,16 @@
 #include "eventql/eventql.h"
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/random.h"
-#include "eventql/util/test/unittest.h"
 #include "eventql/db/metadata_store.h"
+#include "../unit_test.h"
+#include "../util/test_repository.h"
 
-using namespace eventql;
+namespace eventql {
+namespace test {
+namespace unit {
 
-UNIT_TEST(MetadataFileTest);
-
-TEST_CASE(MetadataFileTest, TestMetadataFileStringLookups, [] () {
+// UNIT-METADATAFILE-001
+static bool test_metadata_file_string_lookups() {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -73,9 +75,11 @@ TEST_CASE(MetadataFileTest, TestMetadataFileStringLookups, [] () {
   EXPECT(file.getPartitionMapAt("e") == file.getPartitionMapBegin() + 3);
   EXPECT(file.getPartitionMapAt("ex") == file.getPartitionMapBegin() + 3);
   EXPECT(file.getPartitionMapAt("z") == file.getPartitionMapBegin() + 3);
-});
+  return true;
+}
 
-TEST_CASE(MetadataFileTest, TestMetadataFileUserDefinedStringLookups, [] () {
+// UNIT-METADATAFILE-002
+static bool test_metadata_file_user_defined_string_lookups() {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -116,9 +120,11 @@ TEST_CASE(MetadataFileTest, TestMetadataFileUserDefinedStringLookups, [] () {
   EXPECT(file.getPartitionMapAt("e") == file.getPartitionMapBegin() + 2);
   EXPECT(file.getPartitionMapAt("ex") == file.getPartitionMapEnd());
   EXPECT(file.getPartitionMapAt("z") == file.getPartitionMapEnd());
-});
+  return true;
+}
 
-TEST_CASE(MetadataFileTest, TestMetadataFileFiniteUIntLookups, [] () {
+// UNIT-METADATAFILE-003
+static bool test_metadata_file_finite_uint_lookups() {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -178,13 +184,14 @@ TEST_CASE(MetadataFileTest, TestMetadataFileFiniteUIntLookups, [] () {
   EXPECT(file.getPartitionMapAt(encodePartitionKey(KEYSPACE_UINT64, "12")) == file.getPartitionMapEnd());
   EXPECT(file.getPartitionMapAt(encodePartitionKey(KEYSPACE_UINT64, "13")) == file.getPartitionMapEnd());
   EXPECT(file.getPartitionMapAt(encodePartitionKey(KEYSPACE_UINT64, "50")) == file.getPartitionMapBegin() + 3);
-});
+}
 
 static String uint_encode(uint64_t v) {
   return String((const char*) &v, sizeof(v));
 }
 
-TEST_CASE(MetadataFileTest, TestMetadataFileUIntLookups, [] () {
+// UNIT-METADATAFILE-004
+static bool test_metadata_file_uint_lookups() {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -225,9 +232,11 @@ TEST_CASE(MetadataFileTest, TestMetadataFileUIntLookups, [] () {
   EXPECT(file.getPartitionMapAt(uint_encode(5)) == file.getPartitionMapBegin() + 2);
   EXPECT(file.getPartitionMapAt(uint_encode(6)) == file.getPartitionMapBegin() + 3);
   EXPECT(file.getPartitionMapAt(uint_encode(7)) == file.getPartitionMapBegin() + 3);
-});
+  return true;
+}
 
-TEST_CASE(MetadataFileTest, TestMetadataFileRangeLookups, [] () {
+// UNIT-METADATAFILE-005
+static bool test_metadata_file_range_lookups() {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -274,9 +283,11 @@ TEST_CASE(MetadataFileTest, TestMetadataFileRangeLookups, [] () {
   EXPECT(file.getPartitionMapRangeEnd("z") == file.getPartitionMapBegin() + 4);
   EXPECT(file.getPartitionMapRangeEnd("") == file.getPartitionMapBegin() + 4);
   EXPECT(file.getPartitionMapRangeEnd("") == file.getPartitionMapEnd());
-});
+  return true;
+}
 
-TEST_CASE(MetadataFileTest, TestMetadataFileUserDefinedRangeLookups, [] () {
+// UNIT-METADATAFILE-006
+static bool test_metadata_file_user_defined_range_lookups() {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -330,9 +341,11 @@ TEST_CASE(MetadataFileTest, TestMetadataFileUserDefinedRangeLookups, [] () {
   EXPECT(file.getPartitionMapRangeEnd("z") == file.getPartitionMapBegin() + 4);
   EXPECT(file.getPartitionMapRangeEnd("") == file.getPartitionMapBegin() + 4);
   EXPECT(file.getPartitionMapRangeEnd("") == file.getPartitionMapEnd());
-});
+  return true;
+}
 
-TEST_CASE(MetadataFileTest, TestMetadataFileFiniteUIntRangeLookups, [] () {
+// UNIT-METADATAFILE-007
+static bool test_metadata_file_finite_uint_range_lookups() {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -413,9 +426,10 @@ TEST_CASE(MetadataFileTest, TestMetadataFileFiniteUIntRangeLookups, [] () {
   EXPECT(file.getPartitionMapRangeEnd(encodePartitionKey(KEYSPACE_UINT64, "50")) == file.getPartitionMapEnd());
   EXPECT(file.getPartitionMapRangeEnd(encodePartitionKey(KEYSPACE_UINT64, "99")) == file.getPartitionMapEnd());
   EXPECT(file.getPartitionMapRangeEnd(encodePartitionKey(KEYSPACE_UINT64, "800")) == file.getPartitionMapEnd());
-});
+}
 
-TEST_CASE(MetadataFileTest, TestKeyCompare, [] () {
+// UNIT-METADATAFILE-008
+static bool test_metadata_file_key_compare() {
   EXPECT(
       comparePartitionKeys(
           KEYSPACE_UINT64,
@@ -433,9 +447,12 @@ TEST_CASE(MetadataFileTest, TestKeyCompare, [] () {
           KEYSPACE_UINT64,
           encodePartitionKey(KEYSPACE_UINT64, "2"),
           encodePartitionKey(KEYSPACE_UINT64, "400")) == -1);
-});
 
-TEST_CASE(MetadataFileTest, TestMetadataFileEmptyRangeLookups, [] () {
+  return true;
+}
+
+// UNIT-METADATAFILE-009
+static bool test_metadata_file_empty_range_lookups() {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   MetadataFile file(
@@ -458,5 +475,24 @@ TEST_CASE(MetadataFileTest, TestMetadataFileEmptyRangeLookups, [] () {
   EXPECT(file.getPartitionMapRangeEnd("0") == file.getPartitionMapEnd());
   EXPECT(file.getPartitionMapRangeEnd("10") == file.getPartitionMapEnd());
   EXPECT(file.getPartitionMapRangeEnd("99") == file.getPartitionMapEnd());
-});
+  return true;
+}
+
+void setup_unit_metadata_file_tests(TestRepository* repo) {
+  std::vector<TestCase> c;
+  SETUP_UNIT_TESTCASE(&c, "UNIT-METADATAFILE-001", metadata_file, string_lookups);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-METADATAFILE-002", metadata_file, user_defined_string_lookups);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-METADATAFILE-003", metadata_file, finite_uint_lookups);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-METADATAFILE-004", metadata_file, uint_lookups);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-METADATAFILE-005", metadata_file, range_lookups);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-METADATAFILE-006", metadata_file, user_defined_range_lookups);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-METADATAFILE-007", metadata_file, finite_uint_range_lookups);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-METADATAFILE-008", metadata_file, key_compare);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-METADATAFILE-009", metadata_file, empty_range_lookups);
+  repo->addTestBundle(c);
+}
+
+} // namespace unit
+} // namespace test
+} // namespace eventql
 

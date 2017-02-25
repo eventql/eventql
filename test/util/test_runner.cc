@@ -39,6 +39,12 @@ static void expandTestList(
     std::set<std::string>* test_ids) {
 }
 
+struct TestFailure {
+  std::string test_id;
+  std::string description;
+  std::string error;
+};
+
 bool TestRunner::runTests(
     std::set<std::string> test_ids,
     TestOutputFormat format) {
@@ -59,7 +65,7 @@ bool TestRunner::runTests(
       break;
   }
 
-  std::vector<std::pair<std::string, std::string>> test_failures;
+  std::vector<TestFailure> test_failures;
   size_t tests_passed = 0;
   size_t test_num = 0;
   for (const auto& bundle : test_repo_->getTestBundles()) {
@@ -88,33 +94,41 @@ bool TestRunner::runTests(
           case TestOutputFormat::ASCII:
             fprintf(
                 stderr,
-                " * %s \033[1;32m[PASS]\e[0m\n",
-                test.test_id.c_str());
+                " * %s \033[1;32m[PASS]\e[0m -- %s\n",
+                test.test_id.c_str(),
+                test.description.c_str());
             break;
           case TestOutputFormat::TAP:
             fprintf(
                 stdout,
-                "ok %i - %s\n",
+                "ok %i - %s # %s\n",
                 (int) test_num,
-                test.test_id.c_str());
+                test.test_id.c_str(),
+                test.description.c_str());
             break;
         }
       } else {
-        test_failures.emplace_back(test.test_id, test_message);
+        test_failures.emplace_back(TestFailure {
+          .test_id = test.test_id,
+          .description = test.description,
+          .error = test_message
+        });
 
         switch (format) {
           case TestOutputFormat::ASCII:
             fprintf(
                 stderr,
-                " * %s \033[1;31m[FAIL]\e[0m\n",
-                test.test_id.c_str());
+                " * %s \033[1;31m[FAIL]\e[0m -- %s\n",
+                test.test_id.c_str(),
+                test.description.c_str());
             break;
           case TestOutputFormat::TAP:
             fprintf(
                 stdout,
-                "not ok %i - %s # %s\n",
+                "not ok %i - %s # %s; ERROR: %s\n",
                 (int) test_num,
                 test.test_id.c_str(),
+                test.description.c_str(),
                 test_message.c_str());
             break;
         }
@@ -128,9 +142,10 @@ bool TestRunner::runTests(
         for (const auto& fail : test_failures) {
           fprintf(
               stderr,
-              "\n\033[1;31m[FAIL] %s\e[0m\n  %s\n",
-              fail.first.c_str(),
-              fail.second.c_str());
+              "\n\033[1;31m[FAIL] %s\e[0m -- %s\n  ERROR: %s\n",
+              fail.test_id.c_str(),
+              fail.description.c_str(),
+              fail.error.c_str());
         }
 
         fprintf(
