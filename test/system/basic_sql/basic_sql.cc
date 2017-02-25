@@ -93,19 +93,19 @@ void setup_tests(TestRepository* test_repo) {
     t.logfile_path = "test/system/basic_sql/test.log";
 
     t.test_cases.emplace_back(TestCase {
-      .test_id = "REGRESS-BASICSQL-STANDALONE-001",
+      .test_id = "SYS-BASICSQL-STANDALONE-001",
       .description = "Start & create cluster",
       .fun = &init_cluster_standalone,
       .suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE }
     });
     t.test_cases.emplace_back(TestCase {
-      .test_id = "REGRESS-BASICSQL-STANDALONE-002",
+      .test_id = "SYS-BASICSQL-STANDALONE-002",
       .description = "Create tables",
       .fun = &init_cluster_tables,
       .suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE }
     });
     t.test_cases.emplace_back(TestCase {
-      .test_id = "REGRESS-BASICSQL-STANDALONE-003",
+      .test_id = "SYS-BASICSQL-STANDALONE-003",
       .description = "Import table data from CSV",
       .fun = &import_cluster_data,
       .suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE }
