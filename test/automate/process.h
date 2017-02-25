@@ -26,6 +26,8 @@
 #include <vector>
 #include <thread>
 #include <atomic>
+#include <sys/types.h>
+#include <signal.h>
 #include "eventql/util/return_code.h"
 
 namespace eventql {
@@ -48,7 +50,7 @@ public:
   int wait();
   void waitAndExpectSuccess();
 
-  void stop();
+  void stop(int signal = SIGKILL);
 
   void storeSTDOUT(std::string* stdout_dst);
   void storeSTDERR(std::string* stderr_dst);

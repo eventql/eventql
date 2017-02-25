@@ -148,7 +148,8 @@ void Process::waitAndExpectSuccess() {
   }
 }
 
-void Process::stop() {
+void Process::stop(int sig /* = SIGKILL */) {
+  kill(pid_, sig);
   wait();
 }
 
