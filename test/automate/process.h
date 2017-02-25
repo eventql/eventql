@@ -42,6 +42,13 @@ public:
 
   Process& operator=(const Process& other) = delete;
 
+  static void runOrDie(
+      const std::string filename,
+      const std::vector<std::string>& argv,
+      const std::vector<std::string>& envv = std::vector<std::string>{},
+      const std::string& log_prefix = "",
+      int log_fd = -1);
+
   ReturnCode start(
       const std::string filename,
       const std::vector<std::string>& argv,

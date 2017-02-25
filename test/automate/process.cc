@@ -47,6 +47,25 @@ Process::~Process() {
   }
 }
 
+void Process::runOrDie(
+    const std::string filename,
+    const std::vector<std::string>& argv,
+    const std::vector<std::string>& envv /* = std::vector<std::string>{} */,
+    const std::string& log_prefix /* = "" */,
+    int log_fd /* = -1 */) {
+  Process proc;
+  if (log_fd >= 0) {
+    proc.logDebug(log_prefix, log_fd);
+  }
+
+  auto rc = proc.start(filename, argv, envv);
+  if (!rc.isSuccess()) {
+    throw std::runtime_error(rc.getMessage());
+  }
+
+  proc.waitAndExpectSuccess();
+}
+
 ReturnCode Process::start(
     const std::string filename,
     const std::vector<std::string>& argv,
