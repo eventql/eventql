@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include "eventql/util/io/fileutil.h"
 #include "basic_sql.h"
 #include "../../automate/process.h"
 #include "../../test_runner.h"
@@ -30,16 +31,19 @@ namespace test {
 namespace regress_basic_sql {
 
 static bool init_cluster_standalone(TestContext* ctx) {
-  Process evqld_proc;
-  evqld_proc.logDebug("evqld-standalone", ctx->log_fd);
+  std::string datadir = "/tmp/__evql_test_123";
+  FileUtil::mkdir_p(datadir);
 
-  evqld_proc.start(
+  std::unique_ptr<Process> evqld_proc(new Process());
+  evqld_proc->logDebug("evqld-standalone", ctx->log_fd);
+  evqld_proc->start(
       "./src/evqld",
       std::vector<std::string> {
         "--standalone",
-        "--datadir", "/tmp/__evql_test_123"
+        "--datadir", datadir
       });
 
+  ctx->background_procs["evqld-standalone"] = std::move(evqld_proc);
   return true;
 }
 
