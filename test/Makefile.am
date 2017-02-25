@@ -38,7 +38,7 @@ noinst_PROGRAMS= evql-test
 evql_test_SOURCES = evql_test.cc
 evql_test_LDADD = \
     @top_builddir@/src/libevqlcore.a \
-    @top_builddir@/src/libevqlclient.la \
+    @top_builddir@/src/libevqlclient_static.a \
     $(INIH_LDADD) \
     $(MURMURHASH_LDADD) \
     $(SIMDCOMP_LDADD) \
@@ -48,7 +48,7 @@ evql_test_LDADD = \
 evql_test_unit_metadata_file_SOURCES = unit/metadata_file.cc
 evql_test_unit_metadata_file_LDADD = \
     @top_builddir@/src/libevqlcore.a \
-    @top_builddir@/src/libevqlclient.la \
+    @top_builddir@/src/libevqlclient_static.a \
     $(INIH_LDADD) \
     $(MURMURHASH_LDADD) \
     $(SIMDCOMP_LDADD) \
@@ -58,7 +58,7 @@ evql_test_unit_metadata_file_LDADD = \
 evql_test_unit_metadata_store_SOURCES = unit/metadata_store.cc
 evql_test_unit_metadata_store_LDADD = \
     @top_builddir@/src/libevqlcore.a \
-    @top_builddir@/src/libevqlclient.la \
+    @top_builddir@/src/libevqlclient_static.a \
     $(INIH_LDADD) \
     $(MURMURHASH_LDADD) \
     $(SIMDCOMP_LDADD) \
@@ -68,7 +68,7 @@ evql_test_unit_metadata_store_LDADD = \
 evql_test_unit_metadata_operation_split_SOURCES = unit/metadata_operation_split.cc
 evql_test_unit_metadata_operation_split_LDADD = \
     @top_builddir@/src/libevqlcore.a \
-    @top_builddir@/src/libevqlclient.la \
+    @top_builddir@/src/libevqlclient_static.a \
     $(INIH_LDADD) \
     $(MURMURHASH_LDADD) \
     $(SIMDCOMP_LDADD) \
@@ -78,7 +78,7 @@ evql_test_unit_metadata_operation_split_LDADD = \
 evql_test_unit_metadata_operation_createpartition_SOURCES = unit/metadata_operation_createpartition.cc
 evql_test_unit_metadata_operation_createpartition_LDADD = \
     @top_builddir@/src/libevqlcore.a \
-    @top_builddir@/src/libevqlclient.la \
+    @top_builddir@/src/libevqlclient_static.a \
     $(INIH_LDADD) \
     $(MURMURHASH_LDADD) \
     $(SIMDCOMP_LDADD) \
@@ -88,7 +88,7 @@ evql_test_unit_metadata_operation_createpartition_LDADD = \
 evql_test_unit_partition_discovery_SOURCES = unit/partition_discovery.cc
 evql_test_unit_partition_discovery_LDADD = \
     @top_builddir@/src/libevqlcore.a \
-    @top_builddir@/src/libevqlclient.la \
+    @top_builddir@/src/libevqlclient_static.a \
     $(INIH_LDADD) \
     $(MURMURHASH_LDADD) \
     $(SIMDCOMP_LDADD) \
@@ -98,7 +98,7 @@ evql_test_unit_partition_discovery_LDADD = \
 evql_test_unit_sql_parser_SOURCES = unit/sql_parser.cc
 evql_test_unit_sql_parser_LDADD = \
     @top_builddir@/src/libevqlcore.a \
-    @top_builddir@/src/libevqlclient.la \
+    @top_builddir@/src/libevqlclient_static.a \
     $(INIH_LDADD) \
     $(MURMURHASH_LDADD) \
     $(SIMDCOMP_LDADD) \
@@ -108,7 +108,7 @@ evql_test_unit_sql_parser_LDADD = \
 evql_test_unit_sql_qtree_SOURCES = unit/sql_qtree.cc
 evql_test_unit_sql_qtree_LDADD = \
     @top_builddir@/src/libevqlcore.a \
-    @top_builddir@/src/libevqlclient.la \
+    @top_builddir@/src/libevqlclient_static.a \
     $(INIH_LDADD) \
     $(MURMURHASH_LDADD) \
     $(SIMDCOMP_LDADD) \
@@ -118,7 +118,7 @@ evql_test_unit_sql_qtree_LDADD = \
 evql_test_sql_SOURCES = sql_test_runner.cc
 evql_test_sql_LDADD = \
     @top_builddir@/src/libevqlcore.a \
-    @top_builddir@/src/libevqlclient.la \
+    @top_builddir@/src/libevqlclient_static.a \
     $(INIH_LDADD) \
     $(MURMURHASH_LDADD) \
     $(SIMDCOMP_LDADD) \
