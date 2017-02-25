@@ -27,19 +27,23 @@ namespace eventql {
 namespace test {
 namespace regress_basic_sql {
 
-bool init_cluster_standalone() {
+static bool init_cluster_standalone(TestContext* ctx) {
 
+  return true;
 }
 
 void setup_tests(TestRepository* test_repo) {
   // standalone cluster
   {
     std::vector<TestCase> cases;
-
-
-
+    cases.emplace_back(TestCase {
+      .test_id = "REGRESS-BASICSQL-STANDALONE-001",
+      .description = "Start & create cluster",
+      .fun = &init_cluster_standalone,
+      .suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE }
+    });
+    test_repo->addTestBundle(cases);
   }
-
 }
 
 } // namespace unit

@@ -183,6 +183,7 @@ static bool test_metadata_file_finite_uint_lookups(TestContext* ctx) {
   EXPECT(file.getPartitionMapAt(encodePartitionKey(KEYSPACE_UINT64, "12")) == file.getPartitionMapEnd());
   EXPECT(file.getPartitionMapAt(encodePartitionKey(KEYSPACE_UINT64, "13")) == file.getPartitionMapEnd());
   EXPECT(file.getPartitionMapAt(encodePartitionKey(KEYSPACE_UINT64, "50")) == file.getPartitionMapBegin() + 3);
+  return true;
 }
 
 static String uint_encode(uint64_t v) {
@@ -425,6 +426,7 @@ static bool test_metadata_file_finite_uint_range_lookups(TestContext* ctx) {
   EXPECT(file.getPartitionMapRangeEnd(encodePartitionKey(KEYSPACE_UINT64, "50")) == file.getPartitionMapEnd());
   EXPECT(file.getPartitionMapRangeEnd(encodePartitionKey(KEYSPACE_UINT64, "99")) == file.getPartitionMapEnd());
   EXPECT(file.getPartitionMapRangeEnd(encodePartitionKey(KEYSPACE_UINT64, "800")) == file.getPartitionMapEnd());
+  return true;
 }
 
 // UNIT-METADATAFILE-008
