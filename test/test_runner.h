@@ -35,6 +35,10 @@ enum class TestOutputFormat { TAP, ASCII };
 struct TestContext {
   TestContext();
   ~TestContext();
+  std::string tmpdir;
+  std::string logdir;
+  std::string bindir;
+  std::string srcdir;
   std::map<std::string, std::unique_ptr<Process>> background_procs;
   int log_fd;
   std::string log_file;

@@ -37,7 +37,7 @@ static bool init_cluster_standalone(TestContext* ctx) {
   std::unique_ptr<Process> evqld_proc(new Process());
   evqld_proc->logDebug("evqld-standalone", ctx->log_fd);
   evqld_proc->start(
-      "./src/evqld",
+      FileUtil::joinPaths(ctx->bindir, "evqld"),
       std::vector<std::string> {
         "--standalone",
         "--datadir", datadir
@@ -54,7 +54,7 @@ static bool init_cluster_tables(TestContext* ctx) {
     evql_proc.logDebug("evql-create-table", ctx->log_fd);
 
     auto rc = evql_proc.start(
-        "./src/evql",
+        FileUtil::joinPaths(ctx->bindir, "evql"),
         std::vector<std::string> {
           "-d", "test",
           "-f", "./test/system/basic_sql/create_pageviews.sql"

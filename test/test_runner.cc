@@ -27,12 +27,18 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include "eventql/util/stringutil.h"
+#include "eventql/util/io/fileutil.h"
 #include "test_runner.h"
 
 namespace eventql {
 namespace test {
 
-TestContext::TestContext() : log_fd(-1) {}
+TestContext::TestContext() :
+    tmpdir("/tmp"),
+    logdir("./"),
+    bindir("./src"),
+    srcdir("./"),
+    log_fd(-1) {}
 
 TestContext::~TestContext() {
   if (log_fd >= 0) {
@@ -89,7 +95,8 @@ bool TestRunner::runTests(
   for (const auto& bundle : test_repo_->getTestBundles()) {
     TestContext test_ctx;
     if (!bundle.logfile_path.empty()) {
-      test_ctx.openLogfile(bundle.logfile_path);
+      test_ctx.openLogfile(
+          FileUtil::joinPaths(test_ctx.logdir, bundle.logfile_path));
     }
 
     for (const auto& test : bundle.test_cases) {
