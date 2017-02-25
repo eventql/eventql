@@ -51,24 +51,37 @@ static bool init_cluster_standalone(TestContext* ctx) {
 }
 
 static bool init_cluster_tables(TestContext* ctx) {
-  // create pageviews table
-  {
-    Process evql_proc;
-    evql_proc.logDebug("evql-create-table", ctx->log_fd);
-
-    auto rc = evql_proc.start(
+  std::set<std::string> tables{ "pageviews", "customers" };
+  for (const auto& tbl: tables) {
+    Process::runOrDie(
         FileUtil::joinPaths(ctx->bindir, "evql"),
-        std::vector<std::string> {
+        {
           "-d", "test",
-          "-f", "./test/system/basic_sql/create_pageviews.sql"
-        });
-
-    if (!rc.isSuccess()) {
-      throw std::runtime_error(rc.getMessage());
-    }
-
-    evql_proc.waitAndExpectSuccess();
+          "-f", "./test/system/basic_sql/create_" + tbl + ".sql"
+        },
+        {},
+        "evql-create-table",
+        ctx->log_fd);
   }
+
+  return true;
+}
+
+static bool import_cluster_data(TestContext* ctx) {
+  Process::runOrDie(
+      FileUtil::joinPaths(ctx->bindir, "evqlctl"),
+      {
+        "table-import",
+        "--host", "localhost",
+        "--port", "9175",
+        "--database", "test",
+        "--table", "customers",
+        "--format", "csv",
+        "--file", FileUtil::joinPaths(ctx->srcdir, "test/sql_testdata/testtbl2.csv")
+      },
+      {},
+      "evql-import-customers-table",
+      ctx->log_fd);
 
   return true;
 }
@@ -89,6 +102,12 @@ void setup_tests(TestRepository* test_repo) {
       .test_id = "REGRESS-BASICSQL-STANDALONE-002",
       .description = "Create tables",
       .fun = &init_cluster_tables,
+      .suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE }
+    });
+    t.test_cases.emplace_back(TestCase {
+      .test_id = "REGRESS-BASICSQL-STANDALONE-003",
+      .description = "Import table data from CSV",
+      .fun = &import_cluster_data,
       .suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE }
     });
     test_repo->addTestBundle(t);
