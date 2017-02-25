@@ -34,7 +34,7 @@ namespace test {
 namespace unit {
 
 // UNIT-METAOP-CREATEPART-001
-static bool test_metadata_operation_createpartition_create_empty() {
+static bool test_metadata_operation_createpartition_create_empty(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
   MetadataFile input(
       SHA1::compute("mytx"),
@@ -84,7 +84,7 @@ static bool test_metadata_operation_createpartition_create_empty() {
 }
 
 // UNIT-METAOP-CREATEPART-002
-static bool test_metadata_operation_createpartition_create_begin() {
+static bool test_metadata_operation_createpartition_create_begin(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -186,7 +186,7 @@ static bool test_metadata_operation_createpartition_create_begin() {
 }
 
 // UNIT-METAOP-CREATEPART-003
-static bool test_metadata_operation_createpartition_create_begin2() {
+static bool test_metadata_operation_createpartition_create_begin2(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -288,7 +288,7 @@ static bool test_metadata_operation_createpartition_create_begin2() {
 }
 
 // UNIT-METAOP-CREATEPART-004
-static bool test_metadata_operation_createpartition_create_middle() {
+static bool test_metadata_operation_createpartition_create_middle(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -391,7 +391,7 @@ static bool test_metadata_operation_createpartition_create_middle() {
 }
 
 // UNIT-METAOP-CREATEPART-005
-static bool test_metadata_operation_createpartition_create_middle2() {
+static bool test_metadata_operation_createpartition_create_middle2(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -493,7 +493,7 @@ static bool test_metadata_operation_createpartition_create_middle2() {
 }
 
 // UNIT-METAOP-CREATEPART-006
-static bool test_metadata_operation_createpartition_create_end() {
+static bool test_metadata_operation_createpartition_create_end(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -596,7 +596,7 @@ static bool test_metadata_operation_createpartition_create_end() {
 }
 
 // UNIT-METAOP-CREATEPART-007
-static bool test_metadata_operation_createpartition_create_end2() {
+static bool test_metadata_operation_createpartition_create_end2(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -699,7 +699,7 @@ static bool test_metadata_operation_createpartition_create_end2() {
 }
 
 // UNIT-METAOP-CREATEPART-008
-static bool test_metadata_operation_createpartition_create_overlap_begin() {
+static bool test_metadata_operation_createpartition_create_overlap_begin(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -775,7 +775,7 @@ static bool test_metadata_operation_createpartition_create_overlap_begin() {
 }
 
 // UNIT-METAOP-CREATEPART-009
-static bool test_metadata_operation_createpartition_create_overlap_middle() {
+static bool test_metadata_operation_createpartition_create_overlap_middle(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -850,7 +850,7 @@ static bool test_metadata_operation_createpartition_create_overlap_middle() {
 }
 
 // UNIT-METAOP-CREATEPART-010
-static bool test_metadata_operation_createpartition_create_overlap_end() {
+static bool test_metadata_operation_createpartition_create_overlap_end(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -925,7 +925,7 @@ static bool test_metadata_operation_createpartition_create_overlap_end() {
 }
 
 // UNIT-METAOP-CREATEPART-011
-static bool test_metadata_operation_createpartition_create_overlap_exact() {
+static bool test_metadata_operation_createpartition_create_overlap_exact(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {

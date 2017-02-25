@@ -31,6 +31,10 @@ namespace test {
 
 enum class TestOutputFormat { TAP, ASCII };
 
+struct TestContext {
+
+};
+
 class TestRunner {
 public:
 

@@ -43,7 +43,7 @@ static MetadataFile::PartitionPlacement mkPlacement(
 }
 
 // UNIT-METAOP-SPLIT-001
-static bool test_metadata_operation_split_split_begin() {
+static bool test_metadata_operation_split_split_begin(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -182,7 +182,7 @@ static bool test_metadata_operation_split_split_begin() {
 }
 
 // unit-metaop-split-002
-static bool test_metadata_operation_split_subsplit_begin_low() {
+static bool test_metadata_operation_split_subsplit_begin_low(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -287,7 +287,7 @@ static bool test_metadata_operation_split_subsplit_begin_low() {
 }
 
 // UNIT-METAOP-SPLIT-003
-static bool test_metadata_operation_split_subsplit_begin_high() {
+static bool test_metadata_operation_split_subsplit_begin_high(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -392,7 +392,7 @@ static bool test_metadata_operation_split_subsplit_begin_high() {
 }
 
 // UNIT-METAOP-SPLIT-004
-static bool test_metadata_operation_split_split_middle() {
+static bool test_metadata_operation_split_split_middle(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -531,7 +531,7 @@ static bool test_metadata_operation_split_split_middle() {
 }
 
 // UNIT-METAOP-SPLIT-005
-static bool test_metadata_operation_split_subsplit_middle_low() {
+static bool test_metadata_operation_split_subsplit_middle_low(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -647,7 +647,7 @@ static bool test_metadata_operation_split_subsplit_middle_low() {
 }
 
 // UNIT-METAOP-SPLIT-006
-static bool test_metadata_operation_split_subsplit_middle_high() {
+static bool test_metadata_operation_split_subsplit_middle_high(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -763,7 +763,7 @@ static bool test_metadata_operation_split_subsplit_middle_high() {
 }
 
 // UNIT-METAOP-SPLIT-007
-static bool test_metadata_operation_split_split_end() {
+static bool test_metadata_operation_split_split_end(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -902,7 +902,7 @@ static bool test_metadata_operation_split_split_end() {
 }
 
 // UNIT-METAOP-SPLIT-008
-static bool test_metadata_operation_split_subsplit_end_low() {
+static bool test_metadata_operation_split_subsplit_end_low(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -1007,7 +1007,7 @@ static bool test_metadata_operation_split_subsplit_end_low() {
 }
 
 // UNIT-METAOP-SPLIT-009
-static bool test_metadata_operation_split_subsplit_end_high() {
+static bool test_metadata_operation_split_subsplit_end_high(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -1112,7 +1112,7 @@ static bool test_metadata_operation_split_subsplit_end_high() {
 }
 
 // UNIT-METAOP-SPLIT-010
-static bool test_metadata_operation_split_finite_split_begin() {
+static bool test_metadata_operation_split_finite_split_begin(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -1276,7 +1276,7 @@ static bool test_metadata_operation_split_finite_split_begin() {
 }
 
 // UNIT-METAOP-SPLIT-011
-static bool test_metadata_operation_split_finite_split_middle() {
+static bool test_metadata_operation_split_finite_split_middle(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -1440,7 +1440,7 @@ static bool test_metadata_operation_split_finite_split_middle() {
 }
 
 // UNIT-METAOP-SPLIT-012
-static bool test_metadata_operation_split_finite_split_end() {
+static bool test_metadata_operation_split_finite_split_end(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -1604,7 +1604,7 @@ static bool test_metadata_operation_split_finite_split_end() {
 }
 
 // UNIT-METAOP-SPLIT-013
-static bool test_metadata_operation_split_split_begin_immediate() {
+static bool test_metadata_operation_split_split_begin_immediate(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -1711,7 +1711,7 @@ static bool test_metadata_operation_split_split_begin_immediate() {
 }
 
 // UNIT-METAOP-SPLIT-014
-static bool test_metadata_operation_split_split_middle_immediate() {
+static bool test_metadata_operation_split_split_middle_immediate(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -1818,7 +1818,7 @@ static bool test_metadata_operation_split_split_middle_immediate() {
 }
 
 // UNIT-METAOP-SPLIT-015
-static bool test_metadata_operation_split_split_end_immediate() {
+static bool test_metadata_operation_split_split_end_immediate(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -1925,7 +1925,7 @@ static bool test_metadata_operation_split_split_end_immediate() {
 }
 
 // UNIT-METAOP-SPLIT-016
-static bool test_metadata_operation_split_finite_split_begin_immediate() {
+static bool test_metadata_operation_split_finite_split_begin_immediate(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -2046,7 +2046,7 @@ static bool test_metadata_operation_split_finite_split_begin_immediate() {
 }
 
 // UNIT-METAOP-SPLIT-017
-static bool test_metadata_operation_split_finite_split_middle_immediate() {
+static bool test_metadata_operation_split_finite_split_middle_immediate(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -2167,7 +2167,7 @@ static bool test_metadata_operation_split_finite_split_middle_immediate() {
 }
 
 // UNIT-METAOP-SPLIT-018
-static bool test_metadata_operation_split_finite_split_end_immediate() {
+static bool test_metadata_operation_split_finite_split_end_immediate(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -2288,7 +2288,7 @@ static bool test_metadata_operation_split_finite_split_end_immediate() {
 }
 
 // UNIT-METAOP-SPLIT-019
-static bool test_metadata_operation_split_user_defined_split() {
+static bool test_metadata_operation_split_user_defined_split(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {

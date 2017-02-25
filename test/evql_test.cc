@@ -27,6 +27,7 @@
 #include "eventql/util/cli/flagparser.h"
 #include "test_repository.h"
 #include "test_runner.h"
+#include "regress/basic_sql/basic_sql.h"
 
 using namespace eventql::test;
 
@@ -129,6 +130,7 @@ int main(int argc, const char** argv) {
   /* init test repo */
   TestRepository test_repo;
   eventql::test::unit::setup_unit_tests(&test_repo);
+  eventql::test::regress_basic_sql::setup_tests(&test_repo);
 
   /* run tests */
   TestRunner test_runner(&test_repo);

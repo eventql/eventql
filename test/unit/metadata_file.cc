@@ -32,7 +32,7 @@ namespace test {
 namespace unit {
 
 // UNIT-METADATAFILE-001
-static bool test_metadata_file_string_lookups() {
+static bool test_metadata_file_string_lookups(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -78,7 +78,7 @@ static bool test_metadata_file_string_lookups() {
 }
 
 // UNIT-METADATAFILE-002
-static bool test_metadata_file_user_defined_string_lookups() {
+static bool test_metadata_file_user_defined_string_lookups(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -123,7 +123,7 @@ static bool test_metadata_file_user_defined_string_lookups() {
 }
 
 // UNIT-METADATAFILE-003
-static bool test_metadata_file_finite_uint_lookups() {
+static bool test_metadata_file_finite_uint_lookups(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -190,7 +190,7 @@ static String uint_encode(uint64_t v) {
 }
 
 // UNIT-METADATAFILE-004
-static bool test_metadata_file_uint_lookups() {
+static bool test_metadata_file_uint_lookups(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -235,7 +235,7 @@ static bool test_metadata_file_uint_lookups() {
 }
 
 // UNIT-METADATAFILE-005
-static bool test_metadata_file_range_lookups() {
+static bool test_metadata_file_range_lookups(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -286,7 +286,7 @@ static bool test_metadata_file_range_lookups() {
 }
 
 // UNIT-METADATAFILE-006
-static bool test_metadata_file_user_defined_range_lookups() {
+static bool test_metadata_file_user_defined_range_lookups(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -344,7 +344,7 @@ static bool test_metadata_file_user_defined_range_lookups() {
 }
 
 // UNIT-METADATAFILE-007
-static bool test_metadata_file_finite_uint_range_lookups() {
+static bool test_metadata_file_finite_uint_range_lookups(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -428,7 +428,7 @@ static bool test_metadata_file_finite_uint_range_lookups() {
 }
 
 // UNIT-METADATAFILE-008
-static bool test_metadata_file_key_compare() {
+static bool test_metadata_file_key_compare(TestContext* ctx) {
   EXPECT(
       comparePartitionKeys(
           KEYSPACE_UINT64,
@@ -451,7 +451,7 @@ static bool test_metadata_file_key_compare() {
 }
 
 // UNIT-METADATAFILE-009
-static bool test_metadata_file_empty_range_lookups() {
+static bool test_metadata_file_empty_range_lookups(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   MetadataFile file(

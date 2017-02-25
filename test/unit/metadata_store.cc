@@ -33,7 +33,7 @@ namespace test {
 namespace unit {
 
 // UNIT-METADATASTORE-001
-static bool test_metadata_store_storeandload() {
+static bool test_metadata_store_storeandload(TestContext* ctx) {
   auto metadata_store_path = StringUtil::format(
       "/tmp/test_metadata_store-$0",
       Random::singleton()->hex64());
@@ -157,7 +157,7 @@ static bool test_metadata_store_storeandload() {
 }
 
 // UNIT-METADATASTORE-002
-static bool test_metadata_store_cache() {
+static bool test_metadata_store_cache(TestContext* ctx) {
   auto metadata_store_path = StringUtil::format(
       "/tmp/test_metadata_store-$0",
       Random::singleton()->hex64());

@@ -69,6 +69,8 @@ bool TestRunner::runTests(
   size_t tests_passed = 0;
   size_t test_num = 0;
   for (const auto& bundle : test_repo_->getTestBundles()) {
+    TestContext test_ctx;
+
     for (const auto& test : bundle) {
       if (test_ids.count(test.test_id) == 0) {
         break;
@@ -79,7 +81,7 @@ bool TestRunner::runTests(
       bool test_result = false;
       std::string test_message;
       try {
-        test_result = test.fun();
+        test_result = test.fun(&test_ctx);
       } catch (const std::exception& e) {
         test_message = e.what();
       }

@@ -1,8 +1,7 @@
 /**
- * Copyright (c) 2017 DeepCortex GmbH <legal@eventql.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
- *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -22,44 +21,15 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#pragma once
-#include <iostream>
-#include <functional>
-#include <set>
-#include <vector>
-#include <list>
+#include "../../test_repository.h"
 
 namespace eventql {
 namespace test {
-class TestContext;
+namespace regress_basic_sql {
 
-enum class TestSuite {
-  WORLD,
-  SMOKE
-};
+void setup_tests(TestRepository* test_repo);
 
-struct TestCase {
-  std::string test_id;
-  std::string description;
-  std::function<bool (TestContext* ctx)> fun;
-  std::set<TestSuite> suites;
-};
-
-class TestRepository {
-public:
-
-  TestRepository();
-
-  void addTestBundle(std::vector<TestCase> test_bundle);
-
-  const std::list<std::vector<TestCase>>& getTestBundles() const;
-  size_t getTestCount() const;
-
-protected:
-  std::list<std::vector<TestCase>> test_bundles_;
-  size_t test_count_;
-};
-
+} // namespace unit
 } // namespace test
 } // namespace eventql
 

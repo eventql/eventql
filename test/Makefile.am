@@ -31,6 +31,8 @@ evql_test_SOURCES = \
     unit/metadata_file.cc \
     unit/metadata_operation_createpartition.cc \
     unit/metadata_operation_split.cc \
+    regress/basic_sql/basic_sql.h \
+    regress/basic_sql/basic_sql.cc \
     test_repository.cc \
     test_runner.cc
 
