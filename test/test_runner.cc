@@ -60,6 +60,18 @@ bool TestRunner::runTest(const std::string& test_id, TestOutputFormat format) {
 static void expandTestList(
     TestRepository* test_repo,
     std::set<std::string>* test_ids) {
+  for (const auto& bundle : test_repo->getTestBundles()) {
+    ssize_t max_index = -1;
+    for (ssize_t i = 0; i < ssize_t(bundle.test_cases.size()); ++i) {
+      if (test_ids->count(bundle.test_cases[i].test_id) > 0) {
+        max_index = i;
+      }
+    }
+
+    for (ssize_t i = 0; i <= max_index; ++i) {
+      test_ids->insert(bundle.test_cases[i].test_id);
+    }
+  }
 }
 
 struct TestFailure {
