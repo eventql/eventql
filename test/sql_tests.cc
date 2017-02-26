@@ -21,12 +21,14 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <regex>
 #include "eventql/eventql.h"
 #include "eventql/util/stringutil.h"
 #include "eventql/util/io/fileutil.h"
 #include "eventql/util/csv/CSVOutputStream.h"
 #include "eventql/sql/runtime/defaultruntime.h"
 #include "eventql/sql/CSTableScanProvider.h"
+#include "eventql/sql/drivers/csv/CSVTableProvider.h"
 #include "eventql/sql/result_list.h"
 #include "eventql/util/csv/CSVInputStream.h"
 #include "test_repository.h"
@@ -227,36 +229,43 @@ bool runTest(std::string id) {
     }
   }
 
-  /* input table path */
-  auto sql_is = FileInputStream::openFile(sql_file_path);
-  std::string input_table_path;
-  if (!sql_is->readLine(&input_table_path) ||
-      !StringUtil::beginsWith(input_table_path, "--")) {
-    RAISE(kRuntimeError, "no input table provided");
-  }
-
-  StringUtil::replaceAll(&input_table_path, "--");
-  StringUtil::ltrim(&input_table_path);
-  StringUtil::chomp(&input_table_path);
-  input_table_path = FileUtil::joinPaths(
-      kBaseDirectoryPath,
-      input_table_path);
-
-  if (!FileUtil::exists(input_table_path)) {
-    RAISE(
-        kRuntimeError,
-        StringUtil::format("file does not exist: $0", input_table_path));
-  }
-
-  std::string query;
-  sql_is->readUntilEOF(&query);
-
   /* execute query */
   auto runtime = csql::Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
+  auto tables = mkScoped(new csql::TableRepository());
 
-  txn->setTableProvider(
-      new csql::CSTableScanProvider("testtable", input_table_path));
+  /* input tables */
+  std::regex input_regex("-- IMPORT (\\w+) FROM ([a-zA-Z0-9-_\\.\\/]+)");
+  auto sql_is = FileInputStream::openFile(sql_file_path);
+  {
+    std::string line;
+    while (sql_is->readLine(&line)) {
+      StringUtil::chomp(&line);
+      std::smatch match;
+      if (!std::regex_match(line, match, input_regex)) {
+        continue;
+      }
+
+      auto table = match[1];
+      auto filename = match[2];
+
+      if (StringUtil::endsWith(filename, ".cst")) {
+        tables->addProvider(new csql::CSTableScanProvider(table, filename));
+      } else if (StringUtil::endsWith(filename, ".csv")) {
+        tables->addProvider(new csql::backends::csv::CSVTableProvider(table, filename));
+      } else {
+        throw std::runtime_error("invalid table file type");
+      }
+    }
+  }
+
+  txn->setTableProvider(std::move(tables));
+
+  /* query */
+  sql_is->rewind();
+  std::string query;
+  sql_is->readUntilEOF(&query);
+
   csql::ResultList result;
 
   std::string error_message;
