@@ -99,12 +99,34 @@ bool TestRunner::runTests(
           FileUtil::joinPaths(test_ctx.logdir, bundle.logfile_path));
     }
 
+    bool test_bundle_failed = false;
     for (const auto& test : bundle.test_cases) {
       if (test_ids.count(test.test_id) == 0) {
         break;
       }
 
       ++test_num;
+
+      if (test_bundle_failed) {
+        switch (format) {
+          case TestOutputFormat::ASCII:
+            fprintf(
+                stderr,
+                " * %s \033[1;93m[SKIP]\e[0m -- %s\n",
+                test.test_id.c_str(),
+                test.description.c_str());
+            break;
+          case TestOutputFormat::TAP:
+            fprintf(
+                stdout,
+                "not ok %i - %s # %s; skipped because of previous failure\n",
+                (int) test_num,
+                test.test_id.c_str(),
+                test.description.c_str());
+            break;
+        }
+        continue;
+      }
 
       bool test_result = false;
       std::string test_message;
@@ -163,6 +185,8 @@ bool TestRunner::runTests(
                 test_message.c_str());
             break;
         }
+
+        test_bundle_failed = true;
       }
     }
   }
