@@ -316,7 +316,7 @@ void setup_sql_tests(TestRepository* repo) {
 
     auto test_case = eventql::test::TestCase {
       .test_id = StringUtil::format("SQL-$0", test_id.substr(0, 5)),
-      .description = test_id,
+      .description = test_id.substr(6),
       .fun = std::bind(runTest, test_id),
       .suites =  { TestSuite::WORLD, TestSuite::SMOKE }
     };
@@ -324,7 +324,6 @@ void setup_sql_tests(TestRepository* repo) {
     repo->addTestBundle({ test_case });
     test_id.clear();
   }
-
 }
 
 } // namespace sql
