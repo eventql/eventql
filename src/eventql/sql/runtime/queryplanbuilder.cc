@@ -1884,6 +1884,9 @@ static TableSchema buildCreateTableSchema(ASTNode* ast) {
         break;
       }
 
+      case ASTNode::T_PARTITION_KEY:
+        break;
+
       default:
         RAISE(kRuntimeError, "corrupt AST");
 
@@ -1908,6 +1911,7 @@ QueryTreeNode* QueryPlanBuilder::buildCreateTable(
 
   auto table_schema = buildCreateTableSchema(ast->getChildren()[1]);
   Vector<String> primary_key_columns;
+  std::string partition_key;
 
   for (const auto& cld : ast->getChildren()[1]->getChildren()) {
     if (cld->getType() != ASTNode::T_PRIMARY_KEY) {
@@ -1928,6 +1932,25 @@ QueryTreeNode* QueryPlanBuilder::buildCreateTable(
     }
   }
 
+  for (const auto& cld : ast->getChildren()[1]->getChildren()) {
+    if (cld->getType() != ASTNode::T_PARTITION_KEY) {
+      continue;
+    }
+
+    if (!partition_key.empty()) {
+      RAISE(kRuntimeError, "can't have more than one PARTITION KEY definition");
+    }
+
+    for (const auto& col : cld->getChildren()) {
+      if (col->getType() != ASTNode::T_COLUMN_NAME ||
+          col->getToken() == nullptr) {
+        RAISE(kRuntimeError, "corrupt AST");
+      }
+
+      partition_key = col->getToken()->getString();
+    }
+  }
+
   for (auto col : table_schema.getFlatColumnList()) {
     bool is_primary_key = std::find(
         col->column_options.begin(),
@@ -1945,12 +1968,26 @@ QueryTreeNode* QueryPlanBuilder::buildCreateTable(
     primary_key_columns.emplace_back(col->full_column_name);
   }
 
+  if (primary_key_columns.empty()) {
+    RAISE(kRuntimeError, "table must have a PRIMARY KEY");
+  }
+
+  if (!partition_key.empty() && partition_key != primary_key_columns[0]) {
+    RAISE(
+        kRuntimeError,
+        "PARTITION KEY must match the PRIMARY KEY (or the first column of the PRIMARY KEY for compound PRIMARY KEYs)");
+  }
+
   auto node = new CreateTableNode(
       table_name->getToken()->getString(),
       std::move(table_schema));
 
   if (!primary_key_columns.empty()) {
     node->setPrimaryKey(primary_key_columns);
+  }
+
+  if (!partition_key.empty()) {
+    node->setPartitionKey(partition_key);
   }
 
   if (ast->getChildren().size() >= 3) {

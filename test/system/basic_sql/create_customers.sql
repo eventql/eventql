@@ -7,4 +7,5 @@ CREATE TABLE customers (
   postalcode string,
   country string,
   PRIMARY KEY (customerid),
+  PARTITION KEY (customerid)
 );

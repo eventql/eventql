@@ -1542,6 +1542,32 @@ bool test_sql_parser_DescribeServersStatement(TestContext* ctx) {
   return true;
 }
 
+// UNIT-SQLPARSER-064
+bool test_sql_parser_create_table_with_partition_key(TestContext* ctx) {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+  auto parser = parseTestQuery(
+      R"(
+        CREATE TABLE fnord (
+            time DATETIME NOT NULL,
+            myvalue string,
+            other_val REPEATED string,
+            PRIMARY KEY (time, myvalue),
+            PARTITION KEY (time)
+        )
+      )");
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT(*stmt == ASTNode::T_CREATE_TABLE);
+  EXPECT(stmt->getChildren().size() == 2);
+  EXPECT_EQ(*stmt->getChildren()[0], ASTNode::T_TABLE_NAME);
+  EXPECT_EQ(*stmt->getChildren()[0]->getToken(), Token::T_IDENTIFIER);
+  EXPECT_EQ(stmt->getChildren()[0]->getToken()->getString(), "fnord");
+  EXPECT(*stmt->getChildren()[1] == ASTNode::T_COLUMN_LIST);
+  EXPECT(stmt->getChildren()[1]->getChildren().size() == 5);
+  return true;
+}
+
 static const std::vector<std::string> kTestQueries = {
   // UNIT-SQLPARSER-QUERY-001
   "SELECT -sum(fnord) + (123 * 4);",
@@ -1965,6 +1991,7 @@ void setup_unit_sql_parser_tests(TestRepository* repo) {
   SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-061", sql_parser, AlterTableSetPropertyStatement);
   SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-062", sql_parser, DescribePartitionsStatement);
   SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-063", sql_parser, DescribeServersStatement);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-064", sql_parser, create_table_with_partition_key);
   repo->addTestBundle(c);
 
   for (size_t i = 0; i < kTestQueries.size(); ++i) {

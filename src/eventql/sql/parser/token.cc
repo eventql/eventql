@@ -124,6 +124,7 @@ const char* Token::getTypeName(kTokenType type) {
     case T_SET: return "T_SET";
     case T_PROPERTY: return "T_PROPERTY";
     case T_PRIMARY: return "T_PRIMARY";
+    case T_PARTITION: return "T_PARTITION";
     case T_KEY: return "T_KEY";
     case T_COLUMN: return "T_COLUMN";
     case T_SHOW: return "T_SHOW";

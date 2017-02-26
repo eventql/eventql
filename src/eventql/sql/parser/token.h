@@ -97,6 +97,7 @@ public:
     T_CLUSTER,
     T_SERVERS,
     T_PRIMARY,
+    T_PARTITION,
     T_KEY,
     T_REPEATED,
     T_INSERT,

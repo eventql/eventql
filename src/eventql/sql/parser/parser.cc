@@ -339,9 +339,9 @@ ASTNode* Parser::statement() {
   RAISE(
       kParseError,
       "unexpected token %s%s%s, expected one of SELECT, CREATE, INSERT, ALTER, DROP, CLUSTER, DRAW or IMPORT",
-        Token::getTypeName(cur_token_->getType()),
-        cur_token_->getString().size() > 0 ? ": " : "",
-        cur_token_->getString().c_str());
+      Token::getTypeName(cur_token_->getType()),
+      cur_token_->getString().size() > 0 ? ": " : "",
+      cur_token_->getString().c_str());
 
   return nullptr;
 }
@@ -450,6 +450,8 @@ ASTNode* Parser::createTableStatement() {
   while (*cur_token_ != Token::T_RPAREN) {
     if (*cur_token_ == Token::T_PRIMARY) {
       column_list->appendChild(primaryKeyDefinition());
+    } else if (*cur_token_ == Token::T_PARTITION) {
+      column_list->appendChild(partitionKeyDefinition());
     } else {
       auto coldef = columnDefinition();
 
@@ -545,7 +547,6 @@ ASTNode* Parser::columnDefinition() {
   return column;
 }
 
-
 ASTNode* Parser::primaryKeyDefinition() {
   consumeToken();
   expectAndConsume(Token::T_KEY);
@@ -555,10 +556,7 @@ ASTNode* Parser::primaryKeyDefinition() {
   expectAndConsume(Token::T_LPAREN);
 
   while (*cur_token_ != Token::T_RPAREN) {
-    auto expr = new ASTNode(ASTNode::T_COLUMN_NAME);
-    expr->setToken(cur_token_);
-    consumeToken();
-    primary_key->appendChild(expr);
+    primary_key->appendChild(columnName());
 
     if (*cur_token_ == Token::T_COMMA) {
       consumeToken();
@@ -570,6 +568,19 @@ ASTNode* Parser::primaryKeyDefinition() {
   expectAndConsume(Token::T_RPAREN);
 
   return primary_key;
+}
+
+ASTNode* Parser::partitionKeyDefinition() {
+  consumeToken();
+  expectAndConsume(Token::T_KEY);
+
+  auto partition_key = new ASTNode(ASTNode::T_PARTITION_KEY);
+
+  expectAndConsume(Token::T_LPAREN);
+  partition_key->appendChild(columnName());
+  expectAndConsume(Token::T_RPAREN);
+
+  return partition_key;
 }
 
 ASTNode* Parser::tablePropertyDefinition() {
