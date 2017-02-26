@@ -1,4 +1,3 @@
--- ./sql_testdata/testtbl.cst
 select
     date_trunc("msec", from_timestamp(1486553343)),
     date_trunc("seconds", from_timestamp(1486553343)),

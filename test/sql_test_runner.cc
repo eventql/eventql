@@ -236,32 +236,51 @@ Status runTest(const std::string& test, OutputFormat output_format) {
     }
   }
 
-  /* input table path */
+  /* read sql file */
   auto sql_is = FileInputStream::openFile(sql_file_path);
-  std::string input_table_path;
-  if (!sql_is->readLine(&input_table_path) ||
-      !StringUtil::beginsWith(input_table_path, "--")) {
-    return Status(eRuntimeError, "no input table provided");
-  }
-
-  StringUtil::replaceAll(&input_table_path, "--");
-  StringUtil::ltrim(&input_table_path);
-  StringUtil::chomp(&input_table_path);
-
-  if (!FileUtil::exists(input_table_path)) {
-    return Status(
-        eRuntimeError,
-        StringUtil::format("file does not exist: $0", input_table_path));
-  }
-
+  auto tables = mkRef(new TableRepository());
   std::string query;
+
+  std::string sql_first_line;
+  if (sql_is->readLine(&sql_first_line) &&
+      StringUtil::beginsWith(sql_first_line, "--")) {
+
+    StringUtil::replaceAll(&sql_first_line, "--");
+    StringUtil::ltrim(&sql_first_line);
+    StringUtil::chomp(&sql_first_line);
+
+    auto input_tables = StringUtil::split(sql_first_line, ";");
+    for (const auto& tbl : input_tables) {
+      auto tbl_parts = StringUtil::split(tbl, "=");
+      if (tbl_parts.size() != 2) {
+        return Status(
+          eRuntimeError,
+          "input table must be provided as table_path=table_name");
+      }
+
+      auto table_path = tbl_parts[0];
+      auto table_name = tbl_parts[1];
+      if (!FileUtil::exists(table_path)) {
+        return Status(
+            eRuntimeError,
+            StringUtil::format("file does not exist: $0", table_path));
+      }
+
+      tables->addProvider(new CSTableScanProvider(table_name, table_path));
+    }
+
+  } else {
+    query = sql_first_line;
+  }
+
   sql_is->readUntilEOF(&query);
+
 
   /* execute query */
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
-  txn->setTableProvider(new CSTableScanProvider("testtable", input_table_path));
+  txn->setTableProvider(tables.get());
   ResultList result;
 
   std::string error_message;
