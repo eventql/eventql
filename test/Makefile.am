@@ -38,6 +38,7 @@ evql_test_SOURCES = \
     unit/sql_qtree.cc \
     system/basic_sql/basic_sql.h \
     system/basic_sql/basic_sql.cc \
+    sql_tests.cc \
     test_repository.cc \
     test_runner.cc
 

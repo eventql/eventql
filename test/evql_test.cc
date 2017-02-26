@@ -38,6 +38,9 @@ namespace test {
 namespace unit {
 extern void setup_unit_tests(TestRepository* repo);
 } // namespace unit
+namespace sql {
+extern void setup_sql_tests(TestRepository* repo);
+} // namespace sql
 } // namespace test
 } // namespace eventql
 
@@ -131,6 +134,7 @@ int main(int argc, const char** argv) {
   TestRepository test_repo;
   eventql::test::unit::setup_unit_tests(&test_repo);
   eventql::test::system_basic_sql::setup_tests(&test_repo);
+  eventql::test::sql::setup_sql_tests(&test_repo);
 
   /* run tests */
   TestRunner test_runner(&test_repo);
