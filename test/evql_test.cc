@@ -133,8 +133,8 @@ int main(int argc, const char** argv) {
   /* init test repo */
   TestRepository test_repo;
   eventql::test::unit::setup_unit_tests(&test_repo);
-  eventql::test::system_basic_sql::setup_tests(&test_repo);
   eventql::test::sql::setup_sql_tests(&test_repo);
+  eventql::test::system_basic_sql::setup_tests(&test_repo);
 
   /* run tests */
   TestRunner test_runner(&test_repo);
