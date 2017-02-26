@@ -249,8 +249,10 @@ SType SequentialScanNode::getColumnType(size_t idx) const {
 size_t SequentialScanNode::getInputColumnIndex(
     const String& column_name,
     bool allow_add /* = false */) {
+  auto col = normalizeColumnName(column_name);
+
   for (size_t i = 0; i < input_columns_.size(); ++i) {
-    if (input_columns_[i].first == column_name) {
+    if (input_columns_[i].first == col) {
       return i;
     }
   }
@@ -260,8 +262,8 @@ size_t SequentialScanNode::getInputColumnIndex(
   }
 
   for (const auto& c : table_columns_) {
-    if (c.first == column_name) {
-      input_columns_.emplace_back(column_name, c.second);
+    if (c.first == col) {
+      input_columns_.emplace_back(col, c.second);
       return input_columns_.size() - 1;
     }
   }
@@ -398,7 +400,7 @@ RefPtr<QueryTreeNode> SequentialScanNode::decode(
 
   auto select_list_size = is->readVarUInt();
   Vector<RefPtr<SelectListNode>> select_list;
-  for (auto i = 0; i < select_list_size; ++i) {
+  for (size_t i = 0; i < select_list_size; ++i) {
     select_list.emplace_back(coder->decode(is).asInstanceOf<SelectListNode>());
   }
 
@@ -418,19 +420,19 @@ RefPtr<QueryTreeNode> SequentialScanNode::decode(
           aggr_strategy));
 
   auto num_output_columns = is->readVarUInt();
-  for (auto i = 0; i < num_output_columns; ++i) {
+  for (size_t i = 0; i < num_output_columns; ++i) {
     node->output_columns_.emplace_back(is->readLenencString());
   }
 
   auto num_input_columns = is->readVarUInt();
-  for (auto i = 0; i < num_input_columns; ++i) {
+  for (size_t i = 0; i < num_input_columns; ++i) {
     auto cname = is->readLenencString();
     auto ctype = (SType) is->readVarUInt();
     node->input_columns_.emplace_back(cname, ctype);
   }
 
   auto num_constraints = is->readVarUInt();
-  for (auto i = 0; i < num_constraints; ++i) {
+  for (size_t i = 0; i < num_constraints; ++i) {
     auto constraint_name = is->readLenencString();
     auto constraint_type = (ScanConstraintType) is->readUInt8();
     SValue constraint_value;

@@ -504,7 +504,7 @@ bool test_sql_qtree_SerializationJoinAndSubquery(TestContext* ctx) {
       new backends::csv::CSVTableProvider(
           "customers",
           FileUtil::joinPaths(ctx->srcdir, "test/sql_testdata/testtbl2.csv"),
-          '\t'));
+          ','));
 
   tables->addProvider(
       new backends::csv::CSVTableProvider(

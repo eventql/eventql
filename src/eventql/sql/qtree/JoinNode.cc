@@ -130,7 +130,7 @@ Vector<QualifiedColumn> JoinNode::getAvailableColumns() const {
 size_t JoinNode::getComputedColumnIndex(
     const String& column_name,
     bool allow_add /* = false */) {
-  for (int i = 0; i < column_names_.size(); ++i) {
+  for (size_t i = 0; i < column_names_.size(); ++i) {
     if (column_names_[i] == column_name) {
       return i;
     }
@@ -160,7 +160,7 @@ SType JoinNode::getColumnType(size_t idx) const {
 size_t JoinNode::getInputColumnIndex(
     const String& column_name,
     bool allow_add /* = false */) {
-  for (int i = 0; i < input_map_.size(); ++i) {
+  for (size_t i = 0; i < input_map_.size(); ++i) {
     if (input_map_[i].column == column_name) {
       return i;
     }
@@ -325,7 +325,7 @@ RefPtr<QueryTreeNode> JoinNode::decode (
 
   Vector<RefPtr<SelectListNode>> select_list;
   auto select_list_size = is->readVarUInt();
-  for (auto i = 0; i < select_list_size; ++i) {
+  for (size_t i = 0; i < select_list_size; ++i) {
     select_list.emplace_back(coder->decode(is).asInstanceOf<SelectListNode>());
   }
 
