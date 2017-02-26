@@ -2,6 +2,7 @@
  * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Paul Asmuth <paul@eventql.io>
+ *   - Laura Schlimmer <laura@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -189,6 +190,15 @@ int main(int argc, const char** argv) {
       "<number of history entries>");
 
   flags.defineFlag(
+      "output_file",
+      cli::FlagParser::T_STRING,
+      false,
+      "o",
+      NULL,
+      "output file",
+      "<path>");
+
+  flags.defineFlag(
       "loglevel",
       cli::FlagParser::T_STRING,
       false,
@@ -254,6 +264,7 @@ int main(int argc, const char** argv) {
         "   --auth_token <token>      Set the auth token (if required)\n"
         "   -c, --config <file>       Load config from file\n"
         "   -C name=value             Define a config value on the command line\n"
+        "   -o --output_file <file>      Save the output to a file\n"
         "   -B, --batch               Run in batch mode (streaming result output)\n"
         "   -q, --quiet               Be quiet (disables query progress)\n"
         "   --verbose                 Print debug output to STDERR\n"
@@ -338,6 +349,13 @@ int main(int argc, const char** argv) {
     cfg_builder.setProperty("client.lang", flags.getString("lang"));
   }
 
+  if (flags.isSet("output_file")) {
+    cfg_builder.setProperty(
+        "client.output_file",
+        flags.getString("output_file"));
+    cfg_builder.setProperty("client.batch", "true");
+  }
+
   if (flags.isSet("batch")) {
     cfg_builder.setProperty("client.batch", "true");
   }
@@ -407,7 +425,7 @@ int main(int argc, const char** argv) {
     goto exit;
   }
 
-  if (hasSTDIN() || flags.isSet("batch") || !stdout_os->isTTY()) {
+  if (hasSTDIN() || cli_cfg.getBatchMode() || !stdout_os->isTTY()) {
     String query;
     while (stdin_is->readLine(&query)) {
       auto ret = console.runQuery(query);

@@ -152,6 +152,10 @@ uint64_t CLIConfig::getHistoryMaxSize() const {
   }
 }
 
+Option<String> CLIConfig::getOutputFile() const {
+  return cfg_->getString("client.output_file");
+}
+
 } // namespace cli
 } // namespace eventql
 
