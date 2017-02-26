@@ -12,3 +12,4 @@
 00012_test_wildcard_select
 00013_test_wildcard_select_from_subquery
 00014_test_wildcard_select_with_group_by
+00015_test_wildcard_select_with_join

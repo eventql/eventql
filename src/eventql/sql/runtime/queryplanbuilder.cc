@@ -1125,8 +1125,10 @@ QueryTreeNode* QueryPlanBuilder::buildJoinTableReference(
 
     if (*select_expr == ASTNode::T_ALL) {
       for (const auto& col : all_columns) {
-        auto sl = new SelectListNode(
-            new ColumnReferenceNode(col.qualified_name, col.type));
+        auto colnode = new ColumnReferenceNode(col.qualified_name, col.type);
+        colnode->setColumnIndex(
+            join_node->getInputColumnIndex(col.qualified_name, true));
+        auto sl = new SelectListNode(colnode);
         sl->setAlias(col.short_name);
         join_node->addSelectList(sl);
       }
