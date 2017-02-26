@@ -24,14 +24,14 @@
 #include "eventql/eventql.h"
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/random.h"
-#include "eventql/util/test/unittest.h"
 #include "eventql/db/metadata_store.h"
 #include "eventql/db/metadata_operations.pb.h"
 #include "eventql/db/partition_discovery.h"
+#include "../unit_test.h"
 
-using namespace eventql;
-
-UNIT_TEST(PartitionDiscoveryTest);
+namespace eventql {
+namespace test {
+namespace unit {
 
 static MetadataFile::PartitionPlacement mkPlacement(
     const String& server_id,
@@ -42,7 +42,8 @@ static MetadataFile::PartitionPlacement mkPlacement(
   return p;
 }
 
-TEST_CASE(PartitionDiscoveryTest, TestServingPartition, [] () {
+// UNIT-PDISCOVERY-001
+static bool test_partition_discovery_serving_partition(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -177,9 +178,12 @@ TEST_CASE(PartitionDiscoveryTest, TestServingPartition, [] () {
     EXPECT(res.keyrange_begin() == "e");
     EXPECT(res.keyrange_end() == "g");
   }
-});
 
-TEST_CASE(PartitionDiscoveryTest, TestSplittingPartition, [] () {
+  return true;
+}
+
+// UNIT-PDISCOVERY-002
+static bool test_partition_discovery_splitting_partition(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -510,9 +514,12 @@ TEST_CASE(PartitionDiscoveryTest, TestSplittingPartition, [] () {
     EXPECT(res.replication_targets().Get(1).keyrange_begin() == "p");
     EXPECT(res.replication_targets().Get(1).keyrange_end() == "x");
   }
-});
 
-TEST_CASE(PartitionDiscoveryTest, TestFindByID, [] () {
+  return true;
+}
+
+// UNIT-PDISCOVERY-003
+static bool test_partition_discovery_find_by_id(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -679,5 +686,19 @@ TEST_CASE(PartitionDiscoveryTest, TestFindByID, [] () {
     EXPECT(res.keyrange_begin() == "g");
     EXPECT(res.keyrange_end() == "");
   }
-});
+
+  return true;
+}
+
+void setup_unit_partition_discovery_tests(TestRepository* repo) {
+  std::vector<TestCase> c;
+  SETUP_UNIT_TESTCASE(&c, "UNIT-PDISCOVERY-001", partition_discovery, serving_partition);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-PDISCOVERY-002", partition_discovery, splitting_partition);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-PDISCOVERY-003", partition_discovery, find_by_id);
+  repo->addTestBundle(c);
+}
+
+} // namespace unit
+} // namespace test
+} // namespace eventql
 
