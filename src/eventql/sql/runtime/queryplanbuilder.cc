@@ -1343,8 +1343,9 @@ QueryTreeNode* QueryPlanBuilder::buildSeqscanTableReference(
   for (const auto& select_expr : select_list->getChildren()) {
     if (*select_expr == ASTNode::T_ALL) {
       for (const auto& col : table.get().columns) {
-        auto sl = new SelectListNode(
-            new ColumnReferenceNode(col.column_name, col.type));
+        auto colnode = new ColumnReferenceNode(col.column_name, col.type);
+        colnode->setColumnIndex(seqscan->getInputColumnIndex(col.column_name, true));
+        auto sl = new SelectListNode(colnode);
         sl->setAlias(col.column_name);
         seqscan->addSelectList(sl);
       }
