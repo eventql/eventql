@@ -35,6 +35,8 @@ void setup_unit_tests(TestRepository* repo) {
   SETUP_UNIT_TEST(metadata_operation_createpartition, repo);
   SETUP_UNIT_TEST(metadata_operation_split, repo);
   SETUP_UNIT_TEST(partition_discovery, repo);
+  SETUP_UNIT_TEST(sql_parser, repo);
+  SETUP_UNIT_TEST(sql_qtree, repo);
 }
 
 } // namespace unit

@@ -22,19 +22,23 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <iomanip>
+#include <sstream>
+#include "eventql/eventql.h"
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/exception.h>
 #include <eventql/util/wallclock.h>
-#include <eventql/util/test/unittest.h>
 #include <eventql/sql/parser/parser.h>
 #include <eventql/sql/parser/token.h>
 #include <eventql/sql/parser/tokenize.h>
 #include "eventql/sql/runtime/defaultruntime.h"
+#include "../unit_test.h"
 
-#include "eventql/eventql.h"
+namespace eventql {
+namespace test {
+namespace unit {
+
 using namespace csql;
-
-UNIT_TEST(ParserTest);
 
 static Parser parseTestQuery(const char* query) {
   Parser parser;
@@ -42,7 +46,8 @@ static Parser parseTestQuery(const char* query) {
   return parser;
 }
 
-TEST_CASE(ParserTest, TestSimpleValueExpression, [] () {
+// UNIT-SQLPARSER-001
+bool test_sql_parser_SimpleValueExpression(TestContext* ctx) {
   auto parser = parseTestQuery("SELECT 23 + 5.123 FROM sometable;");
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
@@ -65,9 +70,11 @@ TEST_CASE(ParserTest, TestSimpleValueExpression, [] () {
   EXPECT(*expr->getChildren()[1]->getToken() == "5.123");
   const auto& from = stmt->getChildren()[1];
   EXPECT(*from == ASTNode::T_FROM);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestArithmeticValueExpression, [] () {
+// UNIT-SQLPARSER-002
+bool test_sql_parser_ArithmeticValueExpression(TestContext* ctx) {
   auto parser = parseTestQuery("SELECT 1 + 2 / 3;");
   EXPECT(parser.getStatements().size() == 1);
   auto expr = parser.getStatements()[0]
@@ -79,9 +86,11 @@ TEST_CASE(ParserTest, TestArithmeticValueExpression, [] () {
   EXPECT(*expr->getChildren()[0]->getToken() == "1");
   EXPECT(*expr->getChildren()[1] == ASTNode::T_DIV_EXPR);
   EXPECT(expr->getChildren()[1]->getChildren().size() == 2);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestArithmeticValueExpressionParens, [] () {
+// UNIT-SQLPARSER-003
+bool test_sql_parser_ArithmeticValueExpressionParens(TestContext* ctx) {
   auto parser = parseTestQuery("SELECT (1 * 2) + 3;");
   EXPECT(parser.getStatements().size() == 1);
   auto expr = parser.getStatements()[0]
@@ -93,9 +102,11 @@ TEST_CASE(ParserTest, TestArithmeticValueExpressionParens, [] () {
   EXPECT(*expr->getChildren()[1] == ASTNode::T_LITERAL);
   EXPECT(*expr->getChildren()[1]->getToken() == Token::T_NUMERIC);
   EXPECT(*expr->getChildren()[1]->getToken() == "3");
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestParseEqual, [] () {
+// UNIT-SQLPARSER-004
+bool test_sql_parser_ParseEqual(TestContext* ctx) {
   auto parser = parseTestQuery("SELECT 2=5;");
   EXPECT(parser.getStatements().size() == 1);
   auto expr = parser.getStatements()[0]
@@ -108,9 +119,11 @@ TEST_CASE(ParserTest, TestParseEqual, [] () {
   EXPECT(*expr->getChildren()[1] == ASTNode::T_LITERAL);
   EXPECT(*expr->getChildren()[1]->getToken() == Token::T_NUMERIC);
   EXPECT(*expr->getChildren()[1]->getToken() == "5");
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestParseNotEqual, [] () {
+// UNIT-SQLPARSER-005
+bool test_sql_parser_ParseNotEqual(TestContext* ctx) {
   auto parser = parseTestQuery("SELECT 2!=5;");
   EXPECT(parser.getStatements().size() == 1);
   auto expr = parser.getStatements()[0]
@@ -123,9 +136,11 @@ TEST_CASE(ParserTest, TestParseNotEqual, [] () {
   EXPECT(*expr->getChildren()[1] == ASTNode::T_LITERAL);
   EXPECT(*expr->getChildren()[1]->getToken() == Token::T_NUMERIC);
   EXPECT(*expr->getChildren()[1]->getToken() == "5");
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, ParseGreaterThan, [] () {
+// UNIT-SQLPARSER-006
+bool test_sql_parser_ParseGreaterThan(TestContext* ctx) {
   auto parser = parseTestQuery("SELECT 2>5;");
   EXPECT(parser.getStatements().size() == 1);
   auto expr = parser.getStatements()[0]
@@ -138,9 +153,11 @@ TEST_CASE(ParserTest, ParseGreaterThan, [] () {
   EXPECT(*expr->getChildren()[1] == ASTNode::T_LITERAL);
   EXPECT(*expr->getChildren()[1]->getToken() == Token::T_NUMERIC);
   EXPECT(*expr->getChildren()[1]->getToken() == "5");
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, ParseGreaterThanEqual, [] () {
+// UNIT-SQLPARSER-007
+bool test_sql_parser_ParseGreaterThanEqual(TestContext* ctx) {
   auto parser = parseTestQuery("SELECT 2>=5;");
   EXPECT(parser.getStatements().size() == 1);
   auto expr = parser.getStatements()[0]
@@ -153,9 +170,11 @@ TEST_CASE(ParserTest, ParseGreaterThanEqual, [] () {
   EXPECT(*expr->getChildren()[1] == ASTNode::T_LITERAL);
   EXPECT(*expr->getChildren()[1]->getToken() == Token::T_NUMERIC);
   EXPECT(*expr->getChildren()[1]->getToken() == "5");
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestArithmeticValueExpressionPrecedence, [] () {
+// UNIT-SQLPARSER-008
+bool test_sql_parser_ArithmeticValueExpressionPrecedence(TestContext* ctx) {
   {
     auto parser = parseTestQuery("SELECT 1 * 2 + 3;");
     EXPECT(parser.getStatements().size() == 1);
@@ -182,9 +201,11 @@ TEST_CASE(ParserTest, TestArithmeticValueExpressionPrecedence, [] () {
     EXPECT(*expr->getChildren()[1] == ASTNode::T_MUL_EXPR);
     EXPECT(expr->getChildren()[1]->getChildren().size() == 2);
   }
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestMethodCallValueExpression, [] () {
+// UNIT-SQLPARSER-009
+bool test_sql_parser_MethodCallValueExpression(TestContext* ctx) {
   auto parser = parseTestQuery("SELECT 1 + sum(23, 4 + 1) FROM sometable;");
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
@@ -214,9 +235,11 @@ TEST_CASE(ParserTest, TestMethodCallValueExpression, [] () {
   EXPECT(mcall->getChildren()[1]->getChildren().size() == 2);
   const auto& from = stmt->getChildren()[1];
   EXPECT(*from == ASTNode::T_FROM);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestNegatedValueExpression, [] () {
+// UNIT-SQLPARSER-010
+bool test_sql_parser_NegatedValueExpression(TestContext* ctx) {
   auto parser = parseTestQuery("SELECT -(23 + 5.123) AS fucol FROM tbl;");
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
@@ -246,9 +269,11 @@ TEST_CASE(ParserTest, TestNegatedValueExpression, [] () {
   EXPECT(*col_name->getToken() == "fucol");
   const auto& from = stmt->getChildren()[1];
   EXPECT(*from == ASTNode::T_FROM);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestSelectAll, [] () {
+// UNIT-SQLPARSER-011
+bool test_sql_parser_SelectAll(TestContext* ctx) {
   auto parser = parseTestQuery("SELECT * FROM sometable;");
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
@@ -261,9 +286,11 @@ TEST_CASE(ParserTest, TestSelectAll, [] () {
   EXPECT(sl->getChildren()[0]->getToken() == nullptr);
   const auto& from = stmt->getChildren()[1];
   EXPECT(*from == ASTNode::T_FROM);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestSelectTableWildcard, [] () {
+// UNIT-SQLPARSER-012
+bool test_sql_parser_SelectTableWildcard(TestContext* ctx) {
   auto parser = parseTestQuery("SELECT mytablex.* FROM sometable;");
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
@@ -279,9 +306,11 @@ TEST_CASE(ParserTest, TestSelectTableWildcard, [] () {
   EXPECT(*all->getToken() == "mytablex");
   const auto& from = stmt->getChildren()[1];
   EXPECT(*from == ASTNode::T_FROM);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestQuotedTableName, [] () {
+// UNIT-SQLPARSER-013
+bool test_sql_parser_QuotedTableName(TestContext* ctx) {
   auto parser = parseTestQuery("SELECT * FROM `some.table`;");
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
@@ -292,9 +321,11 @@ TEST_CASE(ParserTest, TestQuotedTableName, [] () {
   EXPECT(from->getChildren().size() == 1);
   const auto& tlbname = from->getChildren()[0];
   EXPECT_EQ(tlbname->getToken()->getString(), "some.table");
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestNestedTableName, [] () {
+// UNIT-SQLPARSER-014
+bool test_sql_parser_NestedTableName(TestContext* ctx) {
   auto parser = parseTestQuery("SELECT * FROM some.tbl;");
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
@@ -305,9 +336,11 @@ TEST_CASE(ParserTest, TestNestedTableName, [] () {
   EXPECT(from->getChildren().size() == 1);
   const auto& tlbname = from->getChildren()[0];
   EXPECT_EQ(tlbname->getToken()->getString(), "some.tbl");
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestSelectDerivedColumn, [] () {
+// UNIT-SQLPARSER-015
+bool test_sql_parser_SelectDerivedColumn(TestContext* ctx) {
   auto parser = parseTestQuery("SELECT somecol AS another FROM sometable;");
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
@@ -327,9 +360,11 @@ TEST_CASE(ParserTest, TestSelectDerivedColumn, [] () {
   EXPECT(*derived->getChildren()[1]->getToken() == "another");
   const auto& from = stmt->getChildren()[1];
   EXPECT(*from == ASTNode::T_FROM);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestSelectDerivedColumnWithTableName, [] () {
+// UNIT-SQLPARSER-016
+bool test_sql_parser_SelectDerivedColumnWithTableName(TestContext* ctx) {
   auto parser = parseTestQuery("SELECT tbl.col AS another FROM sometable;");
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
@@ -357,9 +392,11 @@ TEST_CASE(ParserTest, TestSelectDerivedColumnWithTableName, [] () {
   EXPECT(*derived->getChildren()[1]->getToken() == "another");
   const auto& from = stmt->getChildren()[1];
   EXPECT(*from == ASTNode::T_FROM);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestSelectWithQuotedTableName, [] () {
+// UNIT-SQLPARSER-017
+bool test_sql_parser_SelectWithQuotedTableName(TestContext* ctx) {
   auto parser = parseTestQuery("SELECT `xxx` FROM sometable;");
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
@@ -381,18 +418,23 @@ TEST_CASE(ParserTest, TestSelectWithQuotedTableName, [] () {
   EXPECT_EQ(*from->getChildren()[0], ASTNode::T_TABLE_NAME);
   EXPECT_EQ(*from->getChildren()[0]->getToken(), Token::T_IDENTIFIER);
   EXPECT_EQ(from->getChildren()[0]->getToken()->getString(), "sometable");
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestSelectMustBeFirstAssert, [] () {
+// UNIT-SQLPARSER-018
+bool test_sql_parser_SelectMustBeFirstAssert(TestContext* ctx) {
   const char* err_msg = "unexpected token T_GROUP, expected one of SELECT, "
       "CREATE, INSERT, ALTER, DROP, CLUSTER, DRAW or IMPORT";
 
   EXPECT_EXCEPTION(err_msg, [] () {
     auto parser = parseTestQuery("GROUP BY SELECT");
   });
-});
 
-TEST_CASE(ParserTest, TestWhereClause, [] () {
+  return true;
+}
+
+// UNIT-SQLPARSER-019
+bool test_sql_parser_WhereClause(TestContext* ctx) {
   auto parser = parseTestQuery("SELECT x FROM t WHERE a=1 AND a+1=2 OR b=3;");
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
@@ -401,9 +443,11 @@ TEST_CASE(ParserTest, TestWhereClause, [] () {
   EXPECT(*where == ASTNode::T_WHERE);
   EXPECT(where->getChildren().size() == 1);
   EXPECT(*where->getChildren()[0] == ASTNode::T_OR_EXPR);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestGroupByClause, [] () {
+// UNIT-SQLPARSER-020
+bool test_sql_parser_GroupByClause(TestContext* ctx) {
   auto parser = parseTestQuery("select count(x), y from t GROUP BY x;");
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
@@ -412,9 +456,11 @@ TEST_CASE(ParserTest, TestGroupByClause, [] () {
   EXPECT(*where == ASTNode::T_GROUP_BY);
   EXPECT(where->getChildren().size() == 1);
   EXPECT(*where->getChildren()[0] == ASTNode::T_COLUMN_NAME);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestOrderByClause, [] () {
+// UNIT-SQLPARSER-021
+bool test_sql_parser_OrderByClause(TestContext* ctx) {
   auto parser = parseTestQuery("select a FROM t ORDER BY a DESC;");
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
@@ -424,9 +470,11 @@ TEST_CASE(ParserTest, TestOrderByClause, [] () {
   EXPECT(order_by->getChildren().size() == 1);
   EXPECT(*order_by->getChildren()[0] == ASTNode::T_SORT_SPEC);
   EXPECT(*order_by->getChildren()[0]->getToken() == Token::T_DESC);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestHavingClause, [] () {
+// UNIT-SQLPARSER-022
+bool test_sql_parser_HavingClause(TestContext* ctx) {
   auto parser = parseTestQuery("select a FROM t HAVING 1=1;");
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
@@ -435,9 +483,11 @@ TEST_CASE(ParserTest, TestHavingClause, [] () {
   EXPECT(*having == ASTNode::T_HAVING);
   EXPECT(having->getChildren().size() == 1);
   EXPECT(*having->getChildren()[0] == ASTNode::T_EQ_EXPR);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestLimitClause, [] () {
+// UNIT-SQLPARSER-023
+bool test_sql_parser_LimitClause(TestContext* ctx) {
   auto parser = parseTestQuery("select a FROM t LIMIT 10;");
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
@@ -446,9 +496,11 @@ TEST_CASE(ParserTest, TestLimitClause, [] () {
   EXPECT(*limit == ASTNode::T_LIMIT);
   EXPECT(limit->getChildren().size() == 0);
   EXPECT(*limit->getToken() == "10");
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestLimitOffsetClause, [] () {
+// UNIT-SQLPARSER-024
+bool test_sql_parser_LimitOffsetClause(TestContext* ctx) {
   auto parser = parseTestQuery("select a FROM t LIMIT 10 OFFSET 23;");
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
@@ -459,9 +511,11 @@ TEST_CASE(ParserTest, TestLimitOffsetClause, [] () {
   EXPECT(*limit->getToken() == "10");
   EXPECT(*limit->getChildren()[0] == ASTNode::T_OFFSET);
   EXPECT(*limit->getChildren()[0]->getToken() == "23");
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestTokenizerEscaping, [] () {
+// UNIT-SQLPARSER-025
+bool test_sql_parser_TokenizerEscaping(TestContext* ctx) {
   std::vector<Token> tl;
   tokenizeQuery(
       R"( SELECT fnord,sum(blah) from fubar blah.id = 'fnor\'dbar' + 123.5; )",
@@ -494,9 +548,11 @@ TEST_CASE(ParserTest, TestTokenizerEscaping, [] () {
   EXPECT(tl[15].getType() == Token::T_NUMERIC);
   EXPECT(tl[15] == "123.5");
   EXPECT(tl[16].getType() == Token::T_SEMICOLON);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestTokenizerSimple, [] () {
+// UNIT-SQLPARSER-026
+bool test_sql_parser_TokenizerSimple(TestContext* ctx) {
   std::vector<Token> tl;
   tokenizeQuery(
       " SELECT  fnord,sum(`blah-field`) from fubar"
@@ -528,9 +584,11 @@ TEST_CASE(ParserTest, TestTokenizerSimple, [] () {
   //EXPECT(tl[15].getType() == Token::T_NUMERIC);
   //EXPECT(tl[15] == "123");
   //EXPECT(tl[16].getType() == Token::T_SEMICOLON);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestTokenizerAsClause, [] () {
+// UNIT-SQLPARSER-027
+bool test_sql_parser_TokenizerAsClause(TestContext* ctx) {
   auto parser = parseTestQuery(" SELECT fnord As blah from asd;");
   auto tl = &parser.getTokenList();
   EXPECT((*tl)[0].getType() == Token::T_SELECT);
@@ -539,9 +597,11 @@ TEST_CASE(ParserTest, TestTokenizerAsClause, [] () {
   EXPECT((*tl)[2].getType() == Token::T_AS);
   EXPECT((*tl)[3].getType() == Token::T_IDENTIFIER);
   EXPECT((*tl)[3] == "blah");
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestParseMultipleSelects, [] () {
+// UNIT-SQLPARSER-028
+bool test_sql_parser_ParseMultipleSelects(TestContext* ctx) {
   auto parser = parseTestQuery(
       "SELECT "
       "  'Berlin' AS series, "
@@ -560,50 +620,11 @@ TEST_CASE(ParserTest, TestParseMultipleSelects, [] () {
       "WHERE city = \"Tokyo\";");
 
   EXPECT(parser.getStatements().size() == 2);
-});
+  return true;
+}
 
-TEST_INITIALIZER(ParserTest, InitializeComplexQueries, [] () {
-  std::vector<const char*> queries;
-  queries.push_back("SELECT -sum(fnord) + (123 * 4);");
-  queries.push_back("SELECT (-blah + sum(fnord) / (123 * 4)) as myfield;");
-  queries.push_back(
-      "SELECT concat(fnord + 5, -somefunc(myotherfield)) + (123 * 4);");
-  queries.push_back(
-        "  SELECT"
-        "     l_orderkey,"
-        "     sum( l_extendedprice * ( 1 - l_discount) ) AS revenue,"
-        "     o_orderdate,"
-        "     o_shippriority"
-        "  FROM"
-        "     customer,"
-        "     orders,"
-        "     lineitem "
-        "  WHERE"
-        "    c_mktsegment = 'FURNITURE' AND"
-        "    c_custkey = o_custkey AND"
-        "    l_orderkey = o_orderkey AND"
-        "    o_orderdate < \"2013-12-21\" AND"
-        "    l_shipdate > \"2014-01-06\""
-        "  GROUP BY"
-        "    l_orderkey,"
-        "    o_orderdate,"
-        "    o_shippriority"
-        "  ORDER BY"
-        "    revenue,"
-        "    o_orderdate;");
-
-  for (auto query : queries) {
-    new test::UnitTest::TestCase(
-        &ParserTest,
-        "TestComplexQueries",
-        [query] () {
-          auto parser = parseTestQuery(query);
-          EXPECT(parser.getStatements().size() == 1);
-        });
-  }
-});
-
-TEST_CASE(ParserTest, TestParseIfStatement, [] () {
+// UNIT-SQLPARSER-029
+bool test_sql_parser_ParseIfStatement(TestContext* ctx) {
   auto parser = parseTestQuery(" SELECT if(1, 2, 3) from asd;");
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
@@ -629,9 +650,11 @@ TEST_CASE(ParserTest, TestParseIfStatement, [] () {
   EXPECT(*expr->getChildren()[2]->getToken() == "3");
   const auto& from = stmt->getChildren()[1];
   EXPECT(*from == ASTNode::T_FROM);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestCompareASTs, [] () {
+// UNIT-SQLPARSER-030
+bool test_sql_parser_CompareASTs(TestContext* ctx) {
   auto parser = parseTestQuery(R"(
       SELECT if(1, 2, 3) from asd;
       SELECT if(2, 3, 4) from asd;
@@ -649,9 +672,11 @@ TEST_CASE(ParserTest, TestCompareASTs, [] () {
   EXPECT_FALSE(c->compare(b));
   EXPECT_TRUE(a->compare(c));
   EXPECT_TRUE(c->compare(c));
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestSimpleTableReference, [] () {
+// UNIT-SQLPARSER-031
+bool test_sql_parser_SimpleTableReference(TestContext* ctx) {
   auto parser = parseTestQuery("select x from t1;");
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
@@ -660,9 +685,11 @@ TEST_CASE(ParserTest, TestSimpleTableReference, [] () {
   EXPECT(*from == ASTNode::T_FROM);
   EXPECT(from->getChildren().size() == 1);
   EXPECT(*from->getChildren()[0] == ASTNode::T_TABLE_NAME);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestTableReferenceWithAlias, [] () {
+// UNIT-SQLPARSER-032
+bool test_sql_parser_TableReferenceWithAlias(TestContext* ctx) {
   auto parser = parseTestQuery("select x from t1 as t2;");
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
@@ -675,9 +702,11 @@ TEST_CASE(ParserTest, TestTableReferenceWithAlias, [] () {
   EXPECT(*alias == ASTNode::T_TABLE_ALIAS);
   EXPECT(*alias->getToken() == Token::T_IDENTIFIER);
   EXPECT(*alias->getToken() == "t2");
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestParseSimpleSubquery, [] () {
+// UNIT-SQLPARSER-033
+bool test_sql_parser_ParseSimpleSubquery(TestContext* ctx) {
   auto parser = parseTestQuery("select t1.a from (select 123 as a, 435 as b) as t1;");
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
@@ -690,9 +719,11 @@ TEST_CASE(ParserTest, TestParseSimpleSubquery, [] () {
   EXPECT(*alias == ASTNode::T_TABLE_ALIAS);
   EXPECT(*alias->getToken() == Token::T_IDENTIFIER);
   EXPECT(*alias->getToken() == "t1");
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestCommaJoin, [] () {
+// UNIT-SQLPARSER-034
+bool test_sql_parser_CommaJoin(TestContext* ctx) {
   auto parser = parseTestQuery("select x from t1 as t2, t3 as t4, (select 123 as a) as t5;");
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
@@ -703,9 +734,11 @@ TEST_CASE(ParserTest, TestCommaJoin, [] () {
   const auto& join2 = join1->getChildren()[0];
   EXPECT(*join2 == ASTNode::T_INNER_JOIN);
   EXPECT(join2->getChildren().size() == 2);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestInnerJoin, [] () {
+// UNIT-SQLPARSER-035
+bool test_sql_parser_InnerJoin(TestContext* ctx) {
   auto parser = parseTestQuery("select x from t1 JOIN t2 ON t1.x = t2.x JOIN (select 123 as a) as t3 JOIN t4 USING (t4.a, t4.b, t4.c);");
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
@@ -719,9 +752,11 @@ TEST_CASE(ParserTest, TestInnerJoin, [] () {
   const auto& join3 = join2->getChildren()[0];
   EXPECT(*join3 == ASTNode::T_INNER_JOIN);
   EXPECT(join3->getChildren().size() == 3);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestSimpleDrawStatement, [] () {
+// UNIT-SQLPARSER-036
+bool test_sql_parser_SimpleDrawStatement(TestContext* ctx) {
   auto parser = parseTestQuery("DRAW BARCHART;");
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
@@ -729,9 +764,11 @@ TEST_CASE(ParserTest, TestSimpleDrawStatement, [] () {
   EXPECT(stmt->getToken() != nullptr);
   EXPECT(*stmt->getToken() == Token::T_BARCHART);
   EXPECT(stmt->getChildren().size() == 0);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestDrawStatementWithAxes, [] () {
+// UNIT-SQLPARSER-037
+bool test_sql_parser_DrawStatementWithAxes(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
   auto parser = parseTestQuery("DRAW BARCHART AXIS LEFT AXIS RIGHT;");
@@ -759,9 +796,11 @@ TEST_CASE(ParserTest, TestDrawStatementWithAxes, [] () {
       *stmt->getChildren()[0]->getChildren()[0]->getToken() == Token::T_LEFT);
   EXPECT(
       *stmt->getChildren()[1]->getChildren()[0]->getToken() == Token::T_RIGHT);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestDrawStatementWithExplicitYDomain, [] () {
+// UNIT-SQLPARSER-038
+bool test_sql_parser_DrawStatementWithExplicitYDomain(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
   auto parser = parseTestQuery("DRAW BARCHART YDOMAIN 0, 100;");
@@ -775,9 +814,11 @@ TEST_CASE(ParserTest, TestDrawStatementWithExplicitYDomain, [] () {
   EXPECT(stmt->getChildren()[0]->getChildren().size() == 1);
   EXPECT(*stmt->getChildren()[0]->getChildren()[0] == ASTNode::T_DOMAIN_SCALE);
   EXPECT(stmt->getChildren()[0]->getChildren()[0]->getChildren().size() == 2);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestDrawStatementWithScaleLogInvYDomain, [] () {
+// UNIT-SQLPARSER-039
+bool test_sql_parser_DrawStatementWithScaleLogInvYDomain(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
   auto parser = parseTestQuery(
@@ -800,9 +841,11 @@ TEST_CASE(ParserTest, TestDrawStatementWithScaleLogInvYDomain, [] () {
   EXPECT(*domain->getChildren()[2] == ASTNode::T_PROPERTY);
   EXPECT(domain->getChildren()[2]->getToken() != nullptr);
   EXPECT(*domain->getChildren()[2]->getToken() == Token::T_INVERT);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestDrawStatementWithLogInvYDomain, [] () {
+// UNIT-SQLPARSER-040
+bool test_sql_parser_DrawStatementWithLogInvYDomain(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
   auto parser = parseTestQuery(
@@ -823,9 +866,11 @@ TEST_CASE(ParserTest, TestDrawStatementWithLogInvYDomain, [] () {
   EXPECT(*domain->getChildren()[1] == ASTNode::T_PROPERTY);
   EXPECT(domain->getChildren()[1]->getToken() != nullptr);
   EXPECT(*domain->getChildren()[1]->getToken() == Token::T_INVERT);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestDrawStatementWithGrid, [] () {
+// UNIT-SQLPARSER-041
+bool test_sql_parser_DrawStatementWithGrid(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
   auto parser = parseTestQuery(
@@ -845,9 +890,11 @@ TEST_CASE(ParserTest, TestDrawStatementWithGrid, [] () {
   EXPECT(*grid->getChildren()[1] == ASTNode::T_PROPERTY);
   EXPECT(grid->getChildren()[1]->getToken() != nullptr);
   EXPECT(*grid->getChildren()[1]->getToken() == Token::T_VERTICAL);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestDrawStatementWithTitle, [] () {
+// UNIT-SQLPARSER-042
+bool test_sql_parser_DrawStatementWithTitle(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
   auto parser = parseTestQuery(
@@ -865,9 +912,11 @@ TEST_CASE(ParserTest, TestDrawStatementWithTitle, [] () {
       txn.get(),
       title_expr).toString();
   EXPECT_EQ(title, "fnordtitle");
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestDrawStatementWithSubtitle, [] () {
+// UNIT-SQLPARSER-043
+bool test_sql_parser_DrawStatementWithSubtitle(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
   auto parser = parseTestQuery(
@@ -885,9 +934,11 @@ TEST_CASE(ParserTest, TestDrawStatementWithSubtitle, [] () {
       txn.get(),
       title_expr).toString();
   EXPECT_EQ(title, "fnordsubtitle");
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestDrawStatementWithTitleAndSubtitle, [] () {
+// UNIT-SQLPARSER-044
+bool test_sql_parser_DrawStatementWithTitleAndSubtitle(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
   auto parser = parseTestQuery(
@@ -914,9 +965,11 @@ TEST_CASE(ParserTest, TestDrawStatementWithTitleAndSubtitle, [] () {
       txn.get(),
       subtitle_expr).toString();
   EXPECT_EQ(subtitle, "fnordsubtitle");
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestDrawStatementWithAxisTitle, [] () {
+// UNIT-SQLPARSER-045
+bool test_sql_parser_DrawStatementWithAxisTitle(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
   auto parser = parseTestQuery("DRAW BARCHART AXIS LEFT TITLE 'axistitle';");
@@ -938,9 +991,11 @@ TEST_CASE(ParserTest, TestDrawStatementWithAxisTitle, [] () {
       txn.get(),
       title_expr).toString();
   EXPECT_EQ(title, "axistitle");
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestDrawStatementWithAxisLabelPos, [] () {
+// UNIT-SQLPARSER-046
+bool test_sql_parser_DrawStatementWithAxisLabelPos(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
   auto parser = parseTestQuery("DRAW BARCHART AXIS LEFT TICKS INSIDE;");
@@ -961,9 +1016,11 @@ TEST_CASE(ParserTest, TestDrawStatementWithAxisLabelPos, [] () {
   EXPECT(*labels->getChildren()[0] == ASTNode::T_PROPERTY);
   EXPECT(labels->getChildren()[0]->getToken() != nullptr);
   EXPECT(*labels->getChildren()[0]->getToken() == Token::T_INSIDE);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestDrawStatementWithAxisLabelRotate, [] () {
+// UNIT-SQLPARSER-047
+bool test_sql_parser_DrawStatementWithAxisLabelRotate(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
   auto parser = parseTestQuery("DRAW BARCHART AXIS LEFT TICKS ROTATE 45;");
@@ -990,9 +1047,11 @@ TEST_CASE(ParserTest, TestDrawStatementWithAxisLabelRotate, [] () {
       txn.get(),
       deg_expr).toString();
   EXPECT_EQ(deg, "45");
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestDrawStatementWithAxisLabelPosAndRotate, [] () {
+// UNIT-SQLPARSER-048
+bool test_sql_parser_DrawStatementWithAxisLabelPosAndRotate(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
   auto parser = parseTestQuery(
@@ -1023,9 +1082,11 @@ TEST_CASE(ParserTest, TestDrawStatementWithAxisLabelPosAndRotate, [] () {
       txn.get(),
       deg_expr).toString();
   EXPECT_EQ(deg, "45");
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestDrawStatementWithSimpleLegend, [] () {
+// UNIT-SQLPARSER-049
+bool test_sql_parser_DrawStatementWithSimpleLegend(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
   auto parser = parseTestQuery("DRAW BARCHART LEGEND TOP LEFT INSIDE;");
@@ -1047,9 +1108,11 @@ TEST_CASE(ParserTest, TestDrawStatementWithSimpleLegend, [] () {
   EXPECT(*props[2] == ASTNode::T_PROPERTY);
   EXPECT(props[2]->getToken() != nullptr);
   EXPECT(*props[2]->getToken() == Token::T_INSIDE);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestDrawStatementWithLegendWithTitle, [] () {
+// UNIT-SQLPARSER-050
+bool test_sql_parser_DrawStatementWithLegendWithTitle(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
   auto parser = parseTestQuery(
@@ -1078,9 +1141,11 @@ TEST_CASE(ParserTest, TestDrawStatementWithLegendWithTitle, [] () {
       txn.get(),
       title_expr).toString();
   EXPECT_EQ(title, "fnordylegend");
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestCreateTableStatement, [] () {
+// UNIT-SQLPARSER-051
+bool test_sql_parser_CreateTableStatement(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
   auto parser = parseTestQuery("CREATE TABLE fnord ()");
@@ -1092,9 +1157,11 @@ TEST_CASE(ParserTest, TestCreateTableStatement, [] () {
   EXPECT_EQ(*stmt->getChildren()[0]->getToken(), Token::T_IDENTIFIER);
   EXPECT_EQ(stmt->getChildren()[0]->getToken()->getString(), "fnord");
   EXPECT(*stmt->getChildren()[1] == ASTNode::T_COLUMN_LIST);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestCreateTableStatement2, [] () {
+// UNIT-SQLPARSER-052
+bool test_sql_parser_CreateTableStatement2(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
   auto parser = parseTestQuery(
@@ -1123,9 +1190,11 @@ TEST_CASE(ParserTest, TestCreateTableStatement2, [] () {
   EXPECT_EQ(stmt->getChildren()[0]->getToken()->getString(), "fnord");
   EXPECT(*stmt->getChildren()[1] == ASTNode::T_COLUMN_LIST);
   EXPECT(stmt->getChildren()[1]->getChildren().size() == 6);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestCreateTableWithStatement, [] () {
+// UNIT-SQLPARSER-053
+bool test_sql_parser_CreateTableWithStatement(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
   auto parser = parseTestQuery(
@@ -1174,9 +1243,11 @@ TEST_CASE(ParserTest, TestCreateTableWithStatement, [] () {
   EXPECT_EQ(
       properties[1]->getChildren()[1]->getToken()->getString(),
       "1");
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestDropTableStatement, [] () {
+// UNIT-SQLPARSER-054
+bool test_sql_parser_DropTableStatement(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
   auto parser = parseTestQuery("DROP TABLE fnord");
@@ -1187,9 +1258,11 @@ TEST_CASE(ParserTest, TestDropTableStatement, [] () {
   EXPECT_EQ(*stmt->getChildren()[0], ASTNode::T_TABLE_NAME);
   EXPECT_EQ(*stmt->getChildren()[0]->getToken(), Token::T_IDENTIFIER);
   EXPECT_EQ(stmt->getChildren()[0]->getToken()->getString(), "fnord");
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestInsertIntoStatement, [] () {
+// UNIT-SQLPARSER-055
+bool test_sql_parser_InsertIntoStatement(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
@@ -1239,9 +1312,11 @@ TEST_CASE(ParserTest, TestInsertIntoStatement, [] () {
 
   EXPECT_EQ(*children[2]->getChildren()[3]->getToken(), Token::T_TRUE);
   EXPECT_EQ(*children[2]->getChildren()[4]->getToken(), Token::T_NULL);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestInsertIntoShortStatement, [] () {
+// UNIT-SQLPARSER-056
+bool test_sql_parser_InsertIntoShortStatement(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
@@ -1282,9 +1357,11 @@ TEST_CASE(ParserTest, TestInsertIntoShortStatement, [] () {
 
   EXPECT_EQ(*children[2]->getChildren()[3]->getToken(), Token::T_TRUE);
   EXPECT_EQ(*children[2]->getChildren()[4]->getToken(), Token::T_NULL);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestInsertIntoFromJSONStatement, [] () {
+// UNIT-SQLPARSER-057
+bool test_sql_parser_InsertIntoFromJSONStatement(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
@@ -1313,9 +1390,11 @@ TEST_CASE(ParserTest, TestInsertIntoFromJSONStatement, [] () {
   EXPECT_EQ(children[0]->getToken()->getString(), "evtbl");
 
   EXPECT(*children[1] == ASTNode::T_JSON_STRING);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestCreateDatabaseStatement, [] () {
+// UNIT-SQLPARSER-058
+bool test_sql_parser_CreateDatabaseStatement(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
@@ -1329,9 +1408,11 @@ TEST_CASE(ParserTest, TestCreateDatabaseStatement, [] () {
   EXPECT(*stmt->getChildren()[0] == ASTNode::T_DATABASE_NAME);
   EXPECT_EQ(*stmt->getChildren()[0]->getToken(), Token::T_IDENTIFIER);
   EXPECT_EQ(stmt->getChildren()[0]->getToken()->getString(), "events");
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestUseDatabaseStatement, [] () {
+// UNIT-SQLPARSER-059
+bool test_sql_parser_UseDatabaseStatement(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
@@ -1345,9 +1426,11 @@ TEST_CASE(ParserTest, TestUseDatabaseStatement, [] () {
   EXPECT(*stmt->getChildren()[0] == ASTNode::T_DATABASE_NAME);
   EXPECT_EQ(*stmt->getChildren()[0]->getToken(), Token::T_IDENTIFIER);
   EXPECT_EQ(stmt->getChildren()[0]->getToken()->getString(), "events");
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestAlterTableStatement, [] () {
+// UNIT-SQLPARSER-060
+bool test_sql_parser_AlterTableStatement(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
@@ -1383,9 +1466,11 @@ TEST_CASE(ParserTest, TestAlterTableStatement, [] () {
   EXPECT_EQ(children[3]->getToken()->getString(), "place");
   EXPECT_EQ(*children[4], ASTNode::T_COLUMN_NAME);
   EXPECT_EQ(children[4]->getToken()->getString(), "version");
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestAlterTableSetPropertyStatement, [] () {
+// UNIT-SQLPARSER-061
+bool test_sql_parser_AlterTableSetPropertyStatement(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
@@ -1427,9 +1512,11 @@ TEST_CASE(ParserTest, TestAlterTableSetPropertyStatement, [] () {
   EXPECT_EQ(
       *children[3]->getChildren()[1]->getToken(),
       Token::T_FALSE);
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestDescribePartitionsStatement, [] () {
+// UNIT-SQLPARSER-062
+bool test_sql_parser_DescribePartitionsStatement(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
   auto parser = parseTestQuery("DESCRIBE PARTITIONS my_tbl;");
@@ -1440,9 +1527,11 @@ TEST_CASE(ParserTest, TestDescribePartitionsStatement, [] () {
   EXPECT_EQ(stmt->getChildren().size(), 1);
   EXPECT_EQ(*stmt->getChildren()[0], ASTNode::T_TABLE_NAME);
   EXPECT_EQ(stmt->getChildren()[0]->getToken()->getString(), "my_tbl");
-});
+  return true;
+}
 
-TEST_CASE(ParserTest, TestDescribeServersStatement, [] () {
+// UNIT-SQLPARSER-063
+bool test_sql_parser_DescribeServersStatement(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
   auto parser = parseTestQuery("CLUSTER SHOW SERVERS;");
@@ -1450,5 +1539,135 @@ TEST_CASE(ParserTest, TestDescribeServersStatement, [] () {
   EXPECT(parser.getStatements().size() == 1);
   const auto& stmt = parser.getStatements()[0];
   EXPECT_EQ(*stmt, ASTNode::T_CLUSTER_SHOW_SERVERS);
-});
+  return true;
+}
+
+static const std::vector<std::string> kTestQueries = {
+  // UNIT-SQLPARSER-QUERY-001
+  "SELECT -sum(fnord) + (123 * 4);",
+
+  // UNIT-SQLPARSER-QUERY-002
+  "SELECT (-blah + sum(fnord) / (123 * 4)) as myfield;",
+
+  // UNIT-SQLPARSER-QUERY-003
+  "SELECT concat(fnord + 5, -somefunc(myotherfield)) + (123 * 4);",
+
+  // UNIT-SQLPARSER-QUERY-004
+  "  SELECT"
+  "     l_orderkey,"
+  "     sum( l_extendedprice * ( 1 - l_discount) ) AS revenue,"
+  "     o_orderdate,"
+  "     o_shippriority"
+  "  FROM"
+  "     customer,"
+  "     orders,"
+  "     lineitem "
+  "  WHERE"
+  "    c_mktsegment = 'FURNITURE' AND"
+  "    c_custkey = o_custkey AND"
+  "    l_orderkey = o_orderkey AND"
+  "    o_orderdate < \"2013-12-21\" AND"
+  "    l_shipdate > \"2014-01-06\""
+  "  GROUP BY"
+  "    l_orderkey,"
+  "    o_orderdate,"
+  "    o_shippriority"
+  "  ORDER BY"
+  "    revenue,"
+  "    o_orderdate;"
+};
+
+bool test_sql_parser_query(TestContext* ctx, const std::string& query) {
+  auto parser = parseTestQuery(query.c_str());
+  EXPECT(parser.getStatements().size() == 1);
+  return true;
+}
+
+void setup_unit_sql_parser_tests(TestRepository* repo) {
+  std::vector<TestCase> c;
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-001", sql_parser, SimpleValueExpression);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-002", sql_parser, ArithmeticValueExpression);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-003", sql_parser, ArithmeticValueExpressionParens);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-004", sql_parser, ParseEqual);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-005", sql_parser, ParseNotEqual);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-006", sql_parser, ParseGreaterThan);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-007", sql_parser, ParseGreaterThanEqual);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-008", sql_parser, ArithmeticValueExpressionPrecedence);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-009", sql_parser, MethodCallValueExpression);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-010", sql_parser, NegatedValueExpression);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-011", sql_parser, SelectAll);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-012", sql_parser, SelectTableWildcard);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-013", sql_parser, QuotedTableName);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-014", sql_parser, NestedTableName);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-015", sql_parser, SelectDerivedColumn);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-016", sql_parser, SelectDerivedColumnWithTableName);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-017", sql_parser, SelectWithQuotedTableName);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-018", sql_parser, SelectMustBeFirstAssert);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-019", sql_parser, WhereClause);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-020", sql_parser, GroupByClause);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-021", sql_parser, OrderByClause);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-022", sql_parser, HavingClause);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-023", sql_parser, LimitClause);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-024", sql_parser, LimitOffsetClause);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-025", sql_parser, TokenizerEscaping);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-026", sql_parser, TokenizerSimple);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-027", sql_parser, TokenizerAsClause);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-028", sql_parser, ParseMultipleSelects);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-029", sql_parser, ParseIfStatement);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-030", sql_parser, CompareASTs);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-031", sql_parser, SimpleTableReference);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-032", sql_parser, TableReferenceWithAlias);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-033", sql_parser, ParseSimpleSubquery);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-034", sql_parser, CommaJoin);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-035", sql_parser, InnerJoin);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-036", sql_parser, SimpleDrawStatement);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-037", sql_parser, DrawStatementWithAxes);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-038", sql_parser, DrawStatementWithExplicitYDomain);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-039", sql_parser, DrawStatementWithScaleLogInvYDomain);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-040", sql_parser, DrawStatementWithLogInvYDomain);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-041", sql_parser, DrawStatementWithGrid);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-042", sql_parser, DrawStatementWithTitle);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-043", sql_parser, DrawStatementWithSubtitle);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-044", sql_parser, DrawStatementWithTitleAndSubtitle);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-045", sql_parser, DrawStatementWithAxisTitle);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-046", sql_parser, DrawStatementWithAxisLabelPos);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-047", sql_parser, DrawStatementWithAxisLabelRotate);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-048", sql_parser, DrawStatementWithAxisLabelPosAndRotate);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-049", sql_parser, DrawStatementWithSimpleLegend);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-050", sql_parser, DrawStatementWithLegendWithTitle);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-051", sql_parser, CreateTableStatement);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-052", sql_parser, CreateTableStatement2);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-053", sql_parser, CreateTableWithStatement);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-054", sql_parser, DropTableStatement);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-055", sql_parser, InsertIntoStatement);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-056", sql_parser, InsertIntoShortStatement);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-057", sql_parser, InsertIntoFromJSONStatement);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-058", sql_parser, CreateDatabaseStatement);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-059", sql_parser, UseDatabaseStatement);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-060", sql_parser, AlterTableStatement);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-061", sql_parser, AlterTableSetPropertyStatement);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-062", sql_parser, DescribePartitionsStatement);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-SQLPARSER-063", sql_parser, DescribeServersStatement);
+  repo->addTestBundle(c);
+
+  for (size_t i = 0; i < kTestQueries.size(); ++i) {
+    std::stringstream test_id;
+    test_id << "UNIT-SQLPARSER-QUERY-" << std::setfill('0') << std::setw(3) << i + 1;
+
+    TestCase test_case;
+    test_case.test_id = test_id.str();
+    test_case.description = StringUtil::format("SQL parser test query #$0", i + 1);
+    test_case.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
+    test_case.fun =  std::bind(
+        &test_sql_parser_query,
+        std::placeholders::_1,
+        kTestQueries[i]);
+
+    repo->addTestBundle({ test_case });
+  }
+}
+
+} // namespace unit
+} // namespace test
+} // namespace eventql
 

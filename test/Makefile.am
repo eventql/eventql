@@ -34,6 +34,8 @@ evql_test_SOURCES = \
     unit/metadata_operation_createpartition.cc \
     unit/metadata_operation_split.cc \
     unit/partition_discovery.cc \
+    unit/sql_parser.cc \
+    unit/sql_qtree.cc \
     system/basic_sql/basic_sql.h \
     system/basic_sql/basic_sql.cc \
     test_repository.cc \
