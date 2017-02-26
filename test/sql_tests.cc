@@ -309,25 +309,22 @@ bool runTest(std::string id) {
 }
 
 void setup_sql_tests(TestRepository* repo) {
-  std::vector<TestCase> test_bundle;
-
   auto is = FileInputStream::openFile(kTestListFile);
   std::string test_id;
   while (is->readLine(&test_id)) {
     StringUtil::chomp(&test_id);
 
     auto test_case = eventql::test::TestCase {
-      .test_id = StringUtil::format("SQL-$0", test_id),
+      .test_id = StringUtil::format("SQL-$0", test_id.substr(0, 5)),
       .description = test_id,
       .fun = std::bind(runTest, test_id),
       .suites =  { TestSuite::WORLD, TestSuite::SMOKE }
     };
-    test_bundle.emplace_back(test_case);
 
+    repo->addTestBundle({ test_case });
     test_id.clear();
   }
 
-  repo->addTestBundle(test_bundle);
 }
 
 } // namespace sql

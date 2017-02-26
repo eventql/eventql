@@ -1173,7 +1173,7 @@ void setup_unit_sql_qtree_tests(TestRepository* repo) {
   SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-008", sql_qtree, SimpleConstantFolding);
   SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-009", sql_qtree, PruneConstraints);
   SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-010", sql_qtree, Serialization);
-  //SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-011", sql_qtree, SerializationJoinAndSubquery);
+  SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-011", sql_qtree, SerializationJoinAndSubquery);
   SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-012", sql_qtree, CreateTable);
   SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-013", sql_qtree, CreateTableWith);
   SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-014", sql_qtree, InsertInto);
