@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
+ * Copyright (c) 2017 DeepCortex GmbH <legal@eventql.io>
  * Authors:
  *   - Laura Schlimmer <laura@eventql.io>
  *
