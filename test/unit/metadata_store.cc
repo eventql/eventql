@@ -195,10 +195,8 @@ static bool test_metadata_store_cache(TestContext* ctx) {
 }
 
 void setup_unit_metadata_store_tests(TestRepository* repo) {
-  std::vector<TestCase> c;
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METADATASTORE-001", metadata_store, storeandload);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METADATASTORE-002", metadata_store, cache);
-  repo->addTestBundle(c);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METADATASTORE-001", metadata_store, storeandload);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METADATASTORE-002", metadata_store, cache);
 }
 
 } // namespace unit

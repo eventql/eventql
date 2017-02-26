@@ -1162,32 +1162,30 @@ bool test_sql_qtree_CreateTableWithPrimaryWithoutPartitionKey(TestContext* ctx) 
 }
 
 void setup_unit_sql_qtree_tests(TestRepository* repo) {
-  std::vector<TestCase> c;
-  SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-001", sql_qtree, ExtractEqualsConstraint);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-002", sql_qtree, ExtractNotEqualsConstraint);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-003", sql_qtree, ExtractLessThanConstraint);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-004", sql_qtree, ExtractLessThanOrEqualToConstraint);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-005", sql_qtree, ExtractGreaterThanConstraint);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-006", sql_qtree, ExtractGreaterThanOrEqualToConstraint);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-007", sql_qtree, ExtractMultipleConstraints);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-008", sql_qtree, SimpleConstantFolding);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-009", sql_qtree, PruneConstraints);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-010", sql_qtree, Serialization);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-011", sql_qtree, SerializationJoinAndSubquery);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-012", sql_qtree, CreateTable);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-013", sql_qtree, CreateTableWith);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-014", sql_qtree, InsertInto);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-016", sql_qtree, InsertIntoFromJSON);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-017", sql_qtree, DropTable);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-018", sql_qtree, CreateDatabase);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-019", sql_qtree, UseDatabase);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-020", sql_qtree, AlterTable);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-021", sql_qtree, AlterTableSetProperty);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-022", sql_qtree, DescribePartitions);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-023", sql_qtree, ClusterShowServers);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-024", sql_qtree, CreateTableWithPrimaryAndPartitionKey);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-QTREE-025", sql_qtree, CreateTableWithPrimaryWithoutPartitionKey);
-  repo->addTestBundle(c);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-001", sql_qtree, ExtractEqualsConstraint);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-002", sql_qtree, ExtractNotEqualsConstraint);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-003", sql_qtree, ExtractLessThanConstraint);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-004", sql_qtree, ExtractLessThanOrEqualToConstraint);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-005", sql_qtree, ExtractGreaterThanConstraint);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-006", sql_qtree, ExtractGreaterThanOrEqualToConstraint);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-007", sql_qtree, ExtractMultipleConstraints);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-008", sql_qtree, SimpleConstantFolding);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-009", sql_qtree, PruneConstraints);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-010", sql_qtree, Serialization);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-011", sql_qtree, SerializationJoinAndSubquery);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-012", sql_qtree, CreateTable);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-013", sql_qtree, CreateTableWith);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-014", sql_qtree, InsertInto);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-016", sql_qtree, InsertIntoFromJSON);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-017", sql_qtree, DropTable);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-018", sql_qtree, CreateDatabase);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-019", sql_qtree, UseDatabase);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-020", sql_qtree, AlterTable);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-021", sql_qtree, AlterTableSetProperty);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-022", sql_qtree, DescribePartitions);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-023", sql_qtree, ClusterShowServers);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-024", sql_qtree, CreateTableWithPrimaryAndPartitionKey);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-025", sql_qtree, CreateTableWithPrimaryWithoutPartitionKey);
 }
 
 } // namespace unit

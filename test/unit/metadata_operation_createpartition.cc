@@ -1001,19 +1001,17 @@ static bool test_metadata_operation_createpartition_create_overlap_exact(TestCon
 }
 
 void setup_unit_metadata_operation_createpartition_tests(TestRepository* repo) {
-  std::vector<TestCase> c;
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-CREATEPART-001", metadata_operation_createpartition, create_empty);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-CREATEPART-002", metadata_operation_createpartition, create_begin);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-CREATEPART-003", metadata_operation_createpartition, create_begin2);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-CREATEPART-004", metadata_operation_createpartition, create_middle);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-CREATEPART-005", metadata_operation_createpartition, create_middle2);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-CREATEPART-006", metadata_operation_createpartition, create_end);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-CREATEPART-007", metadata_operation_createpartition, create_end2);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-CREATEPART-008", metadata_operation_createpartition, create_overlap_begin);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-CREATEPART-009", metadata_operation_createpartition, create_overlap_middle);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-CREATEPART-010", metadata_operation_createpartition, create_overlap_end);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-CREATEPART-011", metadata_operation_createpartition, create_overlap_exact);
-  repo->addTestBundle(c);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-CREATEPART-001", metadata_operation_createpartition, create_empty);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-CREATEPART-002", metadata_operation_createpartition, create_begin);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-CREATEPART-003", metadata_operation_createpartition, create_begin2);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-CREATEPART-004", metadata_operation_createpartition, create_middle);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-CREATEPART-005", metadata_operation_createpartition, create_middle2);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-CREATEPART-006", metadata_operation_createpartition, create_end);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-CREATEPART-007", metadata_operation_createpartition, create_end2);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-CREATEPART-008", metadata_operation_createpartition, create_overlap_begin);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-CREATEPART-009", metadata_operation_createpartition, create_overlap_middle);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-CREATEPART-010", metadata_operation_createpartition, create_overlap_end);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-CREATEPART-011", metadata_operation_createpartition, create_overlap_exact);
 }
 
 } // namespace unit

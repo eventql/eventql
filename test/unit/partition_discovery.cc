@@ -691,11 +691,9 @@ static bool test_partition_discovery_find_by_id(TestContext* ctx) {
 }
 
 void setup_unit_partition_discovery_tests(TestRepository* repo) {
-  std::vector<TestCase> c;
-  SETUP_UNIT_TESTCASE(&c, "UNIT-PDISCOVERY-001", partition_discovery, serving_partition);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-PDISCOVERY-002", partition_discovery, splitting_partition);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-PDISCOVERY-003", partition_discovery, find_by_id);
-  repo->addTestBundle(c);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-PDISCOVERY-001", partition_discovery, serving_partition);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-PDISCOVERY-002", partition_discovery, splitting_partition);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-PDISCOVERY-003", partition_discovery, find_by_id);
 }
 
 } // namespace unit

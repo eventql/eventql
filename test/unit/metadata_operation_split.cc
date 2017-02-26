@@ -2370,27 +2370,25 @@ static bool test_metadata_operation_split_user_defined_split(TestContext* ctx) {
 }
 
 void setup_unit_metadata_operation_split_tests(TestRepository* repo) {
-  std::vector<TestCase> c;
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-SPLIT-001", metadata_operation_split, split_begin);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-SPLIT-002", metadata_operation_split, subsplit_begin_low);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-SPLIT-003", metadata_operation_split, subsplit_begin_high);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-SPLIT-004", metadata_operation_split, split_middle);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-SPLIT-005", metadata_operation_split, subsplit_middle_low);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-SPLIT-006", metadata_operation_split, subsplit_middle_high);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-SPLIT-007", metadata_operation_split, split_end);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-SPLIT-008", metadata_operation_split, subsplit_end_low);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-SPLIT-009", metadata_operation_split, subsplit_end_high);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-SPLIT-010", metadata_operation_split, finite_split_begin);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-SPLIT-011", metadata_operation_split, finite_split_middle);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-SPLIT-012", metadata_operation_split, finite_split_end);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-SPLIT-013", metadata_operation_split, split_begin_immediate);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-SPLIT-014", metadata_operation_split, split_middle_immediate);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-SPLIT-015", metadata_operation_split, split_end_immediate);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-SPLIT-016", metadata_operation_split, finite_split_begin_immediate);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-SPLIT-017", metadata_operation_split, finite_split_middle_immediate);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-SPLIT-018", metadata_operation_split, finite_split_end_immediate);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METAOP-SPLIT-019", metadata_operation_split, user_defined_split);
-  repo->addTestBundle(c);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-SPLIT-001", metadata_operation_split, split_begin);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-SPLIT-002", metadata_operation_split, subsplit_begin_low);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-SPLIT-003", metadata_operation_split, subsplit_begin_high);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-SPLIT-004", metadata_operation_split, split_middle);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-SPLIT-005", metadata_operation_split, subsplit_middle_low);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-SPLIT-006", metadata_operation_split, subsplit_middle_high);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-SPLIT-007", metadata_operation_split, split_end);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-SPLIT-008", metadata_operation_split, subsplit_end_low);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-SPLIT-009", metadata_operation_split, subsplit_end_high);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-SPLIT-010", metadata_operation_split, finite_split_begin);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-SPLIT-011", metadata_operation_split, finite_split_middle);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-SPLIT-012", metadata_operation_split, finite_split_end);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-SPLIT-013", metadata_operation_split, split_begin_immediate);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-SPLIT-014", metadata_operation_split, split_middle_immediate);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-SPLIT-015", metadata_operation_split, split_end_immediate);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-SPLIT-016", metadata_operation_split, finite_split_begin_immediate);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-SPLIT-017", metadata_operation_split, finite_split_middle_immediate);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-SPLIT-018", metadata_operation_split, finite_split_end_immediate);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-SPLIT-019", metadata_operation_split, user_defined_split);
 }
 
 } // namespace unit

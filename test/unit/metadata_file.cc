@@ -480,17 +480,15 @@ static bool test_metadata_file_empty_range_lookups(TestContext* ctx) {
 }
 
 void setup_unit_metadata_file_tests(TestRepository* repo) {
-  std::vector<TestCase> c;
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METADATAFILE-001", metadata_file, string_lookups);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METADATAFILE-002", metadata_file, user_defined_string_lookups);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METADATAFILE-003", metadata_file, finite_uint_lookups);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METADATAFILE-004", metadata_file, uint_lookups);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METADATAFILE-005", metadata_file, range_lookups);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METADATAFILE-006", metadata_file, user_defined_range_lookups);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METADATAFILE-007", metadata_file, finite_uint_range_lookups);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METADATAFILE-008", metadata_file, key_compare);
-  SETUP_UNIT_TESTCASE(&c, "UNIT-METADATAFILE-009", metadata_file, empty_range_lookups);
-  repo->addTestBundle(c);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METADATAFILE-001", metadata_file, string_lookups);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METADATAFILE-002", metadata_file, user_defined_string_lookups);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METADATAFILE-003", metadata_file, finite_uint_lookups);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METADATAFILE-004", metadata_file, uint_lookups);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METADATAFILE-005", metadata_file, range_lookups);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METADATAFILE-006", metadata_file, user_defined_range_lookups);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METADATAFILE-007", metadata_file, finite_uint_range_lookups);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METADATAFILE-008", metadata_file, key_compare);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METADATAFILE-009", metadata_file, empty_range_lookups);
 }
 
 } // namespace unit

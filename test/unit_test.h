@@ -121,13 +121,13 @@ void EXPECT_EQ(T1 left, T2 right) {
     } \
   }
 
-#define SETUP_UNIT_TESTCASE(CASES, ID, UNIT, TEST) do { \
-    (CASES)->emplace_back(eventql::test::TestCase { \
+#define SETUP_UNIT_TESTCASE(REPO, ID, UNIT, TEST) do { \
+    (REPO)->addTestBundle({ eventql::test::TestCase { \
       .test_id = (ID), \
       .description = "Test " + std::string(#TEST) + " in " + std::string(#UNIT), \
       .fun = &test_##UNIT##_##TEST, \
       .suites =  { TestSuite::WORLD, TestSuite::SMOKE } \
-    }); \
+    }}); \
   } while (0)
 
 #define SETUP_UNIT_TEST(T, R) do { \
