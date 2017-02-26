@@ -1574,12 +1574,329 @@ static const std::vector<std::string> kTestQueries = {
   "    o_shippriority"
   "  ORDER BY"
   "    revenue,"
-  "    o_orderdate;"
+  "    o_orderdate;",
+
+  // UNIT-SQLPARSER-QUERY-005
+  R"(select testtable.time from testtable;)",
+
+  // UNIT-SQLPARSER-QUERY-006
+  R"(select t1.time from testtable t1;)",
+
+  // UNIT-SQLPARSER-QUERY-007
+  R"(select count(1) from testtable;)",
+
+  // UNIT-SQLPARSER-QUERY-008
+  R"(select count(event.search_query.time) from testtable;)",
+
+  // UNIT-SQLPARSER-QUERY-009
+  R"(select sum(event.search_query.num_result_items) from testtable;)",
+
+  // UNIT-SQLPARSER-QUERY-010
+  R"(select sum(count(event.search_query.result_items.position) WITHIN RECORD) from testtable;)",
+
+  // UNIT-SQLPARSER-QUERY-011
+  R"(
+    select
+      sum(event.search_query.num_result_items) WITHIN RECORD,
+      count(event.search_query.result_items.position) WITHIN RECORD
+    from testtable;)",
+
+  // UNIT-SQLPARSER-QUERY-012
+  R"(
+    select
+      1,
+      event.search_query.time,
+      event.search_query.num_result_items,
+      event.search_query.result_items.position
+    from testtable;)",
+
+  // UNIT-SQLPARSER-QUERY-013
+  R"(
+    select
+      count(time),
+      sum(count(event.search_query.time) WITHIN RECORD),
+      sum(sum(event.search_query.num_result_items) WITHIN RECORD),
+      sum(count(event.search_query.result_items.position) WITHIN RECORD)
+    from testtable;)",
+
+  // UNIT-SQLPARSER-QUERY-014
+  R"(
+    select
+      count(time),
+      sum(count(event.search_query.time) WITHIN RECORD),
+      sum(sum(event.search_query.num_result_items) WITHIN RECORD),
+      sum(count(event.search_query.result_items.position) WITHIN RECORD),
+      (
+        count(time) +
+        sum(count(event.search_query.time) WITHIN RECORD) +
+        sum(sum(event.search_query.num_result_items) WITHIN RECORD) +
+        sum(count(event.search_query.result_items.position) WITHIN RECORD)
+      )
+    from testtable
+    group by 1;)",
+
+  // UNIT-SQLPARSER-QUERY-015
+  R"(
+    select
+      count(1) as num_items,
+      sum(if(s.c, 1, 0)) as clicks
+    from (
+        select
+            event.search_query.result_items.position as p,
+            event.search_query.result_items.clicked as c
+        from testtable) as s
+        where s.p = 6;)",
+
+  // UNIT-SQLPARSER-QUERY-016
+  R"(select fnord from 'test.tbl';)",
+
+  // UNIT-SQLPARSER-QUERY-017
+  R"(select * from testtable order by time desc limit 10;)",
+
+  // UNIT-SQLPARSER-QUERY-018
+  R"(select * from testtable;)",
+
+  // UNIT-SQLPARSER-QUERY-019
+  R"(select value, time from testtable;)",
+
+  // UNIT-SQLPARSER-QUERY-020
+  R"(select * from (select value, time from testtable);)",
+
+  // UNIT-SQLPARSER-QUERY-021
+  R"(select * from (select * from (select value, time from testtable));)",
+
+  // UNIT-SQLPARSER-QUERY-022
+  R"(select * from (select * from (select * from testtable));)",
+
+  // UNIT-SQLPARSER-QUERY-023
+  R"(select 123 as a, 435 as b;)",
+
+  // UNIT-SQLPARSER-QUERY-024
+  R"(select t1.b, a from (select 123 as a, 435 as b) as t1)",
+
+  // UNIT-SQLPARSER-QUERY-025
+  R"(select * from (select 123 as a, 435 as b) as t1)",
+
+  // UNIT-SQLPARSER-QUERY-026
+  R"(select count(1), t1.fubar + t1.x from (select count(1) as x, 123 as fubar from testtable group by TRUNCATE(time / 2000000)) t1 GROUP BY t1.x;)",
+
+  // UNIT-SQLPARSER-QUERY-027
+  R"(select t1.x from (select count(1) as x from testtable group by TRUNCATE(time / 2000000)) t1  order by t1.x DESC LIMIT 2;)",
+
+  // UNIT-SQLPARSER-QUERY-028
+  R"(select * from testtable group by time;)",
+
+  // UNIT-SQLPARSER-QUERY-029
+  R"(
+    SELECT
+      t1.time, t2.time, t3.time, t1.x, t2.x, t1.x + t2.x, t1.x * 3 = t3.x, x1, x2, x3
+    FROM
+      (select TRUNCATE(time / 1000000) as time, count(1) as x, 123 as x1 from testtable group by TRUNCATE(time / 1200000000)) t1,
+      (select TRUNCATE(time / 1000000) as time, sum(2) as x, 456 as x2 from testtable group by TRUNCATE(time / 1200000000)) AS t2,
+      (select TRUNCATE(time / 1000000) as time, sum(3) as x, 789 as x3 from testtable group by TRUNCATE(time / 1200000000)) AS t3
+    ORDER BY
+      t1.time desc;)",
+
+  // UNIT-SQLPARSER-QUERY-030
+  R"(
+    SELECT
+      t1.time, t2.time, t3.time, t1.x, t2.x, t1.x + t2.x, t1.x * 3 = t3.x, x1, x2, x3
+    FROM
+      (select TRUNCATE(time / 1000000) as time, count(1) as x, 123 as x1 from testtable group by TRUNCATE(time / 1200000000)) t1
+    JOIN
+      (select TRUNCATE(time / 1000000) as time, sum(2) as x, 456 as x2 from testtable group by TRUNCATE(time / 1200000000)) AS t2
+    JOIN
+      (select TRUNCATE(time / 1000000) as time, sum(3) as x, 789 as x3 from testtable group by TRUNCATE(time / 1200000000)) AS t3
+    ON
+      t2.time = t1.time and t3.time = t2.time
+    ORDER BY
+      t1.time desc;)",
+
+  // UNIT-SQLPARSER-QUERY-031
+  R"(
+    SELECT
+      t1.time, t2.time, t3.time, t1.x, t2.x, t1.x + t2.x, t1.x * 3 = t3.x, x1, x2, x3
+    FROM
+      (select TRUNCATE(time / 1000000) as time, count(1) as x, 123 as x1 from testtable group by TRUNCATE(time / 1200000000)) t1
+    JOIN
+      (select TRUNCATE(time / 1000000) as time, sum(2) as x, 456 as x2 from testtable group by TRUNCATE(time / 1200000000)) AS t2
+    JOIN
+      (select TRUNCATE(time / 1000000) as time, sum(3) as x, 789 as x3 from testtable group by TRUNCATE(time / 1200000000)) AS t3
+    WHERE
+      t2.time = t1.time AND t1.time = t3.time
+    ORDER BY
+        t1.time desc;)",
+
+  // UNIT-SQLPARSER-QUERY-032
+  R"(
+    SELECT customers.customername, orders.orderid
+    FROM customers
+    LEFT JOIN orders
+    ON customers.customerid=orders.customerid
+    ORDER BY customers.customername;)",
+
+  // UNIT-SQLPARSER-QUERY-033
+  R"(
+    SELECT customers.customername, orders.orderid
+    FROM customers
+    LEFT JOIN orders
+    ON customers.customerid=orders.customerid
+    WHERE customers.country = 'UK'
+    ORDER BY customers.customername;)",
+
+  // UNIT-SQLPARSER-QUERY-034
+  R"(
+    SELECT orders.orderid, employees.firstname
+    FROM orders
+    RIGHT JOIN employees
+    ON orders.employeeid=employees.employeeid
+    ORDER BY orders.orderid;)",
+
+  // UNIT-SQLPARSER-QUERY-035
+  R"(
+    SELECT orders.orderid, employees.firstname
+    FROM orders
+    RIGHT JOIN employees
+    ON orders.employeeid=employees.employeeid
+    WHERE employees.firstname = 'Steven'
+    ORDER BY orders.orderid;)",
+
+  // UNIT-SQLPARSER-QUERY-036
+  R"(
+    SELECT *
+    FROM departments
+    JOIN users
+    ON users.deptid = departments.deptid
+    ORDER BY name;)",
+
+  // UNIT-SQLPARSER-QUERY-037
+  R"(
+    SELECT *
+    FROM departments, users, openinghours
+    WHERE users.deptid = departments.deptid AND openinghours.deptid = departments.deptid
+    ORDER BY name;)",
+
+  // UNIT-SQLPARSER-QUERY-038
+  R"(
+    SELECT * FROM (
+      SELECT *
+      FROM departments, users, openinghours
+      WHERE users.deptid = departments.deptid AND openinghours.deptid = departments.deptid
+    ) ORDER BY name;)",
+
+  // UNIT-SQLPARSER-QUERY-039
+  R"(
+    SELECT *
+    FROM departments
+    NATURAL JOIN users
+    ORDER BY name;)",
+
+
+  // UNIT-SQLPARSER-QUERY-040
+  R"(
+    SELECT *
+    FROM departments
+    NATURAL JOIN openinghours
+    NATURAL JOIN users
+    ORDER BY name;)",
+
+  // UNIT-SQLPARSER-QUERY-041
+  R"(
+    SELECT *
+    FROM (SELECT * FROM departments) t1
+    NATURAL JOIN (SELECT deptid, start_time, end_time FROM openinghours) t2
+    NATURAL JOIN (SELECT * FROM users) t3
+    ORDER BY name;)",
+
+
+  // UNIT-SQLPARSER-QUERY-042
+  R"(
+    select
+      FROM_TIMESTAMP(TRUNCATE(time / 86400000000) *  86400),
+      sum(sum(if(event.cart_items.checkout_step = 1, event.cart_items.price_cents, 0)) WITHIN RECORD) / 100.0 as gmv_eur,
+      sum(if(event.cart_items.checkout_step = 1, event.cart_items.price_cents, 0)) / sum(count(event.page_view.item_id) WITHIN RECORD) as fu
+      from testtable
+      group by TRUNCATE(time / 86400000000)
+        order by time desc;)",
+
+
+  // UNIT-SQLPARSER-QUERY-043
+  R"(select count(1) cnt, time from testtable group by TRUNCATE(time / 60000000) order by cnt desc;)",
+
+  // UNIT-SQLPARSER-QUERY-044
+  R"(select time from testtable group by TRUNCATE(time / 60000000);)",
+
+  // UNIT-SQLPARSER-QUERY-045
+  R"(select user_id from testtable order by time desc limit 10;)",
+
+  // UNIT-SQLPARSER-QUERY-046
+  R"(SELECT 'fubar' REGEX '^b' as x;)",
+
+  // UNIT-SQLPARSER-QUERY-047
+  R"(
+    SELECT customername
+    FROM customers
+    ORDER BY customername;)",
+
+  // UNIT-SQLPARSER-QUERY-048
+  R"(show tables;)",
+
+  // UNIT-SQLPARSER-QUERY-049
+  R"(describe departments;)",
+
+  // UNIT-SQLPARSER-QUERY-050
+  R"(select now();)",
+
+  // UNIT-SQLPARSER-QUERY-051
+  R"(
+    SELECT *
+    FROM departments
+    JOIN users
+    ORDER BY name
+    LIMIT 5;)",
+
+  // UNIT-SQLPARSER-QUERY-052
+  "  DRAW LINECHART AXIS LEFT;"
+  ""
+  "  SELECT"
+  "    'series1' as series, one AS x, two AS y"
+  "  FROM"
+  "    testtable;"
+  ""
+  "  SELECT"
+  "    'series2' as series, one as x, two + 5 as y"
+  "  from"
+  "    testtable;"
+  ""
+  "  SELECT"
+  "    'series3' as series, one as x, two / 2 + 4 as y"
+  "  FROM"
+  "    testtable;",
+
+  // UNIT-SQLPARSER-QUERY-053
+  "  DRAW BARCHART"
+  "    ORIENTATION HORIZONTAL"
+  "    AXIS LEFT"
+  "    AXIS BOTTOM"
+  "    LEGEND TOP RIGHT INSIDE TITLE 'gdp per country';"
+  ""
+  "  SELECT"
+  "    'gross domestic product per country' as series,"
+  "    country as x,"
+  "    gbp as y"
+  "  FROM"
+  "    gdp_per_country"
+  "  LIMIT 30;",
+
+  // UNIT-SQLPARSER-QUERY-054
+  R"(
+    select sum(value), count(value), min(value), max(value) FROM testtable;)"
+
 };
 
 bool test_sql_parser_query(TestContext* ctx, const std::string& query) {
   auto parser = parseTestQuery(query.c_str());
-  EXPECT(parser.getStatements().size() == 1);
+  EXPECT(parser.getStatements().size() > 0);
   return true;
 }
 
