@@ -363,6 +363,26 @@ const SFunction date_add_timestamp64(
     SType::TIMESTAMP64,
     &date_add_timestamp64_call);
 
+void date_sub_timestamp64_call(sql_txn* ctx, VMStack* stack) {
+  auto unit = popString(stack);
+  auto expr = popString(stack);
+  auto timestamp = popTimestamp64(stack);
+
+  StringUtil::toLower(&unit);
+
+  auto values = parseUnitExpr(unit, expr);
+  uint64_t result = 0;
+  for (auto v : values) {
+    result -= v;
+  }
+
+  pushTimestamp64(stack, (uint64_t)timestamp + result);
+}
+
+const SFunction date_sub_timestamp64(
+    { SType::TIMESTAMP64, SType::STRING, SType::STRING },
+    SType::TIMESTAMP64,
+    &date_sub_timestamp64_call);
 
 static Option<uint64_t> parseInterval(String time_interval) {
   uint64_t num;
@@ -388,301 +408,6 @@ static Option<uint64_t> parseInterval(String time_interval) {
     return None<uint64_t>();
   }
 }
-
-//
-//void dateSubExpr(sql_txn* ctx, int argc, SValue* argv, SValue* out) {
-//  checkArgs("DATE_SUB", argc, 3);
-//
-//  SValue val = argv[0];
-//  auto date = val.getTimestamp();
-//  auto unit = argv[2].getString();
-//  StringUtil::toLower(&unit);
-//
-//  if (unit == "second") {
-//    if (argv[1].isConvertibleToNumeric()) {
-//      *out = SValue(SValue::TimeType(
-//          uint64_t(date) - (argv[1].getFloat() * kMicrosPerSecond)));
-//      return;
-//    }
-//
-//    RAISEF(
-//        kRuntimeError,
-//        "DATE_SUB: invalid expression $0 for unit $1",
-//        argv[1].getString(),
-//        argv[2].getString());
-//  }
-//
-//  if (unit == "minute") {
-//    if (argv[1].isConvertibleToNumeric()) {
-//      *out = SValue(SValue::TimeType(
-//          uint64_t(date) - (argv[1].getFloat() * kMicrosPerMinute)));
-//      return;
-//    }
-//
-//    RAISEF(
-//        kRuntimeError,
-//        "DATE_SUB: invalid expression $0 for unit $1",
-//        argv[1].getString(),
-//        argv[2].getString());
-//  }
-//
-//  if (unit == "hour") {
-//    if (argv[1].isConvertibleToNumeric()) {
-//      *out = SValue(SValue::TimeType(
-//          uint64_t(date) - (argv[1].getFloat() * kMicrosPerHour)));
-//      return;
-//    }
-//
-//    RAISEF(
-//        kRuntimeError,
-//        "DATE_SUB: invalid expression $0 for unit $1",
-//        argv[1].getString(),
-//        argv[2].getString());
-//  }
-//
-//  if (unit == "day") {
-//    if (argv[1].isConvertibleToNumeric()) {
-//      *out = SValue(SValue::TimeType(
-//          uint64_t(date) - (argv[1].getFloat() * kMicrosPerDay)));
-//      return;
-//    }
-//
-//    RAISEF(
-//        kRuntimeError,
-//        "DATE_SUB: invalid expression $0 for unit $1",
-//        argv[1].getString(),
-//        argv[2].getString());
-//  }
-//
-//  if (unit == "week") {
-//    if (argv[1].isConvertibleToNumeric()) {
-//      *out = SValue(SValue::TimeType(
-//          uint64_t(date) - (argv[1].getFloat() * kMicrosPerWeek)));
-//      return;
-//    }
-//
-//    RAISEF(
-//        kRuntimeError,
-//        "DATE_SUB: invalid expression $0 for unit $1",
-//        argv[1].getString(),
-//        argv[2].getString());
-//  }
-//
-//  if (unit == "month") {
-//    if (argv[1].isConvertibleToNumeric()) {
-//      *out = SValue(SValue::TimeType(
-//          uint64_t(date) - (argv[1].getFloat() * kMicrosPerDay * 31)));
-//      return;
-//    }
-//    RAISEF(
-//        kRuntimeError,
-//        "DATE_SUB: invalid expression $0 for unit $1",
-//        argv[1].getString(),
-//        argv[2].getString());
-//  }
-//
-//  if (unit == "year") {
-//    if (argv[1].isConvertibleToNumeric()) {
-//      *out = SValue(SValue::TimeType(
-//          uint64_t(date) - (argv[1].getFloat() * kMicrosPerYear)));
-//      return;
-//    }
-//
-//    RAISEF(
-//        kRuntimeError,
-//        "DATE_SUB: invalid expression $0 for unit $1",
-//        argv[1].getString(),
-//        argv[2].getString());
-//  }
-//
-//  auto expr = argv[1].getString();
-//  if (unit == "minute_second") {
-//    auto values = StringUtil::split(expr, ":");
-//    if (values.size() == 2 &&
-//        StringUtil::isNumber(values[0]) &&
-//        StringUtil::isNumber(values[1])) {
-//
-//      try {
-//        *out = SValue(SValue::TimeType(
-//            uint64_t(date) -
-//            (std::stoull(values[0]) * kMicrosPerMinute) +
-//            (std::stoull(values[1]) * kMicrosPerSecond)));
-//        return;
-//      } catch (std::invalid_argument e) {
-//        /* fallthrough */
-//      }
-//    }
-//
-//    RAISEF(
-//        kRuntimeError,
-//        "DATE_SUB: invalid expression $0 for unit $1",
-//        expr,
-//        argv[2].getString());
-//  }
-//
-//  if (unit == "hour_second") {
-//    auto values = StringUtil::split(expr, ":");
-//    if (values.size() == 3 &&
-//        StringUtil::isNumber(values[0]) &&
-//        StringUtil::isNumber(values[1]) &&
-//        StringUtil::isNumber(values[2])) {
-//
-//      try {
-//        *out = SValue(SValue::TimeType(
-//            uint64_t(date) -
-//            (std::stoull(values[0]) * kMicrosPerHour) +
-//            (std::stoull(values[1]) * kMicrosPerMinute) +
-//            (std::stoull(values[2]) * kMicrosPerSecond)));
-//        return;
-//      } catch (std::invalid_argument e) {
-//        /* fallthrough */
-//      }
-//    }
-//
-//    RAISEF(
-//        kRuntimeError,
-//        "DATE_SUB: invalid expression $0 for unit $1",
-//        expr,
-//        argv[2].getString());
-//  }
-//
-//  if (unit == "hour_minute") {
-//    auto values = StringUtil::split(expr, ":");
-//    if (values.size() == 2 &&
-//        StringUtil::isNumber(values[0]) &&
-//        StringUtil::isNumber(values[1])) {
-//
-//      try {
-//        *out = SValue(SValue::TimeType(
-//            uint64_t(date) -
-//            (std::stoull(values[0]) * kMicrosPerHour) +
-//            (std::stoull(values[1]) * kMicrosPerMinute)));
-//        return;
-//      } catch (std::invalid_argument e) {
-//        /* fallthrough */
-//      }
-//    }
-//
-//    RAISEF(
-//        kRuntimeError,
-//        "DATE_SUB: invalid expression $0 for unit $1",
-//        expr,
-//        argv[2].getString());
-//  }
-//
-//  if (unit == "day_second") {
-//    auto values = StringUtil::split(expr, " ");
-//    if (values.size() == 2 && StringUtil::isNumber(values[0])) {
-//
-//      auto time_values = StringUtil::split(values[1], ":");
-//      if (time_values.size() == 3 &&
-//          StringUtil::isNumber(time_values[0]) &&
-//          StringUtil::isNumber(time_values[1]) &&
-//          StringUtil::isNumber(time_values[2])) {
-//
-//        try {
-//          *out = SValue(SValue::TimeType(
-//              uint64_t(date) -
-//              (std::stoull(values[0]) * kMicrosPerDay) +
-//              (std::stoull(time_values[0]) * kMicrosPerHour) +
-//              (std::stoull(time_values[1]) * kMicrosPerMinute) +
-//              (std::stoull(time_values[2]) * kMicrosPerSecond)));
-//          return;
-//        } catch (std::invalid_argument e) {
-//          /* fallthrough */
-//        }
-//      }
-//    }
-//
-//    RAISEF(
-//        kRuntimeError,
-//        "DATE_SUB: invalid expression $0 for unit $1",
-//        expr,
-//        argv[2].getString());
-//  }
-//
-//  if (unit == "day_minute") {
-//    auto values = StringUtil::split(expr, " ");
-//    if (values.size() == 2 && StringUtil::isNumber(values[0])) {
-//
-//      auto time_values = StringUtil::split(values[1], ":");
-//      if (time_values.size() == 2 &&
-//          StringUtil::isNumber(time_values[0]) &&
-//          StringUtil::isNumber(time_values[1])) {
-//
-//        try {
-//          *out = SValue(SValue::TimeType(
-//              uint64_t(date) -
-//              (std::stoull(values[0]) * kMicrosPerDay) +
-//              (std::stoull(time_values[0]) * kMicrosPerHour) +
-//              (std::stoull(time_values[1]) * kMicrosPerMinute)));
-//          return;
-//        } catch (std::invalid_argument e) {
-//          /* fallthrough */
-//        }
-//      }
-//    }
-//
-//    RAISEF(
-//        kRuntimeError,
-//        "DATE_SUB: invalid expression $0 for unit $1",
-//        expr,
-//        argv[2].getString());
-//  }
-//
-//  if (unit == "day_hour") {
-//    auto values = StringUtil::split(expr, " ");
-//    if (values.size() == 2 &&
-//        StringUtil::isNumber(values[0]) &&
-//        StringUtil::isNumber(values[1])) {
-//
-//      try {
-//        *out = SValue(SValue::TimeType(
-//            uint64_t(date) -
-//            (std::stoull(values[0]) * kMicrosPerDay) +
-//            (std::stoull(values[1]) * kMicrosPerHour)));
-//        return;
-//      } catch (std::invalid_argument e) {
-//        /* fallthrough */
-//      }
-//    }
-//
-//    RAISEF(
-//        kRuntimeError,
-//        "DATE_SUB: invalid expression $0 for unit $1",
-//        expr,
-//        argv[2].getString());
-//  }
-//
-//  if (unit == "year_month") {
-//    auto values = StringUtil::split(expr, "-");
-//    if (values.size() == 2 &&
-//        StringUtil::isNumber(values[0]) &&
-//        StringUtil::isNumber(values[1])) {
-//
-//      try {
-//        *out = SValue(SValue::TimeType(
-//            uint64_t(date) -
-//            (std::stoull(values[0]) * kMicrosPerYear) +
-//            (std::stoull(values[1]) * kMicrosPerDay * 31)));
-//        return;
-//      } catch (std::invalid_argument e) {
-//        /* fallthrough */
-//      }
-//    }
-//
-//    RAISEF(
-//        kRuntimeError,
-//        "DATE_SUB: invalid expression $0 for unit $1",
-//        expr,
-//        argv[2].getString());
-//  }
-//
-//  RAISEF(
-//      kRuntimeError,
-//      "DATE_SUB: invalid unit $0",
-//      argv[2].getString());
-//}
 
 void time_at_call(sql_txn* ctx, VMStack* stack) {
   auto time_str = popString(stack);
