@@ -491,9 +491,9 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(
   for (const auto& select_expr : select_list->getChildren()) {
     if (*select_expr == ASTNode::T_ALL) {
       for (const auto& col : subtree_tbl->getAvailableColumns()) {
-        auto sl = new SelectListNode(
-            new ColumnReferenceNode(col.qualified_name, col.type));
-
+        auto colnode = new ColumnReferenceNode(col.qualified_name, col.type);
+        colnode->setColumnIndex(subtree_tbl->getComputedColumnIndex(col.qualified_name, true));
+        auto sl = new SelectListNode(colnode);
         sl->setAlias(col.short_name);
         select_list_expressions.emplace_back(sl);
       }
@@ -1202,12 +1202,13 @@ QueryTreeNode* QueryPlanBuilder::buildSubqueryTableReference(
   for (const auto& select_expr : select_list->getChildren()) {
     if (*select_expr == ASTNode::T_ALL) {
       for (const auto& col : subquery_tbl->getResultColumns()) {
-        auto sl = new SelectListNode(
-            new ColumnReferenceNode(
-                col,
-                subquery_tbl->getColumnType(
-                    subquery_tbl->getComputedColumnIndex(col))));
+        auto colnode = new ColumnReferenceNode(
+            col,
+            subquery_tbl->getColumnType(
+                subquery_tbl->getComputedColumnIndex(col)));
+        colnode->setColumnIndex(subquery_tbl->getComputedColumnIndex(col));
 
+        auto sl = new SelectListNode(colnode);
         sl->setAlias(col);
         select_list_expressions.emplace_back(sl);
       }
