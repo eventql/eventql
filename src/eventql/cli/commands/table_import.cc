@@ -128,10 +128,6 @@ Status TableImport::execute(
   try {
     flags.parseArgv(argv);
   } catch (const Exception& e) {
-    stderr_os->write(StringUtil::format(
-        "$0: $1\n",
-        e.getTypeName(),
-        e.getMessage()));
     return Status(e);
   }
 

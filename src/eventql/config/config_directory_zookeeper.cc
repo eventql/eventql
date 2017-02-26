@@ -90,6 +90,15 @@ ZookeeperConfigDirectory::~ZookeeperConfigDirectory() {
   if (logtail_.joinable()) {
     logtail_.join();
   }
+
+  std::unique_lock<std::mutex> lk(mutex_);
+  state_ = ZKState::CLOSED;
+  cv_.notify_all();
+  lk.unlock();
+
+  if (watchdog_.joinable()) {
+    watchdog_.join();
+  }
 }
 
 static void zk_watch_cb(

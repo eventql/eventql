@@ -107,7 +107,6 @@ Status TableSplit::execute(
       }
 
       if (!rc.isSuccess()) {
-        stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
         return rc;
       }
     }
@@ -214,13 +213,10 @@ Status TableSplit::execute(
 
 
   } catch (const Exception& e) {
-    stderr_os->write(StringUtil::format(
-        "$0: $1\n",
-        e.getTypeName(),
-        e.getMessage()));
     return Status(e);
   }
 
+  stderr_os->write("Table successfully splitted\n");
   return Status::success();
 }
 

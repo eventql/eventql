@@ -78,8 +78,7 @@ Status ClusterRemoveServer::execute(
     bool remove_hard = flags.isSet("hard");
     bool remove_soft = flags.isSet("soft");
     if (!(remove_hard ^ remove_soft)) {
-      stderr_os->write("ERROR: either --hard or --soft must be set\n");
-      return Status(eFlagError);
+      return Status(eFlagError, "ERROR: either --hard or --soft must be set\n");
     }
 
     ScopedPtr<ConfigDirectory> cdir;
@@ -93,7 +92,6 @@ Status ClusterRemoveServer::execute(
       }
 
       if (!rc.isSuccess()) {
-        stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
         return rc;
       }
     }
@@ -110,13 +108,10 @@ Status ClusterRemoveServer::execute(
     cdir->stop();
 
   } catch (const Exception& e) {
-    stderr_os->write(StringUtil::format(
-        "$0: $1\n",
-        e.getTypeName(),
-        e.getMessage()));
     return Status(e);
   }
 
+  stderr_os->write("Server successfully removed\n");
   return Status::success();
 }
 

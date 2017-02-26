@@ -57,7 +57,6 @@ Status ClusterCreate::execute(
       }
 
       if (!rc.isSuccess()) {
-        stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
         return rc;
       }
     }
@@ -69,13 +68,10 @@ Status ClusterCreate::execute(
     cdir->stop();
 
   } catch (const Exception& e) {
-    stderr_os->write(StringUtil::format(
-        "$0: $1\n",
-        e.getTypeName(),
-        e.getMessage()));
     return Status(e);
   }
 
+  stderr_os->write("Cluster successfully created\n");
   return Status::success();
 }
 
