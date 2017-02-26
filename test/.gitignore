@@ -1,3 +1,4 @@
 .libs
 evql-test
 test.log
+sql/*.actual.result.txt
