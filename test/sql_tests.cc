@@ -75,7 +75,7 @@ std::string getResultCSV(
 Status checkTableResult(
     csql::ResultList* result,
     const std::string& result_file_path) {
-  auto csv_is = CSVInputStream::openFile(result_file_path);
+  auto csv_is = CSVInputStream::openFile(result_file_path, ';');
   std::vector<std::string> columns;
   if (!csv_is->readNextRow(&columns)) {
     return Status(eRuntimeError, "CSV needs a header");
