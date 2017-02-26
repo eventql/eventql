@@ -37,6 +37,7 @@ extern const SFunction neg;
 extern const SFunction cmp_uint64;
 extern const SFunction cmp_int64;
 extern const SFunction cmp_float64;
+extern const SFunction cmp_string;
 extern const SFunction cmp_timestamp64;
 
 /**

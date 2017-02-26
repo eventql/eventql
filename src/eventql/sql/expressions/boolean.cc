@@ -146,6 +146,34 @@ const SFunction cmp_float64(
 
 
 /**
+ * cmp(string, string) -> int64
+ */
+void cmp_string_call(sql_txn* ctx, VMStack* stack) {
+  const char* right;
+  size_t right_len;
+  popString(stack, &right, &right_len);
+
+  const char* left;
+  size_t left_len;
+  popString(stack, &left, &left_len);
+
+  auto cmp = strncmp(left, right, std::min(left_len, right_len));
+  if (left_len == right_len && cmp == 0) {
+    pushInt64(stack, 0);
+  } else if (cmp < 0 || (cmp == 0 && left_len < right_len)) {
+    pushInt64(stack, -1);
+  } else if (cmp > 0 || (cmp == 0 && left_len > right_len)) {
+    pushInt64(stack, 1);
+  }
+}
+
+const SFunction cmp_string(
+    { SType::STRING, SType::STRING },
+    SType::INT64,
+    &cmp_string_call);
+
+
+/**
  * eq(uint64, uint64) -> bool
  * eq(timestamp64, timestamp64) -> bool
  */

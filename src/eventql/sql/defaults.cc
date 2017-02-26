@@ -60,6 +60,7 @@ void installDefaultSymbols(SymbolTable* rt) {
   rt->registerFunction("cmp",  expressions::cmp_uint64);
   rt->registerFunction("cmp",  expressions::cmp_int64);
   rt->registerFunction("cmp",  expressions::cmp_float64);
+  rt->registerFunction("cmp",  expressions::cmp_string);
   rt->registerFunction("cmp",  expressions::cmp_timestamp64);
   rt->registerFunction("eq",  expressions::eq_uint64);
   rt->registerFunction("eq",  expressions::eq_int64);
