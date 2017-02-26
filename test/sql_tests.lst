@@ -10,3 +10,4 @@
 00010_test_fnv32
 00011_test_date_add
 00012_test_wildcard_select
+00013_test_wildcard_select_from_subquery
