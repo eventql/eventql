@@ -1568,6 +1568,42 @@ bool test_sql_parser_create_table_with_partition_key(TestContext* ctx) {
   return true;
 }
 
+// UNIT-SQLPARSER-065
+bool test_sql_parser_create_partition(TestContext* ctx) {
+  {
+    auto runtime = Runtime::getDefaultRuntime();
+    auto txn = runtime->newTransaction();
+    auto parser = parseTestQuery("CREATE PARTITION my_part ON test;");
+    EXPECT(parser.getStatements().size() == 1);
+    const auto& stmt = parser.getStatements()[0];
+    EXPECT(*stmt == ASTNode::T_CREATE_PARTITION);
+    EXPECT(stmt->getChildren().size() == 2);
+    EXPECT_EQ(*stmt->getChildren()[0], ASTNode::T_PARTITION_NAME);
+    EXPECT_EQ(*stmt->getChildren()[0]->getToken(), Token::T_IDENTIFIER);
+    EXPECT_EQ(stmt->getChildren()[0]->getToken()->getString(), "my_part");
+    EXPECT_EQ(*stmt->getChildren()[1], ASTNode::T_TABLE_NAME);
+    EXPECT_EQ(*stmt->getChildren()[1]->getToken(), Token::T_IDENTIFIER);
+    EXPECT_EQ(stmt->getChildren()[1]->getToken()->getString(), "test");
+  }
+
+  {
+    auto runtime = Runtime::getDefaultRuntime();
+    auto txn = runtime->newTransaction();
+    auto parser = parseTestQuery("CREATE PARTITION my_part ON TABLE test;");
+    EXPECT(parser.getStatements().size() == 1);
+    const auto& stmt = parser.getStatements()[0];
+    EXPECT(*stmt == ASTNode::T_CREATE_PARTITION);
+    EXPECT(stmt->getChildren().size() == 2);
+    EXPECT_EQ(*stmt->getChildren()[0], ASTNode::T_PARTITION_NAME);
+    EXPECT_EQ(*stmt->getChildren()[0]->getToken(), Token::T_IDENTIFIER);
+    EXPECT_EQ(stmt->getChildren()[0]->getToken()->getString(), "my_part");
+    EXPECT_EQ(*stmt->getChildren()[1], ASTNode::T_TABLE_NAME);
+    EXPECT_EQ(*stmt->getChildren()[1]->getToken(), Token::T_IDENTIFIER);
+    EXPECT_EQ(stmt->getChildren()[1]->getToken()->getString(), "test");
+  }
+  return true;
+}
+
 static const std::vector<std::string> kTestQueries = {
   // UNIT-SQLPARSER-QUERY-001
   "SELECT -sum(fnord) + (123 * 4);",
@@ -1991,6 +2027,7 @@ void setup_unit_sql_parser_tests(TestRepository* repo) {
   SETUP_UNIT_TESTCASE(repo, "UNIT-SQLPARSER-062", sql_parser, DescribePartitionsStatement);
   SETUP_UNIT_TESTCASE(repo, "UNIT-SQLPARSER-063", sql_parser, DescribeServersStatement);
   SETUP_UNIT_TESTCASE(repo, "UNIT-SQLPARSER-064", sql_parser, create_table_with_partition_key);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-SQLPARSER-065", sql_parser, create_partition);
 
   for (size_t i = 0; i < kTestQueries.size(); ++i) {
     std::stringstream test_id;

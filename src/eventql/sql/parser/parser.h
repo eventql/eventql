@@ -103,6 +103,7 @@ protected:
   ASTNode* createStatement();
   ASTNode* createTableStatement();
   ASTNode* createDatabaseStatement();
+  ASTNode* createPartitionStatement();
   ASTNode* columnDefinition();
   ASTNode* primaryKeyDefinition();
   ASTNode* partitionKeyDefinition();

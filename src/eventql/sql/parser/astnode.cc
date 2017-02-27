@@ -384,6 +384,12 @@ void ASTNode::debugPrint(int indent /* = 0 */) const {
     case T_CREATE_DATABASE:
       printf("- T_CREATE_DATABASE");
       break;
+    case T_CREATE_PARTITION:
+      printf("- T_CREATE_PARTITION");
+      break;
+    case T_PARTITION_NAME:
+      printf("- T_PARTITOIN_NAME");
+      break;
     case T_USE_DATABASE:
       printf("- T_USE_DATABASE");
       break;

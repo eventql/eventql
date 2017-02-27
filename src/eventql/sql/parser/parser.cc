@@ -425,10 +425,12 @@ ASTNode* Parser::createStatement() {
       return createTableStatement();
     case Token::T_DATABASE:
       return createDatabaseStatement();
+    case Token::T_PARTITION:
+      return createPartitionStatement();
     default:
       RAISEF(
         kParseError,
-        "unexpected token $0$1$2, expected one of SELECT, DRAW or IMPORT",
+        "unexpected token $0$1$2, expected one of TABLE, DATABASE or PARTITION",
           Token::getTypeName(cur_token_->getType()),
           cur_token_->getString().size() > 0 ? ": " : "",
           cur_token_->getString().c_str());
@@ -643,6 +645,29 @@ ASTNode* Parser::createDatabaseStatement() {
   }
 
   return create_database;
+}
+
+ASTNode* Parser::createPartitionStatement() {
+  expectAndConsume(Token::T_PARTITION);
+
+  auto create_partition = new ASTNode(ASTNode::T_CREATE_PARTITION);
+  auto name = new ASTNode(ASTNode::T_PARTITION_NAME);
+  name->setToken(cur_token_);
+  create_partition->appendChild(name);
+  consumeToken();
+
+  expectAndConsume(Token::T_ON);
+  if (*cur_token_ == Token::T_TABLE) {
+    consumeToken();
+  }
+
+  create_partition->appendChild(tableName());
+
+  if (*cur_token_ == Token::T_SEMICOLON) {
+    consumeToken();
+  }
+
+  return create_partition;
 }
 
 ASTNode* Parser::dropStatement() {
