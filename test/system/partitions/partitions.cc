@@ -24,14 +24,58 @@
 #include <unistd.h>
 #include "eventql/util/io/fileutil.h"
 #include "eventql/util/random.h"
+#include "eventql/util/SHA1.h"
+#include "eventql/util/UnixTime.h"
+#include "eventql/util/csv/CSVOutputStream.h"
 #include "partitions.h"
 #include "../../automate/cluster.h"
 #include "../../automate/query.h"
+#include "../../automate/tables.h"
 #include "../../test_runner.h"
 
 namespace eventql {
 namespace test {
 namespace system_partitions {
+
+static void generate_pageviews_csv(const std::string& file, size_t row_count) {
+  if (FileUtil::exists(file)) {
+    return;
+  }
+
+  CSVOutputStream os(FileOutputStream::openFile(file), ",");
+
+  os.appendRow({
+    "time",
+    "sid",
+    "request_id",
+    "url",
+    "user_agent",
+    "referrer",
+    "product_id",
+    "time_on_page",
+    "screen_width",
+    "screen_height",
+    "is_logged_in"
+  });
+
+  uint64_t time_epoch = 1488211057000000;
+
+  for (size_t i = 0; i < row_count; ++i) {
+    os.appendRow({
+      UnixTime(time_epoch + i * 250000).toString(),        // time
+      std::to_string(i % 100),                             // sid
+      std::to_string(i),                                   // request_id
+      "/",                                                 // url
+      "MyUserAgent",                                       // user_agent
+      "http://example.com",                                // referrer
+      "1234",                                              // product_id
+      "1.42",                                              // time_on_page
+      "1440",                                              // screen_width
+      "900",                                               // screen_height
+      "false"                                              // is_logged_in
+    });
+  }
+}
 
 static void setup_tests(TestBundle* test_bundle, const std::string& id_prefix) {
   {
@@ -69,6 +113,47 @@ static void setup_tests(TestBundle* test_bundle, const std::string& id_prefix) {
     };
     test_bundle->test_cases.emplace_back(t);
   }
+
+  {
+    TestCase t;
+    t.test_id = id_prefix + "004";
+    t.description = "Import table data from CSV: pageviews_with_pkey";
+    t.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
+    t.fun = [] (TestContext* ctx) -> bool {
+      generate_pageviews_csv(
+          "test/system/partitions/pageviews_10m.gen.csv",
+          10000000);
+
+      ImportTableOpts opts;
+      opts.host = "localhost";
+      opts.port = "9175";
+      opts.database = "test";
+      opts.table = "pageviews_with_pkey";
+      opts.input_file = "test/system/partitions/pageviews_10m.gen.csv";
+
+      importTable(ctx, opts);
+      return true;
+    };
+    test_bundle->test_cases.emplace_back(t);
+  }
+
+  {
+    TestCase t;
+    t.test_id = id_prefix + "005";
+    t.description = "Test: test_count_pageviews_with_pkey.sql";
+    t.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
+    t.fun = [] (TestContext* ctx) -> bool {
+      executeTestQuery(
+          ctx,
+          "test/system/partitions/test_count_pageviews_with_pkey.sql",
+          "localhost",
+          "9175",
+          "test");
+
+      return true;
+    };
+    test_bundle->test_cases.emplace_back(t);
+  }
 }
 
 void setup_tests(TestRepository* test_repo) {
@@ -91,6 +176,7 @@ void setup_tests(TestRepository* test_repo) {
     test_repo->addTestBundle(t);
   }
 }
+
 } // namespace unit
 } // namespace test
 } // namespace eventql

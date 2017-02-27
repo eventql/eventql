@@ -1,5 +1,7 @@
 .libs
 evql-test
 test.log
+*.actual.result.txt
+*.gen.csv
 sql/*.actual.result.txt
 system/basic_sql/*.actual.result.txt
