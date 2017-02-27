@@ -111,6 +111,7 @@ protected:
   ASTNode* tableName();
   ASTNode* dropStatement();
   ASTNode* dropTableStatement();
+  ASTNode* dropPartitionStatement();
   ASTNode* insertStatement();
   ASTNode* insertIntoStatement();
   ASTNode* insertColumnList();

@@ -671,13 +671,25 @@ ASTNode* Parser::createPartitionStatement() {
 }
 
 ASTNode* Parser::dropStatement() {
-  return dropTableStatement();
+  consumeToken();
+  switch (cur_token_->getType()) {
+    case Token::T_TABLE:
+      consumeToken();
+      return dropTableStatement();
+    case Token::T_PARTITION:
+      consumeToken();
+      return dropPartitionStatement();
+    default:
+      RAISEF(
+        kParseError,
+        "unexpected token $0$1$2, expected TABLE or PARTITION",
+          Token::getTypeName(cur_token_->getType()),
+          cur_token_->getString().size() > 0 ? ": " : "",
+          cur_token_->getString().c_str());
+  }
 }
 
 ASTNode* Parser::dropTableStatement() {
-  consumeToken();
-  expectAndConsume(Token::T_TABLE);
-
   auto drop_table = new ASTNode(ASTNode::T_DROP_TABLE);
   drop_table->appendChild(tableName());
 
@@ -686,6 +698,27 @@ ASTNode* Parser::dropTableStatement() {
   }
 
   return drop_table;
+}
+
+ASTNode* Parser::dropPartitionStatement() {
+  auto drop_partition = new ASTNode(ASTNode::T_DROP_PARTITION);
+  auto name = new ASTNode(ASTNode::T_PARTITION_NAME);
+  name->setToken(cur_token_);
+  drop_partition->appendChild(name);
+  consumeToken();
+
+  expectAndConsume(Token::T_FROM);
+  if (*cur_token_ == Token::T_TABLE) {
+    consumeToken();
+  }
+
+  drop_partition->appendChild(tableName());
+
+  if (*cur_token_ == Token::T_SEMICOLON) {
+    consumeToken();
+  }
+
+  return drop_partition;
 }
 
 ASTNode* Parser::insertStatement() {

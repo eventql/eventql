@@ -1,4 +1,4 @@
-5.2.11 DESCRIBE SERVERS
+5.2.12 DESCRIBE SERVERS
 ===============================
 
     DESCRIBE SERVERS

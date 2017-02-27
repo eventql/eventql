@@ -387,6 +387,9 @@ void ASTNode::debugPrint(int indent /* = 0 */) const {
     case T_CREATE_PARTITION:
       printf("- T_CREATE_PARTITION");
       break;
+    case T_DROP_PARTITION:
+      printf("- T_DROP_PARTITION");
+      break;
     case T_PARTITION_NAME:
       printf("- T_PARTITOIN_NAME");
       break;

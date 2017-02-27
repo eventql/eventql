@@ -13,4 +13,5 @@ The following SQL statements are currently supported.
   - [DESCRIBE](./describe/) shows the structure of a table
   - [CREATE PARTITION](./create-partition/) is used to create a new partition
   - [DESCRIBE PARTITIONS](./describe-partitions/) list the table's partitions
+  - [DROP PARTITION](./drop-partition/) is used to drop an existing partition
 

@@ -680,6 +680,13 @@
             visible_in_toc: true
             source: "/sql/statements/describe_partitions.md"
           -
+            url: "/sql/statements/drop-partition"
+            title: "DROP PARTITION"
+            type: page
+            visible_in_menu: true
+            visible_in_toc: true
+            source: "/sql/statements/drop_partition.md"
+          -
             url: "/sql/statements/describe-servers"
             title: "DESCRIBE SERVERS"
             type: page
