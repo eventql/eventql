@@ -26,8 +26,11 @@ noinst_PROGRAMS= evql-test
 
 evql_test_SOURCES = \
     evql_test.cc \
+    automate/tables.h \
+    automate/tables.cc \
     automate/process.h \
     automate/process.cc \
+    automate/query.h \
     automate/query.cc \
     unit_tests.cc \
     unit/metadata_store.cc \

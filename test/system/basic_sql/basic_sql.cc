@@ -27,6 +27,7 @@
 #include "basic_sql.h"
 #include "../../automate/process.h"
 #include "../../automate/query.h"
+#include "../../automate/tables.h"
 #include "../../test_runner.h"
 
 namespace eventql {
@@ -51,40 +52,61 @@ static bool init_cluster_standalone(TestContext* ctx) {
   return true;
 }
 
-static bool init_cluster_tables(TestContext* ctx) {
-  std::set<std::string> tables{ "pageviews", "customers" };
-  for (const auto& tbl: tables) {
-    Process::runOrDie(
-        FileUtil::joinPaths(ctx->bindir, "evql"),
-        {
-          "-d", "test",
-          "-f", "./test/system/basic_sql/create_" + tbl + ".sql"
-        },
-        {},
-        "evql-create-table",
-        ctx->log_fd);
+static void setup_tests(TestBundle* test_bundle, const std::string& id_prefix) {
+  {
+    TestCase t;
+    t.test_id = id_prefix + "002";
+    t.description = "Create table: pageviews";
+    t.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
+    t.fun = [] (TestContext* ctx) -> bool {
+      executeQueryAndExpectSuccess(
+          ctx,
+          "./test/system/basic_sql/create_pageviews.sql",
+          "localhost",
+          "9175",
+          "test");
+
+      return true;
+    };
+    test_bundle->test_cases.emplace_back(t);
   }
 
-  return true;
-}
+  {
+    TestCase t;
+    t.test_id = id_prefix + "003";
+    t.description = "Create table: customers";
+    t.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
+    t.fun = [] (TestContext* ctx) -> bool {
+      executeQueryAndExpectSuccess(
+          ctx,
+          "./test/system/basic_sql/create_customers.sql",
+          "localhost",
+          "9175",
+          "test");
 
-static bool import_cluster_data(TestContext* ctx) {
-  Process::runOrDie(
-      FileUtil::joinPaths(ctx->bindir, "evqlctl"),
-      {
-        "table-import",
-        "--host", "localhost",
-        "--port", "9175",
-        "--database", "test",
-        "--table", "customers",
-        "--format", "csv",
-        "--file", FileUtil::joinPaths(ctx->srcdir, "test/sql_testdata/testtbl2.csv")
-      },
-      {},
-      "evql-import-customers-table",
-      ctx->log_fd);
+      return true;
+    };
+    test_bundle->test_cases.emplace_back(t);
+  }
 
-  return true;
+  {
+    TestCase t;
+    t.test_id = id_prefix + "004";
+    t.description = "Import table: customers";
+    t.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
+    t.fun = [] (TestContext* ctx) -> bool {
+      ImportTableOpts opts;
+      opts.host = "localhost";
+      opts.port = "9175";
+      opts.database = "test";
+      opts.table = "customers";
+      opts.input_file = "test/sql_testdata/testtbl2.csv";
+
+      importTable(ctx, opts);
+      return true;
+    };
+    test_bundle->test_cases.emplace_back(t);
+  }
 }
 
 void setup_tests(TestRepository* test_repo) {
@@ -99,18 +121,8 @@ void setup_tests(TestRepository* test_repo) {
       .fun = &init_cluster_standalone,
       .suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE }
     });
-    t.test_cases.emplace_back(TestCase {
-      .test_id = "SYS-BASICSQL-STANDALONE-002",
-      .description = "Create tables",
-      .fun = &init_cluster_tables,
-      .suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE }
-    });
-    t.test_cases.emplace_back(TestCase {
-      .test_id = "SYS-BASICSQL-STANDALONE-003",
-      .description = "Import table data from CSV",
-      .fun = &import_cluster_data,
-      .suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE }
-    });
+
+    setup_tests(&t, "SYS-BASICSQL-STANDALONE-");
     test_repo->addTestBundle(t);
   }
 }

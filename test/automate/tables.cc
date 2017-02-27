@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2017 DeepCortex GmbH <legal@eventql.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Laura Schlimmer <laura@eventql.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -21,25 +21,31 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/eventql.h"
+#include <iostream>
+#include <unistd.h>
+#include "tables.h"
+#include "eventql/util/io/fileutil.h"
 #include "../test_runner.h"
 
 namespace eventql {
 namespace test {
 
-void executeTestQuery(
-    TestContext* ctx,
-    const std::string& query_path,
-    const std::string& host,
-    const std::string& port,
-    const std::string& database);
-
-void executeQueryAndExpectSuccess(
-    TestContext* ctx,
-    const std::string& query_path,
-    const std::string& host,
-    const std::string& port,
-    const std::string& database);
+void importTable(TestContext* ctx, const ImportTableOpts& opts) {
+  Process::runOrDie(
+      FileUtil::joinPaths(ctx->bindir, "evqlctl"),
+      {
+        "table-import",
+        "--host", opts.host,
+        "--port", opts.port,
+        "--database", opts.database,
+        "--table", opts.table,
+        "--format", "csv",
+        "--file", FileUtil::joinPaths(ctx->srcdir, opts.input_file)
+      },
+      {},
+      "evqlctl-import-table<" + opts.input_file + ">",
+      ctx->log_fd);
+}
 
 } // namespace test
 } // namespace eventql

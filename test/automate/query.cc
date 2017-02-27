@@ -55,13 +55,13 @@ void executeTestQuery(
       FileUtil::joinPaths(ctx->bindir, "evql"),
       {
         "--file", sql_file_path,
-        "--host", "localhost",
+        "--host", host,
         "--port", port,
         "--database", database,
         "--output_file", output_file_path
       },
       {},
-      "evql-test-query",
+      "evql-test-query<" + query_id + ">",
       ctx->log_fd);
 
   auto result_file_path = FileUtil::joinPaths(
@@ -93,6 +93,27 @@ void executeTestQuery(
   if (result_is->readLine(&result_line)) {
     RAISE(kRuntimeError, "not enough rows returned");
   }
+}
+
+void executeQueryAndExpectSuccess(
+    TestContext* ctx,
+    const std::string& query_path,
+    const std::string& host,
+    const std::string& port,
+    const std::string& database) {
+  auto sql_file_path = FileUtil::joinPaths(ctx->srcdir, query_path);
+
+  Process::runOrDie(
+      FileUtil::joinPaths(ctx->bindir, "evql"),
+      {
+        "--file", sql_file_path,
+        "--host", host,
+        "--port", port,
+        "--database", database
+      },
+      {},
+      "evql<" + query_path + ">",
+      ctx->log_fd);
 }
 
 } // namespace test

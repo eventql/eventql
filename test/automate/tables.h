@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2017 DeepCortex GmbH <legal@eventql.io>
+ * Copyright (c) 2016 DeepCortex GmbH <legal@eventql.io>
  * Authors:
- *   - Laura Schlimmer <laura@eventql.io>
+ *   - Paul Asmuth <paul@eventql.io>
  *
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License ("the license") as
@@ -21,25 +21,24 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#include "eventql/eventql.h"
-#include "../test_runner.h"
+#pragma once
+#include <string>
+#include <vector>
 
 namespace eventql {
 namespace test {
+struct TestContext;
 
-void executeTestQuery(
-    TestContext* ctx,
-    const std::string& query_path,
-    const std::string& host,
-    const std::string& port,
-    const std::string& database);
+struct ImportTableOpts {
+  std::string host;
+  std::string port;
+  std::string database;
+  std::string table;
+  std::string input_file;
+};
 
-void executeQueryAndExpectSuccess(
-    TestContext* ctx,
-    const std::string& query_path,
-    const std::string& host,
-    const std::string& port,
-    const std::string& database);
+void importTable(TestContext* ctx, const ImportTableOpts& opts);
+
 
 } // namespace test
 } // namespace eventql
