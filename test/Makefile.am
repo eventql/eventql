@@ -28,7 +28,7 @@ evql_test_SOURCES = \
     evql_test.cc \
     automate/process.h \
     automate/process.cc \
-    automate/automate_query.cc \
+    automate/query.cc \
     unit_tests.cc \
     unit/metadata_store.cc \
     unit/metadata_file.cc \

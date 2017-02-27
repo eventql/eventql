@@ -47,15 +47,14 @@ void executeTestQuery(
       src_path,
       StringUtil::format("$0$1", query_id, kOutputFileEnding));
 
-  auto input_file_path = FileUtil::joinPaths(
+  auto sql_file_path = FileUtil::joinPaths(
       src_path,
       StringUtil::format("$0$1", query_id, kSQLFileEnding));
-  auto query_buf = FileUtil::read(input_file_path);
 
   Process::runOrDie(
       FileUtil::joinPaths(ctx->bindir, "evql"),
       {
-        "--exec", query_buf.toString(),
+        "--file", sql_file_path,
         "--host", "localhost",
         "--port", port,
         "--database", database,
