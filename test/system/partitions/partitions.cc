@@ -143,12 +143,141 @@ static void setup_tests(TestBundle* test_bundle, const std::string& id_prefix) {
     t.description = "Test: test_count_pageviews_with_pkey.sql";
     t.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
     t.fun = [] (TestContext* ctx) -> bool {
-      executeTestQuery(
+      executeTestQueryWithRetries(
           ctx,
           "test/system/partitions/test_count_pageviews_with_pkey.sql",
           "localhost",
           "9175",
+          "test",
+          300);
+
+      return true;
+    };
+    test_bundle->test_cases.emplace_back(t);
+  }
+
+  {
+    TestCase t;
+    t.test_id = id_prefix + "006";
+    t.description = "Test: test_select_row_1337_from_pageviews_with_pkey.sql";
+    t.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
+    t.fun = [] (TestContext* ctx) -> bool {
+      executeTestQuery(
+          ctx,
+          "test/system/partitions/test_select_row_1337_from_pageviews_with_pkey.sql",
+          "localhost",
+          "9175",
           "test");
+
+      return true;
+    };
+    test_bundle->test_cases.emplace_back(t);
+  }
+
+  {
+    TestCase t;
+    t.test_id = id_prefix + "007";
+    t.description = "Test: test_update_row_1337_in_pageviews_with_pkey.sql";
+    t.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
+    t.fun = [] (TestContext* ctx) -> bool {
+      executeQueryAndExpectSuccess(
+          ctx,
+          "test/system/partitions/test_update_row_1337_in_pageviews_with_pkey.sql",
+          "localhost",
+          "9175",
+          "test");
+
+      return true;
+    };
+    test_bundle->test_cases.emplace_back(t);
+  }
+
+  {
+    TestCase t;
+    t.test_id = id_prefix + "008";
+    t.description = "Test: test_count_pageviews_with_pkey.sql";
+    t.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
+    t.fun = [] (TestContext* ctx) -> bool {
+      executeTestQueryWithRetries(
+          ctx,
+          "test/system/partitions/test_count_pageviews_with_pkey.sql",
+          "localhost",
+          "9175",
+          "test",
+          300);
+
+      return true;
+    };
+    test_bundle->test_cases.emplace_back(t);
+  }
+
+  {
+    TestCase t;
+    t.test_id = id_prefix + "009";
+    t.description = "Test: test_select_row_1337_from_pageviews_with_pkey_after_update.sql";
+    t.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
+    t.fun = [] (TestContext* ctx) -> bool {
+      executeTestQuery(
+          ctx,
+          "test/system/partitions/test_select_row_1337_from_pageviews_with_pkey_after_update.sql",
+          "localhost",
+          "9175",
+          "test");
+
+      return true;
+    };
+    test_bundle->test_cases.emplace_back(t);
+  }
+
+  {
+    TestCase t;
+    t.test_id = id_prefix + "010";
+    t.description = "test: test_insert_into_pageviews_with_pkey.sql";
+    t.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
+    t.fun = [] (TestContext* ctx) -> bool {
+      executeQueryAndExpectSuccess(
+          ctx,
+          "test/system/partitions/test_insert_into_pageviews_with_pkey.sql",
+          "localhost",
+          "9175",
+          "test");
+
+      return true;
+    };
+    test_bundle->test_cases.emplace_back(t);
+  }
+
+  {
+    TestCase t;
+    t.test_id = id_prefix + "011";
+    t.description = "Test: test_select_new_row_from_pageviews_with_pkey.sql";
+    t.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
+    t.fun = [] (TestContext* ctx) -> bool {
+      executeTestQuery(
+          ctx,
+          "test/system/partitions/test_select_new_row_from_pageviews_with_pkey.sql",
+          "localhost",
+          "9175",
+          "test");
+
+      return true;
+    };
+    test_bundle->test_cases.emplace_back(t);
+  }
+
+  {
+    TestCase t;
+    t.test_id = id_prefix + "012";
+    t.description = "test: test_count_pageviews_with_pkey_after_insert.sql";
+    t.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
+    t.fun = [] (TestContext* ctx) -> bool {
+      executeTestQueryWithRetries(
+          ctx,
+          "test/system/partitions/test_count_pageviews_with_pkey_after_insert.sql",
+          "localhost",
+          "9175",
+          "test",
+          300);
 
       return true;
     };

@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <unistd.h>
 #include "eventql/eventql.h"
 #include "eventql/util/io/fileutil.h"
 #include "eventql/util/io/inputstream.h"
@@ -87,6 +88,29 @@ void executeTestQuery(
 
   if (result_is->readLine(&result_line)) {
     RAISE(kRuntimeError, "not enough rows returned");
+  }
+}
+
+void executeTestQueryWithRetries(
+    TestContext* ctx,
+    const std::string& query_path,
+    const std::string& host,
+    const std::string& port,
+    const std::string& database,
+    size_t retry_count) {
+  while (retry_count > 0) {
+    --retry_count;
+
+    try {
+      executeTestQuery(ctx, query_path, host, port, database);
+      return;
+    } catch (const std::exception& e) {
+      if (retry_count == 0) {
+        throw std::runtime_error(e.what());
+      } else {
+        usleep(1000000);
+      }
+    }
   }
 }
 
