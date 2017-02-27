@@ -1,4 +1,4 @@
-5.2.8 DESCRIBE PARTITIONS
+5.2.10 DESCRIBE PARTITIONS
 ===============================
 
     DESCRIBE PARTITIONS table_name
