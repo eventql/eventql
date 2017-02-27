@@ -26,6 +26,7 @@
 #include "eventql/util/random.h"
 #include "basic_sql.h"
 #include "../../automate/process.h"
+#include "../../automate/automate_query.h"
 #include "../../test_runner.h"
 
 namespace eventql {
