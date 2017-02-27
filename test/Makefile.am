@@ -46,8 +46,11 @@ evql_test_SOURCES = \
     system/basic_sql/basic_sql.cc \
     system/partitions/partitions.h \
     system/partitions/partitions.cc \
+    sql_tests.h \
     sql_tests.cc \
+    test_repository.h \
     test_repository.cc \
+    test_runner.h \
     test_runner.cc
 
 evql_test_LDADD = \
