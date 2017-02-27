@@ -26,6 +26,8 @@ noinst_PROGRAMS= evql-test
 
 evql_test_SOURCES = \
     evql_test.cc \
+    automate/cluster.h \
+    automate/cluster.cc \
     automate/tables.h \
     automate/tables.cc \
     automate/process.h \

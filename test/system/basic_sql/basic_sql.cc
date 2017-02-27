@@ -23,8 +23,8 @@
  */
 #include <unistd.h>
 #include "eventql/util/io/fileutil.h"
-#include "eventql/util/random.h"
 #include "basic_sql.h"
+#include "../../automate/cluster.h"
 #include "../../automate/process.h"
 #include "../../automate/query.h"
 #include "../../automate/tables.h"
@@ -33,24 +33,6 @@
 namespace eventql {
 namespace test {
 namespace system_basic_sql {
-
-static bool init_cluster_standalone(TestContext* ctx) {
-  std::string datadir = "/tmp/__evql_test_" + Random::singleton()->hex64();
-  FileUtil::mkdir_p(datadir);
-
-  std::unique_ptr<Process> evqld_proc(new Process());
-  evqld_proc->logDebug("evqld-standalone", ctx->log_fd);
-  evqld_proc->start(
-      FileUtil::joinPaths(ctx->bindir, "evqld"),
-      std::vector<std::string> {
-        "--standalone",
-        "--datadir", datadir
-      });
-
-  ctx->background_procs["evqld-standalone"] = std::move(evqld_proc);
-  usleep(500000); // FIXME give the process time to start
-  return true;
-}
 
 static void setup_tests(TestBundle* test_bundle, const std::string& id_prefix) {
   {
@@ -115,12 +97,15 @@ void setup_tests(TestRepository* test_repo) {
     TestBundle t;
     t.logfile_path = "test/system/basic_sql/test.log";
 
-    t.test_cases.emplace_back(TestCase {
-      .test_id = "SYS-BASICSQL-STANDALONE-001",
-      .description = "Start & create cluster",
-      .fun = &init_cluster_standalone,
-      .suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE }
-    });
+    TestCase tc;
+    tc.test_id = "SYS-BASICSQL-STANDALONE-001";
+    tc.description = "Start & create cluster";
+    tc.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
+    tc.fun = [] (TestContext* ctx) -> bool {
+      startStandaloneCluster(ctx);
+      return true;
+    };
+    t.test_cases.emplace_back(tc);
 
     setup_tests(&t, "SYS-BASICSQL-STANDALONE-");
     test_repo->addTestBundle(t);
