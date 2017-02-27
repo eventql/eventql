@@ -342,6 +342,11 @@ int main(int argc, const char** argv) {
     cfg_builder.setProperty("client.batch", "true");
   }
 
+  if (flags.isSet("quiet")) {
+    cfg_builder.setProperty("client.quiet", "true");
+  }
+
+
   /* cli config */
   eventql::cli::CLIConfig cli_cfg(cfg_builder.getConfig());
 
