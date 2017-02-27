@@ -264,7 +264,7 @@ int main(int argc, const char** argv) {
         "   --auth_token <token>      Set the auth token (if required)\n"
         "   -c, --config <file>       Load config from file\n"
         "   -C name=value             Define a config value on the command line\n"
-        "   -o --output_file <file>      Save the output to a file\n"
+        "   -o --output_file <file>   Save the output to a file\n"
         "   -B, --batch               Run in batch mode (streaming result output)\n"
         "   -q, --quiet               Be quiet (disables query progress)\n"
         "   --verbose                 Print debug output to STDERR\n"
