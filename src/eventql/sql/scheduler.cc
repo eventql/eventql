@@ -426,6 +426,13 @@ ScopedPtr<ResultCursor> DefaultScheduler::executeCreatePartition(
   RAISE(kNotYetImplementedError, "nyi");
 }
 
+ScopedPtr<ResultCursor> DefaultScheduler::executeDropPartition(
+    Transaction* txn,
+    ExecutionContext* execution_context,
+    RefPtr<DropPartitionNode> drop_partition) {
+  RAISE(kNotYetImplementedError, "nyi");
+}
+
 ScopedPtr<ResultCursor> DefaultScheduler::executeUseDatabase(
     Transaction* txn,
     ExecutionContext* execution_context,
@@ -577,6 +584,13 @@ ScopedPtr<ResultCursor> DefaultScheduler::execute(
         query_plan->getTransaction(),
         execution_context,
         stmt.asInstanceOf<CreatePartitionNode>());
+  }
+
+  if (stmt.isInstanceOf<DropPartitionNode>()) {
+    return executeDropPartition(
+        query_plan->getTransaction(),
+        execution_context,
+        stmt.asInstanceOf<DropPartitionNode>());
   }
 
   if (stmt.isInstanceOf<UseDatabaseNode>()) {
