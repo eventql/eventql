@@ -34,6 +34,7 @@ evql_test_SOURCES = \
     automate/process.cc \
     automate/query.h \
     automate/query.cc \
+    unit_test.h \
     unit_tests.cc \
     unit/metadata_store.cc \
     unit/metadata_file.cc \
