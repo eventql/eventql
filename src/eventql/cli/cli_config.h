@@ -71,6 +71,8 @@ public:
 
   uint64_t getHistoryMaxSize() const;
 
+  Option<String> getOutputFile() const;
+
 protected:
   RefPtr<ProcessConfig> cfg_;
   String default_user_;

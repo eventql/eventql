@@ -2,3 +2,4 @@
 evql-test
 test.log
 sql/*.actual.result.txt
+system/basic_sql/*.actual.result.txt
