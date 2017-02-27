@@ -226,6 +226,10 @@ public:
       Transaction* txn,
       ASTNode* ast);
 
+  QueryTreeNode* buildDropPartition(
+      Transaction* txn,
+      ASTNode* ast);
+
   QueryTreeNode* buildUseDatabase(
       Transaction* txn,
       ASTNode* ast);

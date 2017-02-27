@@ -689,6 +689,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/qtree/nodes/create_database.h \
     eventql/sql/qtree/nodes/create_partition.cc \
     eventql/sql/qtree/nodes/create_partition.h \
+    eventql/sql/qtree/nodes/drop_partition.cc \
+    eventql/sql/qtree/nodes/drop_partition.h \
     eventql/sql/qtree/nodes/use_database.cc \
     eventql/sql/qtree/nodes/use_database.h \
     eventql/sql/qtree/nodes/drop_table.cc \
