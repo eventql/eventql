@@ -222,6 +222,10 @@ public:
       Transaction* txn,
       ASTNode* ast);
 
+  QueryTreeNode* buildCreatePartition(
+      Transaction* txn,
+      ASTNode* ast);
+
   QueryTreeNode* buildUseDatabase(
       Transaction* txn,
       ASTNode* ast);

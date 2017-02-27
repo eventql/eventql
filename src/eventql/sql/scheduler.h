@@ -31,6 +31,7 @@
 #include <eventql/sql/runtime/ValueExpression.h>
 #include <eventql/sql/scheduler/execution_context.h>
 #include <eventql/sql/qtree/nodes/create_database.h>
+#include <eventql/sql/qtree/nodes/create_partition.h>
 #include <eventql/sql/qtree/nodes/use_database.h>
 #include <eventql/sql/qtree/nodes/alter_table.h>
 #include <eventql/sql/qtree/nodes/create_table.h>
@@ -104,6 +105,11 @@ protected:
       Transaction* txn,
       ExecutionContext* execution_context,
       RefPtr<CreateDatabaseNode> create_database);
+
+  virtual ScopedPtr<ResultCursor> executeCreatePartition(
+      Transaction* txn,
+      ExecutionContext* execution_context,
+      RefPtr<CreatePartitionNode> create_partition);
 
   virtual ScopedPtr<ResultCursor> executeUseDatabase(
       Transaction* txn,

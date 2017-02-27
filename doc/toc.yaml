@@ -659,6 +659,20 @@
             visible_in_toc: true
             source: "/sql/statements/describe.md"
           -
+            url: "/sql/statements/show-tables"
+            title: "SHOW TABLES"
+            type: page
+            visible_in_menu: true
+            visible_in_toc: true
+            source: "/sql/statements/show_tables.md"
+          -
+            url: "/sql/statements/create-partition"
+            title: "CREATE PARTITION"
+            type: page
+            visible_in_menu: true
+            visible_in_toc: true
+            source: "/sql/statements/create_partition.md"
+          -
             url: "/sql/statements/describe-partitions"
             title: "DESCRIBE PARTITIONS"
             type: page
@@ -672,13 +686,6 @@
             visible_in_menu: true
             visible_in_toc: true
             source: "/sql/statements/describe_servers.md"
-          -
-            url: "/sql/statements/show-tables"
-            title: "SHOW TABLES"
-            type: page
-            visible_in_menu: true
-            visible_in_toc: true
-            source: "/sql/statements/show_tables.md"
     -
       url: "/mapreduce"
       title: "MapReduce Queries"

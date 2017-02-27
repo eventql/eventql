@@ -41,6 +41,9 @@ and functions you'd expect (including JOINs) are implemented.
       <li>
         <a href="/documentation/sql/statements/show-tables">SHOW TABLES</a>
       </li>
+      <li>
+        <a href="/documentation/sql/statements/create-partition">CREATE PARTITION</a>
+      </li>
     </ul>
   </li>
 </ul>
