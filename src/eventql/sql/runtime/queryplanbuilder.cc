@@ -43,6 +43,7 @@
 #include <eventql/sql/qtree/ValueExpressionNode.h>
 #include <eventql/sql/qtree/JoinNode.h>
 #include <eventql/sql/qtree/nodes/create_database.h>
+#include <eventql/sql/qtree/nodes/create_partition.h>
 #include <eventql/sql/qtree/nodes/use_database.h>
 #include <eventql/sql/qtree/nodes/alter_table.h>
 #include <eventql/sql/qtree/nodes/create_table.h>
@@ -140,6 +141,10 @@ RefPtr<QueryTreeNode> QueryPlanBuilder::build(
     return node;
   }
 
+  if ((node = buildCreatePartition(txn, ast)) != nullptr) {
+    return node;
+  }
+
   if ((node = buildUseDatabase(txn, ast)) != nullptr) {
     return node;
   }
@@ -169,6 +174,7 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
       case ASTNode::T_CLUSTER_SHOW_SERVERS:
       case ASTNode::T_CREATE_TABLE:
       case ASTNode::T_CREATE_DATABASE:
+      case ASTNode::T_CREATE_PARTITION:
       case ASTNode::T_USE_DATABASE:
       case ASTNode::T_DROP_TABLE:
       case ASTNode::T_INSERT_INTO:
@@ -2042,6 +2048,30 @@ QueryTreeNode* QueryPlanBuilder::buildCreateDatabase(
   }
 
   return new CreateDatabaseNode(db_name->getToken()->getString());
+}
+
+QueryTreeNode* QueryPlanBuilder::buildCreatePartition(
+    Transaction* txn,
+    ASTNode* ast) {
+  if (!(*ast == ASTNode::T_CREATE_PARTITION) || ast->getChildren().size() != 2) {
+    return nullptr;
+  }
+
+  auto partition_name = ast->getChildren()[0];
+  if (partition_name->getType() != ASTNode::T_PARTITION_NAME ||
+      partition_name->getToken() == nullptr) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  auto tbl_name = ast->getChildren()[1];
+  if (tbl_name->getType() != ASTNode::T_TABLE_NAME ||
+      tbl_name->getToken() == nullptr) {
+    RAISE(kRuntimeError, "corrupt AST");
+  }
+
+  return new CreatePartitionNode(
+      partition_name->getToken()->getString(),
+      tbl_name->getToken()->getString());
 }
 
 QueryTreeNode* QueryPlanBuilder::buildUseDatabase(

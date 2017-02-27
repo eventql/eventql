@@ -35,6 +35,7 @@
 #include "eventql/sql/qtree/QueryTreeUtil.h"
 #include "eventql/sql/qtree/qtree_coder.h"
 #include "eventql/sql/qtree/nodes/create_database.h"
+#include "eventql/sql/qtree/nodes/create_partition.h"
 #include "eventql/sql/qtree/nodes/use_database.h"
 #include "eventql/sql/qtree/nodes/alter_table.h"
 #include "eventql/sql/qtree/nodes/create_table.h"
@@ -1161,6 +1162,29 @@ bool test_sql_qtree_CreateTableWithPrimaryWithoutPartitionKey(TestContext* ctx) 
   return true;
 }
 
+// UNIT-QTREE-026
+bool test_sql_qtree_CreatePartition(TestContext* ctx) {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  String query = "CREATE PARTITION my_part ON test";
+  csql::Parser parser;
+  parser.parse(query.data(), query.size());
+
+  auto qtree_builder = runtime->queryPlanBuilder();
+  Vector<RefPtr<QueryTreeNode>> qtrees = qtree_builder->build(
+      txn.get(),
+      parser.getStatements(),
+      txn->getTableProvider());
+
+  EXPECT_EQ(qtrees.size(), 1u);
+  RefPtr<CreatePartitionNode> qtree = qtrees[0].asInstanceOf<CreatePartitionNode>();
+  EXPECT_EQ(qtree->getPartitionName(), "my_part");
+  EXPECT_EQ(qtree->getTableName(), "test");
+
+  return true;
+}
+
 void setup_unit_sql_qtree_tests(TestRepository* repo) {
   SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-001", sql_qtree, ExtractEqualsConstraint);
   SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-002", sql_qtree, ExtractNotEqualsConstraint);
@@ -1186,6 +1210,7 @@ void setup_unit_sql_qtree_tests(TestRepository* repo) {
   SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-023", sql_qtree, ClusterShowServers);
   SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-024", sql_qtree, CreateTableWithPrimaryAndPartitionKey);
   SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-025", sql_qtree, CreateTableWithPrimaryWithoutPartitionKey);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-026", sql_qtree, CreatePartition);
 }
 
 } // namespace unit
