@@ -28,6 +28,7 @@
 #include "test_repository.h"
 #include "test_runner.h"
 #include "system/basic_sql/basic_sql.h"
+#include "system/partitions/partitions.h"
 
 using namespace eventql::test;
 
@@ -135,6 +136,7 @@ int main(int argc, const char** argv) {
   eventql::test::unit::setup_unit_tests(&test_repo);
   eventql::test::sql::setup_sql_tests(&test_repo);
   eventql::test::system_basic_sql::setup_tests(&test_repo);
+  eventql::test::system_partitions::setup_tests(&test_repo);
 
   /* run tests */
   TestRunner test_runner(&test_repo);
