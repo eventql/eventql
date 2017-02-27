@@ -34,6 +34,14 @@ void executeTestQuery(
     const std::string& port,
     const std::string& database);
 
+void executeTestQueryWithRetries(
+    TestContext* ctx,
+    const std::string& query_path,
+    const std::string& host,
+    const std::string& port,
+    const std::string& database,
+    size_t retry_count);
+
 void executeQueryAndExpectSuccess(
     TestContext* ctx,
     const std::string& query_path,

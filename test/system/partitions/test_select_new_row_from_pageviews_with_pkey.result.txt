@@ -1,0 +1,2 @@
+time	sid	request_id	url	user_agent	referrer	product_id	time_on_page	screen_width	screen_height	is_logged_in	
+2017-01-01 12:00:00	99999999	11111111	/blah	OtherUserAgent		1337	0.120000	2000	1000	true	

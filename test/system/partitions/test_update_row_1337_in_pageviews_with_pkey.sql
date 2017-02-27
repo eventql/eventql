@@ -1,0 +1,25 @@
+INSERT INTO pageviews_with_pkey (
+  time,
+  sid,
+  request_id,
+  url,
+  user_agent,
+  referrer,
+  product_id,
+  time_on_page,
+  screen_width,
+  screen_height,
+  is_logged_in,
+) VALUES (
+  "2017-02-27 16:03:11",
+  37,
+  1337,
+  "/otherpath",
+  "MyOtherUserAgent",
+  "http://example.com",
+  1234,
+  1.420000,
+  1440,
+  900,
+  true
+);

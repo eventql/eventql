@@ -21,6 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
+#include <unistd.h>
 #include "eventql/eventql.h"
 #include "eventql/util/io/fileutil.h"
 #include "eventql/util/io/inputstream.h"
@@ -30,26 +31,23 @@
 namespace eventql {
 namespace test {
 
-const std::string kResourcesDirectory = "/test/system/basic_sql";
 const std::string kSQLFileEnding = ".sql";
 const std::string kResultFileEnding = ".result.txt";
 const std::string kOutputFileEnding = ".actual.result.txt";
 
 void executeTestQuery(
     TestContext* ctx,
-    const std::string& query_id,
+    const std::string& query_path,
     const std::string& host,
     const std::string& port,
     const std::string& database) {
-  auto src_path = FileUtil::joinPaths(ctx->srcdir, kResourcesDirectory);
-
-  auto output_file_path = FileUtil::joinPaths(
-      src_path,
-      StringUtil::format("$0$1", query_id, kOutputFileEnding));
-
-  auto sql_file_path = FileUtil::joinPaths(
-      src_path,
-      StringUtil::format("$0$1", query_id, kSQLFileEnding));
+  auto sql_file_path = FileUtil::joinPaths(ctx->srcdir, query_path);
+  auto output_file_path = sql_file_path
+      .substr(0, sql_file_path.size() - kSQLFileEnding.size())
+      + kOutputFileEnding;
+  auto result_file_path = sql_file_path
+      .substr(0, sql_file_path.size() - kSQLFileEnding.size())
+      + kResultFileEnding;
 
   Process::runOrDie(
       FileUtil::joinPaths(ctx->bindir, "evql"),
@@ -61,12 +59,10 @@ void executeTestQuery(
         "--output_file", output_file_path
       },
       {},
-      "evql-test-query<" + query_id + ">",
+      "evql-test-query<" + query_path + ">",
       ctx->log_fd);
 
-  auto result_file_path = FileUtil::joinPaths(
-      src_path,
-      StringUtil::format("$0$1", query_id, kResultFileEnding));
+
   auto result_is = FileInputStream::openFile(result_file_path);
   auto output_is = FileInputStream::openFile(output_file_path);
 
@@ -92,6 +88,29 @@ void executeTestQuery(
 
   if (result_is->readLine(&result_line)) {
     RAISE(kRuntimeError, "not enough rows returned");
+  }
+}
+
+void executeTestQueryWithRetries(
+    TestContext* ctx,
+    const std::string& query_path,
+    const std::string& host,
+    const std::string& port,
+    const std::string& database,
+    size_t retry_count) {
+  while (retry_count > 0) {
+    --retry_count;
+
+    try {
+      executeTestQuery(ctx, query_path, host, port, database);
+      return;
+    } catch (const std::exception& e) {
+      if (retry_count == 0) {
+        throw std::runtime_error(e.what());
+      } else {
+        usleep(1000000);
+      }
+    }
   }
 }
 
