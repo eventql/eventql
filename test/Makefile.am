@@ -34,6 +34,8 @@ evql_test_SOURCES = \
     automate/process.cc \
     automate/query.h \
     automate/query.cc \
+    automate/curl.h \
+    automate/curl.cc \
     unit_test.h \
     unit_tests.cc \
     unit/metadata_store.cc \
@@ -47,6 +49,8 @@ evql_test_SOURCES = \
     system/basic_sql/basic_sql.cc \
     system/partitions/partitions.h \
     system/partitions/partitions.cc \
+    system/http_api/http_api.h \
+    system/http_api/http_api.cc \
     sql_tests.cc \
     test_repository.h \
     test_repository.cc \
