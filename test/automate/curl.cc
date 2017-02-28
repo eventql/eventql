@@ -43,7 +43,6 @@ void executePOST(
   auto result_file_path = abs_test_path + kResultFileEnding;
   auto api_path = FileUtil::joinPaths(kAPIPath, path);
 
-  std::cerr << "BODY -------- " << body << std::endl;
   Process::runOrDie(
       "/usr/bin/curl",
       {
@@ -59,14 +58,46 @@ void executePOST(
       ctx->log_fd);
 
   if (FileUtil::exists(output_file_path)) {
-    //auto result_is = FileInputStream::openFile(result_file_path);
     auto output_is = FileInputStream::openFile(output_file_path);
 
-    std::string line;
+    if (FileUtil::exists(result_file_path)) {
+      auto result_is = FileInputStream::openFile(result_file_path);
+      std::string result_line;
+      std::string output_line;
+      while (output_is->readLine(&output_line)) {
+        if (!result_is->readLine(&result_line)) {
+          RAISE(kRuntimeError, "too many rows returned");
+        }
 
-    while (output_is->readLine(&line)) {
-      std::cerr << line << std::endl;
-      line.clear();
+        StringUtil::chomp(&result_line);
+        StringUtil::chomp(&output_line);
+
+        if (result_line != output_line) {
+          RAISE(
+              kRuntimeError,
+              StringUtil::format("expected $0 to be $1", output_line, result_line));
+        }
+
+        result_line.clear();
+        output_line.clear();
+      }
+
+      if (result_is->readLine(&result_line)) {
+        RAISE(kRuntimeError, "not enough rows returned");
+      }
+
+    } else if (FileUtil::exists(result_file_path)) {
+      auto result_buf = FileUtil::read(result_file_path);
+      if (result_buf.size() > 0) {
+        RAISE(kRuntimeError, "got result but none was excepted");
+      }
+      RAISE(kRuntimeError, "expected result but none was returned");
+
+    } else {
+      auto output_buf = FileUtil::read(output_file_path);
+      if (output_buf.size() > 0) {
+        RAISE(kRuntimeError, "got result but none was excepted");
+      }
     }
   }
 }
