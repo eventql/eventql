@@ -1,4 +1,4 @@
-EventQL v0.4.1 beta;
+EventQL v0.4.1 (v0.4.1, gitc8b3ee9) beta; 2017-01-31 19:53:20 +0000
 
   * Fixed a potential modulo by zero errror in server allocator
 
@@ -8,6 +8,7 @@ EventQL v0.4.1 beta;
 
   * Added the ALTER TABLE SET PROPERTY statement to update the table properties
     enable_async_split, partition_split_threshold and disable_replication
+
 
 EventQL v0.4.0 (v0.4.0-rc0, git267e851) beta; 2016-12-20 13:43:47 +0000
 
