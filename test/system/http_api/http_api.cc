@@ -31,6 +31,75 @@ namespace eventql {
 namespace test {
 namespace system_http_api {
 
+static void setup_tests(TestBundle* test_bundle, const std::string& id_prefix) {
+  {
+    TestCase t;
+    t.test_id = id_prefix + "002";
+    t.description = "Create Table";
+    t.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
+    t.fun = [] (TestContext* ctx) -> bool {
+      std::string body =
+          "{\"database\": \"test\", \
+            \"table_name\": \"pages\", \
+             \"primary_key\": [\"id\"], \
+             \"columns\": [{\
+                \"name\": \"id\", \"type\": \"UINT64\", \
+                \"name\": \"path\", \"type\": \"STRING\" \
+            }] \
+          }";
+
+      executePOST(
+          ctx,
+          "test/system/http_api/create_table",
+          "tables/create",
+          "localhost",
+          "9175",
+          body);
+
+      return true;
+    };
+    test_bundle->test_cases.emplace_back(t);
+  }
+
+  {
+    TestCase t;
+    t.test_id = id_prefix + "003";
+    t.description = "List Tables";
+    t.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
+    t.fun = [] (TestContext* ctx) -> bool {
+      executePOST(
+          ctx,
+          "test/system/http_api/list_tables",
+          "tables/list",
+          "localhost",
+          "9175",
+          "{\"database\": \"test\"}");
+
+      return true;
+    };
+    test_bundle->test_cases.emplace_back(t);
+  }
+
+ // {
+ //   TestCase t;
+ //   t.test_id = id_prefix + "002";
+ //   t.description = "Create table: pageviews";
+ //   t.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
+ //   t.fun = [] (TestContext* ctx) -> bool {
+ //     executePOST(
+ //         ctx,
+ //         "test/system/http_api/test",
+ //         "tables/insert",
+ //         "localhost",
+ //         "9175",
+ //         "[{\"table\": \"customers\", \"database\": \"test\", \"data\": {\"customerid\": 123}}]");
+
+ //     return true;
+ //   };
+ //   test_bundle->test_cases.emplace_back(t);
+ // }
+}
+
 void setup_tests(TestRepository* test_repo) {
 // standalone cluster
   {
@@ -39,24 +108,16 @@ void setup_tests(TestRepository* test_repo) {
 
     TestCase tc;
     tc.test_id = "SYS-HTTPAPI-STANDALONE-001";
-    tc.description = "/api/v1/tables/insert";
+    tc.description = "start";
     tc.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
     tc.fun = [] (TestContext* ctx) -> bool {
       startStandaloneCluster(ctx);
-
-      executePOST(
-          ctx,
-          "test/system/http_api/test",
-          "tables/insert",
-          "localhost",
-          "9175",
-          "[{\"table\": \"customers\", \"database\": \"test\", \"data\": {\"customerid\": 123}}]");
 
       return true;
     };
     t.test_cases.emplace_back(tc);
 
-   // setup_tests(&t, "SYS-BASICSQL-STANDALONE-");
+    setup_tests(&t, "SYS-HTTPAPI-STANDALONE-");
     test_repo->addTestBundle(t);
   }
 }
