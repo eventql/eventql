@@ -35,6 +35,50 @@ static void setup_tests(TestBundle* test_bundle, const std::string& id_prefix) {
   {
     TestCase t;
     t.test_id = id_prefix + "002";
+    t.description = "Execute sql format=json";
+    t.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
+    t.fun = [] (TestContext* ctx) -> bool {
+      executePOST(
+          ctx,
+          "test/system/http_api/execute_sql_json",
+          "sql",
+          "localhost",
+          "9175",
+          "{\"database\": \"test\", \"query\": \"SELECT 1;\"}");
+
+      return true;
+    };
+    test_bundle->test_cases.emplace_back(t);
+  }
+
+  {
+    TestCase t;
+    t.test_id = id_prefix + "003";
+    t.description = "Execute sql format=json_sse";
+    t.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
+    t.fun = [] (TestContext* ctx) -> bool {
+      std::string body = "{ \
+          \"database\": \"test\", \
+          \"query\": \"SELECT 1;\", \
+          \"format\": \"json_sse\" \
+        }";
+
+      executePOST(
+          ctx,
+          "test/system/http_api/execute_sql_jsonsse",
+          "sql",
+          "localhost",
+          "9175",
+          body);
+
+      return true;
+    };
+    test_bundle->test_cases.emplace_back(t);
+  }
+
+  {
+    TestCase t;
+    t.test_id = id_prefix + "004";
     t.description = "Create Table";
     t.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
     t.fun = [] (TestContext* ctx) -> bool {
@@ -63,7 +107,7 @@ static void setup_tests(TestBundle* test_bundle, const std::string& id_prefix) {
 
   {
     TestCase t;
-    t.test_id = id_prefix + "003";
+    t.test_id = id_prefix + "005";
     t.description = "List Tables";
     t.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
     t.fun = [] (TestContext* ctx) -> bool {
@@ -80,28 +124,125 @@ static void setup_tests(TestBundle* test_bundle, const std::string& id_prefix) {
     test_bundle->test_cases.emplace_back(t);
   }
 
- // {
- //   TestCase t;
- //   t.test_id = id_prefix + "002";
- //   t.description = "Create table: pageviews";
- //   t.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
- //   t.fun = [] (TestContext* ctx) -> bool {
- //     executePOST(
- //         ctx,
- //         "test/system/http_api/test",
- //         "tables/insert",
- //         "localhost",
- //         "9175",
- //         "[{\"table\": \"customers\", \"database\": \"test\", \"data\": {\"customerid\": 123}}]");
+  {
+    TestCase t;
+    t.test_id = id_prefix + "006";
+    t.description = "Add table field";
+    t.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
+    t.fun = [] (TestContext* ctx) -> bool {
+      std::string body = "{ \
+          \"database\": \"test\", \
+          \"table\": \"pages\", \
+          \"field_name\": \"title\", \
+          \"field_type\": \"STRING\", \
+          \"repeated\": \"false\", \
+          \"optional\": \"true\" \
+        }";
 
- //     return true;
- //   };
- //   test_bundle->test_cases.emplace_back(t);
- // }
+      executePOST(
+          ctx,
+          "test/system/http_api/add_table_field",
+          "tables/add_field",
+          "localhost",
+          "9175",
+          body);
+
+      return true;
+    };
+    test_bundle->test_cases.emplace_back(t);
+  }
+
+  {
+    TestCase t;
+    t.test_id = id_prefix + "007";
+    t.description = "Remove table field";
+    t.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
+    t.fun = [] (TestContext* ctx) -> bool {
+      std::string body = "{ \
+          \"database\": \"test\", \
+          \"table\": \"pages\", \
+          \"field_name\": \"title\" \
+        }";
+
+      executePOST(
+          ctx,
+          "test/system/http_api/remove_table_field",
+          "tables/remove_field",
+          "localhost",
+          "9175",
+          body);
+
+      return true;
+    };
+    test_bundle->test_cases.emplace_back(t);
+  }
+
+  {
+    TestCase t;
+    t.test_id = id_prefix + "008";
+    t.description = "Insert";
+    t.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
+    t.fun = [] (TestContext* ctx) -> bool {
+      std::string body = "[{ \
+          \"table\": \"pages\", \
+          \"database\": \"test\", \
+          \"data\": {\"id\": 123} \
+        }]";
+
+      executePOST(
+          ctx,
+          "test/system/http_api/insert",
+          "tables/insert",
+          "localhost",
+          "9175",
+          body);
+
+      return true;
+    };
+    test_bundle->test_cases.emplace_back(t);
+  }
+
+  {
+    TestCase t;
+    t.test_id = id_prefix + "009";
+    t.description = "Describe table";
+    t.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
+    t.fun = [] (TestContext* ctx) -> bool {
+      executePOST(
+          ctx,
+          "test/system/http_api/describe_table",
+          "tables/describe",
+          "localhost",
+          "9175",
+          "{\"database\": \"test\", \"table\": \"pages\"}");
+
+      return true;
+    };
+    test_bundle->test_cases.emplace_back(t);
+  }
+
+  {
+    TestCase t;
+    t.test_id = id_prefix + "010";
+    t.description = "Drop table";
+    t.suites = std::set<TestSuite> { TestSuite::WORLD, TestSuite::SMOKE };
+    t.fun = [] (TestContext* ctx) -> bool {
+      executePOST(
+          ctx,
+          "test/system/http_api/drop_table",
+          "tables/drop",
+          "localhost",
+          "9175",
+          "{\"database\": \"test\", \"table\": \"pages\"}");
+
+      return true;
+    };
+    test_bundle->test_cases.emplace_back(t);
+  }
 }
 
 void setup_tests(TestRepository* test_repo) {
-// standalone cluster
+  // standalone cluster
   {
     TestBundle t;
     t.logfile_path = "test/system/http_api/test.log";
