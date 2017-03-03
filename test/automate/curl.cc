@@ -86,18 +86,17 @@ void executePOST(
         RAISE(kRuntimeError, "not enough rows returned");
       }
 
-    } else if (FileUtil::exists(result_file_path)) {
-      auto result_buf = FileUtil::read(result_file_path);
-      if (result_buf.size() > 0) {
-        RAISE(kRuntimeError, "got result but none was excepted");
-      }
-      RAISE(kRuntimeError, "expected result but none was returned");
-
     } else {
       auto output_buf = FileUtil::read(output_file_path);
       if (output_buf.size() > 0) {
-        RAISE(kRuntimeError, "got result but none was excepted");
+        RAISE(kRuntimeError, "got result but none was expected");
       }
+    }
+
+  } else if (FileUtil::exists(result_file_path)) {
+    auto result_buf = FileUtil::read(result_file_path);
+    if (result_buf.size() > 0) {
+      RAISE(kRuntimeError, "expected_result but none was returned");
     }
   }
 }
