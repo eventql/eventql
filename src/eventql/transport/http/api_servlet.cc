@@ -132,6 +132,14 @@ void APIServlet::handle(
     return;
   }
 
+  if (uri.path() == "/api/v1/tables/insert_into") {
+    catchAndReturnErrors(&res, [this, session, &req, &res] {
+      insertIntoTableWithParams(session, &req, &res);
+    });
+    res_stream->writeResponse(res);
+    return;
+  }
+
   /* SQL */
   if (uri.path() == "/api/v1/sql" ||
       uri.path() == "/api/v1/sql_stream") {
@@ -728,27 +736,6 @@ void APIServlet::insertIntoTable(
     return;
   }
 
-  URI uri(req->uri());
-  URI::ParamList params = uri.queryParams();
-  URI::parseQueryString(req->body().toString(), &params);
-
-  std::string table;
-  URI::getParam(params, "table", &table);
-
-  std::string database;
-  URI::getParam(params, "database", &database);
-
-  if (!table.empty() && !database.empty()) {
-    insertIntoTableWithParams(session, req, res, database, table);
-  } else {
-    insertIntoTableFromJSON(session, req, res);
-  }
-}
-
-void APIServlet::insertIntoTableFromJSON(
-    Session* session,
-    const http::HTTPRequest* req,
-    http::HTTPResponse* res) {
   auto dbctx = session->getDatabaseContext();
   auto jreq = json::parseJSON(req->body());
 
@@ -832,9 +819,40 @@ void APIServlet::insertIntoTableFromJSON(
 void APIServlet::insertIntoTableWithParams(
     Session* session,
     const http::HTTPRequest* req,
-    http::HTTPResponse* res,
-    const std::string& database,
-    const std::string& table) {
+    http::HTTPResponse* res) {
+  if (req->method() != http::HTTPMessage::kHTTPMethod::M_POST) {
+    res->setStatus(http::kStatusMethodNotAllowed);
+    res->addHeader("Content-Type", "text/plain; charset=utf-8");
+    res->addBody("expected POST request");
+    return;
+  }
+
+  std::string insert_database;
+  auto hdrval = req->getHeader("X-Z1-Namespace");
+  if (!hdrval.empty()) {
+    insert_database = hdrval;
+  }
+
+  URI uri(req->uri());
+  URI::ParamList params = uri.queryParams();
+  URI::parseQueryString(req->body().toString(), &params);
+
+  std::string database;
+  URI::getParam(params, "database", &database);
+  if (!database.empty()) {
+    insert_database = database;
+  }
+
+  if (insert_database.empty()) {
+    RAISE(kRuntimeError, "missing param: database");
+  }
+
+  std::string table;
+  URI::getParam(params, "table", &table);
+  if (table.empty()) {
+    RAISE(kRuntimeError, "missing param: table");
+  }
+
   auto dbctx = session->getDatabaseContext();
 
   auto tc = dbctx->table_service->tableConfig(database, table);

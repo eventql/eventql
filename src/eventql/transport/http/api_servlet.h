@@ -96,17 +96,10 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
-  void insertIntoTableFromJSON(
-      Session* session,
-      const http::HTTPRequest* req,
-      http::HTTPResponse* res);
-
   void insertIntoTableWithParams(
       Session* session,
       const http::HTTPRequest* req,
-      http::HTTPResponse* res,
-      const std::string& database,
-      const std::string& table);
+      http::HTTPResponse* res);
 
   void executeSQL(
       Session* session,
