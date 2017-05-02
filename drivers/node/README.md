@@ -60,7 +60,7 @@ Example:
 
     let query = client.query("select * from test");
     query.execute((results) => {
-      // 
+
     }, (error) => {
 
     });
