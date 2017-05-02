@@ -1,0 +1,27 @@
+{
+  "name": "eventql-node",
+  "version": "0.0.1",
+  "description": "EventQL node driver",
+  "main": "lib/index.js",
+  "scripts": {},
+  "contributors": [
+    {
+      "name": "Jon Sharratt",
+      "email": "jon@craftship.io"
+    },
+    {
+      "name": "Laura Schlimmer",
+      "email": "laura@eventql.io"
+    },
+    {
+      "name": "Paul Asmuth",
+      "email": "paul@asmuth.com"
+    }
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "eventsource": "^0.2.1",
+    "http": "0.0.0"
+  },
+  "devDependencies": {}
+}

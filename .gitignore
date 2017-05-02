@@ -43,3 +43,4 @@ docker/server/cache/*
 docker/server/data/*
 docker/server/trash/*
 docker/server/metadata/*
+drivers/node/node_modules/
