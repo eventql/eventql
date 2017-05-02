@@ -4,18 +4,13 @@ const http = require('http');
 const EventSource = require("eventsource");
 
 class Query {
-  constructor (client, query_str, opts = {}) {
+  constructor (client, query_str) {
     if (typeof query_str !== 'string') {
       throw new Error('The query must be a string')
     }
 
-    if (typeof opts !== 'object') {
-      throw new Error("opts must be an object");
-    }
-
     this.client = client;
     this.query_str = query_str;
-    this.opts = opts;
   }
 
   execute(success_callback, error_callback) {

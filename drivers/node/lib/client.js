@@ -25,8 +25,8 @@ class Client {
     this.auth_provider = auth_provider;
   }
 
-  query(query_str, opts) {
-    return new Query(this, query_str, opts);
+  query(query_str) {
+    return new Query(this, query_str);
   }
 
   insert(body, callback) {
