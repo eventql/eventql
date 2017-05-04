@@ -25,6 +25,7 @@
 #include "eventql/eventql.h"
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/return_code.h"
+#include "eventql/util/status.h"
 
 namespace eventql {
 struct DatabaseContext;
@@ -37,6 +38,8 @@ public:
 
   String getUserID() const;
   void setUserID(const String& user_id);
+
+  Status changeNamespace(const std::string& ns);
 
   String getEffectiveNamespace() const;
   void setEffectiveNamespace(const String& ns);

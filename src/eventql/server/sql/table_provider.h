@@ -44,7 +44,6 @@ struct TSDBTableProvider : public csql::TableProvider {
 public:
 
   TSDBTableProvider(
-      const String& tsdb_namespace,
       PartitionMap* partition_map,
       ConfigDirectory* cdir,
       TableService* table_service,
@@ -69,6 +68,9 @@ public:
 
   Status listServers(
       Function<void (const ServerConfig& server)> fn) const override;
+
+  Status listDatabases(
+      Function<void (const NamespaceConfig& cfg)> fn) const override;
 
   Option<csql::TableInfo> describe(const String& table_name) const override;
 

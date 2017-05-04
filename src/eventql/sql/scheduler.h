@@ -39,6 +39,7 @@
 #include <eventql/sql/qtree/nodes/drop_table.h>
 #include <eventql/sql/qtree/nodes/describe_partitions.h>
 #include <eventql/sql/qtree/nodes/cluster_show_servers.h>
+#include <eventql/sql/qtree/nodes/show_databases.h>
 #include <eventql/sql/qtree/TableExpressionNode.h>
 #include <eventql/sql/table_expression.h>
 #include <eventql/sql/qtree/QueryTreeNode.h>
@@ -46,6 +47,7 @@
 #include <eventql/sql/statements/select/subquery.h>
 #include <eventql/sql/statements/select/orderby.h>
 #include <eventql/sql/statements/show_tables.h>
+#include <eventql/sql/statements/show_databases.h>
 #include <eventql/sql/statements/select/limit.h>
 #include <eventql/sql/statements/describe_table.h>
 #include <eventql/sql/statements/describe_partitions.h>

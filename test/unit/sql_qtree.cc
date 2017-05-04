@@ -43,6 +43,7 @@
 #include "eventql/sql/qtree/nodes/insert_json.h"
 #include "eventql/sql/qtree/nodes/describe_partitions.h"
 #include "eventql/sql/qtree/nodes/cluster_show_servers.h"
+#include "eventql/sql/qtree/nodes/show_databases.h"
 #include "eventql/sql/CSTableScanProvider.h"
 #include "eventql/sql/drivers/csv/CSVTableProvider.h"
 #include "../unit_test.h"
@@ -1191,4 +1192,21 @@ void setup_unit_sql_qtree_tests(TestRepository* repo) {
 } // namespace unit
 } // namespace test
 } // namespace eventql
+
+TEST_CASE(QTreeTest, TestShowDatabases, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  String query = "SHOW DATABASES;";
+  csql::Parser parser;
+  parser.parse(query.data(), query.size());
+
+  auto qtree_builder = runtime->queryPlanBuilder();
+  Vector<RefPtr<QueryTreeNode>> qtrees = qtree_builder->build(
+      txn.get(),
+      parser.getStatements(),
+      txn->getTableProvider());
+  RefPtr<ShowDatabasesNode> qtree =
+      qtrees[0].asInstanceOf<ShowDatabasesNode>();
+});
 
