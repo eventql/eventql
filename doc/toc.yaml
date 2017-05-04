@@ -740,6 +740,13 @@
               visible_in_toc: false
               source: "/api/http/tables/insert.md"
             -
+              url: "/api/http/tables/insert_into"
+              title: "POST tables/insert_into"
+              type: page
+              visible_in_menu: false
+              visible_in_toc: false
+              source: "/api/http/tables/insert_into.md"
+            -
               url: "/api/http/tables/drop"
               title: "POST tables/drop"
               type: page

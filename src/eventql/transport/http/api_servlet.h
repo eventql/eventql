@@ -96,6 +96,11 @@ protected:
       const http::HTTPRequest* req,
       http::HTTPResponse* res);
 
+  void insertIntoTableWithParams(
+      Session* session,
+      const http::HTTPRequest* req,
+      http::HTTPResponse* res);
+
   void executeSQL(
       Session* session,
       const http::HTTPRequest* req,
