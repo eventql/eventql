@@ -49,7 +49,7 @@ CSVTableProvider::CSVTableProvider(
 CSVTableProvider::CSVTableProvider(
       const String& table_name,
       const std::string& file_path,
-      char column_separator /* = ';' */,
+      char column_separator /* = ',' */,
       char row_separator /* = '\n' */,
       char quote_char /* = '"' */) :
       CSVTableProvider(

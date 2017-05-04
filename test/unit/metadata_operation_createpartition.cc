@@ -24,16 +24,17 @@
 #include "eventql/eventql.h"
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/random.h"
-#include "eventql/util/test/unittest.h"
 #include "eventql/db/metadata_store.h"
 #include "eventql/db/metadata_operation.h"
 #include "eventql/db/metadata_operations.pb.h"
+#include "../unit_test.h"
 
-using namespace eventql;
+namespace eventql {
+namespace test {
+namespace unit {
 
-UNIT_TEST(MetadataOperationPartitionCreate);
-
-TEST_CASE(MetadataOperationPartitionCreate, TestCreateEmpty, [] () {
+// UNIT-METAOP-CREATEPART-001
+static bool test_metadata_operation_createpartition_create_empty(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
   MetadataFile input(
       SHA1::compute("mytx"),
@@ -67,20 +68,23 @@ TEST_CASE(MetadataOperationPartitionCreate, TestCreateEmpty, [] () {
   Vector<MetadataFile::PartitionMapEntry> output;
   auto rc = openv.perform(input, &output);
   EXPECT(rc.isSuccess());
-  EXPECT_EQ(output.size(), 1);
+  EXPECT_EQ(output.size(), 1u);
   EXPECT_EQ(output[0].partition_id, SHA1::compute("X"));
   EXPECT_EQ(output[0].begin, encodePartitionKey(KEYSPACE_UINT64, "17"));
   EXPECT_EQ(output[0].end, encodePartitionKey(KEYSPACE_UINT64, "23"));
   EXPECT_EQ(output[0].splitting, false);
   EXPECT_EQ(output[0].servers[0].server_id, "s1");
-  EXPECT_EQ(output[0].servers[0].placement_id, 42);
+  EXPECT_EQ(output[0].servers[0].placement_id, 42u);
   EXPECT_EQ(output[0].servers[1].server_id, "s2");
-  EXPECT_EQ(output[0].servers[1].placement_id, 42);
+  EXPECT_EQ(output[0].servers[1].placement_id, 42u);
   EXPECT_EQ(output[0].servers[2].server_id, "s3");
-  EXPECT_EQ(output[0].servers[2].placement_id, 42);
-});
+  EXPECT_EQ(output[0].servers[2].placement_id, 42u);
 
-TEST_CASE(MetadataOperationPartitionCreate, TestCreateBegin, [] () {
+  return true;
+}
+
+// UNIT-METAOP-CREATEPART-002
+static bool test_metadata_operation_createpartition_create_begin(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -178,9 +182,11 @@ TEST_CASE(MetadataOperationPartitionCreate, TestCreateBegin, [] () {
   EXPECT_EQ(output[4].end, encodePartitionKey(KEYSPACE_UINT64, "900"));
   EXPECT_EQ(output[4].partition_id, SHA1::compute("D"));
   EXPECT_EQ(output[4].splitting, false);
-});
+  return true;
+}
 
-TEST_CASE(MetadataOperationPartitionCreate, TestCreateBegin2, [] () {
+// UNIT-METAOP-CREATEPART-003
+static bool test_metadata_operation_createpartition_create_begin2(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -278,9 +284,11 @@ TEST_CASE(MetadataOperationPartitionCreate, TestCreateBegin2, [] () {
   EXPECT_EQ(output[4].end, encodePartitionKey(KEYSPACE_UINT64, "900"));
   EXPECT_EQ(output[4].partition_id, SHA1::compute("D"));
   EXPECT_EQ(output[4].splitting, false);
-});
+  return true;
+}
 
-TEST_CASE(MetadataOperationPartitionCreate, TestCreateMiddle, [] () {
+// UNIT-METAOP-CREATEPART-004
+static bool test_metadata_operation_createpartition_create_middle(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -378,9 +386,12 @@ TEST_CASE(MetadataOperationPartitionCreate, TestCreateMiddle, [] () {
   EXPECT_EQ(output[4].end, encodePartitionKey(KEYSPACE_UINT64, "900"));
   EXPECT_EQ(output[4].partition_id, SHA1::compute("D"));
   EXPECT_EQ(output[4].splitting, false);
-});
 
-TEST_CASE(MetadataOperationPartitionCreate, TestCreateMiddle2, [] () {
+  return true;
+}
+
+// UNIT-METAOP-CREATEPART-005
+static bool test_metadata_operation_createpartition_create_middle2(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -478,9 +489,11 @@ TEST_CASE(MetadataOperationPartitionCreate, TestCreateMiddle2, [] () {
   EXPECT_EQ(output[4].end, encodePartitionKey(KEYSPACE_UINT64, "900"));
   EXPECT_EQ(output[4].partition_id, SHA1::compute("D"));
   EXPECT_EQ(output[4].splitting, false);
-});
+  return true;
+}
 
-TEST_CASE(MetadataOperationPartitionCreate, TestCreateEnd, [] () {
+// UNIT-METAOP-CREATEPART-006
+static bool test_metadata_operation_createpartition_create_end(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -578,9 +591,12 @@ TEST_CASE(MetadataOperationPartitionCreate, TestCreateEnd, [] () {
   EXPECT_EQ(output[4].servers[1].placement_id, 42);
   EXPECT_EQ(output[4].servers[2].server_id, "s3");
   EXPECT_EQ(output[4].servers[2].placement_id, 42);
-});
 
-TEST_CASE(MetadataOperationPartitionCreate, TestCreateEnd2, [] () {
+  return true;
+}
+
+// UNIT-METAOP-CREATEPART-007
+static bool test_metadata_operation_createpartition_create_end2(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -678,9 +694,12 @@ TEST_CASE(MetadataOperationPartitionCreate, TestCreateEnd2, [] () {
   EXPECT_EQ(output[4].servers[1].placement_id, 42);
   EXPECT_EQ(output[4].servers[2].server_id, "s3");
   EXPECT_EQ(output[4].servers[2].placement_id, 42);
-});
 
-TEST_CASE(MetadataOperationPartitionCreate, TestCreateOverlapBegin, [] () {
+  return true;
+}
+
+// UNIT-METAOP-CREATEPART-008
+static bool test_metadata_operation_createpartition_create_overlap_begin(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -751,9 +770,12 @@ TEST_CASE(MetadataOperationPartitionCreate, TestCreateOverlapBegin, [] () {
   Vector<MetadataFile::PartitionMapEntry> output;
   auto rc = openv.perform(input, &output);
   EXPECT(!rc.isSuccess());
-});
 
-TEST_CASE(MetadataOperationPartitionCreate, TestCreateOverlapMiddle, [] () {
+  return true;
+}
+
+// UNIT-METAOP-CREATEPART-009
+static bool test_metadata_operation_createpartition_create_overlap_middle(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -824,9 +846,11 @@ TEST_CASE(MetadataOperationPartitionCreate, TestCreateOverlapMiddle, [] () {
   Vector<MetadataFile::PartitionMapEntry> output;
   auto rc = openv.perform(input, &output);
   EXPECT(!rc.isSuccess());
-});
+  return true;
+}
 
-TEST_CASE(MetadataOperationPartitionCreate, TestCreateOverlapEnd, [] () {
+// UNIT-METAOP-CREATEPART-010
+static bool test_metadata_operation_createpartition_create_overlap_end(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -897,9 +921,11 @@ TEST_CASE(MetadataOperationPartitionCreate, TestCreateOverlapEnd, [] () {
   Vector<MetadataFile::PartitionMapEntry> output;
   auto rc = openv.perform(input, &output);
   EXPECT(!rc.isSuccess());
-});
+  return true;
+}
 
-TEST_CASE(MetadataOperationPartitionCreate, TestCreateOverlapExact, [] () {
+// UNIT-METAOP-CREATEPART-011
+static bool test_metadata_operation_createpartition_create_overlap_exact(TestContext* ctx) {
   Vector<MetadataFile::PartitionMapEntry> pmap;
 
   {
@@ -970,5 +996,25 @@ TEST_CASE(MetadataOperationPartitionCreate, TestCreateOverlapExact, [] () {
   Vector<MetadataFile::PartitionMapEntry> output;
   auto rc = openv.perform(input, &output);
   EXPECT(!rc.isSuccess());
-});
+
+  return true;
+}
+
+void setup_unit_metadata_operation_createpartition_tests(TestRepository* repo) {
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-CREATEPART-001", metadata_operation_createpartition, create_empty);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-CREATEPART-002", metadata_operation_createpartition, create_begin);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-CREATEPART-003", metadata_operation_createpartition, create_begin2);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-CREATEPART-004", metadata_operation_createpartition, create_middle);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-CREATEPART-005", metadata_operation_createpartition, create_middle2);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-CREATEPART-006", metadata_operation_createpartition, create_end);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-CREATEPART-007", metadata_operation_createpartition, create_end2);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-CREATEPART-008", metadata_operation_createpartition, create_overlap_begin);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-CREATEPART-009", metadata_operation_createpartition, create_overlap_middle);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-CREATEPART-010", metadata_operation_createpartition, create_overlap_end);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METAOP-CREATEPART-011", metadata_operation_createpartition, create_overlap_exact);
+}
+
+} // namespace unit
+} // namespace test
+} // namespace eventql
 

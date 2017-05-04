@@ -89,7 +89,6 @@ Status TableSplitFinalize::execute(
       }
 
       if (!rc.isSuccess()) {
-        stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
         return rc;
       }
     }
@@ -120,7 +119,6 @@ Status TableSplitFinalize::execute(
           envelope);
 
       if (!rc.isSuccess()) {
-        stderr_os->write(StringUtil::format("ERROR: $0\n", rc.message()));
         return rc;
       } else {
         stdout_os->write("SUCCESS\n");
@@ -130,10 +128,6 @@ Status TableSplitFinalize::execute(
     cdir->stop();
 
   } catch (const Exception& e) {
-    stderr_os->write(StringUtil::format(
-        "$0: $1\n",
-        e.getTypeName(),
-        e.getMessage()));
     return Status(e);
   }
 

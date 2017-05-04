@@ -592,6 +592,11 @@ next:
     goto next;
   }
 
+  if (token == "PARTITION") {
+    token_list->emplace_back(Token::T_PARTITION);
+    goto next;
+  }
+
   if (token == "KEY") {
     token_list->emplace_back(Token::T_KEY);
     goto next;

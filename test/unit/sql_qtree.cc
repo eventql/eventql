@@ -26,7 +26,6 @@
 #include <eventql/util/stdtypes.h>
 #include <eventql/util/exception.h>
 #include <eventql/util/wallclock.h>
-#include <eventql/util/test/unittest.h>
 #include "eventql/sql/svalue.h"
 #include "eventql/sql/runtime/defaultruntime.h"
 #include "eventql/sql/qtree/SequentialScanNode.h"
@@ -47,19 +46,24 @@
 #include "eventql/sql/qtree/nodes/show_databases.h"
 #include "eventql/sql/CSTableScanProvider.h"
 #include "eventql/sql/drivers/csv/CSVTableProvider.h"
+#include "../unit_test.h"
+#include "../test_runner.h"
+
+namespace eventql {
+namespace test {
+namespace unit {
 
 using namespace csql;
 
-UNIT_TEST(QTreeTest);
-
-TEST_CASE(QTreeTest, TestExtractEqualsConstraint, [] () {
+// UNIT-QTREE-001
+bool test_sql_qtree_ExtractEqualsConstraint(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
   txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "sql_testdata/testtbl.cst"));
+          FileUtil::joinPaths(ctx->srcdir, "test/sql_testdata/testtbl.cst")));
 
   Vector<String> queries;
   queries.push_back("select 1 from testtable where time = 1234;");
@@ -83,23 +87,25 @@ TEST_CASE(QTreeTest, TestExtractEqualsConstraint, [] () {
     EXPECT_EQ(seqscan->tableName(), "testtable");
 
     auto constraints = seqscan->constraints();
-    EXPECT_EQ(constraints.size(), 1);
+    EXPECT_EQ(constraints.size(), 1u);
 
     auto constraint = constraints[0];
     EXPECT_EQ(constraint.column_name, "time");
     EXPECT_TRUE(constraint.type == ScanConstraintType::EQUAL_TO);
     EXPECT_EQ(constraint.value.toString(), "1234");
   }
-});
+  return true;
+}
 
-TEST_CASE(QTreeTest, TestExtractNotEqualsConstraint, [] () {
+// UNIT-QTREE-002
+bool test_sql_qtree_ExtractNotEqualsConstraint(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
   txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "sql_testdata/testtbl.cst"));
+          FileUtil::joinPaths(ctx->srcdir, "test/sql_testdata/testtbl.cst")));
 
   Vector<String> queries;
   queries.push_back("select 1 from testtable where time != 1234;");
@@ -116,30 +122,32 @@ TEST_CASE(QTreeTest, TestExtractNotEqualsConstraint, [] () {
         parser.getStatements(),
         txn->getTableProvider());
 
-    EXPECT_EQ(qtrees.size(), 1);
+    EXPECT_EQ(qtrees.size(), 1u);
     auto qtree = qtrees[0];
     EXPECT_TRUE(dynamic_cast<SequentialScanNode*>(qtree.get()) != nullptr);
     auto seqscan = qtree.asInstanceOf<SequentialScanNode>();
     EXPECT_EQ(seqscan->tableName(), "testtable");
 
     auto constraints = seqscan->constraints();
-    EXPECT_EQ(constraints.size(), 1);
+    EXPECT_EQ(constraints.size(), 1u);
 
     auto constraint = constraints[0];
     EXPECT_EQ(constraint.column_name, "time");
     EXPECT_TRUE(constraint.type == ScanConstraintType::NOT_EQUAL_TO);
     EXPECT_EQ(constraint.value.toString(), "1234");
   }
-});
+  return true;
+}
 
-TEST_CASE(QTreeTest, TestExtractLessThanConstraint, [] () {
+// UNIT-QTREE-003
+bool test_sql_qtree_ExtractLessThanConstraint(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
   txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "sql_testdata/testtbl.cst"));
+          FileUtil::joinPaths(ctx->srcdir, "test/sql_testdata/testtbl.cst")));
 
   Vector<String> queries;
   queries.push_back("select 1 from testtable where time < 1234;");
@@ -156,30 +164,32 @@ TEST_CASE(QTreeTest, TestExtractLessThanConstraint, [] () {
         parser.getStatements(),
         txn->getTableProvider());
 
-    EXPECT_EQ(qtrees.size(), 1);
+    EXPECT_EQ(qtrees.size(), 1u);
     auto qtree = qtrees[0];
     EXPECT_TRUE(dynamic_cast<SequentialScanNode*>(qtree.get()) != nullptr);
     auto seqscan = qtree.asInstanceOf<SequentialScanNode>();
     EXPECT_EQ(seqscan->tableName(), "testtable");
 
     auto constraints = seqscan->constraints();
-    EXPECT_EQ(constraints.size(), 1);
+    EXPECT_EQ(constraints.size(), 1u);
 
     auto constraint = constraints[0];
     EXPECT_EQ(constraint.column_name, "time");
     EXPECT_TRUE(constraint.type == ScanConstraintType::LESS_THAN);
     EXPECT_EQ(constraint.value.toString(), "1234");
   }
-});
+  return true;
+}
 
-TEST_CASE(QTreeTest, TestExtractLessThanOrEqualToConstraint, [] () {
+// UNIT-QTREE-004
+bool test_sql_qtree_ExtractLessThanOrEqualToConstraint(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
   txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "sql_testdata/testtbl.cst"));
+          FileUtil::joinPaths(ctx->srcdir, "test/sql_testdata/testtbl.cst")));
 
   Vector<String> queries;
   queries.push_back("select 1 from testtable where time <= 1234;");
@@ -196,30 +206,32 @@ TEST_CASE(QTreeTest, TestExtractLessThanOrEqualToConstraint, [] () {
         parser.getStatements(),
         txn->getTableProvider());
 
-    EXPECT_EQ(qtrees.size(), 1);
+    EXPECT_EQ(qtrees.size(), 1u);
     auto qtree = qtrees[0];
     EXPECT_TRUE(dynamic_cast<SequentialScanNode*>(qtree.get()) != nullptr);
     auto seqscan = qtree.asInstanceOf<SequentialScanNode>();
     EXPECT_EQ(seqscan->tableName(), "testtable");
 
     auto constraints = seqscan->constraints();
-    EXPECT_EQ(constraints.size(), 1);
+    EXPECT_EQ(constraints.size(), 1u);
 
     auto constraint = constraints[0];
     EXPECT_EQ(constraint.column_name, "time");
     EXPECT_TRUE(constraint.type == ScanConstraintType::LESS_THAN_OR_EQUAL_TO);
     EXPECT_EQ(constraint.value.toString(), "1234");
   }
-});
+  return true;
+}
 
-TEST_CASE(QTreeTest, TestExtractGreaterThanConstraint, [] () {
+// UNIT-QTREE-005
+bool test_sql_qtree_ExtractGreaterThanConstraint(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
   txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "sql_testdata/testtbl.cst"));
+          FileUtil::joinPaths(ctx->srcdir, "test/sql_testdata/testtbl.cst")));
 
   Vector<String> queries;
   queries.push_back("select 1 from testtable where time > 1234;");
@@ -236,30 +248,32 @@ TEST_CASE(QTreeTest, TestExtractGreaterThanConstraint, [] () {
         parser.getStatements(),
         txn->getTableProvider());
 
-    EXPECT_EQ(qtrees.size(), 1);
+    EXPECT_EQ(qtrees.size(), 1u);
     auto qtree = qtrees[0];
     EXPECT_TRUE(dynamic_cast<SequentialScanNode*>(qtree.get()) != nullptr);
     auto seqscan = qtree.asInstanceOf<SequentialScanNode>();
     EXPECT_EQ(seqscan->tableName(), "testtable");
 
     auto constraints = seqscan->constraints();
-    EXPECT_EQ(constraints.size(), 1);
+    EXPECT_EQ(constraints.size(), 1u);
 
     auto constraint = constraints[0];
     EXPECT_EQ(constraint.column_name, "time");
     EXPECT_TRUE(constraint.type == ScanConstraintType::GREATER_THAN);
     EXPECT_EQ(constraint.value.toString(), "1234");
   }
-});
+  return true;
+}
 
-TEST_CASE(QTreeTest, TestExtractGreaterThanOrEqualToConstraint, [] () {
+// UNIT-QTREE-006
+bool test_sql_qtree_ExtractGreaterThanOrEqualToConstraint(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
   txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "sql_testdata/testtbl.cst"));
+          FileUtil::joinPaths(ctx->srcdir, "test/sql_testdata/testtbl.cst")));
 
   Vector<String> queries;
   queries.push_back("select 1 from testtable where time >= 1234;");
@@ -276,30 +290,32 @@ TEST_CASE(QTreeTest, TestExtractGreaterThanOrEqualToConstraint, [] () {
         parser.getStatements(),
         txn->getTableProvider());
 
-    EXPECT_EQ(qtrees.size(), 1);
+    EXPECT_EQ(qtrees.size(), 1u);
     auto qtree = qtrees[0];
     EXPECT_TRUE(dynamic_cast<SequentialScanNode*>(qtree.get()) != nullptr);
     auto seqscan = qtree.asInstanceOf<SequentialScanNode>();
     EXPECT_EQ(seqscan->tableName(), "testtable");
 
     auto constraints = seqscan->constraints();
-    EXPECT_EQ(constraints.size(), 1);
+    EXPECT_EQ(constraints.size(), 1u);
 
     auto constraint = constraints[0];
     EXPECT_EQ(constraint.column_name, "time");
     EXPECT_TRUE(constraint.type == ScanConstraintType::GREATER_THAN_OR_EQUAL_TO);
     EXPECT_EQ(constraint.value.toString(), "1234");
   }
-});
+  return true;
+}
 
-TEST_CASE(QTreeTest, TestExtractMultipleConstraints, [] () {
+// UNIT-QTREE-007
+bool test_sql_qtree_ExtractMultipleConstraints(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
   txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "sql_testdata/testtbl.cst"));
+          FileUtil::joinPaths(ctx->srcdir, "test/sql_testdata/testtbl.cst")));
 
   String query = "select 1 from testtable where 1000 + 200 + 30 + 4 > time AND session_id != 'blah' AND time >= 1111 * 6;";
 
@@ -312,14 +328,14 @@ TEST_CASE(QTreeTest, TestExtractMultipleConstraints, [] () {
       parser.getStatements(),
       txn->getTableProvider());
 
-  EXPECT_EQ(qtrees.size(), 1);
+  EXPECT_EQ(qtrees.size(), 1u);
   auto qtree = qtrees[0];
   EXPECT_TRUE(dynamic_cast<SequentialScanNode*>(qtree.get()) != nullptr);
   auto seqscan = qtree.asInstanceOf<SequentialScanNode>();
   EXPECT_EQ(seqscan->tableName(), "testtable");
 
   auto constraints = seqscan->constraints();
-  EXPECT_EQ(constraints.size(), 3);
+  EXPECT_EQ(constraints.size(), 3u);
 
   {
     auto constraint = constraints[0];
@@ -341,16 +357,18 @@ TEST_CASE(QTreeTest, TestExtractMultipleConstraints, [] () {
     EXPECT_TRUE(constraint.type == ScanConstraintType::GREATER_THAN_OR_EQUAL_TO);
     EXPECT_EQ(constraint.value.toString(), "6666");
   }
-});
+  return true;
+}
 
-TEST_CASE(QTreeTest, TestSimpleConstantFolding, [] () {
+// UNIT-QTREE-008
+bool test_sql_qtree_SimpleConstantFolding(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
   txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "sql_testdata/testtbl.cst"));
+          FileUtil::joinPaths(ctx->srcdir, "test/sql_testdata/testtbl.cst")));
 
   String query = "select 1 + 2 + 3 from testtable where session_id > ucase('fu') + lcase('Bar');";
 
@@ -363,7 +381,7 @@ TEST_CASE(QTreeTest, TestSimpleConstantFolding, [] () {
       parser.getStatements(),
       txn->getTableProvider());
 
-  EXPECT_EQ(qtrees.size(), 1);
+  EXPECT_EQ(qtrees.size(), 1u);
   auto qtree = qtrees[0];
   EXPECT_TRUE(dynamic_cast<SequentialScanNode*>(qtree.get()) != nullptr);
   auto seqscan = qtree.asInstanceOf<SequentialScanNode>();
@@ -372,16 +390,18 @@ TEST_CASE(QTreeTest, TestSimpleConstantFolding, [] () {
   auto where_expr = seqscan->whereExpression();
   EXPECT_FALSE(where_expr.isEmpty());
   EXPECT_EQ(where_expr.get()->toSQL(), "gt(`session_id`,\"FUbar\")");
-});
+  return true;
+}
 
-TEST_CASE(QTreeTest, TestPruneConstraints, [] () {
+// UNIT-QTREE-009
+bool test_sql_qtree_PruneConstraints(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
   txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "sql_testdata/testtbl.cst"));
+          FileUtil::joinPaths(ctx->srcdir, "test/sql_testdata/testtbl.cst")));
 
   String query = "select 1 from testtable where 1000 + 200 + 30 + 4 > time AND session_id != to_string(400 + 44) AND time >= 1111 * 6;";
   csql::Parser parser;
@@ -393,7 +413,7 @@ TEST_CASE(QTreeTest, TestPruneConstraints, [] () {
       parser.getStatements(),
       txn->getTableProvider());
 
-  EXPECT_EQ(qtrees.size(), 1);
+  EXPECT_EQ(qtrees.size(), 1u);
   auto qtree = qtrees[0];
   EXPECT_TRUE(dynamic_cast<SequentialScanNode*>(qtree.get()) != nullptr);
   auto seqscan = qtree.asInstanceOf<SequentialScanNode>();
@@ -433,16 +453,18 @@ TEST_CASE(QTreeTest, TestPruneConstraints, [] () {
         pruned_expr->toSQL(),
         "logical_and(neq(`session_id`,\"444\"),gte(`time`,6666))");
   }
-});
+  return true;
+}
 
-TEST_CASE(QTreeTest, TestSerialization, [] () {
+// UNIT-QTREE-010
+bool test_sql_qtree_Serialization(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
   txn->setTableProvider(
       new CSTableScanProvider(
           "testtable",
-          "sql_testdata/testtbl.cst"));
+          FileUtil::joinPaths(ctx->srcdir, "test/sql_testdata/testtbl.cst")));
 
   String query = "select 1 + 2 + 3 from testtable where session_id > ucase('fu') + lcase('Bar') limit 10;";
 
@@ -455,7 +477,7 @@ TEST_CASE(QTreeTest, TestSerialization, [] () {
       parser.getStatements(),
       txn->getTableProvider());
 
-  EXPECT_EQ(qtrees.size(), 1);
+  EXPECT_EQ(qtrees.size(), 1u);
   auto qtree = qtrees[0];
 
   QueryTreeCoder coder(txn.get());
@@ -468,9 +490,11 @@ TEST_CASE(QTreeTest, TestSerialization, [] () {
   auto qtree2 = coder.decode(buf_is.get());
 
   EXPECT_EQ(qtree->toString(), qtree2->toString());
-});
+  return true;
+}
 
-TEST_CASE(QTreeTest, TestSerializationJoinAndSubquery, [] () {
+// UNIT-QTREE-011
+bool test_sql_qtree_SerializationJoinAndSubquery(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
@@ -478,15 +502,15 @@ TEST_CASE(QTreeTest, TestSerializationJoinAndSubquery, [] () {
   txn->setTableProvider(tables.get());
 
   tables->addProvider(
-    new backends::csv::CSVTableProvider(
-        "customers",
-        "sql_testdata/testtbl2.csv",
-        '\t'));
+      new backends::csv::CSVTableProvider(
+          "customers",
+          FileUtil::joinPaths(ctx->srcdir, "test/sql_testdata/testtbl2.csv"),
+          ','));
 
   tables->addProvider(
       new backends::csv::CSVTableProvider(
           "orders",
-          "sql_testdata/testtbl3.csv",
+          FileUtil::joinPaths(ctx->srcdir, "test/sql_testdata/testtbl3.csv"),
           '\t'));
 
   String query =
@@ -507,7 +531,7 @@ TEST_CASE(QTreeTest, TestSerializationJoinAndSubquery, [] () {
       parser.getStatements(),
       txn->getTableProvider());
 
-  EXPECT_EQ(qtrees.size(), 1);
+  EXPECT_EQ(qtrees.size(), 1u);
   auto qtree = qtrees[0];
 
   QueryTreeCoder coder(txn.get());
@@ -520,9 +544,11 @@ TEST_CASE(QTreeTest, TestSerializationJoinAndSubquery, [] () {
   auto qtree2 = coder.decode(buf_is.get());
 
   EXPECT_EQ(qtree->toString(), qtree2->toString());
-});
+  return true;
+}
 
-TEST_CASE(QTreeTest, TestCreateTable, [] () {
+// UNIT-QTREE-012
+bool test_sql_qtree_CreateTable(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
@@ -551,14 +577,14 @@ TEST_CASE(QTreeTest, TestCreateTable, [] () {
       parser.getStatements(),
       txn->getTableProvider());
 
-  EXPECT_EQ(qtrees.size(), 1);
+  EXPECT_EQ(qtrees.size(), 1u);
   RefPtr<CreateTableNode> qtree = qtrees[0].asInstanceOf<CreateTableNode>();
   EXPECT_EQ(qtree->getTableName(), "fnord");
 
   auto table_schema = qtree->getTableSchema();
 
   auto fcolumns = table_schema.getFlatColumnList();
-  EXPECT_EQ(fcolumns.size(), 9);
+  EXPECT_EQ(fcolumns.size(), 9u);
 
   EXPECT_EQ(fcolumns[0]->column_name, "time");
   EXPECT_EQ(fcolumns[0]->column_name, fcolumns[0]->full_column_name);
@@ -587,7 +613,7 @@ TEST_CASE(QTreeTest, TestCreateTable, [] () {
   EXPECT(fcolumns[3]->column_class == TableSchema::ColumnClass::RECORD);
   EXPECT_EQ(fcolumns[3]->column_type, "RECORD");
   EXPECT(fcolumns[3]->column_options == Vector<TableSchema::ColumnOptions> {});
-  EXPECT_EQ(fcolumns[3]->column_schema.size(), 2);
+  EXPECT_EQ(fcolumns[3]->column_schema.size(), 2u);
 
   EXPECT(fcolumns[4]->column_name == "val1");
   EXPECT_EQ(fcolumns[4]->full_column_name, "temperatur.val1");
@@ -611,7 +637,7 @@ TEST_CASE(QTreeTest, TestCreateTable, [] () {
   EXPECT(fcolumns[6]->column_options == Vector<TableSchema::ColumnOptions> {
     TableSchema::ColumnOptions::REPEATED
   });
-  EXPECT_EQ(fcolumns[6]->column_schema.size(), 2);
+  EXPECT_EQ(fcolumns[6]->column_schema.size(), 2u);
 
   EXPECT(fcolumns[7]->column_name == "val1");
   EXPECT_EQ(fcolumns[7]->full_column_name, "some_other.val1");
@@ -631,7 +657,7 @@ TEST_CASE(QTreeTest, TestCreateTable, [] () {
 
 
   auto columns = table_schema.getColumns();
-  EXPECT_EQ(columns.size(), 5);
+  EXPECT_EQ(columns.size(), 5u);
 
   EXPECT_EQ(columns[0]->column_name, "time");
   EXPECT(columns[0]->column_class == TableSchema::ColumnClass::SCALAR);
@@ -656,7 +682,7 @@ TEST_CASE(QTreeTest, TestCreateTable, [] () {
   EXPECT(columns[3]->column_class == TableSchema::ColumnClass::RECORD);
   EXPECT_EQ(columns[3]->column_type, "RECORD");
   EXPECT(columns[3]->column_options == Vector<TableSchema::ColumnOptions> {});
-  EXPECT_EQ(columns[3]->column_schema.size(), 2);
+  EXPECT_EQ(columns[3]->column_schema.size(), 2u);
 
   {
     auto scolumns = columns[3]->column_schema;
@@ -682,7 +708,7 @@ TEST_CASE(QTreeTest, TestCreateTable, [] () {
   EXPECT(columns[4]->column_options == Vector<TableSchema::ColumnOptions> {
     TableSchema::ColumnOptions::REPEATED
   });
-  EXPECT_EQ(columns[4]->column_schema.size(), 2);
+  EXPECT_EQ(columns[4]->column_schema.size(), 2u);
 
   {
     auto scolumns = columns[4]->column_schema;
@@ -706,9 +732,11 @@ TEST_CASE(QTreeTest, TestCreateTable, [] () {
   pkey.emplace_back("time");
   pkey.emplace_back("myvalue");
   EXPECT(qtree->getPrimaryKey() == pkey);
-});
+  return true;
+}
 
-TEST_CASE(QTreeTest, TestCreateTableWith, [] () {
+// UNIT-QTREE-013
+bool test_sql_qtree_CreateTableWith(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
@@ -729,24 +757,26 @@ TEST_CASE(QTreeTest, TestCreateTableWith, [] () {
       parser.getStatements(),
       txn->getTableProvider());
 
-  EXPECT_EQ(qtrees.size(), 1);
+  EXPECT_EQ(qtrees.size(), 1u);
   RefPtr<CreateTableNode> qtree = qtrees[0].asInstanceOf<CreateTableNode>();
   EXPECT_EQ(qtree->getTableName(), "fnord");
 
   auto table_schema = qtree->getTableSchema();
 
   auto fcolumns = table_schema.getFlatColumnList();
-  EXPECT_EQ(fcolumns.size(), 2);
+  EXPECT_EQ(fcolumns.size(), 2u);
 
   auto property_list = qtree->getProperties();
-  EXPECT_EQ(property_list.size(), 2);
+  EXPECT_EQ(property_list.size(), 2u);
   EXPECT_EQ(property_list[0].first, "akey");
   EXPECT_EQ(property_list[0].second, "value");
   EXPECT_EQ(property_list[1].first, "test.some_key");
   EXPECT_EQ(property_list[1].second, "some value");
-});
+  return true;
+}
 
-TEST_CASE(QTreeTest, TestInsertInto, [] () {
+// UNIT-QTREE-014
+bool test_sql_qtree_InsertInto(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
@@ -779,7 +809,7 @@ TEST_CASE(QTreeTest, TestInsertInto, [] () {
   EXPECT_EQ(qtree->getTableName(), "evtbl");
 
   auto specs = qtree->getValueSpecs();
-  EXPECT_EQ(specs.size(), 5);
+  EXPECT_EQ(specs.size(), 5u);
 
   EXPECT_EQ(specs[0].column, "evtime");
   EXPECT_EQ(specs[1].column, "evid");
@@ -792,9 +822,11 @@ TEST_CASE(QTreeTest, TestInsertInto, [] () {
   EXPECT_EQ(specs[2].expr->toSQL(), "3");
   EXPECT_EQ(specs[3].expr->toSQL(), "true");
   EXPECT_EQ(specs[4].expr->toSQL(), "NULL");
-});
+  return true;
+}
 
-//TEST_CASE(QTreeTest, TestInsertShortInto, [] () {
+// UNIT-QTREE-015
+//bool test_sql_qtree_InsertShortInto(TestContext* ctx) {
 //  auto runtime = Runtime::getDefaultRuntime();
 //  auto txn = runtime->newTransaction();
 //
@@ -836,7 +868,8 @@ TEST_CASE(QTreeTest, TestInsertInto, [] () {
 //  EXPECT_EQ(specs[4].expr->toSQL(), "NULL");
 //});
 
-TEST_CASE(QTreeTest, TestInsertIntoFromJSON, [] () {
+// UNIT-QTREE-016
+bool test_sql_qtree_InsertIntoFromJSON(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
@@ -863,9 +896,11 @@ TEST_CASE(QTreeTest, TestInsertIntoFromJSON, [] () {
 
   RefPtr<InsertJSONNode> qtree = qtrees[0].asInstanceOf<InsertJSONNode>();
   EXPECT_EQ(qtree->getTableName(), "evtbl");
-});
+  return true;
+}
 
-TEST_CASE(QTreeTest, TestDropTable, [] () {
+// UNIT-QTREE-017
+bool test_sql_qtree_DropTable(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
@@ -882,9 +917,11 @@ TEST_CASE(QTreeTest, TestDropTable, [] () {
 
   RefPtr<DropTableNode> qtree = qtrees[0].asInstanceOf<DropTableNode>();
   EXPECT_EQ(qtree->getTableName(), "test");
-});
+  return true;
+}
 
-TEST_CASE(QTreeTest, TestCreateDatabase, [] () {
+// UNIT-QTREE-018
+bool test_sql_qtree_CreateDatabase(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
@@ -901,9 +938,11 @@ TEST_CASE(QTreeTest, TestCreateDatabase, [] () {
 
   RefPtr<CreateDatabaseNode> qtree = qtrees[0].asInstanceOf<CreateDatabaseNode>();
   EXPECT_EQ(qtree->getDatabaseName(), "test");
-});
+  return true;
+}
 
-TEST_CASE(QTreeTest, TestUseDatabase, [] () {
+// UNIT-QTREE-019
+bool test_sql_qtree_UseDatabase(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
@@ -920,9 +959,11 @@ TEST_CASE(QTreeTest, TestUseDatabase, [] () {
 
   RefPtr<UseDatabaseNode> qtree = qtrees[0].asInstanceOf<UseDatabaseNode>();
   EXPECT_EQ(qtree->getDatabaseName(), "test");
-});
+  return true;
+}
 
-TEST_CASE(QTreeTest, TestAlterTable, [] () {
+// UNIT-QTREE-020
+bool test_sql_qtree_AlterTable(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
@@ -947,7 +988,7 @@ TEST_CASE(QTreeTest, TestAlterTable, [] () {
   EXPECT_EQ(qtree->getTableName(), "evtbl");
 
   auto operations = qtree->getOperations();
-  EXPECT_EQ(operations.size(), 4);
+  EXPECT_EQ(operations.size(), 4u);
 
   EXPECT(
     operations[0].optype == AlterTableNode::AlterTableOperationType::OP_ADD_COLUMN);
@@ -970,9 +1011,11 @@ TEST_CASE(QTreeTest, TestAlterTable, [] () {
   EXPECT(
     operations[3].optype == AlterTableNode::AlterTableOperationType::OP_REMOVE_COLUMN);
   EXPECT_EQ(operations[3].column_name, "version");
-});
+  return true;
+}
 
-TEST_CASE(QTreeTest, TestAlterTableSetProperty, [] () {
+// UNIT-QTREE-021
+bool test_sql_qtree_AlterTableSetProperty(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
@@ -996,15 +1039,17 @@ TEST_CASE(QTreeTest, TestAlterTableSetProperty, [] () {
   EXPECT_EQ(qtree->getTableName(), "evtbl");
 
   auto properties = qtree->getProperties();
-  EXPECT_EQ(properties.size(), 2);
+  EXPECT_EQ(properties.size(), 2u);
   EXPECT_EQ(properties[0].first, "disable_split");
   EXPECT_EQ(properties[0].second, "false");
 
   EXPECT_EQ(properties[1].first, "split_point");
   EXPECT_EQ(properties[1].second, "1000");
-});
+  return true;
+}
 
-TEST_CASE(QTreeTest, TestDescribePartitions, [] () {
+// UNIT-QTREE-022
+bool test_sql_qtree_DescribePartitions(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
@@ -1022,9 +1067,11 @@ TEST_CASE(QTreeTest, TestDescribePartitions, [] () {
       qtrees[0].asInstanceOf<DescribePartitionsNode>();
   EXPECT_EQ(qtree->tableName(), "evtbl");
 
-});
+  return true;
+}
 
-TEST_CASE(QTreeTest, TestClusterShowServers, [] () {
+// UNIT-QTREE-023
+bool test_sql_qtree_ClusterShowServers(TestContext* ctx) {
   auto runtime = Runtime::getDefaultRuntime();
   auto txn = runtime->newTransaction();
 
@@ -1039,7 +1086,112 @@ TEST_CASE(QTreeTest, TestClusterShowServers, [] () {
       txn->getTableProvider());
   RefPtr<ClusterShowServersNode> qtree =
       qtrees[0].asInstanceOf<ClusterShowServersNode>();
-});
+  return true;
+}
+
+// UNIT-QTREE-024
+bool test_sql_qtree_CreateTableWithPrimaryAndPartitionKey(TestContext* ctx) {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  String query =
+    "  CREATE TABLE fnord ("
+    "      time DATETIME NOT NULL,"
+    "      location string,"
+    "      PRIMARY KEY (time, location),"
+    "      PARTITION KEY (time))";
+
+  csql::Parser parser;
+  parser.parse(query.data(), query.size());
+
+  auto qtree_builder = runtime->queryPlanBuilder();
+  Vector<RefPtr<QueryTreeNode>> qtrees = qtree_builder->build(
+      txn.get(),
+      parser.getStatements(),
+      txn->getTableProvider());
+
+  EXPECT_EQ(qtrees.size(), 1u);
+  RefPtr<CreateTableNode> qtree = qtrees[0].asInstanceOf<CreateTableNode>();
+  EXPECT_EQ(qtree->getTableName(), "fnord");
+
+  auto table_schema = qtree->getTableSchema();
+  auto fcolumns = table_schema.getFlatColumnList();
+  EXPECT_EQ(fcolumns.size(), 2u);
+
+  EXPECT_EQ(qtree->getPrimaryKey().size(), 2u);
+  EXPECT_EQ(qtree->getPrimaryKey()[0], "time");
+  EXPECT_EQ(qtree->getPrimaryKey()[1], "location");
+  EXPECT_EQ(qtree->getPartitionKey(), "time");
+
+  return true;
+}
+
+// UNIT-QTREE-025
+bool test_sql_qtree_CreateTableWithPrimaryWithoutPartitionKey(TestContext* ctx) {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+
+  String query =
+    "  CREATE TABLE fnord ("
+    "      time DATETIME NOT NULL,"
+    "      location string,"
+    "      PRIMARY KEY (time, location))";
+
+  csql::Parser parser;
+  parser.parse(query.data(), query.size());
+
+  auto qtree_builder = runtime->queryPlanBuilder();
+  Vector<RefPtr<QueryTreeNode>> qtrees = qtree_builder->build(
+      txn.get(),
+      parser.getStatements(),
+      txn->getTableProvider());
+
+  EXPECT_EQ(qtrees.size(), 1u);
+  RefPtr<CreateTableNode> qtree = qtrees[0].asInstanceOf<CreateTableNode>();
+  EXPECT_EQ(qtree->getTableName(), "fnord");
+
+  auto table_schema = qtree->getTableSchema();
+  auto fcolumns = table_schema.getFlatColumnList();
+  EXPECT_EQ(fcolumns.size(), 2u);
+
+  EXPECT_EQ(qtree->getPrimaryKey().size(), 2u);
+  EXPECT_EQ(qtree->getPrimaryKey()[0], "time");
+  EXPECT_EQ(qtree->getPrimaryKey()[1], "location");
+  EXPECT_TRUE(qtree->getPartitionKey().empty());
+
+  return true;
+}
+
+void setup_unit_sql_qtree_tests(TestRepository* repo) {
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-001", sql_qtree, ExtractEqualsConstraint);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-002", sql_qtree, ExtractNotEqualsConstraint);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-003", sql_qtree, ExtractLessThanConstraint);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-004", sql_qtree, ExtractLessThanOrEqualToConstraint);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-005", sql_qtree, ExtractGreaterThanConstraint);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-006", sql_qtree, ExtractGreaterThanOrEqualToConstraint);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-007", sql_qtree, ExtractMultipleConstraints);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-008", sql_qtree, SimpleConstantFolding);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-009", sql_qtree, PruneConstraints);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-010", sql_qtree, Serialization);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-011", sql_qtree, SerializationJoinAndSubquery);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-012", sql_qtree, CreateTable);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-013", sql_qtree, CreateTableWith);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-014", sql_qtree, InsertInto);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-016", sql_qtree, InsertIntoFromJSON);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-017", sql_qtree, DropTable);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-018", sql_qtree, CreateDatabase);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-019", sql_qtree, UseDatabase);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-020", sql_qtree, AlterTable);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-021", sql_qtree, AlterTableSetProperty);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-022", sql_qtree, DescribePartitions);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-023", sql_qtree, ClusterShowServers);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-024", sql_qtree, CreateTableWithPrimaryAndPartitionKey);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-QTREE-025", sql_qtree, CreateTableWithPrimaryWithoutPartitionKey);
+}
+
+} // namespace unit
+} // namespace test
+} // namespace eventql
 
 TEST_CASE(QTreeTest, TestShowDatabases, [] () {
   auto runtime = Runtime::getDefaultRuntime();

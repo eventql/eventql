@@ -1,0 +1,92 @@
+city;customername
+Berlin;Alfreds Futterkiste
+México D.F.;Ana Trujillo Emparedados y helados
+México D.F.;Antonio Moreno Taquería
+London;Around the Horn
+Luleå;Berglunds snabbköp
+Mannheim;Blauer See Delikatessen
+Strasbourg;Blondel père et fils
+Madrid;Bólido Comidas preparadas
+Marseille;Bon app'
+Tsawassen;Bottom-Dollar Marketse
+London;B's Beverages
+Buenos Aires;Cactus Comidas para llevar
+México D.F.;Centro comercial Moctezuma
+Bern;Chop-suey Chinese
+São Paulo;Comércio Mineiro
+London;Consolidated Holdings
+Aachen;Drachenblut Delikatessend
+Nantes;Du monde entier
+London;Eastern Connection
+Graz;Ernst Handel
+São Paulo;Familia Arquibaldo
+Madrid;FISSA Fabrica Inter. Salchichas S.A.
+Lille;Folies gourmandes
+Bräcke;Folk och fä HB
+München;Frankenversand
+Nantes;France restauration
+Torino;Franchi S.p.A.
+Lisboa;Furia Bacalhau e Frutos do Mar
+Barcelona;Galería del gastrónomo
+Sevilla;Godos Cocina Típica
+Campinas;Gourmet Lanchonetes
+Eugene;Great Lakes Food Market
+Caracas;GROSELLA-Restaurante
+Rio de Janeiro;Hanari Carnes
+San Cristóbal;HILARIÓN-Abastos
+Elgin;Hungry Coyote Import Store
+Cork;Hungry Owl All-Night Grocers
+Cowes;Island Trading
+Brandenburg;Königlich Essen
+Versailles;La corne d'abondance
+Toulouse;La maison d'Asie
+Vancouver;Laughing Bacchus Wine Cellars
+Walla Walla;Lazy K Kountry Store
+Frankfurt a.M.;Lehmanns Marktstand
+San Francisco;Let's Stop N Shop
+Barquisimeto;LILA-Supermercado
+I. de Margarita;LINO-Delicateses
+Portland;Lonesome Pine Restaurant
+Bergamo;Magazzini Alimentari Riuniti
+Bruxelles;Maison Dewey
+Montréal;Mère Paillarde
+Leipzig;Morgenstern Gesundkost
+London;North/South
+Buenos Aires;Océano Atlántico Ltda.
+Anchorage;Old World Delicatessen
+Köln;Ottilies Käseladen
+Paris;Paris spécialités
+México D.F.;Pericles Comidas clásicas
+Salzburg;Piccolo und mehr
+Lisboa;Princesa Isabel Vinhoss
+Rio de Janeiro;Que Delícia
+São Paulo;Queen Cozinha
+Cunewalde;QUICK-Stop
+Buenos Aires;Rancho grande
+Albuquerque;Rattlesnake Canyon Grocery
+Reggio Emilia;Reggiani Caseifici
+Rio de Janeiro;Ricardo Adocicados
+Genève;Richter Supermarkt
+Madrid;Romero y tomillo
+Stavern;Santé Gourmet
+Boise;Save-a-lot Markets
+London;Seven Seas Imports
+København;Simons bistro
+Paris;Spécialités du monde
+Lander;Split Rail Beer & Ale
+Charleroi;Suprêmes délices
+Portland;The Big Cheese
+Butte;The Cracker Box
+Münster;Toms Spezialitäten
+México D.F.;Tortuga Restaurante
+São Paulo;Tradição Hipermercados
+Kirkland;Trail's Head Gourmet Provisioners
+Århus;Vaffeljernet
+Lyon;Victuailles en stock
+Reims;Vins et alcools Chevalier
+Stuttgart;Die Wandernde Kuh
+Oulu;Wartian Herkku
+Resende;Wellington Importadora
+Seattle;White Clover Markets
+Helsinki;Wilman Kala
+Walla;Wolski

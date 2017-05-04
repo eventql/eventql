@@ -1,0 +1,70 @@
+city;customername
+Aachen;Drachenblut Delikatessend
+Albuquerque;Rattlesnake Canyon Grocery
+Anchorage;Old World Delicatessen
+Barcelona;Galería del gastrónomo
+Barquisimeto;LILA-Supermercado
+Bergamo;Magazzini Alimentari Riuniti
+Berlin;Alfreds Futterkiste
+Bern;Chop-suey Chinese
+Boise;Save-a-lot Markets
+Brandenburg;Königlich Essen
+Bruxelles;Maison Dewey
+Bräcke;Folk och fä HB
+Buenos Aires;Cactus Comidas para llevar
+Butte;The Cracker Box
+Campinas;Gourmet Lanchonetes
+Caracas;GROSELLA-Restaurante
+Charleroi;Suprêmes délices
+Cork;Hungry Owl All-Night Grocers
+Cowes;Island Trading
+Cunewalde;QUICK-Stop
+Elgin;Hungry Coyote Import Store
+Eugene;Great Lakes Food Market
+Frankfurt a.M.;Lehmanns Marktstand
+Genève;Richter Supermarkt
+Graz;Ernst Handel
+Helsinki;Wilman Kala
+I. de Margarita;LINO-Delicateses
+Kirkland;Trail's Head Gourmet Provisioners
+Köln;Ottilies Käseladen
+København;Simons bistro
+Lander;Split Rail Beer & Ale
+Leipzig;Morgenstern Gesundkost
+Lille;Folies gourmandes
+Lisboa;Furia Bacalhau e Frutos do Mar
+London;Around the Horn
+Luleå;Berglunds snabbköp
+Lyon;Victuailles en stock
+Madrid;Bólido Comidas preparadas
+Mannheim;Blauer See Delikatessen
+Marseille;Bon app'
+Montréal;Mère Paillarde
+México D.F.;Ana Trujillo Emparedados y helados
+München;Frankenversand
+Münster;Toms Spezialitäten
+Nantes;Du monde entier
+Oulu;Wartian Herkku
+Paris;Paris spécialités
+Portland;Lonesome Pine Restaurant
+Reggio Emilia;Reggiani Caseifici
+Reims;Vins et alcools Chevalier
+Resende;Wellington Importadora
+Rio de Janeiro;Hanari Carnes
+Salzburg;Piccolo und mehr
+San Cristóbal;HILARIÓN-Abastos
+San Francisco;Let's Stop N Shop
+Seattle;White Clover Markets
+Sevilla;Godos Cocina Típica
+Stavern;Santé Gourmet
+Strasbourg;Blondel père et fils
+Stuttgart;Die Wandernde Kuh
+São Paulo;Comércio Mineiro
+Torino;Franchi S.p.A.
+Toulouse;La maison d'Asie
+Tsawassen;Bottom-Dollar Marketse
+Vancouver;Laughing Bacchus Wine Cellars
+Versailles;La corne d'abondance
+Walla;Wolski
+Walla Walla;Lazy K Kountry Store
+Århus;Vaffeljernet

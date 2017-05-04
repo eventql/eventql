@@ -191,6 +191,13 @@ void callProgressCB(evql_client_t* client, void* cb) {
 Status Console::runQuery(const String& query) {
   auto stdout_os = TerminalOutputStream::fromStream(OutputStream::getStdout());
   auto stderr_os = TerminalOutputStream::fromStream(OutputStream::getStderr());
+
+  auto batch_os = OutputStream::getStdout();
+  auto output_file = cfg_.getOutputFile();
+  if (!output_file.isEmpty()) {
+    batch_os = FileOutputStream::openFile(output_file.get());
+  }
+
   bool line_dirty = false;
   bool is_tty = stderr_os->isTTY();
   bool batchmode = cfg_.getBatchMode();
@@ -239,9 +246,9 @@ Status Console::runQuery(const String& query) {
   if (rc == 0) {
     if (batchmode) {
       for (const auto col : result_columns) {
-        stdout_os->print(col + "\t");
+        batch_os->write(col + "\t");
       }
-      stdout_os->print("\n");
+      batch_os->write("\n");
     } else {
       results.addHeader(result_columns);
     }
@@ -259,10 +266,10 @@ Status Console::runQuery(const String& query) {
     ++result_nrows;
     if (batchmode) {
       for (size_t i = 0; i < result_ncols; ++i) {
-        stdout_os->print(std::string(fields[i], field_lens[i]));
-        stdout_os->print("\t");
+        batch_os->write(std::string(fields[i], field_lens[i]));
+        batch_os->write("\t");
       }
-      stdout_os->print("\n");
+      batch_os->write("\n");
     } else {
       std::vector<std::string> row;
       for (size_t i = 0; i < result_ncols; ++i) {

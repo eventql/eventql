@@ -21,8 +21,7 @@
  * commercial activities involving this program without disclosing the source
  * code of your own applications
  */
-#ifndef _libstx_UTIL_UNITTEST_H
-#define _libstx_UTIL_UNITTEST_H
+#pragma once
 
 #include <functional>
 #include <unordered_map>
@@ -36,22 +35,9 @@
 #include "eventql/util/io/fileutil.h"
 #include "eventql/util/io/inputstream.h"
 #include "eventql/util/io/outputstream.h"
+#include "test_repository.h"
 
 const char kExpectationFailed[] = "ExpectationFailed";
-
-#define UNIT_TEST(T) \
-    static test::UnitTest T(#T); \
-    int main() { \
-      auto& t = T; \
-      return t.run(); \
-    }
-
-#define TEST_CASE(T, N, L) \
-    static test::UnitTest::TestCase __##T##__case__##N(&T, #N, (L));
-
-#define TEST_INITIALIZER(T, N, L) \
-    static test::UnitTest::TestInitializer __##T##__case__##N( \
-        &T, (L));
 
 #define EXPECT(X) \
     if (!(X)) { \
@@ -60,22 +46,19 @@ const char kExpectationFailed[] = "ExpectationFailed";
           "expectation failed: %s", #X); \
     }
 
-
-void EXPECT_TRUE(bool val) {
-  if (!val) {
-    RAISE(
-        kExpectationFailed,
-        "expectation failed: expected TRUE, got FALSE");
+#define EXPECT_TRUE(X) \
+  if (!(X)) { \
+    RAISE( \
+        kExpectationFailed, \
+        "expectation failed: expected TRUE, got FALSE"); \
   }
-}
 
-void EXPECT_FALSE(bool val) {
-  if (val) {
-    RAISE(
-        kExpectationFailed,
-        "expectation failed: expected FALSE, got TRUE");
+#define EXPECT_FALSE(X) \
+  if (!!(X)) { \
+    RAISE( \
+        kExpectationFailed, \
+        "expectation failed: expected FALSE, got TRUE"); \
   }
-}
 
 template <typename T1, typename T2, typename T3>
 void EXPECT_NEAR(T1 expected, T2 actual, T3 diff) {
@@ -138,109 +121,17 @@ void EXPECT_EQ(T1 left, T2 right) {
     } \
   }
 
+#define SETUP_UNIT_TESTCASE(REPO, ID, UNIT, TEST) do { \
+    (REPO)->addTestBundle({ eventql::test::TestCase { \
+      .test_id = (ID), \
+      .description = "Test " + std::string(#TEST) + " in " + std::string(#UNIT), \
+      .fun = &test_##UNIT##_##TEST, \
+      .suites =  { TestSuite::WORLD, TestSuite::SMOKE } \
+    }}); \
+  } while (0)
 
-namespace test {
+#define SETUP_UNIT_TEST(T, R) do { \
+    extern void setup_unit_##T##_tests(TestRepository* repo); \
+    setup_unit_##T##_tests((R)); \
+  } while (0)
 
-class UnitTest {
-public:
-
-  static std::string testDataPath() {
-    return "./";
-  }
-
-  class TestCase {
-  public:
-    TestCase(
-        UnitTest* test,
-        const char* name,
-        std::function<void ()> lambda) :
-        name_(name),
-        lambda_(lambda) {
-      test->addTestCase(this);
-    }
-
-    const char* name_;
-    std::function<void ()> lambda_;
-  };
-
-  class TestInitializer {
-  public:
-    TestInitializer(
-        UnitTest* test,
-        std::function<void ()> lambda) :
-        lambda_(lambda) {
-      test->addInitializer(this);
-    }
-
-    std::function<void ()> lambda_;
-  };
-
-  UnitTest(const char* name) : name_(name) {}
-
-  void addTestCase(const TestCase* test_case) {
-    cases_.push_back(test_case);
-  }
-
-  void addInitializer(const TestInitializer* init) {
-    initializers_.push_back(init);
-  }
-
-  int run() {
-    for (auto initializer : initializers_) {
-      initializer->lambda_();
-    }
-
-    fprintf(stderr, "%s\n", name_);
-
-    size_t num_tests_passed = 0;
-    std::unordered_map<const TestCase*, Exception> errors;
-
-    for (auto test_case : cases_) {
-      fprintf(stderr, "    %s::%s", name_, test_case->name_);
-      fflush(stderr);
-
-      try {
-        test_case->lambda_();
-      } catch (Exception e) {
-        fprintf(stderr, " \033[1;31m[FAIL]\e[0m\n");
-        errors.emplace(test_case, e);
-        continue;
-      }
-
-      num_tests_passed++;
-      fprintf(stderr, " \033[1;32m[PASS]\e[0m\n");
-    }
-
-    if (num_tests_passed != cases_.size()) {
-      for (auto test_case : cases_) {
-        const auto& err = errors.find(test_case);
-
-        if (err != errors.end()) {
-          fprintf(
-              stderr,
-              "\n\033[1;31m[FAIL] %s::%s\e[0m\n",
-              name_,
-              test_case->name_);
-          err->second.debugPrint();
-        }
-      }
-
-      fprintf(
-          stderr,
-          "\n\033[1;31m[FAIL] %i/%i tests failed :(\e[0m\n",
-          (int) (cases_.size() - num_tests_passed),
-          (int) cases_.size());
-      return 1;
-    }
-
-    return 0;
-  }
-
-protected:
-  const char* name_;
-  std::vector<const TestCase*> cases_;
-  std::vector<const TestInitializer*> initializers_;
-};
-
-}
-#endif

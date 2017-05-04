@@ -497,9 +497,9 @@ QueryTreeNode* QueryPlanBuilder::buildGroupBy(
   for (const auto& select_expr : select_list->getChildren()) {
     if (*select_expr == ASTNode::T_ALL) {
       for (const auto& col : subtree_tbl->getAvailableColumns()) {
-        auto sl = new SelectListNode(
-            new ColumnReferenceNode(col.qualified_name, col.type));
-
+        auto colnode = new ColumnReferenceNode(col.qualified_name, col.type);
+        colnode->setColumnIndex(subtree_tbl->getComputedColumnIndex(col.qualified_name, true));
+        auto sl = new SelectListNode(colnode);
         sl->setAlias(col.short_name);
         select_list_expressions.emplace_back(sl);
       }
@@ -1131,8 +1131,10 @@ QueryTreeNode* QueryPlanBuilder::buildJoinTableReference(
 
     if (*select_expr == ASTNode::T_ALL) {
       for (const auto& col : all_columns) {
-        auto sl = new SelectListNode(
-            new ColumnReferenceNode(col.qualified_name, col.type));
+        auto colnode = new ColumnReferenceNode(col.qualified_name, col.type);
+        colnode->setColumnIndex(
+            join_node->getInputColumnIndex(col.qualified_name, true));
+        auto sl = new SelectListNode(colnode);
         sl->setAlias(col.short_name);
         join_node->addSelectList(sl);
       }
@@ -1208,12 +1210,13 @@ QueryTreeNode* QueryPlanBuilder::buildSubqueryTableReference(
   for (const auto& select_expr : select_list->getChildren()) {
     if (*select_expr == ASTNode::T_ALL) {
       for (const auto& col : subquery_tbl->getResultColumns()) {
-        auto sl = new SelectListNode(
-            new ColumnReferenceNode(
-                col,
-                subquery_tbl->getColumnType(
-                    subquery_tbl->getComputedColumnIndex(col))));
+        auto colnode = new ColumnReferenceNode(
+            col,
+            subquery_tbl->getColumnType(
+                subquery_tbl->getComputedColumnIndex(col)));
+        colnode->setColumnIndex(subquery_tbl->getComputedColumnIndex(col));
 
+        auto sl = new SelectListNode(colnode);
         sl->setAlias(col);
         select_list_expressions.emplace_back(sl);
       }
@@ -1349,8 +1352,9 @@ QueryTreeNode* QueryPlanBuilder::buildSeqscanTableReference(
   for (const auto& select_expr : select_list->getChildren()) {
     if (*select_expr == ASTNode::T_ALL) {
       for (const auto& col : table.get().columns) {
-        auto sl = new SelectListNode(
-            new ColumnReferenceNode(col.column_name, col.type));
+        auto colnode = new ColumnReferenceNode(col.column_name, col.type);
+        colnode->setColumnIndex(seqscan->getInputColumnIndex(col.column_name, true));
+        auto sl = new SelectListNode(colnode);
         sl->setAlias(col.column_name);
         seqscan->addSelectList(sl);
       }
@@ -1900,6 +1904,9 @@ static TableSchema buildCreateTableSchema(ASTNode* ast) {
         break;
       }
 
+      case ASTNode::T_PARTITION_KEY:
+        break;
+
       default:
         RAISE(kRuntimeError, "corrupt AST");
 
@@ -1924,6 +1931,7 @@ QueryTreeNode* QueryPlanBuilder::buildCreateTable(
 
   auto table_schema = buildCreateTableSchema(ast->getChildren()[1]);
   Vector<String> primary_key_columns;
+  std::string partition_key;
 
   for (const auto& cld : ast->getChildren()[1]->getChildren()) {
     if (cld->getType() != ASTNode::T_PRIMARY_KEY) {
@@ -1944,6 +1952,25 @@ QueryTreeNode* QueryPlanBuilder::buildCreateTable(
     }
   }
 
+  for (const auto& cld : ast->getChildren()[1]->getChildren()) {
+    if (cld->getType() != ASTNode::T_PARTITION_KEY) {
+      continue;
+    }
+
+    if (!partition_key.empty()) {
+      RAISE(kRuntimeError, "can't have more than one PARTITION KEY definition");
+    }
+
+    for (const auto& col : cld->getChildren()) {
+      if (col->getType() != ASTNode::T_COLUMN_NAME ||
+          col->getToken() == nullptr) {
+        RAISE(kRuntimeError, "corrupt AST");
+      }
+
+      partition_key = col->getToken()->getString();
+    }
+  }
+
   for (auto col : table_schema.getFlatColumnList()) {
     bool is_primary_key = std::find(
         col->column_options.begin(),
@@ -1961,12 +1988,26 @@ QueryTreeNode* QueryPlanBuilder::buildCreateTable(
     primary_key_columns.emplace_back(col->full_column_name);
   }
 
+  if (primary_key_columns.empty()) {
+    RAISE(kRuntimeError, "table must have a PRIMARY KEY");
+  }
+
+  if (!partition_key.empty() && partition_key != primary_key_columns[0]) {
+    RAISE(
+        kRuntimeError,
+        "PARTITION KEY must match the PRIMARY KEY (or the first column of the PRIMARY KEY for compound PRIMARY KEYs)");
+  }
+
   auto node = new CreateTableNode(
       table_name->getToken()->getString(),
       std::move(table_schema));
 
   if (!primary_key_columns.empty()) {
     node->setPrimaryKey(primary_key_columns);
+  }
+
+  if (!partition_key.empty()) {
+    node->setPartitionKey(partition_key);
   }
 
   if (ast->getChildren().size() >= 3) {

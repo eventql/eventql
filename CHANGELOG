@@ -1,13 +1,84 @@
-EventQL v0.4.1 beta;
+EventQL v0.5.0 beta;
+
+  * Fixed a bug in evqlctl where the zookeeper adapter was incorrectly shut down
+    on error
+
+  * Changed the SQL engine to use "static types", i.e. the types of all scalar
+    and table expression outputs are now determined before the execution starts.
+    Accordingly, scalar values (SValues) in the SQL engine are now stored without
+    any additional run time type or size information ("boxing"). Besides
+    reducing memory consumption and improving expression execution speed, this
+    also got rid of most mallocs() when accessing and manipulating strings.
+
+  * Changed the SQL virtual machine to use a custom stack for argument and
+    return value passing (previously the vm was register-based).
+
+  * Changed all built-in functions to have a static type/function signature and
+    updated them to use the new VM interface.
+
+  * Changed the table expression interface to return rows in batches (SVector)
+    and changed the built-in table expressions to use vectorized SQL expression
+    execution (evaluateVector) wherever possible.
+
+  * Changed the existing unit tests to use the new test driver
+
+  * Changed the included spidermonkey JavaScript engine to be disable-able at
+    compile time. The default is disabled, to enable use --enable-jsengine.
+
+  * Changed the build process to not use libtool
+
+  * Changed all evqlctl commands to return better success/error messages
+
+  * Added implicit type conversion to the SQL engine.
+
+  * Added in-memory hash join support for equi-joins.
+
+  * Added the FastCSTableScan access method. This access method is used when
+    no repeated or nested columns are accessed and needs to do less work than
+    the regular CSTableScan when loading tuples from a cstable file.
+
+  * Added the evqlbench benchmarking utility.
+
+  * Added the "count_distinct" function
+
+  * Added a unified test driver (evql-test)
+
+  * Added the SQL test suite that checks the sql engine by executing a list of
+    queries (against a test storage backend) and checking the results.
+
+  * Added a new test suite "basic_sql" that starts a standalone server or a
+    local cluster (using the evqld and evql binaries) and checks basic SQL
+    functionality
+
+  * Added a new test suite "partitions" that starts a local cluster and checks
+    that large bulk inserts and partitioning works
+
+  * Added a new test suite "http_api" that checks the HTTP API with curl
+
+
+EventQL v0.4.1 (v0.4.1, gitc8b3ee9) beta; 2017-01-31 19:53:20 +0000
 
   * Fixed a potential modulo by zero errror in server allocator
 
-  * Add support for INSERT frames with CSV encoding in the protocol
+  * Changed default s2s idle timeout to 10s, s2s pool linger timeout to 1s and
+    max connection pool size to unlimited
+
+  * Changed the partition split procedure to allow "double splits", i.e. split
+    an already splitting partition (thereby finalizing the initial split) when
+    one of the split targets reaches splittable size
+
+  * Added a background task that ensures partition splits are commited timely
+    by retrying split commits until they succeeded
+
+  * Added support for INSERT frames with CSV encoding in the protocol
 
   * Added --format flag and CSV support to evqlctl-table-import
 
+  * Added the --batch_size flag to evqlctl table-import
+
   * Added the ALTER TABLE SET PROPERTY statement to update the table properties
     enable_async_split, partition_split_threshold and disable_replication
+
 
 EventQL v0.4.0 (v0.4.0-rc0, git267e851) beta; 2016-12-20 13:43:47 +0000
 

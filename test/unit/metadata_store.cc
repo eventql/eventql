@@ -25,14 +25,15 @@
 #include "eventql/util/stdtypes.h"
 #include "eventql/util/random.h"
 #include "eventql/util/fnv.h"
-#include "eventql/util/test/unittest.h"
 #include "eventql/db/metadata_store.h"
+#include "../unit_test.h"
 
-using namespace eventql;
+namespace eventql {
+namespace test {
+namespace unit {
 
-UNIT_TEST(MetadataStoreTest);
-
-TEST_CASE(MetadataStoreTest, TestStoreMetadataFile, [] () {
+// UNIT-METADATASTORE-001
+static bool test_metadata_store_storeandload(TestContext* ctx) {
   auto metadata_store_path = StringUtil::format(
       "/tmp/test_metadata_store-$0",
       Random::singleton()->hex64());
@@ -151,9 +152,12 @@ TEST_CASE(MetadataStoreTest, TestStoreMetadataFile, [] () {
     EXPECT_EQ(pmap[1].split_servers_high[0].server_id, "server6");
     EXPECT_EQ(pmap[1].split_servers_high[0].placement_id, 0x456);
   }
-});
 
-TEST_CASE(MetadataStoreTest, TestMetadataCache, [] () {
+  return true;
+}
+
+// UNIT-METADATASTORE-002
+static bool test_metadata_store_cache(TestContext* ctx) {
   auto metadata_store_path = StringUtil::format(
       "/tmp/test_metadata_store-$0",
       Random::singleton()->hex64());
@@ -186,4 +190,16 @@ TEST_CASE(MetadataStoreTest, TestMetadataCache, [] () {
     EXPECT(rc.isSuccess());
     EXPECT(file->getTransactionID() == txid);
   }
-});
+
+  return true;
+}
+
+void setup_unit_metadata_store_tests(TestRepository* repo) {
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METADATASTORE-001", metadata_store, storeandload);
+  SETUP_UNIT_TESTCASE(repo, "UNIT-METADATASTORE-002", metadata_store, cache);
+}
+
+} // namespace unit
+} // namespace test
+} // namespace eventql
+

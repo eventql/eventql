@@ -45,12 +45,20 @@ const TableSchema& CreateTableNode::getTableSchema() const {
   return table_schema_;
 }
 
-const Vector<String> CreateTableNode::getPrimaryKey() const {
+const Vector<String>& CreateTableNode::getPrimaryKey() const {
   return primary_key_;
 }
 
 void CreateTableNode::setPrimaryKey(const Vector<String>& columns) {
   primary_key_ = columns;
+}
+
+const std::string& CreateTableNode::getPartitionKey() const {
+  return partition_key_;
+}
+
+void CreateTableNode::setPartitionKey(const std::string& partition_key) {
+  partition_key_ = partition_key;
 }
 
 RefPtr<QueryTreeNode> CreateTableNode::deepCopy() const {

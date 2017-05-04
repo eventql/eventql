@@ -39,8 +39,11 @@ public:
   const String& getTableName() const;
   const TableSchema& getTableSchema() const;
 
-  const Vector<String> getPrimaryKey() const;
+  const Vector<String>& getPrimaryKey() const;
   void setPrimaryKey(const Vector<String>& columns);
+
+  const std::string& getPartitionKey() const;
+  void setPartitionKey(const std::string& partition_key);
 
   RefPtr<QueryTreeNode> deepCopy() const;
   String toString() const;
@@ -52,6 +55,7 @@ protected:
   String table_name_;
   TableSchema table_schema_;
   Vector<String> primary_key_;
+  std::string partition_key_;
   std::vector<std::pair<std::string, std::string>> properties_;
 };
 

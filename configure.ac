@@ -47,7 +47,7 @@ AC_PROG_CC_FOR_BUILD
 AC_PROG_CXX
 AC_PROG_CXX_FOR_BUILD
 AM_PROG_AS
-LT_INIT
+LT_INIT([disable-shared])
 
 # Check for header files
 AC_HEADER_STDC

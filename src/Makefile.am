@@ -1,6 +1,6 @@
 bin_PROGRAMS = evql evqld evqlctl evqlbench evqlslap cstable_tool
-lib_LTLIBRARIES = libevqlclient.la
-check_LIBRARIES = libevqlcore.a
+lib_LIBRARIES = libevqlclient_static.a
+noinst_LIBRARIES = libevqlcore.a
 
 MAINTAINERCLEANFILES =   \
   Makefile.in
@@ -991,7 +991,7 @@ evql_SOURCES = \
     eventql/evql.cc
 
 evql_LDADD = \
-    libevqlclient.la \
+    libevqlclient_static.a \
     $(ZOOKEEPER_LDADD) \
     $(LINENOISE_LDADD) \
     $(INIH_LDADD) \
@@ -1034,7 +1034,7 @@ evqlctl_SOURCES = \
     eventql/evqlctl.cc
 
 evqlctl_LDADD = \
-    libevqlclient.la \
+    libevqlclient_static.a \
     $(SIMDCOMP_LDADD) \
     $(INIH_LDADD) \
     $(MURMURHASH_LDADD) \
@@ -1056,7 +1056,7 @@ evqlbench_SOURCES = \
     eventql/evqlbench.cc
 
 evqlbench_LDADD = \
-    libevqlclient.la \
+    libevqlclient_static.a \
     $(SIMDCOMP_LDADD) \
     $(INIH_LDADD) \
     $(MURMURHASH_LDADD) \
@@ -1076,7 +1076,7 @@ evqlslap_SOURCES = \
     eventql/evqlslap.cc
 
 evqlslap_LDADD = \
-    libevqlclient.la \
+    libevqlclient_static.a \
     $(ZOOKEEPER_LDADD) \
     $(LINENOISE_LDADD) \
     $(INIH_LDADD) \
@@ -1095,7 +1095,7 @@ cstable_tool_SOURCES = \
     eventql/io/cstable/cstable_tool.cc
 
 cstable_tool_LDADD = \
-    libevqlclient.la \
+    libevqlclient_static.a \
     $(ZOOKEEPER_LDADD) \
     $(LINENOISE_LDADD) \
     $(INIH_LDADD) \
@@ -1107,8 +1107,8 @@ cstable_tool_LDADD = \
 
 cstable_tool_LDFLAGS = -static
 
-################ LIB: libevqlclient.a ###################
-libevqlclient_la_SOURCES = eventql/client.c
+################ LIB: libevqlclient_static.a ###################
+libevqlclient_static_a_SOURCES = eventql/client.c
 
 ################ LIB: libevqlcore.a ###################
 libevqlcore_a_SOURCES = $(EVQL_CORE_SOURCES_) $(EVQL_PROTO_SOURCES_)

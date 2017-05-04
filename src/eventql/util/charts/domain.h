@@ -24,6 +24,7 @@
 #ifndef _libstx_DOMAIN_H
 #define _libstx_DOMAIN_H
 #include <algorithm>
+#include <string>
 #include <math.h>
 #include <stdlib.h>
 #include <vector>
