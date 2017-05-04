@@ -418,22 +418,13 @@ Status setTableProperty(
     TableConfig* config,
     std::pair<std::string, std::string> property) {
   if (property.first == "write_consistency_level") {
-    StringUtil::toUpper(&property.second);
-    if (property.second == "STRICT") {
-      config->set_default_write_consistency_level(EVQL_CLEVEL_WRITE_STRICT);
-      return Status::success();
-    } else if (property.second == "RELAXED") {
-      config->set_default_write_consistency_level(EVQL_CLEVEL_WRITE_RELAXED);
-      return Status::success();
-    } else if (property.second == "BEST_EFFORT") {
-      config->set_default_write_consistency_level(EVQL_CLEVEL_WRITE_BEST_EFFORT);
+    EVQL_CLEVEL_WRITE clevel;
+    auto rc = writeConsistencyLevelFromString(property.second, &clevel);
+    if (rc.isSuccess()) {
+      config->set_default_write_consistency_level(clevel);
       return Status::success();
     } else {
-      return Status(
-          eRuntimeError,
-          StringUtil::format(
-              "invalid write_consistency_level: $0",
-              property.second));
+      return Status(rc);
     }
   }
 
