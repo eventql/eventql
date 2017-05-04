@@ -189,6 +189,13 @@ Status TableService::createTable(
     }
 
     if (p.first == "user_defined_partitions" && p.second == "true") {
+      if (partitioner_type != TBL_PARTITION_STRING &&
+          partitioner_type != TBL_PARTITION_UINT64) {
+        return Status(
+            eIllegalArgumentError,
+            "user defined partition key must be of type STRING or UINT64");
+      }
+
       tblcfg->set_enable_user_defined_partitions(true);
       continue;
     }
