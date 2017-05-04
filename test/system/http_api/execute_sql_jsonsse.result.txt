@@ -1,0 +1,15 @@
+event: status
+data: {"status": "running","progress": 0.0,"tasks_total": 0,"tasks_complete": 0,"tasks_running": 0,"tasks_failed": 0,"message": "Waiting..."}
+
+event: status
+data: {"status": "running","progress": 0.0,"tasks_total": 1,"tasks_complete": 0,"tasks_running": 1,"tasks_failed": 0,"message": "Waiting..."}
+
+event: status
+data: {"status": "running","progress": 1.0,"tasks_total": 1,"tasks_complete": 1,"tasks_running": 0,"tasks_failed": 0,"message": "Running..."}
+
+event: status
+data: {"status": "running","progress": 1.0,"tasks_total": 1,"tasks_complete": 1,"tasks_running": 0,"tasks_failed": 0,"message": "Downloading..."}
+
+event: result
+data: {"results": [{"type": "table","columns": ["1"],"rows": [["1"]]}]}
+
