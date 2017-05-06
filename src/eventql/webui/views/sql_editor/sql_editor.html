@@ -1,0 +1,31 @@
+<template id="evql-sql-editor-tpl">
+  <div class="evql_sql_editor">
+
+    <section class="editor_title">
+      <button class="btn" data-action="execute-query">
+        <i class="icon-play-circled"></i>
+        &nbsp;Execute
+      </button>
+    </section>
+
+    <div class="editor_viewport">
+      <div class="editor">
+        <div data-content='codeeditor'></div>
+
+        <div class="result">
+        </div>
+
+      </div>
+    </div>
+
+    <div data-control="execute_tooltip" data-position="bottom" data-pointer="center">You can also press Ctrl+Enter</div>
+  </div>
+</template>
+
+<template id="evql-sql-editor-error-tpl">
+  <div class="message error">
+    <h3>Error</h3>
+    <p class="info"></p>
+  </div>
+</template>
+

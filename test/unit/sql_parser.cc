@@ -2013,3 +2013,13 @@ void setup_unit_sql_parser_tests(TestRepository* repo) {
 } // namespace test
 } // namespace eventql
 
+TEST_CASE(ParserTest, TestShowDatabasesStatement, [] () {
+  auto runtime = Runtime::getDefaultRuntime();
+  auto txn = runtime->newTransaction();
+  auto parser = parseTestQuery("SHOW DATABASES;");
+
+  EXPECT(parser.getStatements().size() == 1);
+  const auto& stmt = parser.getStatements()[0];
+  EXPECT_EQ(*stmt, ASTNode::T_SHOW_DATABASES);
+});
+

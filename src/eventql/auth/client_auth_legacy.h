@@ -41,10 +41,6 @@ public:
       Session* session,
       HashMap<String, String> auth_data) override;
 
-  Status changeNamespace(
-      Session* session,
-      const String& ns) override;
-
 protected:
   mutable web::SecureCookieCoder cookie_coder_;
 };

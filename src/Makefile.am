@@ -602,6 +602,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/statements/select/select.h \
     eventql/sql/statements/show_tables.cc \
     eventql/sql/statements/show_tables.h \
+    eventql/sql/statements/show_databases.cc \
+    eventql/sql/statements/show_databases.h \
     eventql/sql/statements/select/subquery.cc \
     eventql/sql/statements/select/subquery.h \
     eventql/sql/statements/select/tablescan.cc \
@@ -703,6 +705,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/sql/qtree/nodes/describe_partitions.h \
     eventql/sql/qtree/nodes/cluster_show_servers.cc \
     eventql/sql/qtree/nodes/cluster_show_servers.h \
+    eventql/sql/qtree/nodes/show_databases.cc \
+    eventql/sql/qtree/nodes/show_databases.h \
     eventql/sql/qtree/qtree_coder.cc \
     eventql/sql/qtree/qtree_coder.h \
     eventql/sql/qtree/qtree_coder_impl.h \
@@ -946,6 +950,8 @@ EVQL_CORE_SOURCES_ = \
     eventql/transport/http/http_auth.h \
     eventql/transport/http/status_servlet.cc \
     eventql/transport/http/status_servlet.h \
+    eventql/webui/webui.cc \
+    eventql/webui/webui.h \
     eventql/util/mdb/MDB.cc \
     eventql/util/mdb/MDB.h \
     eventql/util/mdb/MDBUtil.h \
@@ -959,7 +965,10 @@ eventql/mapreduce/mapreduce_preludejs.cc:
 	echo 'eventql/mapreduce/prelude.js:${srcdir}/eventql/mapreduce/prelude.js' | ${srcdir}/eventql/util/assets.sh $(builddir)/eventql/mapreduce/mapreduce_preludejs.cc
 
 ################# BIN: evqld ####################
-evqld_SOURCES = ${EVQL_CORE_SOURCES_} ${EVQL_PROTO_SOURCES_} eventql/evqld.cc
+evqld_SOURCES = \
+    ${EVQL_CORE_SOURCES_} \
+    ${EVQL_PROTO_SOURCES_} \
+    eventql/evqld.cc
 
 evqld_LDADD = \
     $(ZOOKEEPER_LDADD) \

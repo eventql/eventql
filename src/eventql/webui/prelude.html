@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>EventQL Web</title>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-type">
+    <link rel="icon" type="image/png" sizes="64x64" href="/ui/favicon.png">
+    <meta name="google" content="notranslate" />
+    <style type="text/css">
+      .navbar { display: none; }
+    </style>
+  </head>
+  <body>
+    <div id="evql_body">
+      <nav class="navbar">
+      </nav>
+
+      <div id="evql_viewport"></div>
+    </div>
+
+    <script type="text/javascript">
+      window.setTimeout(function() {
+        var http = new XMLHttpRequest();
+        http.open("GET", "/ui/assets/app.html", true);
+        http.send();
+
+        http.onreadystatechange = function() {
+          if (http.readyState == 4) {
+            if (http.status == 200) {
+              var dummy = document.createElement("div");
+              dummy.innerHTML = http.responseText;
+              dummy.style.display = "none";
+              document.body.appendChild(dummy);
+
+              var scripts = dummy.getElementsByTagName('script');
+              for (var i = 0; i < scripts.length; i++) {
+                var script = document.createElement('script');
+                script.type = scripts[i].type;
+                if (scripts[i].src) {
+                  script.src = scripts[i].src;
+                } else {
+                  script.innerHTML = scripts[i].innerHTML;
+                }
+
+                document.head.appendChild(script);
+              }
+
+              EventQL.init();
+            } else {
+              console.log("ERROR: unable to load /ui/assets/app.html");
+            }
+          }
+        }
+      }, 0);
+    </script>
+  </body>
+</html>

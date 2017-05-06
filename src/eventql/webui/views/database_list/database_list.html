@@ -1,0 +1,33 @@
+<template id="evql-database-list-tpl">
+  <div class="evql_database_list">
+
+    <div class="section_title">
+      <button class="btn" data-control="create_database">Create Database</button>
+      <h1>Please select a database</h1>
+    </div>
+
+    <div class="result" data-content="result"></div>
+
+    <div data-content="database_creator"></div>
+
+  </div>
+</template>
+
+<template id="evql-database-list-table-result-tpl">
+  <table class="evql_table database_list">
+    <thead>
+      <tr>
+        <th>Database</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</template>
+
+<template id="evql-database-list-empty-result-tpl">
+  <div class="empty_result">
+    <p class="info">
+      No database found
+    </p>
+  </div>
+</template>

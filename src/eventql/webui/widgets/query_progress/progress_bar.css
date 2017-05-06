@@ -1,0 +1,124 @@
+.evql_query_progress_bar {
+  position: relative;
+  display: block;
+  max-width: 100%;
+  border: 1px solid rgba(39,41,43,.15);
+  margin: 1em 0 2.5em;
+  box-shadow: none;
+  background: rgba(0,0,0,.03);
+  padding: .2857em;
+  border-radius: .2857rem;
+  font-size: 1rem;
+}
+
+.evql_query_progress_bar[data-state='disabled'] {
+  opacity: .35;
+}
+
+.evql_query_progress_bar[data-state='success'].bar {
+  background-color: #5bbd72!important;
+}
+
+.evql_query_progress_bar[data-state='warning'].bar {
+  background-color: #f2c037!important;
+}
+
+.evql_query_progress_bar[data-state='error'].bar {
+  background-color: #d95c5c!important;
+}
+
+.evql_query_progress_bar[data-state='success'] .label {
+  color : #356e36;
+}
+
+.evql_query_progress_bar[data-state='warning'] .label {
+  color : #825c01;
+}
+
+.evql_query_progress_bar[data-state='error'] .label {
+  color : #d95c5c;
+}
+
+.evql_query_progress_bar[data-state='unknown'] .bar {
+  width: 0;
+}
+
+.evql_query_progress_bar .bar {
+  display: block;
+  height: 1.75em;
+  line-height: 1;
+  position: relative;
+  width: 0;
+  min-width: 2em;
+  background: #888;
+  border-radius: .2857rem;
+}
+
+.evql_query_progress_bar .bar::after {
+  content: '';
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  border-radius: .2857rem;
+  -webkit-animation: progress-active 2s ease infinite;
+  animation: progress-active 2s ease infinite;
+}
+
+.evql_query_progress_bar .bar > .progress {
+  white-space: nowrap;
+  position: absolute;
+  width: auto;
+  font-size: .9em;
+  top: 50%;
+  right: .5em;
+  left: auto;
+  bottom: auto;
+  color: rgba(255,255,255,.8);
+  text-shadow: none;
+  margin-top: -.5em;
+  font-weight: 700;
+  text-align: left;
+  font-family: Lato,'Helvetica Neue',Arial,Helvetica,sans-serif;
+  line-height: 1;
+}
+
+.evql_query_progress_bar .label {
+  position: absolute;
+  width: 100%;
+  font-size: 1em;
+  top: 100%;
+  right: auto;
+  left: 0;
+  bottom: auto;
+  color: rgba(0,0,0,.8);
+  font-weight: 700;
+  text-shadow: none;
+  margin-top: .2em;
+  text-align: center;
+}
+
+@-webkit-keyframes progress-active {
+  0% {
+    opacity: 0.3;
+    width: 0;
+  }
+  100% {
+    opacity: 0;
+    width: 100%;
+  }
+}
+
+@keyframes progress-active {
+  0% {
+    opacity: 0.3;
+    width: 0;
+  }
+  100% {
+    opacity: 0;
+    width: 100%;
+  }
+}

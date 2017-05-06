@@ -1,0 +1,140 @@
+.evql_sql_editor,
+.evql_sql_editor .editor_viewport {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  background: #f9f9f9;
+}
+
+.evql_sql_editor [data-content='codeeditor'] {
+  height: 250px;
+}
+
+.evql_sql_editor .editor_title {
+  position: relative;
+  padding: 0 20px;
+  right: 20px;
+  height: 50px;
+  border-bottom: 1px solid #ddd;
+}
+
+.evql_sql_editor .editor_title button.btn {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.evql_sql_editor .toolbar {
+  font-size: 12px;
+  height: 38px;
+  line-height: 38px;
+  border-bottom: 1px solid #eee;
+  padding: 0 20px 0 15px;
+  overflow: visible;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+  background: #f9f9f9;
+}
+
+.evql_sql_editor .toolbar .table_controls {
+  float: right;
+}
+
+.evql_sql_editor .toolbar .table_controls > div {
+  float: left;
+  margin-right: 20px;
+}
+
+.evql_sql_editor .result {
+  border-top: 1px solid #c9d0d4;
+}
+
+.evql_sql_editor .result .toolbar .table_controls.hidden,
+.evql_sql_editor .result .hidden .toolbar + div {
+  display: none;
+}
+
+
+/** review **/ 
+.evql_sql_editor .message {
+  display: block;
+  position: relative;
+  min-height: 1em;
+  padding: 1em 1.5em;
+  line-height: 1.3;
+  font-size: 1em;
+  font-size: 14px;
+}
+
+.evql_sql_editor .message.error {
+  background: #fff0f0;
+  color: #a94442;
+}
+
+.evql_sql_editor .message.hidden {
+  display: none;
+}
+
+.evql_sql_editor .message h3 {
+  margin-top: 0;
+}
+
+.evql_sql_editor .resizer_tooltip {
+  height: 20px;
+  background: url(data:image/gif;base64,R0lGODlhZwABAJEAAPD2+Nve3////////yH5BAEAAAMALAAAAABnAAEAAAINhI+py60hopy02otrAQA7) left center repeat-y #fff;
+  cursor: row-resize;
+  border-bottom: 1px solid #c9d0d4;
+}
+
+
+
+
+/**
+  * Editor
+  */
+.evql_sql_editor z-codeeditor {
+  border-top: 1px solid #c9d0d4;
+  border-bottom: none;
+}
+
+.evql_sql_editor .CodeMirror-gutters {
+  background: #f9f9f9;
+  background-color: none;
+}
+
+.evql_sql_editor .CodeMirror {
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+.evql_sql_editor .result table.z-table {
+  border-bottom: 1px solid #c9d0d4;
+}
+
+.evql_sql_editor .result table.z-table thead th:first-child,
+.evql_sql_editor .result table.z-table tbody td:first-child {
+  padding-left: 20px;
+}
+
+
+.evql_sql_editor .evql_sql_chart {
+  padding: 20px;
+}
+.evql_sql_editor z-modal.change_edit_state .z-modal-content h3 {
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.evql_sql_editor z-modal.change_edit_state .z-modal-content h3 a.link {
+  text-decoration: underline;
+}

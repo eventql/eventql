@@ -1,0 +1,65 @@
+.evql_database_list {
+  padding: 0 20px;
+}
+
+.evql_database_list .section_title {
+  position: relative;
+}
+
+.evql_database_list h1 {
+  font-weight: 300;
+  line-height: 60px;
+  height: 60px;
+  font-size: 20px;
+  color: #333;
+  margin: 0;
+}
+
+.evql_database_list .section_title button.btn {
+  right: 0;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.evql_database_list table.evql_table {
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+}
+
+.evql_database_list table.evql_table th {
+  background: transparent;
+}
+
+.evql_database_list .empty_result {
+  margin-top: 30px;
+}
+
+.evql_database_list .empty_result p.info {
+  text-align: center;
+  color: #697886;
+}
+
+.evql_database_list .evql_modal .modal_window {
+  height: 285px;
+}
+
+.evql_database_list .evql_modal .body {
+  font-size: 13px;
+  line-height: 35px;
+  padding-top: 15px;
+}
+
+.evql_database_list .evql_modal .body label {
+  margin-right: 10px;
+  display: block;
+  vertical-align: top;
+}
+
+.evql_database_list .evql_modal .body input.txt {
+  width: 100%;
+}
+
+.evql_database_list .evql_modal .footer button.btn {
+  margin-left: 5px;
+}
