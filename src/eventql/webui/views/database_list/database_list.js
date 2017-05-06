@@ -35,22 +35,29 @@ EventQL.DatabaseList = function(elem, params) {
     fetchData();
   };
 
+  this.destroy = function() {
+    if (query_mgr) {
+      query_mgr.closeAll();
+    }
+  };
+
   function initCreateDatabaseControl() {
-    var modal_elem = elem.querySelector(".evql_modal");
-    var modal = new EventQL.Modal(modal_elem);
-    modal.onSubmit(function() {
-      var db_name = modal_elem.querySelector("input[name='database']").value;
-      createDatabase(db_name);
+    var creator_elem = elem.querySelector("[data-content='database_creator']");
+    var database_creator = new EventQL.DatabaseList.DatabaseCreator(
+        creator_elem,
+        query_mgr,
+        params);
+
+    database_creator.setChangeCallback(function(result) {
+      fetchData();
     });
 
-    var control = elem.querySelector("button[data-control='create_database']");
-    control.addEventListener("click", function(e) {
-      modal.show();
-    }, false);
+    var ctrl_elem = elem.querySelector("[data-control='create_database']");
+    database_creator.init(ctrl_elem);
   }
 
   function fetchData() {
-    var query_str = "SHOW TABLES;";
+    var query_str = "SHOW DATABASES;";
     var query_id = "show_databases";
 
     var query = query_mgr.add(
@@ -60,7 +67,6 @@ EventQL.DatabaseList = function(elem, params) {
     query.addEventListener('result', function(e) {
       query_mgr.close(query_id);
       var result = JSON.parse(e.data).results;
-
       if (result[0].rows.length > 0) {
         renderDatabaseList(result);
       } else {
@@ -84,6 +90,11 @@ EventQL.DatabaseList = function(elem, params) {
   }
 
   function renderDatabaseList(result) {
+    var result_tpl = TemplateUtil.getTemplate(
+        "evql-database-list-table-result-tpl");
+    var result_elem = elem.querySelector("[data-content='result']");
+    DOMUtil.replaceContent(result_elem, result_tpl);
+
     var tbody_elem = elem.querySelector("table.database_list tbody");
 
     result[0].rows.forEach(function(row) {
@@ -102,41 +113,11 @@ EventQL.DatabaseList = function(elem, params) {
     });
   }
 
-  function createDatabase(db_name) {
-    var query_str = "CREATE DATABASE " + db_name + ";";
-    var query_id = "create_database";
-
-    var query = query_mgr.add(
-        query_id,
-         params.app.api_stubs.evql.executeSQLSSE(query_str));
-
-    query.addEventListener('result', function(e) {
-      query_mgr.close(query_id);
-      var data = JSON.parse(e.data);
-      fetchData();
-    });
-
-    query.addEventListener('query_error', function(e) {
-      query_mgr.close(query_id);
-      console.log("error", JSON.parse(e.data).error);
-      //renderQueryError(JSON.parse(e.data).error);
-    });
-
-    query.addEventListener('error', function(e) {
-      query_mgr.close(query_id);
-      //renderQueryError("Server Error");
-    });
-
-    query.addEventListener('status', function(e) {
-      ///renderQueryProgress(JSON.parse(e.data));
-    });
-  }
-
   function renderEmptyResult() {
     var result_tpl = TemplateUtil.getTemplate(
         "evql-database-list-empty-result-tpl");
 
-    var result_elem = elem.querySelector(".result");
+    var result_elem = elem.querySelector("[data-content='result']");
     DOMUtil.replaceContent(result_elem, result_tpl);
   }
 
@@ -147,8 +128,6 @@ EventQL.DatabaseList = function(elem, params) {
     });
     error_message.render();
   }
-
 };
 
 EventQL.views["eventql.database_list"] = EventQL.DatabaseList;
-

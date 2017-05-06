@@ -56,3 +56,5 @@ views/sql_editor/chart.js
 views/database_list/database_list.css
 views/database_list/database_list.html
 views/database_list/database_list.js
+views/database_list/database_creator.html
+views/database_list/database_creator.js

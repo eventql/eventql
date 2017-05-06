@@ -38,7 +38,7 @@ EventQL = (function() {
   var navbar;
   var api_stubs = {};
 
-  var init = function() {
+  function init() {
     console.log(">> EventQL Cloud ", VERSION);
 
     api_stubs.evql = new API({});
@@ -65,27 +65,26 @@ EventQL = (function() {
     }, 0);
   }
 
-  var navigateTo = function(url) {
+  function navigateTo(url) {
     var path = URLUtil.getPathAndQuery(url);
     history.pushState({path: path}, "", path);
     setPath(path);
   }
 
-  var navigateHome = function() {
+  function navigateHome() {
     navigateTo("/");
   }
 
-  var showLoader = function() {
+  function showLoader() {
     //FIXME
     //document.getElementById("evql_main_loader").classList.remove("hidden");
   };
 
-  var hideLoader = function() {
+  function hideLoader() {
     //FIXME
     //document.getElementById("evql_main_loader").classList.add("hidden");
   };
 
-  /** PRIVATE **/
   function setDatabase(db) {
     api_stubs.evql.setDatabase(db);
     navbar.setDatabase(db);

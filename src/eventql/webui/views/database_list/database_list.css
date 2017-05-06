@@ -40,27 +40,26 @@
   color: #697886;
 }
 
+.evql_database_list .evql_modal .modal_window {
+  height: 285px;
+}
+
 .evql_database_list .evql_modal .body {
   font-size: 13px;
   line-height: 35px;
-  display: flex;
-  flex-direction: row;
-  flex: 1;
+  padding-top: 15px;
 }
 
 .evql_database_list .evql_modal .body label {
   margin-right: 10px;
-  display: inline-block;
+  display: block;
   vertical-align: top;
-}
-
-.evql_database_list .evql_modal .body .input_container {
-  display: flex;
-  flex-direction: row;
-  flex: 1;
 }
 
 .evql_database_list .evql_modal .body input.txt {
   width: 100%;
 }
 
+.evql_database_list .evql_modal .footer button.btn {
+  margin-left: 5px;
+}

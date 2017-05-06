@@ -6,37 +6,22 @@
       <h1>Please select a database</h1>
     </div>
 
-    <div class="result">
-      <table class="evql_table database_list">
-        <thead>
-          <tr>
-            <th>Database</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+    <div class="result" data-content="result"></div>
 
-    <div class="evql_modal">
-      <div class="modal_window">
-        <div class="header">Create Database</div>
-        <div class="body">
-          <div>
-            <label>Please enter a name:</label>
-          </div>
+    <div data-content="database_creator"></div>
 
-          <div class="input_container">
-            <input class="txt" type="text" name="database" />
-          </div>
-        </div>
-
-        <div class="footer">
-          <button class="btn" data-control="hide">Cancel</button>
-          <button class="btn" data-control="submit"> Save</button>
-        </div>
-      </div>
-    </div>
   </div>
+</template>
+
+<template id="evql-database-list-table-result-tpl">
+  <table class="evql_table database_list">
+    <thead>
+      <tr>
+        <th>Database</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
 </template>
 
 <template id="evql-database-list-empty-result-tpl">

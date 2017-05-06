@@ -4,7 +4,7 @@ var API = function(auth_data) {
   const HOSTNAME = document.location.hostname;
   const PORT = document.location.port;
 
-  var database;
+  var database = "test"; //FIXME hack
 
   this.setDatabase = function(db) {
     database = db;
