@@ -1,0 +1,30 @@
+- [x] SQLEditor fix button css
+- [x] SQLEditor: Tooltip
+- [x] fix inital navbar css
+- [x] SQLEditor: Chart Toolbar
+- [x] SQLEditor: Table Toolbar
+- [x] SQLEditor: download
+- [x] SQLEditor: Query Progress
+- [x] ChartPlotter bar chart
+- [x] Console: save history in browser local storage
+- [x] SQLEditor: save chart type in url
+- [x] handleLinks
+
+- [ ] database list
+- [ ] create database
+
+- [ ] handle auth / database
+- [ ] ChartPlotter add area chart
+- [ ] SQLEditor: make x, y axes for generated chart selectable
+- [ ] fix font
+- [ ] fix favicon
+- [ ] Login
+- [ ] isDrawable
+
+- [ ] Table List: import
+
+- [ ] ChartPlotter: make it selectable if x_axis is timeseries or not
+- [ ] ChartPlotter: get timeserries time label format from timesries range
+
+- [ ] check if registerElement polyfill is necessary
+- [ ] add license to all html and css documents

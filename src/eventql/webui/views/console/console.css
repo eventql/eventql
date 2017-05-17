@@ -1,0 +1,179 @@
+.evql_console {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.evql_console .toolbar {
+  height: 37px;
+  border-bottom: 1px solid #ddd;
+  padding: 0 20px;
+  line-height: 37px;
+  font-size: 12px;
+  cursor: default;
+}
+
+.evql_console .toolbar a.link {
+  float: right;
+  height: 36px;
+  line-height: 39px;
+  display: block;
+  color: #3c8bd4;
+}
+
+.evql_console .toolbar button:hover {
+  text-decoration: underline;
+  background: transparent;
+}
+
+.evql_console .console {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100px;
+  justify-content: flex-start;
+  display: flex;
+  flex-direction: column-reverse;
+  background: #f9f9f9;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  -o-user-select: text;
+  user-select: text;
+}
+
+.evql_console .console p.cmd {
+  color: #888;
+}
+
+.evql_console .console p {
+  margin: 0 0 0.4em 0;
+  padding: 0;
+}
+
+.evql_console .console p.status.success {
+  display: none;
+}
+
+.evql_console .console p.banner {
+  color: #aaa;
+}
+
+.evql_console .console p.error:before {
+  content: "ERROR: ";
+  color: #c0392b;
+  font-family:"InconsolataBold", monospace;
+}
+
+.evql_console .console p.warn:before {
+  content: "WARNING: ";
+  color: #e67e22;
+}
+
+.evql_console .console .chart {
+  margin-top: 12px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  max-width: 1100px;
+}
+
+.evql_console .console table {
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-spacing: 0;
+  border-collapse: separate;
+  margin: 12px 0 8px 0;
+}
+
+.evql_console .console table th,
+.evql_console .console table td {
+  margin: 0;
+  padding: 0 .7em 0 .7em;
+  border-right: 1px dashed #ccc;
+  text-align: left;
+}
+
+.evql_console .console table th:last-child,
+.evql_console .console table td:last-child {
+  padding-right: 0;
+  border-right: none;
+}
+
+.evql_console .console table th:first-child,
+.evql_console .console table td:first-child {
+  padding-left: 0;
+}
+
+.evql_console .console table tr:first-child td {
+  padding-top: .3em;
+}
+
+.evql_console .console table th {
+  border-bottom: 1px solid #ccc;
+  font-family:"InconsolataBold", monospace;
+  padding-bottom: .2em;
+}
+
+.evql_console .console > div {
+  display: block;
+  border-top:1px solid #eee;
+  margin:0px;
+  line-height: 18px;
+  padding: 16px 20px 12px 20px;
+  display: block;
+  flex: none;
+}
+
+.evql_console .console > div:last-child {
+  border-top: none;
+}
+
+.evql_console .prompt {
+  padding: 3px 20px 4px 20px;
+  min-height: min-content;
+  margin: 0;
+  display: flex;
+  flex-direction: row;
+  border-top: 1px solid #ddd;
+}
+
+.evql_console .prompt span {
+  margin-right:10px;
+  line-height: 35px;
+  height: 35px;
+  color: #777;
+  cursor: default;
+}
+
+.evql_console .prompt .hint {
+  color: #bbb;
+  position: relative;
+  right: -14px;
+  cursor: default;
+}
+
+.evql_console .console,
+.evql_console .prompt,
+.evql_console .prompt textarea,
+.evql_console .prompt textarea:disabled{
+  font-family:"Inconsolata", monospace;
+  font-size:11pt;
+  color:#111;
+}
+
+.evql_console .prompt textarea {
+  outline:none;
+  padding: 8px 0 6px 0;
+  margin: 0;
+  min-height: 35px;
+  line-height: 19px;
+  flex: 1;
+  resize: none;
+  border: none;
+  overflow: hidden;
+  min-height: 18px;
+  box-sizing: border-box;
+}

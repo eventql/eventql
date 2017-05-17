@@ -1,0 +1,48 @@
+<template id="evql-database-list-tpl">
+  <div class="evql_database_list">
+
+    <div class="section_title">
+      <button class="btn" data-control="create_database">Create Database</button>
+      <h1>Please select a database</h1>
+    </div>
+
+    <div class="result">
+      <table class="evql_table database_list">
+        <thead>
+          <tr>
+            <th>Database</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="evql_modal">
+      <div class="modal_window">
+        <div class="header">Create Database</div>
+        <div class="body">
+          <div>
+            <label>Please enter a name:</label>
+          </div>
+
+          <div class="input_container">
+            <input class="txt" type="text" name="database" />
+          </div>
+        </div>
+
+        <div class="footer">
+          <button class="btn" data-control="hide">Cancel</button>
+          <button class="btn" data-control="submit"> Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="evql-database-list-empty-result-tpl">
+  <div class="empty_result">
+    <p class="info">
+      No database found
+    </p>
+  </div>
+</template>

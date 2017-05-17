@@ -51,6 +51,7 @@
 #include <eventql/sql/qtree/nodes/insert_json.h>
 #include <eventql/sql/qtree/nodes/describe_partitions.h>
 #include "eventql/sql/qtree/nodes/cluster_show_servers.h"
+#include "eventql/sql/qtree/nodes/show_databases.h"
 #include <eventql/sql/table_schema.h>
 
 namespace csql {
@@ -112,6 +113,10 @@ RefPtr<QueryTreeNode> QueryPlanBuilder::build(
     return node;
   }
 
+  if ((node = buildShowDatabases(txn, ast)) != nullptr) {
+    return node;
+  }
+
   if ((node = buildDescribeTable(txn, ast)) != nullptr) {
     return node;
   }
@@ -164,6 +169,7 @@ Vector<RefPtr<QueryTreeNode>> QueryPlanBuilder::build(
       case ASTNode::T_SELECT:
       case ASTNode::T_SELECT_DEEP:
       case ASTNode::T_SHOW_TABLES:
+      case ASTNode::T_SHOW_DATABASES:
       case ASTNode::T_DESCRIBE_TABLE:
       case ASTNode::T_DESCRIBE_PARTITIONS:
       case ASTNode::T_CLUSTER_SHOW_SERVERS:
@@ -1751,6 +1757,16 @@ QueryTreeNode* QueryPlanBuilder::buildShowTables(
   }
 
   return new ShowTablesNode();
+}
+
+QueryTreeNode* QueryPlanBuilder::buildShowDatabases(
+    Transaction* txn,
+    ASTNode* ast) {
+  if (!(*ast == ASTNode::T_SHOW_DATABASES)) {
+    return nullptr;
+  }
+
+  return new ShowDatabasesNode();
 }
 
 QueryTreeNode* QueryPlanBuilder::buildDescribeTable(

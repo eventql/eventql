@@ -78,6 +78,10 @@ http::StreamingHTTPService* HTTPTransport::getServlet(
     return &status_servlet_;
   }
 
+  if (StringUtil::beginsWith(path, "/ui")) {
+    return &webui_servlet_;
+  }
+
   return &default_servlet_;
 }
 

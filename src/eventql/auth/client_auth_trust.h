@@ -37,10 +37,6 @@ public:
       Session* session,
       HashMap<String, String> auth_data) override;
 
-  Status changeNamespace(
-      Session* session,
-      const String& ns) override;
-
 };
 
 } // namespace eventql
